@@ -1,0 +1,16 @@
+data/
+outputs/
+logs/
+checkpoints/
+cache/
+artifacts/
+*.pt
+*.bin
+*.safetensors
+*.parquet
+*.csv
+*.jsonl
+*.zst
+*.gz
+__pycache__/
+*.pyc
