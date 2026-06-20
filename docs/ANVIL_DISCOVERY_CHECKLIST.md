@@ -1,5 +1,7 @@
 # Anvil Discovery Checklist
 
+> ✅ **Answered in [ANVIL_SYSTEM_SPECS.md](./ANVIL_SYSTEM_SPECS.md)** (filled by the Anvil-side agent, 2026-06-20).
+
 The remote agent should answer these before we finalize launch scripts.
 
 ## Hardware

@@ -4,17 +4,28 @@
 #SBATCH --error=logs/%x-%j.err
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=128G
+#SBATCH --cpus-per-task=24          # ~1/4 of the 96-core H100 node
+#SBATCH --mem=240G                  # ~1/4 of ~1 TB host RAM
 #SBATCH --time=24:00:00
 
-#SBATCH --account=YOUR_ACCOUNT
-#SBATCH --partition=YOUR_GPU_PARTITION
+# Anvil (Purdue RCAC). H100 = 'ai' partition; A100 alt: --account=cis230270-gpu --partition=gpu
+#SBATCH --account=cis230270-ai
+#SBATCH --partition=ai
 
 set -euo pipefail
 
-cd /path/to/llm-sequence-mi-remote
+REPO_DIR="${REPO_DIR:-$HOME/cert-qlora-MI/llm-sequence-mi-remote}"
+cd "$REPO_DIR"
+mkdir -p logs
 
+module load conda/2026.03
+conda activate /anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert-qlora
+
+export HF_HOME=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/hf_cache
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
+# Write large delta shards to $SCRATCH (fast, regenerable); copy keepers to $PROJECT afterwards.
+# Keep shards few-and-large: $SCRATCH is near its 1M-file limit.
 python scripts/extract_adapter_deltas.py \
   --config configs/qwen3b_qlora_session.yaml
-
