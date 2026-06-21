@@ -28,12 +28,19 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 # Write large delta shards to $SCRATCH (fast, regenerable); copy keepers to $PROJECT afterwards.
 # Keep shards few-and-large: $SCRATCH is near its 1M-file limit.
 DATA_DIR="${DATA_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl}"
-ADAPTER_DIR="${ADAPTER_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/checkpoints/qwen3b_session_qlora/adapter}"
+# NOTE: default points at the 4-GPU DDP adapter (qwen3b_session_qlora_ddp), which is what we trained.
+ADAPTER_DIR="${ADAPTER_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/checkpoints/qwen3b_session_qlora_ddp/adapter}"
 OUTPUT_DIR="${OUTPUT_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/delta_cache/qwen3b_session_mean_deltas}"
+SPLIT="${SPLIT:-eval}"
+BATCH_SIZE="${BATCH_SIZE:-16}"        # 3B 4-bit x2 models + hidden states fits easily on 80GB (script default 2 is slow)
+MAX_EXAMPLES="${MAX_EXAMPLES:-0}"     # 0 = all examples in the split
 
 python scripts/extract_adapter_deltas.py \
   --config configs/qwen3b_qlora_session.yaml \
   --data-dir "$DATA_DIR" \
   --adapter-dir "$ADAPTER_DIR" \
   --output-dir "$OUTPUT_DIR" \
+  --split "$SPLIT" \
+  --batch-size "$BATCH_SIZE" \
+  --max-examples "$MAX_EXAMPLES" \
   --pool-unit mean
