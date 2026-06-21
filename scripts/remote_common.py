@@ -3,9 +3,11 @@ from __future__ import annotations
 import gzip
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any, Dict, Iterable, Iterator, List
 
+import numpy as np
 import pandas as pd
 
 
@@ -52,11 +54,25 @@ def read_jsonl(path: Path) -> Iterator[Dict[str, Any]]:
                 yield json.loads(line)
 
 
+def to_jsonable(obj: Any) -> Any:
+    if isinstance(obj, dict):
+        return {str(k): to_jsonable(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [to_jsonable(v) for v in obj]
+    if isinstance(obj, np.generic):
+        return obj.item()
+    if isinstance(obj, pd.Timestamp):
+        return obj.isoformat()
+    if isinstance(obj, float) and (math.isnan(obj) or math.isinf(obj)):
+        return None
+    return obj
+
+
 def write_jsonl(path: Path, rows: Iterable[Dict[str, Any]]) -> int:
     n = 0
     with path.open("w", encoding="utf-8") as f:
         for row in rows:
-            f.write(json.dumps(row, ensure_ascii=True) + "\n")
+            f.write(json.dumps(to_jsonable(row), ensure_ascii=True) + "\n")
             n += 1
     return n
 
@@ -78,9 +94,8 @@ def read_session_shards(input_dir: Path) -> pd.DataFrame:
 
 
 def dump_json(path: Path, obj: Dict[str, Any]) -> None:
-    path.write_text(json.dumps(obj, indent=2) + "\n", encoding="utf-8")
+    path.write_text(json.dumps(to_jsonable(obj), indent=2) + "\n", encoding="utf-8")
 
 
 def maybe_read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text())
-
