@@ -1,0 +1,19 @@
+{
+  "verified_at_utc": "2026-06-20T00:00:00Z",
+  "host": "login03.anvil.rcac.purdue.edu",
+  "data_dir": "/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/data",
+  "num_shards": 8,
+  "rows_per_shard": 250000,
+  "labels": "labels_daily.parquet",
+  "shards": [
+    "sessionr6.2_shard_000.csv.gz",
+    "sessionr6.2_shard_001.csv.gz",
+    "sessionr6.2_shard_002.csv.gz",
+    "sessionr6.2_shard_003.csv.gz",
+    "sessionr6.2_shard_004.csv.gz",
+    "sessionr6.2_shard_005.csv.gz",
+    "sessionr6.2_shard_006.csv.gz",
+    "sessionr6.2_shard_007.csv.gz"
+  ],
+  "status": "TRANSFER_VERIFIED"
+}
