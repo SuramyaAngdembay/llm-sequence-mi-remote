@@ -27,15 +27,19 @@ export HF_HOME=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/hf_cache
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export TOKENIZERS_PARALLELISM=false
-export OMP_NUM_THREADS=8
+export OMP_NUM_THREADS=16          # ~cpus-per-task / nproc (torchrun forces 1 if unset)
+# NOTE: do NOT set NCCL_P2P_DISABLE on H100 (NVLink) — leave P2P on.
 
 CONFIG="${CONFIG:-configs/qwen3b_qlora_session.yaml}"
 DATA_DIR="${DATA_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl}"
 OUTPUT_DIR="${OUTPUT_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/checkpoints/qwen3b_session_qlora_ddp}"
 NPROC="${NPROC:-4}"            # GPUs to use (=4 for the whole node)
 MICRO_BS="${MICRO_BS:-8}"      # per-GPU micro batch (1 wastes an 80GB H100; tune vs nvidia-smi)
-GRAD_ACCUM="${GRAD_ACCUM:-2}"  # effective batch = MICRO_BS x GRAD_ACCUM x NPROC = 64 by default
-DL_WORKERS="${DL_WORKERS:-8}"
+GRAD_ACCUM="${GRAD_ACCUM:-1}"  # effective batch = MICRO_BS x GRAD_ACCUM x NPROC = 32 (LoRA prefers <=32; review pt.5)
+DL_WORKERS="${DL_WORKERS:-16}"
+# LR note: config LR=2e-4 was tuned for effective batch 16. For eff batch 32, the sqrt rule
+#   suggests ~2.8e-4 (or keep 2e-4 + longer warmup) -- experiment-design call, left to config owner.
+# Throughput phase-2: true packing (DataCollatorWithFlattening + flash_attention_2) ~1.4x on short examples.
 
 echo "job=$SLURM_JOB_ID node=$(hostname) | CONFIG=$CONFIG NPROC=$NPROC MICRO_BS=$MICRO_BS GRAD_ACCUM=$GRAD_ACCUM"
 nvidia-smi --query-gpu=index,name,memory.total --format=csv,noheader
