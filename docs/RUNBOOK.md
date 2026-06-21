@@ -24,12 +24,18 @@ Use [ANVIL_DISCOVERY_CHECKLIST.md](./ANVIL_DISCOVERY_CHECKLIST.md).
 3. Build a smoke subset.
 4. Serialize canonical JSONL sequence format.
 
+Primary command on Anvil:
+
+```bash
+sbatch slurm/build_jsonl.template.sbatch
+```
+
 Expected outputs:
 
 - `data/raw_shards/`
 - `data/jsonl/train.jsonl`
 - `data/jsonl/val.jsonl`
-- `data/jsonl/test.jsonl`
+- `data/jsonl/eval.jsonl`
 - `data/smoke/*.jsonl`
 
 ## Phase 2: QLoRA Fine-Tuning
@@ -45,6 +51,12 @@ Required outputs:
 - adapter checkpoint
 - tokenizer/config snapshot
 - training metrics
+
+Primary command on Anvil:
+
+```bash
+sbatch slurm/train_qlora.template.sbatch
+```
 
 ## Phase 3: Delta Extraction
 
@@ -65,6 +77,12 @@ Required outputs:
 - chunked delta tensors
 - metadata linking chunk -> layer -> example ids
 
+Primary command on Anvil:
+
+```bash
+sbatch slurm/extract_deltas.template.sbatch
+```
+
 ## Phase 4: Delta-SAE
 
 Train SAEs on the delta tensors.
@@ -82,6 +100,12 @@ Track:
 - dead features
 - feature overlap
 - anomaly selectivity
+
+Primary command on Anvil:
+
+```bash
+sbatch slurm/train_delta_sae.template.sbatch
+```
 
 ## Phase 5: Causal Evaluation
 
@@ -101,4 +125,3 @@ The LLM branch is only a win if it beats the current base session AE branch on:
 not merely on:
 
 - detection quality
-

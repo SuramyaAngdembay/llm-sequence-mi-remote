@@ -25,6 +25,9 @@ DEFAULT_SESSION_CSV = Path(
 DEFAULT_LABELS = Path(
     "/homes/01/srangdembay/InsiderThreatDetection/r6.2/ctmc-semantic-daily-ldap/labels_daily.parquet"
 )
+DEFAULT_USER_MAP = Path(
+    "/homes/01/srangdembay/InsiderThreatDetection/r6.2/ctmc-approach/benchmarks/oneclass_unsupervised_r62/results_r62_lcdal_session_features_clean/sessionr6.2_user_map.csv"
+)
 DEFAULT_OUT = Path(
     "/homes/01/srangdembay/InsiderThreatDetection/r6.2/llm-sequence-mi-remote/artifacts/transfer_package"
 )
@@ -103,6 +106,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--session-csv", type=Path, default=DEFAULT_SESSION_CSV)
     ap.add_argument("--labels", type=Path, default=DEFAULT_LABELS)
+    ap.add_argument("--user-map", type=Path, default=DEFAULT_USER_MAP)
     ap.add_argument("--out-dir", type=Path, default=DEFAULT_OUT)
     ap.add_argument("--rows-per-shard", type=int, default=250_000)
     ap.add_argument("--force", action="store_true")
@@ -112,6 +116,8 @@ def main() -> None:
         raise FileNotFoundError(args.session_csv)
     if not args.labels.exists():
         raise FileNotFoundError(args.labels)
+    if not args.user_map.exists():
+        raise FileNotFoundError(args.user_map)
 
     out_dir = args.out_dir
     if out_dir.exists():
@@ -126,10 +132,14 @@ def main() -> None:
     labels_target = out_dir / args.labels.name
     shutil.copy2(args.labels, labels_target)
     labels_sha = sha256_file(labels_target)
+    user_map_target = out_dir / args.user_map.name
+    shutil.copy2(args.user_map, user_map_target)
+    user_map_sha = sha256_file(user_map_target)
 
     manifest = {
         "session_csv_source": str(args.session_csv),
         "labels_source": str(args.labels),
+        "user_map_source": str(args.user_map),
         "rows_per_shard": args.rows_per_shard,
         "compression": "gzip",
         "num_shards": len(shard_meta),
@@ -139,6 +149,11 @@ def main() -> None:
             "sha256": labels_sha,
             "bytes": labels_target.stat().st_size,
         },
+        "user_map": {
+            "path": user_map_target.name,
+            "sha256": user_map_sha,
+            "bytes": user_map_target.stat().st_size,
+        },
     }
     manifest_path = out_dir / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
@@ -147,6 +162,7 @@ def main() -> None:
     for item in shard_meta:
         checksum_entries.append(f"{item['sha256']}  {item['path']}")
     checksum_entries.append(f"{labels_sha}  {labels_target.name}")
+    checksum_entries.append(f"{user_map_sha}  {user_map_target.name}")
     checksum_entries.append(f"{sha256_file(manifest_path)}  {manifest_path.name}")
     (out_dir / "sha256sums.txt").write_text("\n".join(checksum_entries) + "\n")
 
@@ -155,6 +171,7 @@ def main() -> None:
         "num_shards": len(shard_meta),
         "rows_per_shard": args.rows_per_shard,
         "labels": labels_target.name,
+        "user_map": user_map_target.name,
     }, indent=2))
 
 

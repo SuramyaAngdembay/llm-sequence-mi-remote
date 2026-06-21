@@ -32,12 +32,18 @@ But sparse session SAE units still failed as repair-capable patch units. This re
 - [docs](./docs): specs, runbook, cluster checklist
 - [configs](./configs): model and SAE configs
 - [slurm](./slurm): batch templates for remote execution
-- [scripts](./scripts): script ownership notes and expected entry points
+- [scripts](./scripts): runnable entry points plus ownership notes
 - [manifests](./manifests): artifact manifests and transfer targets
 
-## GitHub Status
+## Current Status
 
-`gh` is installed on the local machine, but the saved token is currently invalid. This directory is ready to push once auth is refreshed on a machine with valid GitHub credentials.
+- GitHub repo is live and being used as the control plane for the Anvil branch.
+- First runnable execution path now exists:
+  1. `build_session_jsonl.py`
+  2. `train_qlora.py`
+  3. `extract_adapter_deltas.py`
+  4. `train_delta_sae_frontier.py`
+- The first pilot is configured around **mean-pooled adapter deltas** for the SAE frontier.
 
 ## Local Source References
 
@@ -49,4 +55,3 @@ Primary local source files:
   - `/homes/01/srangdembay/InsiderThreatDetection/r6.2/ctmc-approach/benchmarks/oneclass_unsupervised_r62/results_r62_lcdal_session_features_clean/sessionr6.2_prepare_stats.json`
 - current primary MI memo:
   - `/homes/01/srangdembay/InsiderThreatDetection/r6.2/ctmc-approach/benchmarks/oneclass_unsupervised_r62/reports/SESSION_PRIMARY_MI_DECISION_MEMO_2026-06-19.md`
-

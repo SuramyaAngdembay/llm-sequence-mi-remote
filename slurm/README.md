@@ -1,21 +1,13 @@
 # Slurm Templates
 
-These templates are intentionally cluster-agnostic placeholders.
+These templates are now Anvil-oriented defaults for the first `Qwen 3B` pilot.
 
-The remote agent should fill in:
+Current job sequence:
 
-- account
-- partition
-- qos
-- module loads
-- scratch paths
-- container or conda activation
+1. `build_jsonl.template.sbatch`
+2. `train_qlora.template.sbatch`
+3. `extract_deltas.template.sbatch`
+4. `train_delta_sae.template.sbatch`
 
-Expected jobs:
-
-- data serialization
-- QLoRA fine-tuning
-- delta extraction
-- delta-SAE sweep
-- causal evaluation
-
+All paths are parameterized through environment variables so the Anvil-side agent
+can override them without patching the files.

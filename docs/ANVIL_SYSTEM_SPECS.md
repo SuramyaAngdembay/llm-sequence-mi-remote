@@ -12,7 +12,7 @@
 - **Send data here:** `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/data/`
   (the **projects** filesystem — 5 TB, persistent, NOT purged). Do **not** ship into `$HOME` (25 GB) or `$SCRATCH` (30-day purge).
 - **Easiest transfer:** **Globus** if the source machine has (or can run) a Globus endpoint — robust, resumable, checksummed. Otherwise **`rsync -avP` over SSH** from the source to the Anvil login node.
-- Ship the **r6.2 session shards + `labels_daily.parquet` + `sha256sums.txt`** per `DATA_SPEC.md`. Compress with `zstd`/`gzip`.
+- Ship the **r6.2 session shards + `labels_daily.parquet` + `sessionr6.2_user_map.csv` + `sha256sums.txt`** per `DATA_SPEC.md`. Compress with `zstd`/`gzip`.
 - Anvil **compute nodes have no internet**; the **login nodes do**. All transfers/unpacks/model-downloads happen on the login node.
 
 ---

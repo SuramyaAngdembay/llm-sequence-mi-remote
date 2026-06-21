@@ -14,8 +14,9 @@ Only ship the minimum first-pass payload:
 
 1. `sessionr6.2` raw session shards
 2. `labels_daily.parquet`
-3. `sha256sums.txt`
-4. `manifest.json`
+3. `sessionr6.2_user_map.csv`
+4. `sha256sums.txt`
+5. `manifest.json`
 
 Do not transfer:
 
@@ -40,6 +41,7 @@ Expected names:
 Companion files:
 
 - `labels_daily.parquet`
+- `sessionr6.2_user_map.csv`
 - `manifest.json`
 - `sha256sums.txt`
 
@@ -95,4 +97,3 @@ Raw session source:
 Labels:
 
 - `/homes/01/srangdembay/InsiderThreatDetection/r6.2/ctmc-semantic-daily-ldap/labels_daily.parquet`
-

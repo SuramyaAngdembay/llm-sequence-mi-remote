@@ -27,5 +27,13 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 # Write large delta shards to $SCRATCH (fast, regenerable); copy keepers to $PROJECT afterwards.
 # Keep shards few-and-large: $SCRATCH is near its 1M-file limit.
+DATA_DIR="${DATA_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl}"
+ADAPTER_DIR="${ADAPTER_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/checkpoints/qwen3b_session_qlora/adapter}"
+OUTPUT_DIR="${OUTPUT_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/delta_cache/qwen3b_session_mean_deltas}"
+
 python scripts/extract_adapter_deltas.py \
-  --config configs/qwen3b_qlora_session.yaml
+  --config configs/qwen3b_qlora_session.yaml \
+  --data-dir "$DATA_DIR" \
+  --adapter-dir "$ADAPTER_DIR" \
+  --output-dir "$OUTPUT_DIR" \
+  --pool-unit mean

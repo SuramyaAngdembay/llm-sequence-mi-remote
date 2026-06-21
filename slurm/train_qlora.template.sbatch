@@ -27,5 +27,10 @@ export HF_HOME=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/hf_cache
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
+DATA_DIR="${DATA_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl}"
+OUTPUT_DIR="${OUTPUT_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/checkpoints/qwen3b_session_qlora}"
+
 python scripts/train_qlora.py \
-  --config configs/qwen3b_qlora_session.yaml
+  --config configs/qwen3b_qlora_session.yaml \
+  --data-dir "$DATA_DIR" \
+  --output-dir "$OUTPUT_DIR"

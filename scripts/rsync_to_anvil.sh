@@ -8,7 +8,7 @@ DEST_DIR="${ANVIL_DEST:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/d
 echo "Source: ${SRC_DIR}"
 echo "Destination: ${DEST_HOST}:${DEST_DIR}"
 
-rsync -avP --partial \
+rsync -avP --partial --checksum \
   "${SRC_DIR%/}/" \
   "${DEST_HOST}:${DEST_DIR}"
 
@@ -16,4 +16,3 @@ echo
 echo "Transfer finished. Next on Anvil:"
 echo "  cd ${DEST_DIR}"
 echo "  sha256sum -c sha256sums.txt"
-

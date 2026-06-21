@@ -3,7 +3,7 @@ experiment_name: session_delta_sae_frontier
 input:
   source: adapter_delta_hidden_states
   normalization: rms
-  unit: token
+  unit: mean
 
 sweep:
   latent_multipliers:
@@ -33,4 +33,3 @@ evaluation:
     - control1_selectivity
     - control3_selectivity
     - top5_minus_control3_advantage
-

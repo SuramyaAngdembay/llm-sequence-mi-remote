@@ -42,7 +42,6 @@ delta_extraction:
     - 12
     - 18
     - 24
-  pool_unit: token
+  pool_unit: mean
   store_dtype: float16
   chunk_examples: 4096
-

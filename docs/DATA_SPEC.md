@@ -36,6 +36,7 @@ Reference:
 Ship the label file used for evaluation:
 
 - `/homes/01/srangdembay/InsiderThreatDetection/r6.2/ctmc-semantic-daily-ldap/labels_daily.parquet`
+- `/homes/01/srangdembay/InsiderThreatDetection/r6.2/ctmc-approach/benchmarks/oneclass_unsupervised_r62/results_r62_lcdal_session_features_clean/sessionr6.2_user_map.csv`
 
 This remains the canonical evaluation label source for user/day anomaly scoring.
 
@@ -75,6 +76,7 @@ Recommended shard naming:
 Recommended companion files:
 
 - `labels_daily.parquet`
+- `sessionr6.2_user_map.csv`
 - `manifest.json`
 - `sha256sums.txt`
 
@@ -125,6 +127,7 @@ For the first pilot, ship only:
 
 - raw `sessionr6.2` shards
 - `labels_daily.parquet`
+- `sessionr6.2_user_map.csv`
 - one small smoke subset:
   - around `5k-20k` user-day examples
 
@@ -135,4 +138,3 @@ Do not ship:
 - SAE outputs
 
 Those should be produced on the remote cluster.
-

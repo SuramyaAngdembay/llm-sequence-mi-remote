@@ -24,5 +24,11 @@ conda activate /anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert-qlora
 
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
+EXTRACT_DIR="${EXTRACT_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/delta_cache/qwen3b_session_mean_deltas}"
+OUTPUT_DIR="${OUTPUT_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/delta_sae_frontier_qwen3b}"
+
 python scripts/train_delta_sae_frontier.py \
-  --config configs/delta_sae_frontier.yaml
+  --config configs/delta_sae_frontier.yaml \
+  --extract-dir "$EXTRACT_DIR" \
+  --out-dir "$OUTPUT_DIR" \
+  --device cuda
