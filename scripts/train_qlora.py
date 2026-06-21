@@ -17,6 +17,13 @@ def main() -> None:
     ap.add_argument("--max-train-examples", type=int, default=0)
     ap.add_argument("--max-val-examples", type=int, default=0)
     ap.add_argument("--seed", type=int, default=42)
+    # --- multi-GPU / utilization overrides (optional; 0/None = fall back to config) ---
+    ap.add_argument("--micro-batch-size", type=int, default=0, help="override training.micro_batch_size (0=use config)")
+    ap.add_argument("--grad-accum", type=int, default=0, help="override gradient_accumulation_steps (0=use config)")
+    ap.add_argument("--gradient-checkpointing", dest="gradient_checkpointing", action="store_true", default=None)
+    ap.add_argument("--no-gradient-checkpointing", dest="gradient_checkpointing", action="store_false", default=None)
+    ap.add_argument("--dataloader-workers", type=int, default=4)
+    ap.add_argument("--attn-impl", type=str, default="sdpa")
     args = ap.parse_args()
 
     cfg = load_yaml(args.config)
@@ -72,14 +79,29 @@ def main() -> None:
 
     import torch
 
+    # Distributed (torchrun) aware placement: under DDP each rank loads the full
+    # 4-bit model onto its OWN gpu. Single-process keeps device_map="auto".
+    world_size = int(os.environ.get("WORLD_SIZE", "1"))
+    local_rank = int(os.environ.get("LOCAL_RANK", "0"))
+    device_map = {"": local_rank} if world_size > 1 else "auto"
+
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         quantization_config=quant_cfg,
         torch_dtype=torch.bfloat16 if bool(cfg["training"].get("bf16", True)) else torch.float16,
-        device_map="auto",
+        device_map=device_map,
+        attn_implementation=args.attn_impl,
     )
     model.config.use_cache = False
-    model = prepare_model_for_kbit_training(model)
+    grad_ckpt = (
+        bool(cfg["training"].get("gradient_checkpointing", True))
+        if args.gradient_checkpointing is None
+        else bool(args.gradient_checkpointing)
+    )
+    prep_kwargs = {"use_gradient_checkpointing": grad_ckpt}
+    if grad_ckpt:
+        prep_kwargs["gradient_checkpointing_kwargs"] = {"use_reentrant": False}
+    model = prepare_model_for_kbit_training(model, **prep_kwargs)
     lora_cfg = LoraConfig(
         r=int(cfg["lora"]["r"]),
         lora_alpha=int(cfg["lora"]["alpha"]),
@@ -90,11 +112,14 @@ def main() -> None:
     )
     model = get_peft_model(model, lora_cfg)
 
+    micro_bs = args.micro_batch_size or int(cfg["training"]["micro_batch_size"])
+    grad_accum = args.grad_accum or int(cfg["training"]["gradient_accumulation_steps"])
+
     training_args = TrainingArguments(
         output_dir=str(out_dir),
-        per_device_train_batch_size=int(cfg["training"]["micro_batch_size"]),
-        per_device_eval_batch_size=int(cfg["training"]["micro_batch_size"]),
-        gradient_accumulation_steps=int(cfg["training"]["gradient_accumulation_steps"]),
+        per_device_train_batch_size=micro_bs,
+        per_device_eval_batch_size=micro_bs,
+        gradient_accumulation_steps=grad_accum,
         num_train_epochs=float(cfg["training"]["num_train_epochs"]),
         learning_rate=float(cfg["training"]["learning_rate"]),
         lr_scheduler_type=str(cfg["training"]["lr_scheduler_type"]),
@@ -106,7 +131,10 @@ def main() -> None:
         evaluation_strategy="steps",
         save_strategy="steps",
         bf16=bool(cfg["training"].get("bf16", True)),
-        gradient_checkpointing=bool(cfg["training"].get("gradient_checkpointing", True)),
+        gradient_checkpointing=grad_ckpt,
+        gradient_checkpointing_kwargs={"use_reentrant": False},
+        ddp_find_unused_parameters=False,
+        dataloader_num_workers=args.dataloader_workers,
         report_to=[],
         remove_unused_columns=False,
         logging_first_step=True,
@@ -121,26 +149,32 @@ def main() -> None:
         data_collator=collator,
     )
     trainer.train()
-    trainer.save_model(str(out_dir / "adapter"))
-    tokenizer.save_pretrained(str(out_dir / "adapter"))
+    if trainer.is_world_process_zero():
+        trainer.save_model(str(out_dir / "adapter"))
+        tokenizer.save_pretrained(str(out_dir / "adapter"))
 
-    summary = {
-        "config": str(args.config),
-        "data_dir": str(args.data_dir),
-        "output_dir": str(out_dir),
-        "model_name_or_path": model_name,
-        "n_train": int(len(tokenized["train"])),
-        "n_validation": int(len(tokenized["validation"])),
-        "max_seq_len": max_seq_len,
-        "seed": int(args.seed),
-        "env": {
-            "HF_HOME": os.environ.get("HF_HOME", ""),
-            "HF_HUB_OFFLINE": os.environ.get("HF_HUB_OFFLINE", ""),
-            "TRANSFORMERS_OFFLINE": os.environ.get("TRANSFORMERS_OFFLINE", ""),
-        },
-    }
-    dump_json(out_dir / "train_summary.json", summary)
-    print(json.dumps(summary, indent=2))
+        summary = {
+            "config": str(args.config),
+            "data_dir": str(args.data_dir),
+            "output_dir": str(out_dir),
+            "model_name_or_path": model_name,
+            "n_train": int(len(tokenized["train"])),
+            "n_validation": int(len(tokenized["validation"])),
+            "max_seq_len": max_seq_len,
+            "seed": int(args.seed),
+            "world_size": world_size,
+            "micro_batch_size": micro_bs,
+            "grad_accum": grad_accum,
+            "effective_batch": micro_bs * grad_accum * world_size,
+            "gradient_checkpointing": grad_ckpt,
+            "env": {
+                "HF_HOME": os.environ.get("HF_HOME", ""),
+                "HF_HUB_OFFLINE": os.environ.get("HF_HUB_OFFLINE", ""),
+                "TRANSFORMERS_OFFLINE": os.environ.get("TRANSFORMERS_OFFLINE", ""),
+            },
+        }
+        dump_json(out_dir / "train_summary.json", summary)
+        print(json.dumps(summary, indent=2))
 
 
 if __name__ == "__main__":
