@@ -37,6 +37,8 @@ NPROC="${NPROC:-4}"            # GPUs to use (=4 for the whole node)
 MICRO_BS="${MICRO_BS:-8}"      # per-GPU micro batch (1 wastes an 80GB H100; tune vs nvidia-smi)
 GRAD_ACCUM="${GRAD_ACCUM:-1}"  # effective batch = MICRO_BS x GRAD_ACCUM x NPROC = 32 (LoRA prefers <=32; review pt.5)
 DL_WORKERS="${DL_WORKERS:-16}"
+MAX_TRAIN="${MAX_TRAIN:-0}"    # 0 = full dataset; set >0 for a capped smoke
+MAX_VAL="${MAX_VAL:-0}"
 # LR note: config LR=2e-4 was tuned for effective batch 16. For eff batch 32, the sqrt rule
 #   suggests ~2.8e-4 (or keep 2e-4 + longer warmup) -- experiment-design call, left to config owner.
 # Throughput phase-2: true packing (DataCollatorWithFlattening + flash_attention_2) ~1.4x on short examples.
@@ -53,4 +55,6 @@ torchrun --standalone --nnodes=1 --nproc_per_node="$NPROC" \
     --output-dir "$OUTPUT_DIR" \
     --micro-batch-size "$MICRO_BS" \
     --grad-accum "$GRAD_ACCUM" \
-    --dataloader-workers "$DL_WORKERS"
+    --dataloader-workers "$DL_WORKERS" \
+    --max-train-examples "$MAX_TRAIN" \
+    --max-val-examples "$MAX_VAL"
