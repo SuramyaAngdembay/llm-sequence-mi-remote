@@ -10,6 +10,8 @@ Implemented entry points:
   - run base and adapted forward passes and store adapter deltas
 - `train_delta_sae_frontier.py`
   - train the first runnable SAE frontier on extracted deltas
+- `eval_delta_sae_causal.py`
+  - first model-level causal patch/repair eval on mean-pooled adapter deltas
 - `prepare_transfer_package.py`
   - build the Anvil transfer package
 - `rsync_to_anvil.sh`
@@ -26,6 +28,5 @@ Shared helpers:
 
 Still missing for a full end-to-end MI branch:
 
-- true model-level causal patching / steering on adapter deltas
 - sparse grounding from delta-SAE features back to token/session factors
 - heldout-user fold orchestration matching the local benchmark exactly

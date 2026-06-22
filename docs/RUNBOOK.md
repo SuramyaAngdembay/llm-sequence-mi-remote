@@ -116,6 +116,24 @@ For the best SAE candidates:
 - sparse patch/repair
 - residual comparison
 
+Primary command on Anvil:
+
+```bash
+sbatch slurm/eval_delta_sae_causal.template.sbatch
+```
+
+Default first target:
+
+- `layer=18`
+- `latent_mult=2`
+- `k=8`
+
+Next comparison target:
+
+- `layer=18`
+- `latent_mult=4`
+- `k=4`
+
 ## Success Condition
 
 The LLM branch is only a win if it beats the current base session AE branch on:
