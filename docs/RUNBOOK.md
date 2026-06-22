@@ -83,6 +83,12 @@ Primary command on Anvil:
 sbatch slurm/extract_deltas.template.sbatch
 ```
 
+Token-level escalation:
+
+```bash
+sbatch slurm/extract_token_deltas.template.sbatch
+```
+
 ## Phase 4: Delta-SAE
 
 Train SAEs on the delta tensors.
@@ -105,6 +111,12 @@ Primary command on Anvil:
 
 ```bash
 sbatch slurm/train_delta_sae.template.sbatch
+```
+
+Token-level frontier:
+
+```bash
+sbatch slurm/train_token_delta_sae.template.sbatch
 ```
 
 ## Phase 5: Causal Evaluation
@@ -133,6 +145,18 @@ Next comparison target:
 - `layer=18`
 - `latent_mult=4`
 - `k=4`
+
+Token-level escalation after null mean-pooled patchability:
+
+```bash
+sbatch slurm/eval_token_delta_sae_causal.template.sbatch
+```
+
+Recommended first token-level path:
+
+1. `extract_token_deltas.template.sbatch`
+2. `train_token_delta_sae.template.sbatch`
+3. `eval_token_delta_sae_causal.template.sbatch`
 
 ## Success Condition
 

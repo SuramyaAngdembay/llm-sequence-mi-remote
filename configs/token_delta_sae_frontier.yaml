@@ -1,0 +1,35 @@
+experiment_name: session_token_delta_sae_frontier
+
+input:
+  source: adapter_delta_hidden_states
+  normalization: rms
+  unit: token
+
+sweep:
+  latent_multipliers:
+    - 2
+    - 4
+    - 8
+  topk:
+    - 4
+    - 8
+    - 16
+    - 32
+
+evaluation:
+  metrics:
+    - recon_mse
+    - effective_l0
+    - dead_feature_frac
+    - top10_row_gap_mean
+    - top1_row_gap
+    - decoder_mean_abs_cos_offdiag
+    - decoder_max_abs_cos_offdiag
+    - top_feature_mean_pairwise_jaccard
+    - top_feature_mean_active_overlap
+    - top1_selectivity
+    - top3_selectivity
+    - top5_selectivity
+    - control1_selectivity
+    - control3_selectivity
+    - top5_minus_control3_advantage

@@ -9,9 +9,11 @@ Implemented entry points:
 - `extract_adapter_deltas.py`
   - run base and adapted forward passes and store adapter deltas
 - `train_delta_sae_frontier.py`
-  - train the first runnable SAE frontier on extracted deltas
+  - train the runnable SAE frontier on extracted deltas (mean or token unit)
 - `eval_delta_sae_causal.py`
   - first model-level causal patch/repair eval on mean-pooled adapter deltas
+- `eval_token_delta_sae_causal.py`
+  - token-local sparse patch/repair eval on token-level adapter deltas
 - `prepare_transfer_package.py`
   - build the Anvil transfer package
 - `rsync_to_anvil.sh`

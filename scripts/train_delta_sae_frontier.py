@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -30,31 +30,67 @@ def load_layer_vectors(extract_dir: Path, layer: int) -> tuple[np.ndarray, np.nd
         raise FileNotFoundError(f"No chunks found for layer {layer} in {layer_dir}")
     all_vecs: List[np.ndarray] = []
     all_idx: List[np.ndarray] = []
+    all_pos: List[np.ndarray] = []
+    has_position = False
     for path in chunk_paths:
         obj = torch.load(path, map_location="cpu", weights_only=False)
         vecs = np.asarray(obj["delta"], dtype=np.float32)
         idx = np.asarray(obj["example_idx"], dtype=np.int64)
         all_vecs.append(vecs)
         all_idx.append(idx)
+        if "position" in obj and obj["position"] is not None:
+            has_position = True
+            all_pos.append(np.asarray(obj["position"], dtype=np.int64))
     x = np.concatenate(all_vecs, axis=0)
     example_idx = np.concatenate(all_idx, axis=0)
     if x.shape[0] != len(example_idx):
         raise ValueError(f"Mismatched vector/index sizes for layer {layer}")
-    if len(np.unique(example_idx)) != len(scores):
-        grp = pd.DataFrame({"example_idx": example_idx})
-        grp["row_id"] = np.arange(len(grp))
-        # token-level chunks: mean-pool to example level
-        raise RuntimeError(
-            "Token-level extraction is not yet supported in train_delta_sae_frontier.py. Re-run extraction with --pool-unit mean."
-        )
-    scores = scores.sort_values("example_idx").reset_index(drop=True)
-    order = np.argsort(example_idx)
+    scores = scores.sort_values("example_idx").reset_index(drop=True).set_index("example_idx", drop=False)
+    if has_position:
+        position = np.concatenate(all_pos, axis=0)
+        order = np.lexsort((position, example_idx))
+    else:
+        position = None
+        order = np.argsort(example_idx)
     x = x[order]
     example_idx = example_idx[order]
+    if position is not None:
+        position = position[order]
+        if not np.all(np.isin(np.unique(example_idx), scores.index.to_numpy())):
+            raise ValueError("Some token rows point at unknown example_idx values")
+        token_meta = scores.loc[example_idx].reset_index(drop=True).copy()
+        token_meta["position"] = position.astype(np.int64)
+        y = token_meta["y"].to_numpy(dtype=np.int64)
+        return x, y, token_meta
     if not np.array_equal(example_idx, scores["example_idx"].to_numpy()):
         raise ValueError("Example ordering mismatch between vectors and scores")
     y = scores["y"].to_numpy(dtype=np.int64)
-    return x, y, scores
+    return x, y, scores.reset_index(drop=True)
+
+
+def subsample_rows(
+    x: np.ndarray,
+    y: np.ndarray,
+    meta: pd.DataFrame,
+    *,
+    max_rows: int,
+    seed: int,
+) -> Tuple[np.ndarray, np.ndarray, pd.DataFrame]:
+    if max_rows <= 0 or len(x) <= max_rows:
+        return x, y, meta
+    rng = np.random.default_rng(seed)
+    pos_idx = np.flatnonzero(y > 0)
+    neg_idx = np.flatnonzero(y <= 0)
+    if len(pos_idx) >= max_rows:
+        chosen = np.sort(rng.choice(pos_idx, size=max_rows, replace=False))
+    else:
+        need_neg = max_rows - len(pos_idx)
+        if len(neg_idx) > need_neg:
+            neg_take = np.sort(rng.choice(neg_idx, size=need_neg, replace=False))
+        else:
+            neg_take = neg_idx
+        chosen = np.sort(np.concatenate([pos_idx, neg_take], axis=0))
+    return x[chosen], y[chosen], meta.iloc[chosen].reset_index(drop=True)
 
 
 def energy_selectivity_summary(
@@ -127,19 +163,29 @@ def main() -> None:
     ap.add_argument("--batch-size", type=int, default=1024)
     ap.add_argument("--epochs", type=int, default=20)
     ap.add_argument("--lr", type=float, default=1e-3)
+    ap.add_argument("--layers", default="", help="comma-separated subset of layers to train; default = all extracted layers")
+    ap.add_argument("--max-rows", type=int, default=0, help="optional cap on rows per layer for large token-level runs")
+    ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args()
 
     cfg = load_yaml(args.config)
     summary = json.loads((args.extract_dir / "extract_summary.json").read_text())
     layers = [int(x) for x in summary["layers"]]
+    if args.layers.strip():
+        want = {int(x) for x in args.layers.split(",") if x.strip()}
+        layers = [x for x in layers if x in want]
+        if not layers:
+            raise ValueError("No requested layers found in extract summary")
     latent_mults = [int(x) for x in cfg["sweep"]["latent_multipliers"]]
     ks = [int(x) for x in cfg["sweep"]["topk"]]
     out_dir = ensure_dir(args.out_dir)
     device = torch.device(args.device)
+    unit = str(summary.get("pool_unit", "mean"))
 
     rows: List[Dict[str, object]] = []
     for layer in layers:
         x, y, scores = load_layer_vectors(args.extract_dir, layer)
+        x, y, scores = subsample_rows(x, y, scores, max_rows=args.max_rows, seed=args.seed + layer)
         mean, std = tensor_stats(x)
         x_norm = (x - mean) / std
         d_in = x.shape[1]
@@ -182,6 +228,7 @@ def main() -> None:
                     {
                         "state_dict": model.state_dict(),
                         "layer": layer,
+                        "unit": unit,
                         "d_in": d_in,
                         "d_latent": d_latent,
                         "k": k,
@@ -193,9 +240,11 @@ def main() -> None:
                 feature_df.to_csv(cfg_dir / "delta_sae_top_features.csv", index=False)
                 proxy.to_csv(cfg_dir / "delta_sae_proxy_selectivity.csv", index=False)
                 row = {
+                    "unit": unit,
                     "layer": layer,
                     "latent_mult": latent_mult,
                     "k": k,
+                    "n_rows": int(len(x)),
                     "d_in": d_in,
                     "d_latent": d_latent,
                     **train_stats,
@@ -214,8 +263,8 @@ def main() -> None:
     summary_df = pd.DataFrame(rows)
     if not summary_df.empty:
         summary_df = summary_df.sort_values(
-            ["layer", "top5_minus_control3_advantage_proxy", "top10_row_gap_mean", "recon_mse"],
-            ascending=[True, False, False, True],
+            ["unit", "layer", "top5_minus_control3_advantage_proxy", "top10_row_gap_mean", "recon_mse"],
+            ascending=[True, True, False, False, True],
         ).reset_index(drop=True)
     summary_df.to_csv(out_dir / "delta_sae_frontier_summary.csv", index=False)
     write_report(summary_df, out_dir / "DELTA_SAE_FRONTIER_REPORT.md")
