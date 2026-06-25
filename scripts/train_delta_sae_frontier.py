@@ -22,12 +22,28 @@ from sae_core import (
 )
 
 
-def load_layer_vectors(extract_dir: Path, layer: int) -> tuple[np.ndarray, np.ndarray, pd.DataFrame]:
+def load_layer_vectors(
+    extract_dir: Path,
+    layer: int,
+    *,
+    max_rows: int = 0,
+    seed: int = 42,
+) -> tuple[np.ndarray, np.ndarray, pd.DataFrame]:
     scores = pd.read_parquet(extract_dir / "example_scores.parquet")
+    score_index = scores.sort_values("example_idx").reset_index(drop=True).set_index("example_idx", drop=False)
     layer_dir = extract_dir / f"layer_{layer}"
     chunk_paths = sorted(layer_dir.glob("chunk_*.pt"))
     if not chunk_paths:
         raise FileNotFoundError(f"No chunks found for layer {layer} in {layer_dir}")
+    sample_prob = 1.0
+    if max_rows > 0:
+        manifest_path = extract_dir / "chunk_manifest.csv"
+        if manifest_path.exists():
+            manifest = pd.read_csv(manifest_path)
+            total_rows = int(manifest.loc[manifest["layer"].astype(int) == layer, "rows"].sum())
+            if total_rows > max_rows:
+                sample_prob = min(1.0, (max_rows * 1.1) / max(total_rows, 1))
+    rng = np.random.default_rng(seed)
     all_vecs: List[np.ndarray] = []
     all_idx: List[np.ndarray] = []
     all_pos: List[np.ndarray] = []
@@ -36,16 +52,25 @@ def load_layer_vectors(extract_dir: Path, layer: int) -> tuple[np.ndarray, np.nd
         obj = torch.load(path, map_location="cpu", weights_only=False)
         vecs = np.asarray(obj["delta"], dtype=np.float32)
         idx = np.asarray(obj["example_idx"], dtype=np.int64)
-        all_vecs.append(vecs)
-        all_idx.append(idx)
+        pos = None
         if "position" in obj and obj["position"] is not None:
             has_position = True
-            all_pos.append(np.asarray(obj["position"], dtype=np.int64))
+            pos = np.asarray(obj["position"], dtype=np.int64)
+        if sample_prob < 1.0:
+            labels = score_index.loc[idx, "y"].to_numpy(dtype=np.int64)
+            keep = (labels > 0) | (rng.random(len(idx)) < sample_prob)
+            vecs = vecs[keep]
+            idx = idx[keep]
+            if pos is not None:
+                pos = pos[keep]
+        all_vecs.append(vecs)
+        all_idx.append(idx)
+        if pos is not None:
+            all_pos.append(pos)
     x = np.concatenate(all_vecs, axis=0)
     example_idx = np.concatenate(all_idx, axis=0)
     if x.shape[0] != len(example_idx):
         raise ValueError(f"Mismatched vector/index sizes for layer {layer}")
-    scores = scores.sort_values("example_idx").reset_index(drop=True).set_index("example_idx", drop=False)
     if has_position:
         position = np.concatenate(all_pos, axis=0)
         order = np.lexsort((position, example_idx))
@@ -56,12 +81,20 @@ def load_layer_vectors(extract_dir: Path, layer: int) -> tuple[np.ndarray, np.nd
     example_idx = example_idx[order]
     if position is not None:
         position = position[order]
-        if not np.all(np.isin(np.unique(example_idx), scores.index.to_numpy())):
+        if not np.all(np.isin(np.unique(example_idx), score_index.index.to_numpy())):
             raise ValueError("Some token rows point at unknown example_idx values")
-        token_meta = scores.loc[example_idx].reset_index(drop=True).copy()
+        token_meta = score_index.loc[example_idx].reset_index(drop=True).copy()
         token_meta["position"] = position.astype(np.int64)
         y = token_meta["y"].to_numpy(dtype=np.int64)
         return x, y, token_meta
+    if sample_prob < 1.0:
+        order = np.argsort(example_idx)
+        x = x[order]
+        example_idx = example_idx[order]
+        sampled_meta = score_index.loc[example_idx].reset_index(drop=True)
+        y = sampled_meta["y"].to_numpy(dtype=np.int64)
+        return x, y, sampled_meta
+    scores = score_index.reset_index(drop=True)
     if not np.array_equal(example_idx, scores["example_idx"].to_numpy()):
         raise ValueError("Example ordering mismatch between vectors and scores")
     y = scores["y"].to_numpy(dtype=np.int64)
@@ -165,6 +198,8 @@ def main() -> None:
     ap.add_argument("--lr", type=float, default=1e-3)
     ap.add_argument("--layers", default="", help="comma-separated subset of layers to train; default = all extracted layers")
     ap.add_argument("--max-rows", type=int, default=0, help="optional cap on rows per layer for large token-level runs")
+    ap.add_argument("--latent-multipliers", default="", help="optional comma-separated latent multipliers")
+    ap.add_argument("--topk", default="", help="optional comma-separated top-k values")
     ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args()
 
@@ -176,15 +211,26 @@ def main() -> None:
         layers = [x for x in layers if x in want]
         if not layers:
             raise ValueError("No requested layers found in extract summary")
-    latent_mults = [int(x) for x in cfg["sweep"]["latent_multipliers"]]
-    ks = [int(x) for x in cfg["sweep"]["topk"]]
+    if args.latent_multipliers.strip():
+        latent_mults = [int(x.strip()) for x in args.latent_multipliers.split(",") if x.strip()]
+    else:
+        latent_mults = [int(x) for x in cfg["sweep"]["latent_multipliers"]]
+    if args.topk.strip():
+        ks = [int(x.strip()) for x in args.topk.split(",") if x.strip()]
+    else:
+        ks = [int(x) for x in cfg["sweep"]["topk"]]
     out_dir = ensure_dir(args.out_dir)
     device = torch.device(args.device)
     unit = str(summary.get("pool_unit", "mean"))
 
     rows: List[Dict[str, object]] = []
     for layer in layers:
-        x, y, scores = load_layer_vectors(args.extract_dir, layer)
+        x, y, scores = load_layer_vectors(
+            args.extract_dir,
+            layer,
+            max_rows=args.max_rows,
+            seed=args.seed + layer,
+        )
         x, y, scores = subsample_rows(x, y, scores, max_rows=args.max_rows, seed=args.seed + layer)
         mean, std = tensor_stats(x)
         x_norm = (x - mean) / std

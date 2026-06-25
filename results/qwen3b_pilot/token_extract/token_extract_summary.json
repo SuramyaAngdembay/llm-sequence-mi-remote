@@ -1,0 +1,11 @@
+{
+  "split": "eval",
+  "n_examples": 142072,
+  "layers": [
+    18
+  ],
+  "pool_unit": "token",
+  "chunk_examples": 1024,
+  "adapter_dir": "/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/checkpoints/qwen3b_session_qlora_ddp/adapter",
+  "model_name_or_path": "Qwen/Qwen2.5-3B"
+}

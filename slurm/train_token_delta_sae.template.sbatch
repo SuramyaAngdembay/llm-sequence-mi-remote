@@ -22,12 +22,13 @@ conda activate /anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert-qlora
 
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-SCRATCH_ROOT="${SCRATCH:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/token_scratch}"
-EXTRACT_DIR="${EXTRACT_DIR:-$SCRATCH_ROOT/qwen3b_session_token_deltas}"
+EXTRACT_DIR="${EXTRACT_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/token_delta_cache/qwen3b_session_token_deltas_l18}"
 OUTPUT_DIR="${OUTPUT_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_frontier_qwen3b}"
 LAYERS="${LAYERS:-18}"
 MAX_ROWS="${MAX_ROWS:-2000000}"
 BATCH_SIZE="${BATCH_SIZE:-4096}"
+LATENT_MULTIPLIERS="${LATENT_MULTIPLIERS:-2,4}"
+TOPK_VALUES="${TOPK_VALUES:-4,8}"
 
 python scripts/train_delta_sae_frontier.py \
   --config configs/token_delta_sae_frontier.yaml \
@@ -36,4 +37,6 @@ python scripts/train_delta_sae_frontier.py \
   --device cuda \
   --layers "$LAYERS" \
   --max-rows "$MAX_ROWS" \
-  --batch-size "$BATCH_SIZE"
+  --batch-size "$BATCH_SIZE" \
+  --latent-multipliers "$LATENT_MULTIPLIERS" \
+  --topk "$TOPK_VALUES"

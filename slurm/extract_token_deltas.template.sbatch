@@ -25,14 +25,14 @@ export HF_HOME=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/hf_cache
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-SCRATCH_ROOT="${SCRATCH:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/token_scratch}"
 DATA_DIR="${DATA_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl}"
 ADAPTER_DIR="${ADAPTER_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/checkpoints/qwen3b_session_qlora_ddp/adapter}"
-OUTPUT_DIR="${OUTPUT_DIR:-$SCRATCH_ROOT/qwen3b_session_token_deltas}"
+OUTPUT_DIR="${OUTPUT_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/token_delta_cache/qwen3b_session_token_deltas_l18}"
 SPLIT="${SPLIT:-eval}"
 BATCH_SIZE="${BATCH_SIZE:-8}"
 MAX_EXAMPLES="${MAX_EXAMPLES:-0}"
 CHUNK_EXAMPLES="${CHUNK_EXAMPLES:-1024}"
+LAYERS="${LAYERS:-18}"
 
 python scripts/extract_adapter_deltas.py \
   --config configs/qwen3b_qlora_session.yaml \
@@ -43,4 +43,5 @@ python scripts/extract_adapter_deltas.py \
   --batch-size "$BATCH_SIZE" \
   --max-examples "$MAX_EXAMPLES" \
   --chunk-examples "$CHUNK_EXAMPLES" \
+  --layers "$LAYERS" \
   --pool-unit token

@@ -48,6 +48,7 @@ def main() -> None:
     ap.add_argument("--max-examples", type=int, default=0)
     ap.add_argument("--chunk-examples", type=int, default=4096)
     ap.add_argument("--pool-unit", choices=["mean", "token"], default=None)
+    ap.add_argument("--layers", default="", help="optional comma-separated hidden-state layers to extract")
     args = ap.parse_args()
 
     cfg = load_yaml(args.config)
@@ -73,7 +74,10 @@ def main() -> None:
 
     model_name = cfg["model_name_or_path"]
     max_seq_len = int(cfg["training"]["max_seq_len"])
-    layers = [int(x) for x in cfg["delta_extraction"]["layers"]]
+    if args.layers.strip():
+        layers = [int(x.strip()) for x in args.layers.split(",") if x.strip()]
+    else:
+        layers = [int(x) for x in cfg["delta_extraction"]["layers"]]
     import torch
 
     quant_cfg = BitsAndBytesConfig(

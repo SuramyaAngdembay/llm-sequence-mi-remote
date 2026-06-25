@@ -51,7 +51,12 @@ def per_example_nll(logits: torch.Tensor, input_ids: torch.Tensor, attention_mas
     return (token_loss * shift_mask).sum(dim=1) / denom
 
 
-def load_token_layer_vectors(extract_dir: Path, layer: int) -> tuple[np.ndarray, pd.DataFrame, pd.DataFrame]:
+def load_token_layer_vectors(
+    extract_dir: Path,
+    layer: int,
+    *,
+    keep_examples: set[int] | None = None,
+) -> tuple[np.ndarray, pd.DataFrame, pd.DataFrame]:
     scores = pd.read_parquet(extract_dir / "example_scores.parquet").sort_values("example_idx").reset_index(drop=True)
     score_index = scores.set_index("example_idx", drop=False)
     layer_dir = extract_dir / f"layer_{layer}"
@@ -62,13 +67,26 @@ def load_token_layer_vectors(extract_dir: Path, layer: int) -> tuple[np.ndarray,
     all_vecs: List[np.ndarray] = []
     all_idx: List[np.ndarray] = []
     all_pos: List[np.ndarray] = []
+    keep_arr = np.asarray(sorted(keep_examples), dtype=np.int64) if keep_examples else None
     for path in chunk_paths:
         obj = torch.load(path, map_location="cpu", weights_only=False)
         if "position" not in obj or obj["position"] is None:
             raise RuntimeError("Token-level causal eval requires token-level extraction with position arrays.")
-        all_vecs.append(np.asarray(obj["delta"], dtype=np.float32))
-        all_idx.append(np.asarray(obj["example_idx"], dtype=np.int64))
-        all_pos.append(np.asarray(obj["position"], dtype=np.int64))
+        vecs = np.asarray(obj["delta"], dtype=np.float32)
+        idx = np.asarray(obj["example_idx"], dtype=np.int64)
+        pos = np.asarray(obj["position"], dtype=np.int64)
+        if keep_arr is not None:
+            keep = np.isin(idx, keep_arr)
+            if not np.any(keep):
+                continue
+            vecs = vecs[keep]
+            idx = idx[keep]
+            pos = pos[keep]
+        all_vecs.append(vecs)
+        all_idx.append(idx)
+        all_pos.append(pos)
+    if not all_vecs:
+        raise RuntimeError(f"No token rows found for requested examples at layer {layer}")
 
     x = np.concatenate(all_vecs, axis=0)
     example_idx = np.concatenate(all_idx, axis=0)
@@ -84,6 +102,37 @@ def load_token_layer_vectors(extract_dir: Path, layer: int) -> tuple[np.ndarray,
     token_meta["position"] = position.astype(np.int64)
     token_meta["token_row_idx"] = np.arange(len(token_meta), dtype=int)
     return x, token_meta, scores
+
+
+def build_all_candidate_pairs(
+    example_meta: pd.DataFrame,
+    context_modes: Sequence[str],
+    *,
+    max_receivers: int,
+    max_candidate_donors: int,
+    seed: int,
+) -> Dict[Tuple[str, str], List[Tuple[int, int]]]:
+    out: Dict[Tuple[str, str], List[Tuple[int, int]]] = {}
+    for context_mode in context_modes:
+        for donor_type, donor_label in [("benign", 0), ("anomalous", 1)]:
+            out[(context_mode, donor_type)] = build_candidate_pairs(
+                example_meta,
+                donor_label=donor_label,
+                context_mode=context_mode,
+                max_receivers=max_receivers,
+                max_candidate_donors=max_candidate_donors,
+                rng=np.random.default_rng(seed + donor_label),
+            )
+    return out
+
+
+def examples_from_pairs(candidate_pairs: Dict[Tuple[str, str], List[Tuple[int, int]]]) -> set[int]:
+    out: set[int] = set()
+    for pairs in candidate_pairs.values():
+        for recv_idx, donor_idx in pairs:
+            out.add(int(recv_idx))
+            out.add(int(donor_idx))
+    return out
 
 
 def flatten_context(ctx: Dict[str, Any]) -> Dict[str, Any]:
@@ -510,9 +559,18 @@ def main() -> None:
     control_set = str(args.control_set)
 
     out_dir = ensure_dir(args.out_dir)
-    x, token_meta, scores = load_token_layer_vectors(args.extract_dir, args.layer)
+    scores = pd.read_parquet(args.extract_dir / "example_scores.parquet").sort_values("example_idx").reset_index(drop=True)
     example_meta = load_eval_examples(args.data_dir, scores)
     _ = required_context_cols(example_meta, context_modes)
+    candidate_pairs_by_key = build_all_candidate_pairs(
+        example_meta,
+        context_modes,
+        max_receivers=args.max_receivers,
+        max_candidate_donors=args.max_candidate_donors,
+        seed=args.seed,
+    )
+    needed_examples = examples_from_pairs(candidate_pairs_by_key)
+    x, token_meta, _ = load_token_layer_vectors(args.extract_dir, args.layer, keep_examples=needed_examples)
 
     cfg_dir = args.frontier_dir / f"layer_{args.layer}" / f"m{args.latent_mult:02d}_k{args.k:02d}"
     model_bundle = torch.load(cfg_dir / "delta_sae_model.pt", map_location="cpu", weights_only=False)
@@ -581,19 +639,8 @@ def main() -> None:
     candidate_rows: List[Dict[str, Any]] = []
 
     for context_mode in context_modes:
-        donor_specs = [("benign", 0), ("anomalous", 1)]
-        candidate_pairs = {
-            donor_type: build_candidate_pairs(
-                example_meta,
-                donor_label=donor_label,
-                context_mode=context_mode,
-                max_receivers=args.max_receivers,
-                max_candidate_donors=args.max_candidate_donors,
-                rng=np.random.default_rng(args.seed + donor_label),
-            )
-            for donor_type, donor_label in donor_specs
-        }
-        for donor_type, pairs in candidate_pairs.items():
+        for donor_type in ["benign", "anomalous"]:
+            pairs = candidate_pairs_by_key[(context_mode, donor_type)]
             if not pairs:
                 continue
             recv_idx = np.asarray([p[0] for p in pairs], dtype=int)

@@ -32,3 +32,19 @@ The delta-SAE DOES find sparse units with proxy-selectivity for malicious (top-v
 - a promising signal, but NOT the decisive test. To judge vs the session-AE baseline on the real win
 condition (sufficiency/patchability), run Phase 5 causal eval (eval_delta_sae_causal.py): top-vs-control
 ablation, grounding, sparse patch/repair on the best configs (start: layer 18, k=8/mult=2 and k=4/mult=4).
+
+## 2026-06-25 token-level Phase 5 update
+
+The mean-pooled Phase 5 eval was followed by token-level layer-18 extraction, token SAE training, and
+token-local causal patching.
+
+Completed causal evals:
+
+- `layer=18, latent_mult=2, k=8`: best top-minus-control repair advantage `+0.001405` (`team/top1`).
+- `layer=18, latent_mult=4, k=4`: best top-minus-control repair advantage `+0.001335` (`team/top3`).
+
+Token-level patching is weakly positive and better than the mean-pooled patch result, but effect sizes remain
+small. Treat this as evidence to continue with session-AE baseline comparison and receiver-level uncertainty
+estimation, not as a finished win condition.
+
+Details: `TOKEN_PHASE5_FINDINGS.md` and `token_causal/`.

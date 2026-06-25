@@ -36,3 +36,13 @@ bluntness of the mean-pooled patch.
 
 Per-config: summary.csv + report.md + selected_sets.csv in `causal/<config>/`. Full candidate/best rows on
 Anvil at `outputs/delta_sae_causal_qwen3b/<config>/`.
+
+## 2026-06-25 follow-up
+
+The token-level escalation in step 1 is now complete for layer 18 on the two requested configs. Results are in
+`TOKEN_PHASE5_FINDINGS.md` and `token_causal/`.
+
+Short version: token-level patching gives small positive top-vs-control repair advantages
+(`+0.001405` for `m02/k08`, `+0.001335` for `m04/k04`), strongest in `team` context. This is better than the
+mean-pooled result, but still small enough that the next decisive step is session-AE baseline comparison plus
+bootstrap confidence intervals over the 70 positive receivers.
