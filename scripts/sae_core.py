@@ -124,18 +124,57 @@ def evaluate_features(
     return feature_df, stats, z_all
 
 
+def _choose_low_gap_ids(
+    feature_df: pd.DataFrame,
+    *,
+    n: int,
+    exclude: Sequence[int] = (),
+) -> List[int]:
+    ranked = (
+        feature_df.assign(abs_gap=feature_df["row_gap"].abs())
+        .sort_values(["abs_gap", "row_active_frac", "feature_id"], ascending=[True, False, True])
+        .reset_index(drop=True)
+    )
+    blocked = {int(x) for x in exclude}
+    chosen: List[int] = []
+    for fid in ranked["feature_id"].tolist():
+        val = int(fid)
+        if val in blocked:
+            continue
+        chosen.append(val)
+        blocked.add(val)
+        if len(chosen) >= n:
+            break
+    return chosen
+
+
 def choose_feature_sets(feature_df: pd.DataFrame) -> Dict[str, List[int]]:
     top = feature_df.sort_values("row_gap", ascending=False).reset_index(drop=True)
     active = top[top["row_active_frac"] > 0.02].copy()
     if active.empty:
         active = top.copy()
-    low = active.assign(abs_gap=active["row_gap"].abs()).sort_values("abs_gap", ascending=True).reset_index(drop=True)
+
+    top1 = [int(top.iloc[0]["feature_id"])]
+    top3 = [int(x) for x in top.head(3)["feature_id"].tolist()]
+    top5 = [int(x) for x in top.head(5)["feature_id"].tolist()]
+    exclude = top5
+
+    control_source = active if len(active) >= 3 else top
+    control1 = _choose_low_gap_ids(control_source, n=1, exclude=exclude)
+    if not control1:
+        control1 = _choose_low_gap_ids(top, n=1, exclude=())
+    control3 = _choose_low_gap_ids(control_source, n=3, exclude=exclude)
+    if len(control3) < 3:
+        control3 = _choose_low_gap_ids(top, n=3, exclude=exclude)
+    if len(control3) < 3:
+        control3 = _choose_low_gap_ids(top, n=3, exclude=())
+
     return {
-        "top1": [int(top.iloc[0]["feature_id"])],
-        "top3": [int(x) for x in top.head(3)["feature_id"].tolist()],
-        "top5": [int(x) for x in top.head(5)["feature_id"].tolist()],
-        "control1": [int(low.iloc[0]["feature_id"])],
-        "control3": [int(x) for x in low.head(3)["feature_id"].tolist()],
+        "top1": top1,
+        "top3": top3,
+        "top5": top5,
+        "control1": control1,
+        "control3": control3,
     }
 
 
@@ -185,4 +224,3 @@ def support_overlap_stats(z_all: np.ndarray, top_feature_ids: Sequence[int]) -> 
         "top_feature_mean_pairwise_jaccard": float(np.mean(jaccs)) if jaccs else float("nan"),
         "top_feature_mean_active_overlap": float(np.mean(conds)) if conds else float("nan"),
     }
-
