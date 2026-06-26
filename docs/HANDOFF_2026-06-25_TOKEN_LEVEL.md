@@ -13,12 +13,39 @@ The old dependency-blocked causal jobs were replaced because the SAE parent job 
 
 ## Main Result
 
-Token-level causal patching gives small positive top-vs-control repair advantages:
+Token-level causal patching gives positive top-vs-control repair advantages:
 
 - `layer=18, latent_mult=2, k=8`: best `+0.001405`, `team/top1`
 - `layer=18, latent_mult=4, k=4`: best `+0.001335`, `team/top3`
 
-This is an improvement over mean-pooled patching, but effect sizes remain small and need baseline comparison/statistics before claiming the project win condition.
+This was the first sign that token-level intervention was better than mean-pooled patching.
+
+## Superseding Update
+
+This handoff is now partially superseded by:
+
+- `docs/HANDOFF_2026-06-25_STRICT_COMPARISON.md`
+- `results/qwen3b_pilot/strict_compare_remote70_daylevel/REMOTE_VS_LOCAL_DAYLEVEL_REPORT.md`
+
+The updated state is:
+
+- `m02/k08` bootstrap is now complete and the best `team` targets remain cleanly positive
+- the strict receiver-day comparison against the local session branch is now done
+- on the matched `(user_id, day_index)` unit, the remote token branch is currently ahead of the local session-AE branch
+
+Matched-unit comparison:
+
+- best local adaptive session-AE day-level advantage: `0.001133`
+- best local residual day-level advantage: `0.000654`
+- best remote token `m02/k08` advantage: `0.001405`
+
+Bootstrap on the best remote config:
+
+- `team/top1`: `0.001405`, CI `[0.000706, 0.002114]`
+- `team/top5`: `0.001382`, CI `[0.000729, 0.002059]`
+- `team/top3`: `0.000907`, CI `[0.000248, 0.001541]`
+
+So this branch is no longer just “promising but unproven.” It is now the strongest current challenger, subject to the remaining `m04/k04_controlfix` rerun.
 
 ## Repo Results
 
@@ -45,6 +72,6 @@ Large files are intentionally Anvil-only:
 
 ## Next Agent Tasks
 
-1. Evaluate against the session-AE baseline using the same token-local causal protocol.
-2. Add bootstrap confidence intervals across the 70 positive receivers.
-3. Re-run only targeted token SAE configs if more frontier points are needed; do not run the full sweep at `240G` RAM.
+1. Wait for the `m04/k04_controlfix` rerun and its bootstrap.
+2. Confirm whether the control-fixed `m04/k04` result stays positive with a real 3-feature control set.
+3. If `m04/k04_controlfix` agrees with `m02/k08`, keep the remote token branch ahead of graph-first escalation.

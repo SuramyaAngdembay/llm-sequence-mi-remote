@@ -19,10 +19,32 @@ Main numbers on the matched receiver-day unit:
 
 So on the correct comparison unit, the current remote token branch is **ahead** of the local session-AE branch.
 
-This is not the final branch decision yet because two checks still matter:
+This is not the final fully-closed branch decision yet because two checks still matter:
 
 1. bootstrap CIs over the `70` positive receivers for the remote token best rows
 2. a clean rerun of `m04/k04` because its control set previously collapsed to one feature
+
+## Latest Synced Update
+
+The first of those two checks is now done.
+
+Synced back from Anvil into:
+
+- `artifacts/anvil_token_causal/l18_m02_k08/bootstrap/`
+- `artifacts/anvil_token_causal/l18_m02_k08/`
+- `artifacts/anvil_token_causal/l18_m04_k04/`
+
+The strongest `m02/k08` bootstrap rows remain positive:
+
+- `team/top1`: estimate `0.001405`, CI `[0.000706, 0.002114]`
+- `team/top5`: estimate `0.001382`, CI `[0.000729, 0.002059]`
+- `team/top3`: estimate `0.000907`, CI `[0.000248, 0.001541]`
+
+So the updated read is:
+
+- the matched day-level comparison already put remote token ahead of local session-AE
+- the best remote token config now also has a clean positive bootstrap interval
+- the remaining `m04/k04_controlfix` rerun is now a stability/control-quality check, not the main source of evidence
 
 ## Code Already Added
 
@@ -110,6 +132,10 @@ The strongest `m02/k08` rows remain positive under bootstrap:
 - `team/top5`: estimate `0.001382`, 95% CI `[0.000729, 0.002059]`
 - `team/top3`: estimate `0.000907`, 95% CI `[0.000248, 0.001541]`
 
+The original `m04/k04` artifact synced here still shows the expected control defect:
+
+- `control3` collapsed to a single feature `[8043]`
+
 The control-fixed `m04/k04` rerun is queued on Anvil as `18586875`; its dependent CPU bootstrap is `18586876`.
 
 ### 1. Bootstrap the current best `m02/k08`
@@ -167,5 +193,8 @@ Best additional CSVs to `rsync` here for local inspection:
 
 After those two checks:
 
-- if `m02/k08` bootstrap stays clearly positive and `m04/k04_controlfix` is also positive, the remote token branch is the right main challenger and should stay ahead of graph-first escalation
-- if bootstrap weakens `m02/k08` badly and the control-fixed rerun collapses, then the remote edge is too fragile and graph/edge/entity-state intervention becomes the higher-risk next path
+- current provisional decision:
+  - the remote token branch is ahead on the matched receiver-day unit
+  - and `m02/k08` now has a positive bootstrap interval
+- if `m04/k04_controlfix` is also positive, keep the remote token branch as the main challenger and continue it before graph-first escalation
+- if `m04/k04_controlfix` collapses badly, keep `m02/k08` as the best remote evidence but treat the branch as narrower and less stable
