@@ -45,7 +45,21 @@ Bootstrap on the best remote config:
 - `team/top5`: `0.001382`, CI `[0.000729, 0.002059]`
 - `team/top3`: `0.000907`, CI `[0.000248, 0.001541]`
 
-So this branch is no longer just “promising but unproven.” It is now the strongest current challenger, subject to the remaining `m04/k04_controlfix` rerun.
+So this branch is no longer just “promising but unproven.” It is now the strongest current challenger.
+
+## Final Control-Fix Update
+
+The `m04/k04_controlfix` rerun and bootstrap are now complete:
+
+- `control3` stayed at three features: `[101, 173, 230]`
+- best row: `team/top3`, estimate `0.001446`, 95% CI `[0.000623, 0.002328]`
+- next strongest row: `project_role/top5`, estimate `0.000749`, 95% CI `[0.000306, 0.001207]`
+
+See:
+
+- `results/qwen3b_pilot/CONTROLFIX_EVALUATION_HANDOFF.md`
+- `results/qwen3b_pilot/token_causal/l18_m04_k04_controlfix/TOKEN_DELTA_SAE_CAUSAL_REPORT.md`
+- `results/qwen3b_pilot/token_causal/l18_m04_k04_controlfix/bootstrap/TOKEN_DELTA_SAE_BOOTSTRAP_REPORT.md`
 
 ## Repo Results
 
@@ -72,6 +86,6 @@ Large files are intentionally Anvil-only:
 
 ## Next Agent Tasks
 
-1. Wait for the `m04/k04_controlfix` rerun and its bootstrap.
-2. Confirm whether the control-fixed `m04/k04` result stays positive with a real 3-feature control set.
-3. If `m04/k04_controlfix` agrees with `m02/k08`, keep the remote token branch ahead of graph-first escalation.
+1. Pull the latest GitHub commit on Magnolia.
+2. Regenerate the strict receiver-day comparison for `l18_m04_k04_controlfix` on Magnolia, where the local session-AE artifacts live.
+3. If the refreshed comparison agrees with the existing matched comparison, keep the token QLoRA branch ahead of graph-first escalation.
