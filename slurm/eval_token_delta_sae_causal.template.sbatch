@@ -19,7 +19,8 @@ cd "$REPO_DIR"
 mkdir -p logs
 
 module load conda/2026.03
-conda activate /anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert-qlora
+CONDA_ENV="${CONDA_ENV:-/anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert-qlora}"
+conda activate "$CONDA_ENV"
 
 export HF_HOME=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/hf_cache
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1

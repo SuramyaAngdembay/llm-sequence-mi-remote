@@ -12,7 +12,7 @@ This branch is intentionally separate from the local CPU `AE`/`SAE` pipeline. Th
 ## Current Recommendation
 
 - Keep the completed `Qwen 3B` token-level branch as the current reference run
-- The next scale-up is a **targeted `Qwen 7B` token-level branch**
+- The next scale-up is a **targeted `Qwen3-8B` token-level branch**
 - Use `4x H100 80GB` on one Anvil `ai` node for training
 - Use `1x H100 80GB` for token extraction and causal eval follow-ons
 - Use structured session sequences, not flattened prose
@@ -52,7 +52,7 @@ The current remote result has now moved beyond a pure pilot:
   3. `extract_adapter_deltas.py`
   4. `train_delta_sae_frontier.py`
 - The `Qwen 3B` token-level branch is complete and currently ahead of the local matched baseline.
-- The next branch to run is a **targeted `Qwen 7B` token-level scale-up**, not a broad new frontier or a graph-first pivot.
+- The next branch to run is a **targeted `Qwen3-8B` token-level scale-up**, not a broad new frontier or a graph-first pivot.
 
 ## Local Source References
 

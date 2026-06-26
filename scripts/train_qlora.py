@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import inspect
 import json
 import os
 from pathlib import Path
@@ -115,30 +116,33 @@ def main() -> None:
     micro_bs = args.micro_batch_size or int(cfg["training"]["micro_batch_size"])
     grad_accum = args.grad_accum or int(cfg["training"]["gradient_accumulation_steps"])
 
-    training_args = TrainingArguments(
-        output_dir=str(out_dir),
-        per_device_train_batch_size=micro_bs,
-        per_device_eval_batch_size=micro_bs,
-        gradient_accumulation_steps=grad_accum,
-        num_train_epochs=float(cfg["training"]["num_train_epochs"]),
-        learning_rate=float(cfg["training"]["learning_rate"]),
-        lr_scheduler_type=str(cfg["training"]["lr_scheduler_type"]),
-        warmup_ratio=float(cfg["training"]["warmup_ratio"]),
-        weight_decay=float(cfg["training"]["weight_decay"]),
-        logging_steps=int(cfg["training"]["logging_steps"]),
-        save_steps=int(cfg["training"]["save_steps"]),
-        eval_steps=int(cfg["training"]["save_steps"]),
-        evaluation_strategy="steps",
-        save_strategy="steps",
-        bf16=bool(cfg["training"].get("bf16", True)),
-        gradient_checkpointing=grad_ckpt,
-        gradient_checkpointing_kwargs={"use_reentrant": False},
-        ddp_find_unused_parameters=False,
-        dataloader_num_workers=args.dataloader_workers,
-        report_to=[],
-        remove_unused_columns=False,
-        logging_first_step=True,
-    )
+    training_arg_kwargs = {
+        "output_dir": str(out_dir),
+        "per_device_train_batch_size": micro_bs,
+        "per_device_eval_batch_size": micro_bs,
+        "gradient_accumulation_steps": grad_accum,
+        "num_train_epochs": float(cfg["training"]["num_train_epochs"]),
+        "learning_rate": float(cfg["training"]["learning_rate"]),
+        "lr_scheduler_type": str(cfg["training"]["lr_scheduler_type"]),
+        "warmup_ratio": float(cfg["training"]["warmup_ratio"]),
+        "weight_decay": float(cfg["training"]["weight_decay"]),
+        "logging_steps": int(cfg["training"]["logging_steps"]),
+        "save_steps": int(cfg["training"]["save_steps"]),
+        "eval_steps": int(cfg["training"]["save_steps"]),
+        "save_strategy": "steps",
+        "bf16": bool(cfg["training"].get("bf16", True)),
+        "gradient_checkpointing": grad_ckpt,
+        "gradient_checkpointing_kwargs": {"use_reentrant": False},
+        "ddp_find_unused_parameters": False,
+        "dataloader_num_workers": args.dataloader_workers,
+        "report_to": [],
+        "remove_unused_columns": False,
+        "logging_first_step": True,
+    }
+    training_args_params = inspect.signature(TrainingArguments.__init__).parameters
+    eval_strategy_key = "eval_strategy" if "eval_strategy" in training_args_params else "evaluation_strategy"
+    training_arg_kwargs[eval_strategy_key] = "steps"
+    training_args = TrainingArguments(**training_arg_kwargs)
 
     trainer = Trainer(
         model=model,

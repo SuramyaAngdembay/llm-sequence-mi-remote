@@ -20,7 +20,8 @@ N_BOOTSTRAP="${N_BOOTSTRAP:-4000}"
 SEED="${SEED:-42}"
 
 module load conda/2026.03
-conda activate /anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert-qlora
+CONDA_ENV="${CONDA_ENV:-/anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert-qlora}"
+conda activate "$CONDA_ENV"
 
 cd "$REPO_DIR"
 python scripts/bootstrap_token_delta_sae_causal.py \

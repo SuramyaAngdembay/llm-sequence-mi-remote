@@ -1,7 +1,7 @@
 #!/bin/bash
 # 4x H100 DDP QLoRA launcher (Anvil `ai` partition). Shared by the `Qwen 3B`
-# pilot reruns and the targeted `Qwen 7B` scale-up. Training uses ALL 4 GPUs
-# on one H100 node via torchrun data-parallel.
+# pilot reruns and targeted larger-Qwen scale-ups. Training uses ALL 4 GPUs on
+# one H100 node via torchrun data-parallel.
 #SBATCH --job-name=qwen_qlora_ddp
 #SBATCH --output=logs/%x-%j.out
 #SBATCH --error=logs/%x-%j.err
@@ -21,7 +21,8 @@ cd "$REPO_DIR"
 mkdir -p logs
 
 module load conda/2026.03
-conda activate /anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert-qlora
+CONDA_ENV="${CONDA_ENV:-/anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert-qlora}"
+conda activate "$CONDA_ENV"
 
 # Compute nodes have no internet: weights must already be in HF_HOME (download on login node).
 export HF_HOME=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/hf_cache
@@ -35,8 +36,8 @@ CONFIG="${CONFIG:-configs/qwen3b_qlora_session.yaml}"
 DATA_DIR="${DATA_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl}"
 OUTPUT_DIR="${OUTPUT_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/checkpoints/qwen3b_session_qlora_ddp}"
 NPROC="${NPROC:-4}"            # GPUs to use (=4 for the whole node)
-MICRO_BS="${MICRO_BS:-8}"      # 3B-friendly default. For 7B targeted runs, start with MICRO_BS=4.
-GRAD_ACCUM="${GRAD_ACCUM:-1}"  # 7B targeted start point: GRAD_ACCUM=2 -> effective batch 32.
+MICRO_BS="${MICRO_BS:-8}"      # 3B-friendly default. Larger Qwen targeted runs override this.
+GRAD_ACCUM="${GRAD_ACCUM:-1}"  # Larger Qwen targeted runs usually keep effective batch near 32.
 DL_WORKERS="${DL_WORKERS:-16}"
 MAX_TRAIN="${MAX_TRAIN:-0}"    # 0 = full dataset; set >0 for a capped smoke
 MAX_VAL="${MAX_VAL:-0}"
@@ -46,7 +47,7 @@ GC_MODE="${GC_MODE:-config}"   # config | on | off
 #   suggests ~2.8e-4 (or keep 2e-4 + longer warmup) -- experiment-design call, left to config owner.
 # Throughput phase-2: true packing (DataCollatorWithFlattening + flash_attention_2) ~1.4x on short examples.
 
-echo "job=$SLURM_JOB_ID node=$(hostname) | CONFIG=$CONFIG NPROC=$NPROC MICRO_BS=$MICRO_BS GRAD_ACCUM=$GRAD_ACCUM"
+echo "job=$SLURM_JOB_ID node=$(hostname) | CONDA_ENV=$CONDA_ENV CONFIG=$CONFIG NPROC=$NPROC MICRO_BS=$MICRO_BS GRAD_ACCUM=$GRAD_ACCUM"
 nvidia-smi --query-gpu=index,name,memory.total --format=csv,noheader
 
 EXTRA_ARGS=()

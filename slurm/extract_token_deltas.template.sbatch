@@ -19,7 +19,8 @@ cd "$REPO_DIR"
 mkdir -p logs
 
 module load conda/2026.03
-conda activate /anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert-qlora
+CONDA_ENV="${CONDA_ENV:-/anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert-qlora}"
+conda activate "$CONDA_ENV"
 
 export HF_HOME=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/hf_cache
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
@@ -30,9 +31,9 @@ DATA_DIR="${DATA_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/out
 ADAPTER_DIR="${ADAPTER_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/checkpoints/qwen3b_session_qlora_ddp/adapter}"
 OUTPUT_DIR="${OUTPUT_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/token_delta_cache/qwen3b_session_token_deltas_l18}"
 SPLIT="${SPLIT:-eval}"
-BATCH_SIZE="${BATCH_SIZE:-8}"      # for 7B targeted runs, start lower, e.g. 4
+BATCH_SIZE="${BATCH_SIZE:-8}"      # for larger targeted runs, start lower, e.g. 4
 MAX_EXAMPLES="${MAX_EXAMPLES:-0}"
-CHUNK_EXAMPLES="${CHUNK_EXAMPLES:-1024}"  # for 7B targeted runs, lower if scratch pressure rises
+CHUNK_EXAMPLES="${CHUNK_EXAMPLES:-1024}"  # for larger targeted runs, lower if scratch pressure rises
 LAYERS="${LAYERS:-18}"
 
 python scripts/extract_adapter_deltas.py \

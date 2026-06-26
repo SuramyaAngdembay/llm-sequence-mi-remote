@@ -10,7 +10,7 @@ The `Qwen 3B` token-level branch is no longer just exploratory:
 So the current path is:
 
 1. keep the `3B` token results as the comparison anchor
-2. scale the **same token-level protocol** to `Qwen 7B`
+2. scale the **same token-level protocol** to `Qwen3-8B`
 3. do not rerun broad mean-pooled or generic frontier work first
 
 ## Phase 0: Remote Discovery
@@ -61,11 +61,11 @@ Completed first target:
 
 Current scale-up target:
 
-- `Qwen 7B`
+- `Qwen3-8B`
 - same structured session JSONL
 - same benign-only objective
 - `4x H100 80GB` single-node DDP on Anvil `ai`
-- recommended start: `MICRO_BS=4`, `GRAD_ACCUM=2`, `NPROC=4`
+- submitted start: `MICRO_BS=2`, `GRAD_ACCUM=4`, `NPROC=4`
 
 Required outputs:
 
@@ -79,10 +79,10 @@ Primary DDP command on Anvil:
 sbatch slurm/train_qlora_ddp.template.sbatch
 ```
 
-Targeted `7B` launcher:
+Targeted `Qwen3-8B` launcher:
 
 ```bash
-bash scripts/submit_qwen7b_targeted_pipeline_anvil.sh
+bash scripts/submit_qwen3_8b_targeted_pipeline_anvil.sh
 ```
 
 ## Phase 3: Delta Extraction
@@ -201,13 +201,13 @@ Recommended first token-level path:
 2. `train_token_delta_sae.template.sbatch`
 3. `eval_token_delta_sae_causal.template.sbatch`
 
-Targeted `7B` eval bundle:
+Targeted `Qwen3-8B` eval bundle:
 
 ```bash
-bash scripts/submit_qwen7b_token_eval_bundle_anvil.sh
+bash scripts/submit_qwen3_8b_token_eval_bundle_anvil.sh
 ```
 
-## Phase 6: Qwen 7B Targeted Scale-Up
+## Phase 6: Qwen3-8B Targeted Scale-Up
 
 This phase is justified only because the `3B` token branch already cleared the matched-comparison bar.
 
@@ -221,7 +221,7 @@ What stays fixed:
 
 What changes:
 
-- base model becomes `Qwen/Qwen2.5-7B`
+- base model becomes `Qwen/Qwen3-8B`
 - training uses 4-GPU DDP as the default path
 - extraction/eval stay token-level
 

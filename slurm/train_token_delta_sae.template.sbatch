@@ -18,7 +18,8 @@ cd "$REPO_DIR"
 mkdir -p logs
 
 module load conda/2026.03
-conda activate /anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert-qlora
+CONDA_ENV="${CONDA_ENV:-/anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert-qlora}"
+conda activate "$CONDA_ENV"
 
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
