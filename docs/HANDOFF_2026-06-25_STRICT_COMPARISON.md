@@ -1,0 +1,157 @@
+# Handoff 2026-06-25: Strict Token-vs-Session Comparison
+
+This handoff finishes the comparison logic after token-level causal patching became weakly positive.
+
+The main correction is that the earlier local session-AE comparison was on **session rows**, while the remote token QLoRA branch is on **receiver user-days**.
+We now collapse the local session repair rows to one value per `(user_id, day_index)` receiver day.
+
+## Current Read
+
+Start here:
+
+- `results/qwen3b_pilot/strict_compare_remote70_daylevel/REMOTE_VS_LOCAL_DAYLEVEL_REPORT.md`
+
+Main numbers on the matched receiver-day unit:
+
+- best local adaptive session-AE day-level advantage: `0.001133`
+- best local residual day-level advantage: `0.000654`
+- best remote token QLoRA advantage: `0.001405`
+
+So on the correct comparison unit, the current remote token branch is **ahead** of the local session-AE branch.
+
+This is not the final branch decision yet because two checks still matter:
+
+1. bootstrap CIs over the `70` positive receivers for the remote token best rows
+2. a clean rerun of `m04/k04` because its control set previously collapsed to one feature
+
+## Code Already Added
+
+These are already committed on `main`:
+
+- `scripts/compare_remote_token_vs_local_session.py`
+- `scripts/bootstrap_token_delta_sae_causal.py`
+- `slurm/bootstrap_token_delta_sae_causal.template.sbatch`
+
+Also patched:
+
+- `scripts/sae_core.py`
+
+The control feature selection is now more robust and does not immediately collapse `control3` to one feature when the active-only low-gap pool is too small.
+
+## Local Strict Comparison (Already Done)
+
+This is the command that generated the matched day-level report:
+
+```bash
+python scripts/compare_remote_token_vs_local_session.py \
+  --session-feature-path /homes/01/srangdembay/InsiderThreatDetection/r6.2/ctmc-approach/benchmarks/oneclass_unsupervised_r62/results_r62_lcdal_session_features_clean/sessionr6.2_features.parquet \
+  --local-run-root /homes/01/srangdembay/InsiderThreatDetection/r6.2/ctmc-approach/benchmarks/oneclass_unsupervised_r62/results_r62_session_lcdal_autoencoder_mech_clean/plain \
+  --local-adaptive-best-rows /homes/01/srangdembay/InsiderThreatDetection/r6.2/ctmc-approach/benchmarks/oneclass_unsupervised_r62/results_r62_session_lcdal_feature_bundle_repair_adaptive_remote70/adaptive_feature_bundle_repair_best_rows.csv \
+  --local-residual-best-rows /homes/01/srangdembay/InsiderThreatDetection/r6.2/ctmc-approach/benchmarks/oneclass_unsupervised_r62/results_r62_session_lcdal_feature_bundle_repair_residual_remote70/residual_feature_bundle_repair_best_rows.csv \
+  --remote-summary-csv results/qwen3b_pilot/token_causal/l18_m02_k08/token_delta_sae_causal_summary.csv \
+  --out-dir results/qwen3b_pilot/strict_compare_remote70_daylevel
+```
+
+## If Anvil CSVs Need To Be Pulled Here
+
+If the full per-receiver token outputs exist only on Anvil, pull them with `rsync`.
+
+Local destination:
+
+```bash
+mkdir -p artifacts/anvil_token_causal/l18_m02_k08
+mkdir -p artifacts/anvil_token_causal/l18_m04_k04
+mkdir -p artifacts/anvil_token_causal/l18_m04_k04_controlfix
+```
+
+Pull the current best-row CSVs:
+
+```bash
+rsync -avP \
+  x-sangdembay@anvil.rcac.purdue.edu:/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3b/l18_m02_k08/token_delta_sae_causal_best_rows.csv \
+  artifacts/anvil_token_causal/l18_m02_k08/
+
+rsync -avP \
+  x-sangdembay@anvil.rcac.purdue.edu:/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3b/l18_m04_k04/token_delta_sae_causal_best_rows.csv \
+  artifacts/anvil_token_causal/l18_m04_k04/
+```
+
+If you want the other small summaries too:
+
+```bash
+rsync -avP \
+  --include='*/' \
+  --include='token_delta_sae_causal_best_rows.csv' \
+  --include='token_delta_sae_causal_summary.csv' \
+  --include='token_delta_sae_causal_selected_sets.csv' \
+  --exclude='*' \
+  x-sangdembay@anvil.rcac.purdue.edu:/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3b/ \
+  artifacts/anvil_token_causal/
+```
+
+## Anvil Pull And Remaining Jobs
+
+First update the repo:
+
+```bash
+cd ~/cert-qlora-MI/llm-sequence-mi-remote
+git pull origin main
+```
+
+### 1. Bootstrap the current best `m02/k08`
+
+```bash
+BEST_ROWS_CSV=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3b/l18_m02_k08/token_delta_sae_causal_best_rows.csv \
+OUT_DIR=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3b/l18_m02_k08/bootstrap \
+sbatch slurm/bootstrap_token_delta_sae_causal.template.sbatch
+```
+
+Expected outputs:
+
+- `token_delta_sae_bootstrap_summary.csv`
+- `TOKEN_DELTA_SAE_BOOTSTRAP_REPORT.md`
+
+### 2. Re-run `m04/k04` with the fixed control pool
+
+```bash
+LAYER=18 LATENT_MULT=4 TOPK=4 \
+OUTPUT_DIR=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3b/l18_m04_k04_controlfix \
+sbatch slurm/eval_token_delta_sae_causal.template.sbatch
+```
+
+Expected outputs:
+
+- `token_delta_sae_causal_best_rows.csv`
+- `token_delta_sae_causal_summary.csv`
+- `TOKEN_DELTA_SAE_CAUSAL_REPORT.md`
+
+### 3. Bootstrap the control-fixed `m04/k04`
+
+```bash
+BEST_ROWS_CSV=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3b/l18_m04_k04_controlfix/token_delta_sae_causal_best_rows.csv \
+OUT_DIR=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3b/l18_m04_k04_controlfix/bootstrap \
+sbatch slurm/bootstrap_token_delta_sae_causal.template.sbatch
+```
+
+## What To Commit Back Or Sync Back
+
+Small files that should come back to Git or be `rsync`ed here:
+
+- `outputs/token_delta_sae_causal_qwen3b/l18_m02_k08/bootstrap/token_delta_sae_bootstrap_summary.csv`
+- `outputs/token_delta_sae_causal_qwen3b/l18_m02_k08/bootstrap/TOKEN_DELTA_SAE_BOOTSTRAP_REPORT.md`
+- `outputs/token_delta_sae_causal_qwen3b/l18_m04_k04_controlfix/token_delta_sae_causal_summary.csv`
+- `outputs/token_delta_sae_causal_qwen3b/l18_m04_k04_controlfix/TOKEN_DELTA_SAE_CAUSAL_REPORT.md`
+- `outputs/token_delta_sae_causal_qwen3b/l18_m04_k04_controlfix/bootstrap/token_delta_sae_bootstrap_summary.csv`
+- `outputs/token_delta_sae_causal_qwen3b/l18_m04_k04_controlfix/bootstrap/TOKEN_DELTA_SAE_BOOTSTRAP_REPORT.md`
+
+Best additional CSVs to `rsync` here for local inspection:
+
+- `token_delta_sae_causal_best_rows.csv` from `l18_m02_k08`
+- `token_delta_sae_causal_best_rows.csv` from `l18_m04_k04_controlfix`
+
+## Branch Decision Rule
+
+After those two checks:
+
+- if `m02/k08` bootstrap stays clearly positive and `m04/k04_controlfix` is also positive, the remote token branch is the right main challenger and should stay ahead of graph-first escalation
+- if bootstrap weakens `m02/k08` badly and the control-fixed rerun collapses, then the remote edge is too fragile and graph/edge/entity-state intervention becomes the higher-risk next path
