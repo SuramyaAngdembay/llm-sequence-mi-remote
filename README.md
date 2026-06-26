@@ -11,8 +11,10 @@ This branch is intentionally separate from the local CPU `AE`/`SAE` pipeline. Th
 
 ## Current Recommendation
 
-- Start with `Qwen 3B`
-- Use `1x H100 80GB` as the primary target
+- Keep the completed `Qwen 3B` token-level branch as the current reference run
+- The next scale-up is a **targeted `Qwen 7B` token-level branch**
+- Use `4x H100 80GB` on one Anvil `ai` node for training
+- Use `1x H100 80GB` for token extraction and causal eval follow-ons
 - Use structured session sequences, not flattened prose
 - Fine-tune with `QLoRA`
 - Train SAEs on `adapter deltas`, not full hidden states
@@ -27,6 +29,12 @@ The current strongest local MI result is the base LC-DAL session branch:
 
 But sparse session SAE units still failed as repair-capable patch units. This remote branch is the next major escalation.
 
+The current remote result has now moved beyond a pure pilot:
+
+- token-level `Qwen 3B` patching beat the matched local session-AE day-level baseline
+- the strongest remote token configs have positive bootstrap intervals
+- the branch decision is now to scale the **same token-level intervention path**, not to switch representations again first
+
 ## Directory Layout
 
 - [docs](./docs): specs, runbook, cluster checklist
@@ -38,12 +46,13 @@ But sparse session SAE units still failed as repair-capable patch units. This re
 ## Current Status
 
 - GitHub repo is live and being used as the control plane for the Anvil branch.
-- First runnable execution path now exists:
+- First runnable execution path exists:
   1. `build_session_jsonl.py`
   2. `train_qlora.py`
   3. `extract_adapter_deltas.py`
   4. `train_delta_sae_frontier.py`
-- The first pilot is configured around **mean-pooled adapter deltas** for the SAE frontier.
+- The `Qwen 3B` token-level branch is complete and currently ahead of the local matched baseline.
+- The next branch to run is a **targeted `Qwen 7B` token-level scale-up**, not a broad new frontier or a graph-first pivot.
 
 ## Local Source References
 

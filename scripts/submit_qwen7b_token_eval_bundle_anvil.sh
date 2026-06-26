@@ -1,0 +1,53 @@
+#!/bin/bash
+set -euo pipefail
+
+REPO_DIR="${REPO_DIR:-$HOME/cert-qlora-MI/llm-sequence-mi-remote}"
+cd "$REPO_DIR"
+
+CONFIG="${CONFIG:-configs/qwen7b_qlora_session_targeted.yaml}"
+DATA_DIR="${DATA_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl}"
+ADAPTER_DIR="${ADAPTER_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/checkpoints/qwen7b_session_qlora_ddp/adapter}"
+EXTRACT_DIR="${EXTRACT_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/token_delta_cache/qwen7b_session_token_deltas_targeted}"
+FRONTIER_DIR="${FRONTIER_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_frontier_qwen7b}"
+
+LAYER="${LAYER:-20}"
+LATENT_MULT="${LATENT_MULT:-2}"
+TOPK="${TOPK:-8}"
+TAG="${TAG:-l${LAYER}_m$(printf '%02d' "$LATENT_MULT")_k$(printf '%02d' "$TOPK")}"
+OUTPUT_DIR="${OUTPUT_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen7b/${TAG}}"
+BOOTSTRAP_DIR="${BOOTSTRAP_DIR:-${OUTPUT_DIR}/bootstrap}"
+
+BATCH_SIZE="${BATCH_SIZE:-4}"
+SAE_BATCH_SIZE="${SAE_BATCH_SIZE:-2048}"
+CONTEXT_MODES="${CONTEXT_MODES:-team,role,project_role,dept_role}"
+TOP_SETS="${TOP_SETS:-top1,top3,top5}"
+CONTROL_SET="${CONTROL_SET:-control3}"
+ALPHAS="${ALPHAS:-0.25,0.5,0.75,1.0}"
+MAX_RECEIVERS="${MAX_RECEIVERS:-0}"
+MAX_CANDIDATE_DONORS="${MAX_CANDIDATE_DONORS:-16}"
+N_BOOTSTRAP="${N_BOOTSTRAP:-4000}"
+SEED="${SEED:-42}"
+
+CAUSAL_JOB=$(
+  sbatch --parsable \
+    --export=ALL,REPO_DIR="$REPO_DIR",CONFIG="$CONFIG",DATA_DIR="$DATA_DIR",ADAPTER_DIR="$ADAPTER_DIR",EXTRACT_DIR="$EXTRACT_DIR",FRONTIER_DIR="$FRONTIER_DIR",OUTPUT_DIR="$OUTPUT_DIR",LAYER="$LAYER",LATENT_MULT="$LATENT_MULT",TOPK="$TOPK",BATCH_SIZE="$BATCH_SIZE",SAE_BATCH_SIZE="$SAE_BATCH_SIZE",CONTEXT_MODES="$CONTEXT_MODES",TOP_SETS="$TOP_SETS",CONTROL_SET="$CONTROL_SET",ALPHAS="$ALPHAS",MAX_RECEIVERS="$MAX_RECEIVERS",MAX_CANDIDATE_DONORS="$MAX_CANDIDATE_DONORS" \
+    slurm/eval_token_delta_sae_causal.template.sbatch
+)
+
+BOOTSTRAP_JOB=$(
+  sbatch --parsable --dependency=afterok:${CAUSAL_JOB} \
+    --export=ALL,REPO_DIR="$REPO_DIR",BEST_ROWS_CSV="${OUTPUT_DIR}/token_delta_sae_causal_best_rows.csv",OUT_DIR="$BOOTSTRAP_DIR",TOP_SETS="$TOP_SETS",CONTROL_SET="$CONTROL_SET",N_BOOTSTRAP="$N_BOOTSTRAP",SEED="$SEED" \
+    slurm/bootstrap_token_delta_sae_causal_cpu.template.sbatch
+)
+
+cat <<EOM
+submitted_qwen7b_token_eval_bundle=1
+causal_job=${CAUSAL_JOB}
+bootstrap_job=${BOOTSTRAP_JOB}
+tag=${TAG}
+output_dir=${OUTPUT_DIR}
+bootstrap_dir=${BOOTSTRAP_DIR}
+layer=${LAYER}
+latent_mult=${LATENT_MULT}
+topk=${TOPK}
+EOM

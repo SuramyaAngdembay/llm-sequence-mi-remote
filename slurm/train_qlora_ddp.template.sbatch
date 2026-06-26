@@ -1,6 +1,7 @@
 #!/bin/bash
-# 4x H100 DDP QLoRA launcher (Anvil `ai` partition). Uses ALL 4 GPUs on the node
-# via torchrun data-parallel. Config-driven: swap CONFIG for qwen7b later.
+# 4x H100 DDP QLoRA launcher (Anvil `ai` partition). Shared by the `Qwen 3B`
+# pilot reruns and the targeted `Qwen 7B` scale-up. Training uses ALL 4 GPUs
+# on one H100 node via torchrun data-parallel.
 #SBATCH --job-name=qwen_qlora_ddp
 #SBATCH --output=logs/%x-%j.out
 #SBATCH --error=logs/%x-%j.err
@@ -34,17 +35,38 @@ CONFIG="${CONFIG:-configs/qwen3b_qlora_session.yaml}"
 DATA_DIR="${DATA_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl}"
 OUTPUT_DIR="${OUTPUT_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/checkpoints/qwen3b_session_qlora_ddp}"
 NPROC="${NPROC:-4}"            # GPUs to use (=4 for the whole node)
-MICRO_BS="${MICRO_BS:-8}"      # per-GPU micro batch (1 wastes an 80GB H100; tune vs nvidia-smi)
-GRAD_ACCUM="${GRAD_ACCUM:-1}"  # effective batch = MICRO_BS x GRAD_ACCUM x NPROC = 32 (LoRA prefers <=32; review pt.5)
+MICRO_BS="${MICRO_BS:-8}"      # 3B-friendly default. For 7B targeted runs, start with MICRO_BS=4.
+GRAD_ACCUM="${GRAD_ACCUM:-1}"  # 7B targeted start point: GRAD_ACCUM=2 -> effective batch 32.
 DL_WORKERS="${DL_WORKERS:-16}"
 MAX_TRAIN="${MAX_TRAIN:-0}"    # 0 = full dataset; set >0 for a capped smoke
 MAX_VAL="${MAX_VAL:-0}"
+ATTN_IMPL="${ATTN_IMPL:-}"     # e.g. sdpa or flash_attention_2 if the env supports it
+GC_MODE="${GC_MODE:-config}"   # config | on | off
 # LR note: config LR=2e-4 was tuned for effective batch 16. For eff batch 32, the sqrt rule
 #   suggests ~2.8e-4 (or keep 2e-4 + longer warmup) -- experiment-design call, left to config owner.
 # Throughput phase-2: true packing (DataCollatorWithFlattening + flash_attention_2) ~1.4x on short examples.
 
 echo "job=$SLURM_JOB_ID node=$(hostname) | CONFIG=$CONFIG NPROC=$NPROC MICRO_BS=$MICRO_BS GRAD_ACCUM=$GRAD_ACCUM"
 nvidia-smi --query-gpu=index,name,memory.total --format=csv,noheader
+
+EXTRA_ARGS=()
+if [[ -n "$ATTN_IMPL" ]]; then
+  EXTRA_ARGS+=(--attn-impl "$ATTN_IMPL")
+fi
+case "$GC_MODE" in
+  config)
+    ;;
+  on)
+    EXTRA_ARGS+=(--gradient-checkpointing)
+    ;;
+  off)
+    EXTRA_ARGS+=(--no-gradient-checkpointing)
+    ;;
+  *)
+    echo "Invalid GC_MODE=$GC_MODE (expected: config|on|off)" >&2
+    exit 2
+    ;;
+esac
 
 # Single-node multi-GPU DDP. HF Trainer auto-detects WORLD_SIZE/RANK from torchrun
 # and wraps the model in DistributedDataParallel.
@@ -57,4 +79,5 @@ torchrun --standalone --nnodes=1 --nproc_per_node="$NPROC" \
     --grad-accum "$GRAD_ACCUM" \
     --dataloader-workers "$DL_WORKERS" \
     --max-train-examples "$MAX_TRAIN" \
-    --max-val-examples "$MAX_VAL"
+    --max-val-examples "$MAX_VAL" \
+    "${EXTRA_ARGS[@]}"

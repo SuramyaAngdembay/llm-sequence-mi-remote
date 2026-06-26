@@ -1,0 +1,63 @@
+#!/bin/bash
+set -euo pipefail
+
+REPO_DIR="${REPO_DIR:-$HOME/cert-qlora-MI/llm-sequence-mi-remote}"
+cd "$REPO_DIR"
+
+CONFIG="${CONFIG:-configs/qwen7b_qlora_session_targeted.yaml}"
+DATA_DIR="${DATA_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl}"
+CHECKPOINT_ROOT="${CHECKPOINT_ROOT:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/checkpoints/qwen7b_session_qlora_ddp}"
+TOKEN_CACHE_ROOT="${TOKEN_CACHE_ROOT:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/token_delta_cache/qwen7b_session_token_deltas_targeted}"
+FRONTIER_ROOT="${FRONTIER_ROOT:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_frontier_qwen7b}"
+
+NPROC="${NPROC:-4}"
+MICRO_BS="${MICRO_BS:-4}"
+GRAD_ACCUM="${GRAD_ACCUM:-2}"
+DL_WORKERS="${DL_WORKERS:-16}"
+ATTN_IMPL="${ATTN_IMPL:-sdpa}"
+GC_MODE="${GC_MODE:-config}"
+MAX_TRAIN="${MAX_TRAIN:-0}"
+MAX_VAL="${MAX_VAL:-0}"
+
+EXTRACT_LAYERS="${EXTRACT_LAYERS:-14,20,26}"
+EXTRACT_BATCH_SIZE="${EXTRACT_BATCH_SIZE:-4}"
+EXTRACT_CHUNK_EXAMPLES="${EXTRACT_CHUNK_EXAMPLES:-1024}"
+EXTRACT_MAX_EXAMPLES="${EXTRACT_MAX_EXAMPLES:-0}"
+
+SAE_MAX_ROWS="${SAE_MAX_ROWS:-2000000}"
+SAE_BATCH_SIZE="${SAE_BATCH_SIZE:-4096}"
+LATENT_MULTIPLIERS="${LATENT_MULTIPLIERS:-2,4}"
+TOPK_VALUES="${TOPK_VALUES:-4,8}"
+
+TRAIN_JOB=$(
+  sbatch --parsable \
+    --export=ALL,REPO_DIR="$REPO_DIR",CONFIG="$CONFIG",DATA_DIR="$DATA_DIR",OUTPUT_DIR="$CHECKPOINT_ROOT",NPROC="$NPROC",MICRO_BS="$MICRO_BS",GRAD_ACCUM="$GRAD_ACCUM",DL_WORKERS="$DL_WORKERS",ATTN_IMPL="$ATTN_IMPL",GC_MODE="$GC_MODE",MAX_TRAIN="$MAX_TRAIN",MAX_VAL="$MAX_VAL" \
+    slurm/train_qlora_ddp.template.sbatch
+)
+
+EXTRACT_JOB=$(
+  sbatch --parsable --dependency=afterok:${TRAIN_JOB} \
+    --export=ALL,REPO_DIR="$REPO_DIR",CONFIG="$CONFIG",DATA_DIR="$DATA_DIR",ADAPTER_DIR="${CHECKPOINT_ROOT}/adapter",OUTPUT_DIR="$TOKEN_CACHE_ROOT",LAYERS="$EXTRACT_LAYERS",BATCH_SIZE="$EXTRACT_BATCH_SIZE",CHUNK_EXAMPLES="$EXTRACT_CHUNK_EXAMPLES",MAX_EXAMPLES="$EXTRACT_MAX_EXAMPLES" \
+    slurm/extract_token_deltas.template.sbatch
+)
+
+SAE_JOB=$(
+  sbatch --parsable --dependency=afterok:${EXTRACT_JOB} \
+    --export=ALL,REPO_DIR="$REPO_DIR",EXTRACT_DIR="$TOKEN_CACHE_ROOT",OUTPUT_DIR="$FRONTIER_ROOT",LAYERS="$EXTRACT_LAYERS",MAX_ROWS="$SAE_MAX_ROWS",BATCH_SIZE="$SAE_BATCH_SIZE",LATENT_MULTIPLIERS="$LATENT_MULTIPLIERS",TOPK_VALUES="$TOPK_VALUES" \
+    slurm/train_token_delta_sae.template.sbatch
+)
+
+cat <<EOM
+submitted_qwen7b_targeted_pipeline=1
+train_job=${TRAIN_JOB}
+extract_job=${EXTRACT_JOB}
+sae_job=${SAE_JOB}
+config=${CONFIG}
+checkpoint_root=${CHECKPOINT_ROOT}
+token_cache_root=${TOKEN_CACHE_ROOT}
+frontier_root=${FRONTIER_ROOT}
+nproc=${NPROC}
+micro_bs=${MICRO_BS}
+grad_accum=${GRAD_ACCUM}
+extract_layers=${EXTRACT_LAYERS}
+EOM

@@ -25,17 +25,18 @@ export HF_HOME=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/hf_cache
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
+CONFIG="${CONFIG:-configs/qwen3b_qlora_session.yaml}"
 DATA_DIR="${DATA_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl}"
 ADAPTER_DIR="${ADAPTER_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/checkpoints/qwen3b_session_qlora_ddp/adapter}"
 OUTPUT_DIR="${OUTPUT_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/token_delta_cache/qwen3b_session_token_deltas_l18}"
 SPLIT="${SPLIT:-eval}"
-BATCH_SIZE="${BATCH_SIZE:-8}"
+BATCH_SIZE="${BATCH_SIZE:-8}"      # for 7B targeted runs, start lower, e.g. 4
 MAX_EXAMPLES="${MAX_EXAMPLES:-0}"
-CHUNK_EXAMPLES="${CHUNK_EXAMPLES:-1024}"
+CHUNK_EXAMPLES="${CHUNK_EXAMPLES:-1024}"  # for 7B targeted runs, lower if scratch pressure rises
 LAYERS="${LAYERS:-18}"
 
 python scripts/extract_adapter_deltas.py \
-  --config configs/qwen3b_qlora_session.yaml \
+  --config "$CONFIG" \
   --data-dir "$DATA_DIR" \
   --adapter-dir "$ADAPTER_DIR" \
   --output-dir "$OUTPUT_DIR" \

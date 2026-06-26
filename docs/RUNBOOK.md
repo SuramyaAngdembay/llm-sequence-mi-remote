@@ -1,5 +1,18 @@
 # Runbook
 
+## Current Direction
+
+The `Qwen 3B` token-level branch is no longer just exploratory:
+
+- matched day-level comparison: remote token > local session-AE > local residual
+- positive bootstrap intervals on the strongest remote token configs
+
+So the current path is:
+
+1. keep the `3B` token results as the comparison anchor
+2. scale the **same token-level protocol** to `Qwen 7B`
+3. do not rerun broad mean-pooled or generic frontier work first
+
 ## Phase 0: Remote Discovery
 
 Before running anything, confirm:
@@ -40,11 +53,19 @@ Expected outputs:
 
 ## Phase 2: QLoRA Fine-Tuning
 
-First target:
+Completed first target:
 
 - `Qwen 3B`
 - structured session-sequence next-token modeling
 - benign-only training split
+
+Current scale-up target:
+
+- `Qwen 7B`
+- same structured session JSONL
+- same benign-only objective
+- `4x H100 80GB` single-node DDP on Anvil `ai`
+- recommended start: `MICRO_BS=4`, `GRAD_ACCUM=2`, `NPROC=4`
 
 Required outputs:
 
@@ -52,10 +73,16 @@ Required outputs:
 - tokenizer/config snapshot
 - training metrics
 
-Primary command on Anvil:
+Primary DDP command on Anvil:
 
 ```bash
-sbatch slurm/train_qlora.template.sbatch
+sbatch slurm/train_qlora_ddp.template.sbatch
+```
+
+Targeted `7B` launcher:
+
+```bash
+bash scripts/submit_qwen7b_targeted_pipeline_anvil.sh
 ```
 
 ## Phase 3: Delta Extraction
@@ -66,11 +93,19 @@ Extract:
 - adapted hidden states
 - adapter deltas `h_adapted - h_base`
 
-Initial layer set:
+Initial `3B` layer set:
 
 - 3 to 4 middle/late layers
 
 Do not extract all layers on the first pass.
+
+Targeted `7B` layer band:
+
+- `14`
+- `20`
+- `26`
+
+Do not reopen the old mean-pooled extraction path for `7B`.
 
 Required outputs:
 
@@ -83,7 +118,7 @@ Primary command on Anvil:
 sbatch slurm/extract_deltas.template.sbatch
 ```
 
-Token-level escalation:
+Token-level extraction:
 
 ```bash
 sbatch slurm/extract_token_deltas.template.sbatch
@@ -118,6 +153,14 @@ Token-level frontier:
 ```bash
 sbatch slurm/train_token_delta_sae.template.sbatch
 ```
+
+Targeted `7B` frontier policy:
+
+- run only the promising sparse regimes first:
+  - `latent_mult=2, k=8`
+  - `latent_mult=4, k=4`
+- if a layer sweep is needed, keep it to the narrow `14/20/26` band
+- do not rerun a large exploratory frontier unless the targeted path fails
 
 ## Phase 5: Causal Evaluation
 
@@ -157,6 +200,36 @@ Recommended first token-level path:
 1. `extract_token_deltas.template.sbatch`
 2. `train_token_delta_sae.template.sbatch`
 3. `eval_token_delta_sae_causal.template.sbatch`
+
+Targeted `7B` eval bundle:
+
+```bash
+bash scripts/submit_qwen7b_token_eval_bundle_anvil.sh
+```
+
+## Phase 6: Qwen 7B Targeted Scale-Up
+
+This phase is justified only because the `3B` token branch already cleared the matched-comparison bar.
+
+What stays fixed:
+
+- structured session JSONL
+- token-level delta extraction
+- matched donor/receiver protocol
+- matched day-level local comparison protocol
+- control-pool fix from the `m04/k04_controlfix` branch
+
+What changes:
+
+- base model becomes `Qwen/Qwen2.5-7B`
+- training uses 4-GPU DDP as the default path
+- extraction/eval stay token-level
+
+What not to rerun:
+
+- no mean-pooled delta path
+- no broad graph detour first
+- no full generic SAE frontier before checking the targeted token configs
 
 ## Success Condition
 
