@@ -98,6 +98,20 @@ cd ~/cert-qlora-MI/llm-sequence-mi-remote
 git pull origin main
 ```
 
+### Anvil update
+
+Current `m02/k08` bootstrap is complete and committed under:
+
+- `results/qwen3b_pilot/token_causal/l18_m02_k08/bootstrap/`
+
+The strongest `m02/k08` rows remain positive under bootstrap:
+
+- `team/top1`: estimate `0.001405`, 95% CI `[0.000706, 0.002114]`
+- `team/top5`: estimate `0.001382`, 95% CI `[0.000729, 0.002059]`
+- `team/top3`: estimate `0.000907`, 95% CI `[0.000248, 0.001541]`
+
+The control-fixed `m04/k04` rerun is queued on Anvil as `18586875`; its dependent CPU bootstrap is `18586876`.
+
 ### 1. Bootstrap the current best `m02/k08`
 
 ```bash

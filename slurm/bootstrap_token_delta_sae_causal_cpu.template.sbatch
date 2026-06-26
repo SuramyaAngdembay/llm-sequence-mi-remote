@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH -A cis230270-ai
-#SBATCH -p ai
-#SBATCH --gres=gpu:1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=64G
-#SBATCH --time=02:00:00
-#SBATCH -J tok_boot
+# CPU-only bootstrap over token causal best-row CSVs. No GPU is needed.
+#SBATCH -A cis230270
+#SBATCH -p shared
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=16G
+#SBATCH --time=00:30:00
+#SBATCH -J tok_boot_cpu
 #SBATCH -o /anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/logs/%x_%j.out
 #SBATCH -e /anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/logs/%x_%j.err
 
