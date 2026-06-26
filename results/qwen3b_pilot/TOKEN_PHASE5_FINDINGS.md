@@ -132,3 +132,14 @@ Large Anvil-only artifacts:
 2. Re-run `m04/k04` with a stronger control pool if control-set parity matters.
 3. Add bootstrap confidence intervals over the 70 positive receivers before treating the small advantages as robust.
 4. If more token SAE frontier is needed, run only the requested config rather than the full `2,4 x 4,8` sweep, or raise memory above `240G`.
+
+## 2026-06-26 Control-Fix Update
+
+The requested `m04/k04` control-fixed rerun is complete. It keeps `control3` at three features
+(`[101, 173, 230]`) and remains positive under bootstrap:
+
+- `team/top3`: estimate `0.001446`, 95% CI `[0.000623, 0.002328]`
+- `project_role/top5`: estimate `0.000749`, 95% CI `[0.000306, 0.001207]`
+
+Together with the `m02/k08` bootstrap, the token branch remains the strongest current challenger to compare
+against the session-AE baseline.

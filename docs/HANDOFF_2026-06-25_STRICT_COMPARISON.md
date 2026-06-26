@@ -138,6 +138,20 @@ The original `m04/k04` artifact synced here still shows the expected control def
 
 The control-fixed `m04/k04` rerun is queued on Anvil as `18586875`; its dependent CPU bootstrap is `18586876`.
 
+Final update: the control-fixed `m04/k04` rerun completed on Anvil as `18590322`, and its bootstrap completed
+as `18590324`. The duplicate A100 attempt was canceled after the H100 run finished.
+
+Control-fix result:
+
+- `control3` now contains three features: `[101, 173, 230]`
+- best row: `team/top3`, estimate `0.001446`, 95% CI `[0.000623, 0.002328]`
+- next strongest row: `project_role/top5`, estimate `0.000749`, 95% CI `[0.000306, 0.001207]`
+
+The fixed-control rerun remains positive, so the token branch still clears the two requested checks:
+
+1. `m02/k08` bootstrap stays clearly positive for the top team rows.
+2. `m04/k04_controlfix` remains positive with a real 3-feature control set.
+
 ### 1. Bootstrap the current best `m02/k08`
 
 ```bash
