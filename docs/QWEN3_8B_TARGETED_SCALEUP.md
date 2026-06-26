@@ -67,6 +67,36 @@ The high-VRAM retune intentionally changes the effective batch from `32` to `64`
 If it OOMs, fall back first to `MICRO_BS=12`, `GRAD_ACCUM=1`, `GC_MODE=off`;
 if that still OOMs, use `MICRO_BS=16`, `GRAD_ACCUM=1`, `GC_MODE=config`.
 
+VRAM depends on all of these:
+
+- model family and architecture (`Qwen3-8B` is not interchangeable with `Qwen2.5-7B`)
+- sequence length and padding distribution from the session dataset
+- per-GPU microbatch size
+- gradient checkpointing mode
+- attention implementation
+- whether the pass is training, eval, checkpoint save, or adapter extraction
+
+To make the estimate explicit, run the one-H100 stress benchmark:
+
+```bash
+sbatch slurm/benchmark_qwen3_8b_vram.template.sbatch
+```
+
+The benchmark uses the exact Qwen3-8B QLoRA stack and synthetic full-length
+`seq_len=2048` batches, so it is closer to a worst-case per-GPU estimate than a
+small random sample of session rows. Results are written to:
+
+- `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/qwen3_8b_vram_benchmark/qwen3_8b_qlora_vram_benchmark.csv`
+- `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/qwen3_8b_vram_benchmark/qwen3_8b_qlora_vram_benchmark.json`
+
+Submitted benchmark:
+
+- Slurm `18616324`, `qwen3_vram_bench`
+- dependency `afterany:18597248`
+- resources: `1x H100`, `16` CPU cores, `160G` RAM, `01:30:00`
+- benchmark settings: `MICRO_BATCHES=4,8,12,16`, `SEQ_LEN=2048`, `GC_MODE=off`
+- high-VRAM retune job `18615954` was updated to wait on `afterok:18616324`
+
 For retunes after an already-running job, use `RESUME_FROM_CHECKPOINT=latest`
 so the Slurm script resolves the newest `checkpoint-*` under `OUTPUT_DIR` at
 job start.
@@ -75,7 +105,8 @@ Submitted high-VRAM retune on 2026-06-26:
 
 - left conservative training job `18597248` running on `h014`
 - canceled stale conservative downstream jobs `18597250` and `18597251`
-- submitted high-VRAM training job `18615954`, dependency `afterany:18597248`
+- submitted high-VRAM training job `18615954`; initially `afterany:18597248`,
+  then updated to `afterok:18616324` so the VRAM benchmark runs first
 - submitted high-VRAM token extraction `18615955`, dependency `afterok:18615954`
 - submitted high-VRAM token SAE `18615957`, dependency `afterok:18615955`
 
