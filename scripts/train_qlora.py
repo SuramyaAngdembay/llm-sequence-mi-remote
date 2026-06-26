@@ -25,6 +25,11 @@ def main() -> None:
     ap.add_argument("--no-gradient-checkpointing", dest="gradient_checkpointing", action="store_false", default=None)
     ap.add_argument("--dataloader-workers", type=int, default=4)
     ap.add_argument("--attn-impl", type=str, default="sdpa")
+    ap.add_argument("--save-steps", type=int, default=0, help="override training.save_steps (0=use config)")
+    ap.add_argument("--eval-steps", type=int, default=0, help="override eval_steps (0=use save_steps)")
+    ap.add_argument("--eval-strategy", choices=("no", "steps", "epoch"), default="steps")
+    ap.add_argument("--resume-from-checkpoint", type=Path, default=None)
+    ap.add_argument("--ignore-data-skip", action="store_true")
     args = ap.parse_args()
 
     cfg = load_yaml(args.config)
@@ -115,6 +120,8 @@ def main() -> None:
 
     micro_bs = args.micro_batch_size or int(cfg["training"]["micro_batch_size"])
     grad_accum = args.grad_accum or int(cfg["training"]["gradient_accumulation_steps"])
+    save_steps = args.save_steps or int(cfg["training"]["save_steps"])
+    eval_steps = args.eval_steps or save_steps
 
     training_arg_kwargs = {
         "output_dir": str(out_dir),
@@ -127,8 +134,8 @@ def main() -> None:
         "warmup_ratio": float(cfg["training"]["warmup_ratio"]),
         "weight_decay": float(cfg["training"]["weight_decay"]),
         "logging_steps": int(cfg["training"]["logging_steps"]),
-        "save_steps": int(cfg["training"]["save_steps"]),
-        "eval_steps": int(cfg["training"]["save_steps"]),
+        "save_steps": save_steps,
+        "eval_steps": eval_steps,
         "save_strategy": "steps",
         "bf16": bool(cfg["training"].get("bf16", True)),
         "gradient_checkpointing": grad_ckpt,
@@ -141,7 +148,9 @@ def main() -> None:
     }
     training_args_params = inspect.signature(TrainingArguments.__init__).parameters
     eval_strategy_key = "eval_strategy" if "eval_strategy" in training_args_params else "evaluation_strategy"
-    training_arg_kwargs[eval_strategy_key] = "steps"
+    training_arg_kwargs[eval_strategy_key] = args.eval_strategy
+    if "ignore_data_skip" in training_args_params:
+        training_arg_kwargs["ignore_data_skip"] = bool(args.ignore_data_skip)
     training_args = TrainingArguments(**training_arg_kwargs)
 
     trainer = Trainer(
@@ -152,7 +161,8 @@ def main() -> None:
         tokenizer=tokenizer,
         data_collator=collator,
     )
-    trainer.train()
+    resume_from_checkpoint = str(args.resume_from_checkpoint) if args.resume_from_checkpoint else None
+    trainer.train(resume_from_checkpoint=resume_from_checkpoint)
     if trainer.is_world_process_zero():
         trainer.save_model(str(out_dir / "adapter"))
         tokenizer.save_pretrained(str(out_dir / "adapter"))
@@ -171,6 +181,11 @@ def main() -> None:
             "grad_accum": grad_accum,
             "effective_batch": micro_bs * grad_accum * world_size,
             "gradient_checkpointing": grad_ckpt,
+            "save_steps": save_steps,
+            "eval_strategy": args.eval_strategy,
+            "eval_steps": eval_steps,
+            "resume_from_checkpoint": resume_from_checkpoint,
+            "ignore_data_skip": bool(args.ignore_data_skip),
             "env": {
                 "HF_HOME": os.environ.get("HF_HOME", ""),
                 "HF_HUB_OFFLINE": os.environ.get("HF_HUB_OFFLINE", ""),

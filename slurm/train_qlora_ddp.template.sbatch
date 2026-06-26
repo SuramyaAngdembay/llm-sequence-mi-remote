@@ -43,12 +43,31 @@ MAX_TRAIN="${MAX_TRAIN:-0}"    # 0 = full dataset; set >0 for a capped smoke
 MAX_VAL="${MAX_VAL:-0}"
 ATTN_IMPL="${ATTN_IMPL:-}"     # e.g. sdpa or flash_attention_2 if the env supports it
 GC_MODE="${GC_MODE:-config}"   # config | on | off
+SAVE_STEPS="${SAVE_STEPS:-0}"
+EVAL_STRATEGY="${EVAL_STRATEGY:-steps}"  # no | steps | epoch
+EVAL_STEPS="${EVAL_STEPS:-0}"
+RESUME_FROM_CHECKPOINT="${RESUME_FROM_CHECKPOINT:-}"
+IGNORE_DATA_SKIP="${IGNORE_DATA_SKIP:-0}"
 # LR note: config LR=2e-4 was tuned for effective batch 16. For eff batch 32, the sqrt rule
 #   suggests ~2.8e-4 (or keep 2e-4 + longer warmup) -- experiment-design call, left to config owner.
 # Throughput phase-2: true packing (DataCollatorWithFlattening + flash_attention_2) ~1.4x on short examples.
 
 echo "job=$SLURM_JOB_ID node=$(hostname) | CONDA_ENV=$CONDA_ENV CONFIG=$CONFIG NPROC=$NPROC MICRO_BS=$MICRO_BS GRAD_ACCUM=$GRAD_ACCUM"
 nvidia-smi --query-gpu=index,name,memory.total --format=csv,noheader
+
+if [[ "$RESUME_FROM_CHECKPOINT" == "latest" ]]; then
+  shopt -s nullglob
+  CHECKPOINTS=("$OUTPUT_DIR"/checkpoint-*)
+  shopt -u nullglob
+  if (( ${#CHECKPOINTS[@]} > 0 )); then
+    RESUME_FROM_CHECKPOINT="$(printf '%s\n' "${CHECKPOINTS[@]}" | sort -V | tail -n 1)"
+  else
+    RESUME_FROM_CHECKPOINT=""
+  fi
+fi
+if [[ -n "$RESUME_FROM_CHECKPOINT" ]]; then
+  echo "resuming_from_checkpoint=$RESUME_FROM_CHECKPOINT"
+fi
 
 EXTRA_ARGS=()
 if [[ -n "$ATTN_IMPL" ]]; then
@@ -68,6 +87,19 @@ case "$GC_MODE" in
     exit 2
     ;;
 esac
+if [[ "$SAVE_STEPS" != "0" ]]; then
+  EXTRA_ARGS+=(--save-steps "$SAVE_STEPS")
+fi
+EXTRA_ARGS+=(--eval-strategy "$EVAL_STRATEGY")
+if [[ "$EVAL_STEPS" != "0" ]]; then
+  EXTRA_ARGS+=(--eval-steps "$EVAL_STEPS")
+fi
+if [[ -n "$RESUME_FROM_CHECKPOINT" ]]; then
+  EXTRA_ARGS+=(--resume-from-checkpoint "$RESUME_FROM_CHECKPOINT")
+fi
+if [[ "$IGNORE_DATA_SKIP" == "1" || "$IGNORE_DATA_SKIP" == "true" ]]; then
+  EXTRA_ARGS+=(--ignore-data-skip)
+fi
 
 # Single-node multi-GPU DDP. HF Trainer auto-detects WORLD_SIZE/RANK from torchrun
 # and wraps the model in DistributedDataParallel.
