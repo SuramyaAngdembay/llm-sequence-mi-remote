@@ -183,12 +183,29 @@ Resume failure and fix:
 - `scripts/submit_qwen3_8b_targeted_pipeline_anvil.sh` defaults
   `SKIP_RNG_STATE_RESUME=1` for this Qwen3 resume path
 
-Resubmitted after the RNG-resume fix:
+Resubmitted after the RNG-resume fix, then canceled before start:
 
 - train: Slurm `18649348`, `qwen_qlora_ddp`, `4x H100`, `48:00:00`,
-  queued with `Reason=Priority`
+  canceled while still pending
 - token extraction: Slurm `18649349`, dependency `afterok:18649348`
 - token SAE: Slurm `18649350`, dependency `afterok:18649349`
+- reason: this would still have been a hybrid continuation from
+  `checkpoint-10000` while changing effective batch from `32` to `48`
+
+Fresh benchmark-backed chain submitted on 2026-06-27:
+
+- train: Slurm `18649521`, `qwen_qlora_ddp`, `4x H100`, `48:00:00`,
+  queued with `Reason=Priority`
+- token extraction: Slurm `18649522`, dependency `afterok:18649521`
+- token SAE: Slurm `18649523`, dependency `afterok:18649522`
+- checkpoint root:
+  `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/checkpoints/qwen3_8b_session_qlora_ddp_mb12_gc_on_fresh`
+- token cache root:
+  `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/token_delta_cache/qwen3_8b_session_token_deltas_targeted_mb12_gc_on_fresh`
+- frontier root:
+  `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_frontier_qwen3_8b_mb12_gc_on_fresh`
+- resume disabled: `RESUME_FROM_CHECKPOINT=`, `IGNORE_DATA_SKIP=0`,
+  `SKIP_RNG_STATE_RESUME=0`
 
 The earlier unsafe `MICRO_BS=16`, `GC_MODE=off` train chain
 `18615954 -> 18615955 -> 18615957` was canceled after the benchmark showed
