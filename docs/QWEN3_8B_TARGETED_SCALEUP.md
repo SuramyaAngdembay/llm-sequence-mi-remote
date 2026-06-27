@@ -52,7 +52,9 @@ The original conservative launcher kept the effective batch at `32`:
 The first live H100 run, Slurm `18597248`, used only about `20 GB` per `80 GB`
 H100 with `MICRO_BS=2`, `GRAD_ACCUM=4`, and gradient checkpointing enabled.
 It was healthy but underutilized, and the full validation pass every `1000`
-steps cost about `36.5` minutes.
+steps cost about `36.5` minutes. It hit the `12:00:00` Slurm limit at
+`checkpoint-10000`, which is `0.2557` epochs out of a planned `39101` optimizer
+steps. This was a wall-clock limit, not a model failure.
 
 Retune target:
 
@@ -62,6 +64,8 @@ Retune target:
 - disable gradient checkpointing with `GC_MODE=off`
 - disable intermediate eval with `EVAL_STRATEGY=no`
 - keep checkpoint saves every `1000` steps
+- use a `48:00:00` wall clock for the 4-H100 training job, because the
+  conservative run reached only about one quarter epoch in `12:00:00`
 
 The high-VRAM retune intentionally changes the effective batch from `32` to `64`.
 If it OOMs, fall back first to `MICRO_BS=12`, `GRAD_ACCUM=1`, `GC_MODE=off`;
@@ -109,6 +113,10 @@ Submitted high-VRAM retune on 2026-06-26:
   then updated to `afterok:18616324` so the VRAM benchmark runs first
 - submitted high-VRAM token extraction `18615955`, dependency `afterok:18615954`
 - submitted high-VRAM token SAE `18615957`, dependency `afterok:18615955`
+- after conservative job `18597248` timed out, pending retune job `18615954`
+  was updated in Slurm to `TimeLimit=2-00:00:00`
+- `slurm/train_qlora_ddp.template.sbatch` now defaults to `#SBATCH --time=2-00:00:00`
+  for future QLoRA DDP submissions
 
 High-VRAM submission settings:
 

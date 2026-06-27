@@ -10,7 +10,7 @@
 #SBATCH --cpus-per-task=64          # ~16 cores/GPU x 4
 #SBATCH --mem=480G
 #SBATCH --gres=gpu:4               # whole node's GPUs
-#SBATCH --time=12:00:00
+#SBATCH --time=2-00:00:00
 #SBATCH --account=cis230270-ai
 #SBATCH --partition=ai
 
