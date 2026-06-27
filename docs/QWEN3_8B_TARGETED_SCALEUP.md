@@ -60,16 +60,16 @@ Retune target:
 
 - aim for roughly `60-70 GB` per H100, leaving some headroom under the `80 GB`
   H100 limit
-- use `MICRO_BS=16`, `GRAD_ACCUM=1`
-- disable gradient checkpointing with `GC_MODE=off`
+- use `MICRO_BS=12`, `GRAD_ACCUM=1`
+- keep gradient checkpointing enabled with `GC_MODE=on`
 - disable intermediate eval with `EVAL_STRATEGY=no`
 - keep checkpoint saves every `1000` steps
 - use a `48:00:00` wall clock for the 4-H100 training job, because the
   conservative run reached only about one quarter epoch in `12:00:00`
 
-The high-VRAM retune intentionally changes the effective batch from `32` to `64`.
-If it OOMs, fall back first to `MICRO_BS=12`, `GRAD_ACCUM=1`, `GC_MODE=off`;
-if that still OOMs, use `MICRO_BS=16`, `GRAD_ACCUM=1`, `GC_MODE=config`.
+The high-VRAM retune intentionally changes the effective batch from `32` to `48`.
+If it OOMs, fall back first to `MICRO_BS=10`, `GRAD_ACCUM=1`, `GC_MODE=on`;
+if that still OOMs, use `MICRO_BS=8`, `GRAD_ACCUM=1`, `GC_MODE=on`.
 
 VRAM depends on all of these:
 
@@ -101,6 +101,25 @@ Submitted benchmark:
 - benchmark settings: `MICRO_BATCHES=4,8,12,16`, `SEQ_LEN=2048`, `GC_MODE=off`
 - high-VRAM retune job `18615954` was updated to wait on `afterok:18616324`
 
+Benchmark outcome:
+
+- Slurm `18616324`, `GC_MODE=off`, `MICRO_BS=4`: OOM at `78.381 GB`
+  allocated / `78.494 GB` reserved
+- Slurm `18630407`, `GC_MODE=off`: `MICRO_BS=1` ok at `42.970 GB`,
+  `MICRO_BS=2` ok but too close at `77.413 GB`, `MICRO_BS=3` OOM
+- Slurm `18630408`, `GC_MODE=on`: `MICRO_BS=4` ok at `27.063 GB`,
+  `MICRO_BS=8` ok at `45.598 GB`, `MICRO_BS=10` ok at `54.866 GB`,
+  `MICRO_BS=12` ok at `64.134 GB`
+
+Chosen training setting after the benchmarks:
+
+- `MICRO_BS=12`
+- `GRAD_ACCUM=1`
+- `GC_MODE=on`
+- effective batch `48` across `4x H100`
+- expected peak VRAM about `64-66 GB/H100` under synthetic full-length
+  `seq_len=2048` stress
+
 For retunes after an already-running job, use `RESUME_FROM_CHECKPOINT=latest`
 so the Slurm script resolves the newest `checkpoint-*` under `OUTPUT_DIR` at
 job start.
@@ -120,9 +139,9 @@ Submitted high-VRAM retune on 2026-06-26:
 
 High-VRAM submission settings:
 
-- `MICRO_BS=16`
+- `MICRO_BS=12`
 - `GRAD_ACCUM=1`
-- `GC_MODE=off`
+- `GC_MODE=on`
 - `EVAL_STRATEGY=no`
 - `SAVE_STEPS=1000`
 - `RESUME_FROM_CHECKPOINT=latest`
@@ -136,6 +155,20 @@ srun --jobid=18615954 --overlap --nodes=1 --ntasks=1 \
   nvidia-smi --query-gpu=index,name,memory.used,memory.total,utilization.gpu \
   --format=csv,noheader,nounits
 ```
+
+Corrected benchmark-backed chain submitted on 2026-06-27:
+
+- train: Slurm `18631661`, `qwen_qlora_ddp`, `4x H100`, `48:00:00`,
+  queued with `Reason=Priority`
+- token extraction: Slurm `18631662`, dependency `afterok:18631661`
+- token SAE: Slurm `18631663`, dependency `afterok:18631662`
+- training wrapper: `slurm/train_qlora_ddp.template.sbatch`
+- training script: `scripts/train_qlora.py`
+- pipeline launcher: `scripts/submit_qwen3_8b_targeted_pipeline_anvil.sh`
+
+The earlier unsafe `MICRO_BS=16`, `GC_MODE=off` train chain
+`18615954 -> 18615955 -> 18615957` was canceled after the benchmark showed
+OOM at `MICRO_BS=4`, `GC_MODE=off`.
 
 ## Original Conservative Pipeline
 
