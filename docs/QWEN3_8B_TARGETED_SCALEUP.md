@@ -159,12 +159,36 @@ srun --jobid=18615954 --overlap --nodes=1 --ntasks=1 \
 Corrected benchmark-backed chain submitted on 2026-06-27:
 
 - train: Slurm `18631661`, `qwen_qlora_ddp`, `4x H100`, `48:00:00`,
-  queued with `Reason=Priority`
+  failed before training at resume RNG restore
 - token extraction: Slurm `18631662`, dependency `afterok:18631661`
 - token SAE: Slurm `18631663`, dependency `afterok:18631662`
 - training wrapper: `slurm/train_qlora_ddp.template.sbatch`
 - training script: `scripts/train_qlora.py`
 - pipeline launcher: `scripts/submit_qwen3_8b_targeted_pipeline_anvil.sh`
+
+Resume failure and fix:
+
+- job `18631661` started on `h013` at `2026-06-27T08:28:47` and failed at
+  `2026-06-27T08:32:21`
+- it loaded the intended settings (`MICRO_BS=12`, `GRAD_ACCUM=1`, `GC_MODE=on`)
+  and resolved `checkpoint-10000`
+- failure cause: `transformers.Trainer._load_rng_state` called
+  `torch.load(..., weights_only=True)` on `rng_state_*.pth`, which rejected the
+  NumPy RNG pickle globals
+- `scripts/train_qlora.py` now supports `--skip-rng-state-resume`, which keeps
+  checkpoint resume for model/optimizer/scheduler while skipping only RNG-state
+  restoration
+- `slurm/train_qlora_ddp.template.sbatch` passes this when
+  `SKIP_RNG_STATE_RESUME=1`
+- `scripts/submit_qwen3_8b_targeted_pipeline_anvil.sh` defaults
+  `SKIP_RNG_STATE_RESUME=1` for this Qwen3 resume path
+
+Resubmitted after the RNG-resume fix:
+
+- train: Slurm `18649348`, `qwen_qlora_ddp`, `4x H100`, `48:00:00`,
+  queued with `Reason=Priority`
+- token extraction: Slurm `18649349`, dependency `afterok:18649348`
+- token SAE: Slurm `18649350`, dependency `afterok:18649349`
 
 The earlier unsafe `MICRO_BS=16`, `GC_MODE=off` train chain
 `18615954 -> 18615955 -> 18615957` was canceled after the benchmark showed

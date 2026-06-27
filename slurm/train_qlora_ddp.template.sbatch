@@ -48,6 +48,7 @@ EVAL_STRATEGY="${EVAL_STRATEGY:-steps}"  # no | steps | epoch
 EVAL_STEPS="${EVAL_STEPS:-0}"
 RESUME_FROM_CHECKPOINT="${RESUME_FROM_CHECKPOINT:-}"
 IGNORE_DATA_SKIP="${IGNORE_DATA_SKIP:-0}"
+SKIP_RNG_STATE_RESUME="${SKIP_RNG_STATE_RESUME:-0}"
 # LR note: config LR=2e-4 was tuned for effective batch 16. For eff batch 32, the sqrt rule
 #   suggests ~2.8e-4 (or keep 2e-4 + longer warmup) -- experiment-design call, left to config owner.
 # Throughput phase-2: true packing (DataCollatorWithFlattening + flash_attention_2) ~1.4x on short examples.
@@ -99,6 +100,9 @@ if [[ -n "$RESUME_FROM_CHECKPOINT" ]]; then
 fi
 if [[ "$IGNORE_DATA_SKIP" == "1" || "$IGNORE_DATA_SKIP" == "true" ]]; then
   EXTRA_ARGS+=(--ignore-data-skip)
+fi
+if [[ "$SKIP_RNG_STATE_RESUME" == "1" || "$SKIP_RNG_STATE_RESUME" == "true" ]]; then
+  EXTRA_ARGS+=(--skip-rng-state-resume)
 fi
 
 # Single-node multi-GPU DDP. HF Trainer auto-detects WORLD_SIZE/RANK from torchrun

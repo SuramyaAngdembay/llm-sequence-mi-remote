@@ -30,6 +30,11 @@ def main() -> None:
     ap.add_argument("--eval-strategy", choices=("no", "steps", "epoch"), default="steps")
     ap.add_argument("--resume-from-checkpoint", type=Path, default=None)
     ap.add_argument("--ignore-data-skip", action="store_true")
+    ap.add_argument(
+        "--skip-rng-state-resume",
+        action="store_true",
+        help="resume checkpoint weights/optimizer/scheduler without restoring rng_state_*.pth",
+    )
     args = ap.parse_args()
 
     cfg = load_yaml(args.config)
@@ -153,7 +158,16 @@ def main() -> None:
         training_arg_kwargs["ignore_data_skip"] = bool(args.ignore_data_skip)
     training_args = TrainingArguments(**training_arg_kwargs)
 
-    trainer = Trainer(
+    trainer_cls = Trainer
+    if args.skip_rng_state_resume:
+        class RngSkipTrainer(Trainer):
+            def _load_rng_state(self, checkpoint):
+                if self.is_world_process_zero():
+                    print(f"skipping_rng_state_restore=1 checkpoint={checkpoint}")
+
+        trainer_cls = RngSkipTrainer
+
+    trainer = trainer_cls(
         model=model,
         args=training_args,
         train_dataset=tokenized["train"],
@@ -186,6 +200,7 @@ def main() -> None:
             "eval_steps": eval_steps,
             "resume_from_checkpoint": resume_from_checkpoint,
             "ignore_data_skip": bool(args.ignore_data_skip),
+            "skip_rng_state_resume": bool(args.skip_rng_state_resume),
             "env": {
                 "HF_HOME": os.environ.get("HF_HOME", ""),
                 "HF_HUB_OFFLINE": os.environ.get("HF_HUB_OFFLINE", ""),
