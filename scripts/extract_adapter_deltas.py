@@ -34,7 +34,7 @@ def mean_pool(hidden: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tenso
 
 
 def flush_chunk(path: Path, payload: Dict[str, Any]) -> None:
-    torch.save(payload, path)
+    torch.save(payload, path, pickle_protocol=4)
 
 
 def main() -> None:

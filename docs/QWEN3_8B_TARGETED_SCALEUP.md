@@ -219,6 +219,25 @@ Fresh benchmark-backed chain submitted on 2026-06-27:
 - resume disabled: `RESUME_FROM_CHECKPOINT=`, `IGNORE_DATA_SKIP=0`,
   `SKIP_RNG_STATE_RESUME=0`
 
+Fresh training completion and extraction retry:
+
+- train `18649521` completed successfully on `2026-06-28T09:02:00`
+- final checkpoint: `checkpoint-26068`, epoch `1.0`, train loss `0.143472`
+- first extraction job `18649522` failed while writing a large token-delta chunk:
+  `OverflowError: serializing a string larger than 4 GiB requires pickle protocol 4 or higher`
+- fix: `scripts/extract_adapter_deltas.py` now saves chunks with
+  `pickle_protocol=4`
+- Qwen3 pipeline default `EXTRACT_CHUNK_EXAMPLES` is reduced from `1024` to
+  `512`, because 1024-example token chunks were already around `4.2 GB`
+- stale dependent SAE `18649523` was canceled
+- extraction retry: Slurm `18688748`, `token_delta_extract`, started on
+  `2026-06-28T15:21:49` on AI node `h006`
+- retry extract root:
+  `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/token_delta_cache/qwen3_8b_session_token_deltas_targeted_mb12_gc_on_fresh_v2`
+- retry SAE: Slurm `18688749`, dependency `afterok:18688748`
+- retry SAE root:
+  `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_frontier_qwen3_8b_mb12_gc_on_fresh_v2`
+
 The earlier unsafe `MICRO_BS=16`, `GC_MODE=off` train chain
 `18615954 -> 18615955 -> 18615957` was canceled after the benchmark showed
 OOM at `MICRO_BS=4`, `GC_MODE=off`.
