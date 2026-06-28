@@ -16,7 +16,7 @@ from sae_core import (
     choose_feature_sets,
     decoder_overlap_stats,
     evaluate_features,
-    support_overlap_stats,
+    support_overlap_stats_streaming,
     tensor_stats,
     train_sae,
 )
@@ -69,10 +69,12 @@ def load_layer_vectors(
             all_pos.append(pos)
     x = np.concatenate(all_vecs, axis=0)
     example_idx = np.concatenate(all_idx, axis=0)
+    del all_vecs, all_idx
     if x.shape[0] != len(example_idx):
         raise ValueError(f"Mismatched vector/index sizes for layer {layer}")
     if has_position:
         position = np.concatenate(all_pos, axis=0)
+        del all_pos
         order = np.lexsort((position, example_idx))
     else:
         position = None
@@ -233,8 +235,11 @@ def main() -> None:
         )
         x, y, scores = subsample_rows(x, y, scores, max_rows=args.max_rows, seed=args.seed + layer)
         mean, std = tensor_stats(x)
-        x_norm = (x - mean) / std
-        d_in = x.shape[1]
+        x -= mean
+        x /= std
+        x_norm = x
+        d_in = x_norm.shape[1]
+        del scores
         for latent_mult in latent_mults:
             d_latent = d_in * latent_mult
             for k in ks:
@@ -248,7 +253,7 @@ def main() -> None:
                     epochs=args.epochs,
                     lr=args.lr,
                 )
-                feature_df, eval_stats, z_all = evaluate_features(
+                feature_df, eval_stats = evaluate_features(
                     model,
                     x_norm,
                     y,
@@ -267,7 +272,13 @@ def main() -> None:
                 proxy_map = {r["intervention"]: float(r["selectivity_proxy"]) for _, r in proxy.iterrows()}
                 top_ids = [int(x) for x in feature_df.head(10)["feature_id"].tolist()]
                 overlap = decoder_overlap_stats(model, top_ids)
-                support = support_overlap_stats(z_all, top_ids)
+                support = support_overlap_stats_streaming(
+                    model,
+                    x_norm,
+                    top_ids,
+                    device=device,
+                    batch_size=args.batch_size,
+                )
 
                 cfg_dir = ensure_dir(out_dir / f"layer_{layer}" / f"m{latent_mult:02d}_k{k:02d}")
                 torch.save(

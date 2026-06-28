@@ -78,41 +78,71 @@ def evaluate_features(
     *,
     device: torch.device,
     batch_size: int,
-) -> Tuple[pd.DataFrame, Dict[str, float], np.ndarray]:
+) -> Tuple[pd.DataFrame, Dict[str, float]]:
     model.eval()
-    dataset = TensorDataset(torch.from_numpy(x))
+    row_y = np.asarray(row_y)
+    if len(row_y) != len(x):
+        raise ValueError(f"row_y length {len(row_y)} does not match x rows {len(x)}")
+    dataset = TensorDataset(torch.from_numpy(x), torch.from_numpy(row_y.astype(np.int64, copy=False)))
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
-    zs: List[np.ndarray] = []
-    recons: List[np.ndarray] = []
-    for (xb,) in loader:
+    d_latent = int(model.encoder.out_features)
+    sum_pos = np.zeros(d_latent, dtype=np.float64)
+    sum_neg = np.zeros(d_latent, dtype=np.float64)
+    support_pos = np.zeros(d_latent, dtype=np.float64)
+    support_neg = np.zeros(d_latent, dtype=np.float64)
+    max_z = np.full(d_latent, -np.inf, dtype=np.float32)
+    sqerr_sum = 0.0
+    n_elements = 0
+    active_total = 0.0
+    row_active_total = 0.0
+    n_pos = int(np.count_nonzero(row_y > 0))
+    n_neg = int(len(row_y) - n_pos)
+
+    for xb, yb in loader:
         xb = xb.to(device)
         recon, z = model(xb)
-        zs.append(z.cpu().numpy())
-        recons.append(recon.cpu().numpy())
-    z_all = np.concatenate(zs, axis=0)
-    recon_all = np.concatenate(recons, axis=0)
-    mse = float(np.mean((recon_all - x) ** 2))
-    active_mask = z_all > 0.0
-    active_frac = float(np.mean(active_mask))
-    effective_l0 = float(np.mean(active_mask.sum(axis=1)))
-    dead_frac = float(np.mean(np.max(z_all, axis=0) <= 0.0))
-    row_pos = row_y > 0
-    rows = []
-    for feat_idx in range(z_all.shape[1]):
-        feat = z_all[:, feat_idx]
-        row_gap = float(feat[row_pos].mean() - feat[~row_pos].mean()) if row_pos.any() and (~row_pos).any() else float("nan")
-        row_support_gap = float(np.mean(feat[row_pos] > 0.0) - np.mean(feat[~row_pos] > 0.0)) if row_pos.any() and (~row_pos).any() else float("nan")
-        rows.append(
-            {
-                "feature_id": feat_idx,
-                "row_gap": row_gap,
-                "row_support_gap": row_support_gap,
-                "row_mean_pos": float(feat[row_pos].mean()) if row_pos.any() else float("nan"),
-                "row_mean_neg": float(feat[~row_pos].mean()) if (~row_pos).any() else float("nan"),
-                "row_active_frac": float(np.mean(feat > 0.0)),
-            }
-        )
-    feature_df = pd.DataFrame(rows).sort_values("row_gap", ascending=False).reset_index(drop=True)
+        sqerr_sum += float(torch.sum((recon - xb) ** 2).item())
+        n_elements += int(xb.numel())
+
+        z_cpu = z.detach().cpu().numpy()
+        active_cpu = z_cpu > 0.0
+        active_total += float(active_cpu.sum())
+        row_active_total += float(active_cpu.sum(axis=1).sum())
+        max_z = np.maximum(max_z, z_cpu.max(axis=0))
+
+        pos_mask = yb.numpy() > 0
+        if pos_mask.any():
+            z_pos = z_cpu[pos_mask]
+            sum_pos += z_pos.sum(axis=0, dtype=np.float64)
+            support_pos += (z_pos > 0.0).sum(axis=0)
+        if (~pos_mask).any():
+            z_neg = z_cpu[~pos_mask]
+            sum_neg += z_neg.sum(axis=0, dtype=np.float64)
+            support_neg += (z_neg > 0.0).sum(axis=0)
+
+    n_rows = int(len(row_y))
+    mse = float(sqerr_sum / max(n_elements, 1))
+    active_frac = float(active_total / max(n_rows * d_latent, 1))
+    effective_l0 = float(row_active_total / max(n_rows, 1))
+    dead_frac = float(np.mean(max_z <= 0.0))
+    row_mean_pos = sum_pos / n_pos if n_pos else np.full(d_latent, np.nan, dtype=np.float64)
+    row_mean_neg = sum_neg / n_neg if n_neg else np.full(d_latent, np.nan, dtype=np.float64)
+    row_support_pos = support_pos / n_pos if n_pos else np.full(d_latent, np.nan, dtype=np.float64)
+    row_support_neg = support_neg / n_neg if n_neg else np.full(d_latent, np.nan, dtype=np.float64)
+    row_gap = row_mean_pos - row_mean_neg if n_pos and n_neg else np.full(d_latent, np.nan, dtype=np.float64)
+    row_support_gap = row_support_pos - row_support_neg if n_pos and n_neg else np.full(d_latent, np.nan, dtype=np.float64)
+
+    feature_df = pd.DataFrame(
+        {
+            "feature_id": np.arange(d_latent, dtype=np.int64),
+            "row_gap": row_gap,
+            "row_support_gap": row_support_gap,
+            "row_mean_pos": row_mean_pos,
+            "row_mean_neg": row_mean_neg,
+            "row_active_frac": (support_pos + support_neg) / max(n_rows, 1),
+        }
+    )
+    feature_df = feature_df.sort_values("row_gap", ascending=False).reset_index(drop=True)
     stats = {
         "recon_mse": mse,
         "active_frac": active_frac,
@@ -121,7 +151,7 @@ def evaluate_features(
         "top10_row_gap_mean": float(feature_df.head(10)["row_gap"].mean()) if not feature_df.empty else float("nan"),
         "top1_row_gap": float(feature_df.iloc[0]["row_gap"]) if not feature_df.empty else float("nan"),
     }
-    return feature_df, stats, z_all
+    return feature_df, stats
 
 
 def _choose_low_gap_ids(
@@ -178,20 +208,35 @@ def choose_feature_sets(feature_df: pd.DataFrame) -> Dict[str, List[int]]:
     }
 
 
-def decoder_overlap_stats(model: TopKSAE, top_feature_ids: Sequence[int]) -> Dict[str, float]:
-    weight = model.decoder.weight.detach().cpu().numpy().astype(np.float64)
-    norms = np.linalg.norm(weight, axis=0, keepdims=True)
+def decoder_overlap_stats(model: TopKSAE, top_feature_ids: Sequence[int], *, block_size: int = 512) -> Dict[str, float]:
+    weight = model.decoder.weight.detach().cpu().numpy().astype(np.float32, copy=True)
+    norms = np.linalg.norm(weight, axis=0, keepdims=True).astype(np.float32)
     norms[norms < 1e-9] = 1.0
-    w = weight / norms
-    sim = np.abs(w.T @ w)
-    np.fill_diagonal(sim, np.nan)
-    tri = sim[np.triu_indices(sim.shape[0], k=1)]
-    tri = tri[~np.isnan(tri)]
-    mean_abs_cos = float(np.mean(tri)) if tri.size else float("nan")
-    max_abs_cos = float(np.max(tri)) if tri.size else float("nan")
+    weight /= norms
+    d_latent = int(weight.shape[1])
+    sim_sum = 0.0
+    sim_count = 0
+    max_abs_cos = float("nan")
+    for start in range(0, d_latent, block_size):
+        end = min(start + block_size, d_latent)
+        sims = np.abs(weight[:, start:end].T @ weight)
+        block_max = float("nan")
+        for local_idx, feat_idx in enumerate(range(start, end)):
+            vals = sims[local_idx, feat_idx + 1 :]
+            if vals.size:
+                sim_sum += float(vals.sum(dtype=np.float64))
+                sim_count += int(vals.size)
+                local_max = float(vals.max())
+                block_max = local_max if np.isnan(block_max) else max(block_max, local_max)
+        if not np.isnan(block_max):
+            max_abs_cos = block_max if np.isnan(max_abs_cos) else max(max_abs_cos, block_max)
+    mean_abs_cos = float(sim_sum / sim_count) if sim_count else float("nan")
 
-    top_ids = [int(x) for x in top_feature_ids if int(x) < sim.shape[0]]
-    top_sim = sim[np.ix_(top_ids, top_ids)] if top_ids else np.empty((0, 0))
+    top_ids = [int(x) for x in top_feature_ids if 0 <= int(x) < d_latent]
+    top_w = weight[:, top_ids] if top_ids else np.empty((weight.shape[0], 0), dtype=np.float32)
+    top_sim = np.abs(top_w.T @ top_w) if top_ids else np.empty((0, 0), dtype=np.float32)
+    if top_sim.size:
+        np.fill_diagonal(top_sim, np.nan)
     top_tri = top_sim[np.triu_indices(len(top_ids), k=1)] if len(top_ids) > 1 else np.asarray([])
     top_tri = top_tri[~np.isnan(top_tri)] if top_tri.size else top_tri
     return {
@@ -199,6 +244,49 @@ def decoder_overlap_stats(model: TopKSAE, top_feature_ids: Sequence[int]) -> Dic
         "decoder_max_abs_cos_offdiag": max_abs_cos,
         "decoder_top_features_mean_abs_cos": float(np.mean(top_tri)) if top_tri.size else float("nan"),
         "decoder_top_features_max_abs_cos": float(np.max(top_tri)) if top_tri.size else float("nan"),
+    }
+
+
+@torch.no_grad()
+def support_overlap_stats_streaming(
+    model: TopKSAE,
+    x: np.ndarray,
+    top_feature_ids: Sequence[int],
+    *,
+    device: torch.device,
+    batch_size: int,
+) -> Dict[str, float]:
+    d_latent = int(model.encoder.out_features)
+    top_ids = [int(x) for x in top_feature_ids if 0 <= int(x) < d_latent]
+    if not top_ids:
+        return {
+            "top_feature_mean_pairwise_jaccard": float("nan"),
+            "top_feature_mean_active_overlap": float("nan"),
+        }
+    model.eval()
+    dataset = TensorDataset(torch.from_numpy(x))
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
+    active_counts = np.zeros(len(top_ids), dtype=np.float64)
+    intersections = np.zeros((len(top_ids), len(top_ids)), dtype=np.float64)
+    for (xb,) in loader:
+        xb = xb.to(device)
+        _, z = model(xb)
+        active = (z[:, top_ids] > 0.0).cpu().numpy().astype(np.float64, copy=False)
+        active_counts += active.sum(axis=0)
+        intersections += active.T @ active
+    jaccs: List[float] = []
+    conds: List[float] = []
+    for i in range(len(top_ids)):
+        ai = active_counts[i]
+        for j in range(i + 1, len(top_ids)):
+            aj = active_counts[j]
+            inter = intersections[i, j]
+            union = ai + aj - inter
+            jaccs.append(float(inter / union) if union else 0.0)
+            conds.append(float(inter / max(ai, 1.0)))
+    return {
+        "top_feature_mean_pairwise_jaccard": float(np.mean(jaccs)) if jaccs else float("nan"),
+        "top_feature_mean_active_overlap": float(np.mean(conds)) if conds else float("nan"),
     }
 
 
