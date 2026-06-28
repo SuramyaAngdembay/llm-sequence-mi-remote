@@ -120,6 +120,18 @@ Chosen training setting after the benchmarks:
 - expected peak VRAM about `64-66 GB/H100` under synthetic full-length
   `seq_len=2048` stress
 
+Optional 70k-MiB VRAM probe:
+
+- launcher: `scripts/submit_qwen3_8b_vram_70k_probe_anvil.sh`
+- default probe: `MICRO_BATCHES=12,13`, `GC_MODE=on`, `SEQ_LEN=2048`
+- output dir:
+  `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/qwen3_8b_vram_benchmark_70k_probe`
+- rationale: `MICRO_BS=12` measured `64.134 GiB` allocated / `65.490 GiB`
+  reserved; linear extrapolation puts `MICRO_BS=13` near the requested
+  `70k MiB` region while still leaving visible H100 headroom
+- do not make `70k MiB` the default training target unless the probe shows
+  stable headroom; keep the live fresh training run at `MICRO_BS=12`
+
 For retunes after an already-running job, use `RESUME_FROM_CHECKPOINT=latest`
 so the Slurm script resolves the newest `checkpoint-*` under `OUTPUT_DIR` at
 job start.
