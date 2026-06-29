@@ -89,6 +89,12 @@ The Anvil launcher defaults `BATCH_SIZE=8` for Qwen3-8B causal scoring. This is
 still conservative for H100 inference but avoids the very slow initial
 `BATCH_SIZE=4` setting.
 
+Implementation note: the launcher exports comma-valued settings like
+`CONTEXT_MODES`, `TOP_SETS`, and `ALPHAS` through the shell environment before
+calling `sbatch --export=ALL`. Do not inline these values into Slurm's
+comma-separated `--export=ALL,...` list, or Slurm will truncate them at the
+first comma.
+
 ## Expected Output Files
 
 Per config under:
