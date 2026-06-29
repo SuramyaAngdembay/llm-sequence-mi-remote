@@ -122,14 +122,35 @@ Commit lightweight files back into git under a new results directory, for exampl
 
 Large caches and model artifacts should stay Anvil-only.
 
-## Success Criterion
+## Outcome Update
 
-The `Qwen3-8B` branch only counts as an improvement if its token-level causal
-patching:
+The causal outputs now exist, and the branch has cleared the original bar.
 
-- beats the current best `Qwen 3B` remote token result (`0.001446`)
-- keeps positive bootstrap intervals
-- stays ahead of the matched local session-AE day-level baseline (`0.001133`)
+Committed result bundle:
 
-Until those causal outputs exist, the `Qwen3-8B` branch should be treated as a
-promising scale-up with a successful frontier, not as a mechanistic win.
+- `results/qwen3_8b_token_causal/CAUSAL_EVAL_RESULTS.md`
+- `results/qwen3_8b_token_causal/AUDIT_FINDINGS.md`
+
+Matched day-level comparison reports:
+
+- `results/qwen3_8b_token_causal/strict_compare_remote70_daylevel_l18_m04_k04/REMOTE_VS_LOCAL_DAYLEVEL_REPORT.md`
+- `results/qwen3_8b_token_causal/strict_compare_remote70_daylevel_l18_m04_k08/REMOTE_VS_LOCAL_DAYLEVEL_REPORT.md`
+- `results/qwen3_8b_token_causal/strict_compare_remote70_daylevel_l18_m02_k04/REMOTE_VS_LOCAL_DAYLEVEL_REPORT.md`
+
+Best matched numbers:
+
+- local adaptive session-AE day-level: `0.001133`
+- local residual day-level: `0.000654`
+- remote `Qwen3-3B` token best: `0.001446`
+- remote `Qwen3-8B` `l18_m04_k08` best: `0.018769`
+
+Important audit caveat:
+
+- `l18_m04_k04` has the largest raw effect, but its `control3` rows are inert
+  (`0.0` mean active receiver tokens), so it should be treated as an upper-bound
+  variant, not the cleanest headline.
+- `l18_m04_k08` remains strongly positive against an active nontrivial control
+  and is the audited headline result.
+
+So the branch should now be treated as a real mechanistic win, with the
+conservative headline centered on `l18_m04_k08`.

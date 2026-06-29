@@ -52,6 +52,49 @@ positive CI lower bounds across the three full-suite configs.
 
 The `l18_m02_k04` config underperformed the other two in this causal run.
 
+## Audited Read
+
+After these lightweight results were committed, the missing
+`token_delta_sae_causal_candidate_rows.csv` files for the strongest configs were
+synced back to Magnolia and inspected locally.
+
+That audit changes how the three configs should be interpreted:
+
+- `l18_m04_k08` is the **clean headline result**
+- `l18_m04_k04` is a strong **upper-bound result with a weak-control caveat**
+- `l18_m02_k04` is a negative config
+
+The key control audit finding is:
+
+- `l18_m04_k04` `control3` rows are completely inert
+  - mean active receiver tokens: `0.0` for both benign and anomalous donors
+- `l18_m04_k08` `control3` rows are active and nontrivial
+  - mean active receiver tokens: about `23.1`
+
+So while `l18_m04_k04` shows the largest raw effect, its control is too weak to
+use as the main headline. By contrast, `l18_m04_k08` stays clearly positive even
+against an active control set:
+
+| config | context | target | estimate | 95% CI |
+|---|---|---|---:|---:|
+| `l18_m04_k08` | `role` | `top5` | `0.018769` | `[0.013444, 0.024649]` |
+| `l18_m04_k08` | `dept_role` | `top5` | `0.016588` | `[0.012042, 0.021516]` |
+| `l18_m04_k08` | `project_role` | `top5` | `0.016075` | `[0.011553, 0.020986]` |
+
+Strict matched day-level comparison against the local session baseline also
+confirms that the remote `8B` token branch is ahead:
+
+- local adaptive day-level best: `0.001133`
+- local residual day-level best: `0.000654`
+- remote `l18_m04_k08` best: `0.018769`
+
+So the conservative conclusion is now:
+
+- `Qwen3-8B` token-level patching is the strongest mechanistic branch so far
+- `l18_m04_k08` is the audited headline result
+- `l18_m04_k04` should be treated as an upper-bound variant because of the inert
+  control
+
 ## Git Bundle
 
 Committed lightweight files for each full config:
