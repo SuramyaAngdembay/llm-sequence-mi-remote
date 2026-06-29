@@ -1,0 +1,2 @@
+layer,latent_mult,k,context_mode,target,n_receivers,top_benign_mean_best_delta,top_anomalous_mean_best_delta,control_benign_mean_best_delta,control_anomalous_mean_best_delta,top_repair_advantage,control_repair_advantage,top_minus_control_advantage
+18,4,4,team,top1,15,-0.07463037595152855,-0.033121537417173386,-0.0022845864295959473,0.0010003820061683655,0.041508838534355164,0.0032849684357643127,0.03822387009859085

@@ -1,0 +1,19 @@
+{
+  "layer": 18,
+  "latent_mult": 4,
+  "k": 4,
+  "n_examples": 142072,
+  "n_positive_receivers": 70,
+  "n_token_rows": 19354,
+  "top_sets": [
+    "top1"
+  ],
+  "control_set": "control3",
+  "context_modes": [
+    "team"
+  ],
+  "alphas": [
+    1.0
+  ],
+  "candidate_rows": 128
+}
