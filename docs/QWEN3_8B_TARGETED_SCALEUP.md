@@ -238,6 +238,46 @@ Fresh training completion and extraction retry:
 - retry SAE root:
   `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_frontier_qwen3_8b_mb12_gc_on_fresh_v2`
 
+Final extraction/SAE completion:
+
+- extraction retry `18688748` completed on `2026-06-28`, exit `0:0`, elapsed
+  `02:41:40`, on `h006`
+- extracted token cache root:
+  `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/token_delta_cache/qwen3_8b_session_token_deltas_targeted_mb12_gc_on_fresh_v2`
+- extraction produced `142072` eval examples and `278` chunks for each target
+  layer (`18`, `26`, `34`)
+- first SAE retry `18688749` hit CPU RAM OOM at `MaxRSS=245759M` under a
+  `240G` request; this was caused by the old dense post-train evaluation path,
+  not by GPU VRAM
+- fix commit: `4ea4d0b` (`Stream delta SAE eval to reduce CPU memory`)
+- streamed SAE retry `18695458` completed, exit `0:0`, elapsed `03:42:04`, on
+  `h003`, with `MaxRSS=105474232K` under a `360G` request
+- final SAE frontier root:
+  `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_frontier_qwen3_8b_mb12_gc_on_fresh_v3_stream`
+- git result bundle:
+  `results/qwen3_8b_token_frontier/`
+- completed frontier grid: layers `18,26,34` x latent multipliers `2,4` x
+  top-k `4,8`, for `12` configs total
+
+Top proxy rows from the completed frontier:
+
+| layer | latent_mult | k | recon_mse | top10_row_gap_mean | top5-control3 proxy |
+|---:|---:|---:|---:|---:|---:|
+| 18 | 4 | 4 | 0.077840 | 0.093653 | 0.028509 |
+| 18 | 2 | 4 | 0.074744 | 0.085286 | 0.014818 |
+| 18 | 4 | 8 | 0.054468 | 0.086540 | 0.014153 |
+| 34 | 4 | 4 | 0.094887 | 0.095607 | 0.012530 |
+| 34 | 4 | 8 | 0.072461 | 0.097798 | 0.011513 |
+
+Recommended causal-eval order for Magnolia or the next Anvil eval pass:
+
+1. `layer=18`, `latent_mult=4`, `k=4`
+2. `layer=18`, `latent_mult=2`, `k=4`
+3. `layer=18`, `latent_mult=4`, `k=8`
+
+These are still proxy frontier metrics. The branch only advances if token-level
+causal patching/strict comparison beats the current matched session-AE baseline.
+
 The earlier unsafe `MICRO_BS=16`, `GC_MODE=off` train chain
 `18615954 -> 18615955 -> 18615957` was canceled after the benchmark showed
 OOM at `MICRO_BS=4`, `GC_MODE=off`.
