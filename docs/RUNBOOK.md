@@ -12,6 +12,7 @@ So the current path is:
 1. keep the `3B` token results as the comparison anchor
 2. scale the **same token-level protocol** to `Qwen3-8B`
 3. do not rerun broad mean-pooled or generic frontier work first
+4. after the `Qwen3-8B` frontier, run model-level causal patching on the top layer-18 configs
 
 ## Phase 0: Remote Discovery
 
@@ -99,13 +100,13 @@ Initial `3B` layer set:
 
 Do not extract all layers on the first pass.
 
-Targeted `7B` layer band:
+Targeted `Qwen3-8B` layer band:
 
-- `14`
-- `20`
+- `18`
 - `26`
+- `34`
 
-Do not reopen the old mean-pooled extraction path for `7B`.
+Do not reopen the old mean-pooled extraction path for `Qwen3-8B`.
 
 Required outputs:
 
@@ -154,12 +155,13 @@ Token-level frontier:
 sbatch slurm/train_token_delta_sae.template.sbatch
 ```
 
-Targeted `7B` frontier policy:
+Targeted `Qwen3-8B` frontier policy:
 
 - run only the promising sparse regimes first:
   - `latent_mult=2, k=8`
   - `latent_mult=4, k=4`
-- if a layer sweep is needed, keep it to the narrow `14/20/26` band
+- after the completed frontier, prioritize layer `18` for the first causal patch runs
+- if a layer sweep is needed, keep it to the narrow `18/26/34` band
 - do not rerun a large exploratory frontier unless the targeted path fails
 
 ## Phase 5: Causal Evaluation
@@ -205,6 +207,12 @@ Targeted `Qwen3-8B` eval bundle:
 
 ```bash
 bash scripts/submit_qwen3_8b_token_eval_bundle_anvil.sh
+```
+
+Recommended first `Qwen3-8B` causal suite:
+
+```bash
+bash scripts/submit_qwen3_8b_recommended_causal_suite_anvil.sh
 ```
 
 ## Phase 6: Qwen3-8B Targeted Scale-Up
