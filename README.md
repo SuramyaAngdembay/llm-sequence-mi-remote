@@ -1,8 +1,9 @@
 # LLM Sequence MI Remote Branch
 
-This directory is the handoff/control-plane for the next branch:
+This directory is the handoff/control-plane for the remote mechanistic branch:
 
 - `QLoRA` fine-tuning on structured `r6.2` session sequences
+- transfer/generalization follow-on to `r4.2`
 - adapter-delta extraction
 - delta-SAE training
 - causal evaluation against the current session AE baseline
@@ -60,7 +61,12 @@ Primary local source files:
 
 - raw session extract:
   - `/homes/01/srangdembay/InsiderThreatDetection/r6.2/lcdal-r62-full/extract_stage/r6.2/ExtractedData/sessionr6.2.csv`
+  - `/homes/01/srangdembay/insider_threat/r4.2/ExtractedData/sessionr4.2.csv`
 - prepared session benchmark stats:
   - `/homes/01/srangdembay/InsiderThreatDetection/r6.2/ctmc-approach/benchmarks/oneclass_unsupervised_r62/results_r62_lcdal_session_features_clean/sessionr6.2_prepare_stats.json`
 - current primary MI memo:
   - `/homes/01/srangdembay/InsiderThreatDetection/r6.2/ctmc-approach/benchmarks/oneclass_unsupervised_r62/reports/SESSION_PRIMARY_MI_DECISION_MEMO_2026-06-19.md`
+
+For the next transfer/generalization step, see:
+
+- [R42_REMOTE_TRANSFER_AND_BASELINES.md](./docs/R42_REMOTE_TRANSFER_AND_BASELINES.md)

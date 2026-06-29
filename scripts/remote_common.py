@@ -86,7 +86,16 @@ def load_user_map(path: Path) -> Dict[int, str]:
 
 
 def read_session_shards(input_dir: Path) -> pd.DataFrame:
-    shard_paths = sorted(input_dir.glob("sessionr6.2_shard_*.csv.gz"))
+    manifest_path = input_dir / "manifest.json"
+    shard_paths: List[Path] = []
+    if manifest_path.exists():
+        try:
+            manifest = json.loads(manifest_path.read_text())
+            shard_paths = [input_dir / shard["path"] for shard in manifest.get("shards", [])]
+        except Exception:
+            shard_paths = []
+    if not shard_paths:
+        shard_paths = sorted(input_dir.glob("session*_shard_*.csv.gz"))
     if not shard_paths:
         raise FileNotFoundError(f"No session shards found in {input_dir}")
     dfs = [pd.read_csv(p, compression="gzip", low_memory=False) for p in shard_paths]

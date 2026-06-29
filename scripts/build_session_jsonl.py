@@ -50,11 +50,14 @@ SESSION_COLS = [
 def resolve_user_map(input_dir: Path, user_map_path: Path | None) -> Path:
     if user_map_path and user_map_path.exists():
         return user_map_path
+    candidates = sorted(input_dir.glob("session*_user_map.csv"))
+    if len(candidates) == 1:
+        return candidates[0]
     candidate = input_dir / "sessionr6.2_user_map.csv"
     if candidate.exists():
         return candidate
     raise FileNotFoundError(
-        "Missing sessionr6.2_user_map.csv. Transfer this mapping alongside the session shards."
+        "Missing session*_user_map.csv. Transfer this mapping alongside the session shards."
     )
 
 
@@ -156,8 +159,8 @@ def build_examples(df: pd.DataFrame, labels: pd.DataFrame, val_frac: float, max_
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--input-dir", type=Path, required=True, help="Directory containing sessionr6.2_shard_*.csv.gz and labels_daily.parquet")
-    ap.add_argument("--user-map", type=Path, default=None, help="Path to sessionr6.2_user_map.csv")
+    ap.add_argument("--input-dir", type=Path, required=True, help="Directory containing session*_shard_*.csv.gz and labels_daily.parquet")
+    ap.add_argument("--user-map", type=Path, default=None, help="Path to session*_user_map.csv")
     ap.add_argument("--labels", type=Path, default=None, help="Path to labels_daily.parquet; defaults to input-dir/labels_daily.parquet")
     ap.add_argument("--out-dir", type=Path, required=True)
     ap.add_argument("--val-frac", type=float, default=0.10)

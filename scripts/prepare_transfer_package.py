@@ -18,6 +18,8 @@ import shutil
 from pathlib import Path
 from typing import Iterable
 
+import pandas as pd
+
 
 DEFAULT_SESSION_CSV = Path(
     "/homes/01/srangdembay/InsiderThreatDetection/r6.2/lcdal-r62-full/extract_stage/r6.2/ExtractedData/sessionr6.2.csv"
@@ -31,6 +33,22 @@ DEFAULT_USER_MAP = Path(
 DEFAULT_OUT = Path(
     "/homes/01/srangdembay/InsiderThreatDetection/r6.2/llm-sequence-mi-remote/artifacts/transfer_package"
 )
+DEFAULTS_BY_DATASET = {
+    "r6.2": {
+        "session_csv": DEFAULT_SESSION_CSV,
+        "labels": DEFAULT_LABELS,
+        "user_map": DEFAULT_USER_MAP,
+        "out_dir": DEFAULT_OUT,
+        "source_root": Path("/homes/01/srangdembay/InsiderThreatDetection/r6.2"),
+    },
+    "r4.2": {
+        "session_csv": Path("/homes/01/srangdembay/insider_threat/r4.2/ExtractedData/sessionr4.2.csv"),
+        "labels": Path("/homes/01/srangdembay/InsiderThreatDetection/r4.2/labels_daily.parquet"),
+        "user_map": None,
+        "out_dir": Path("/homes/01/srangdembay/InsiderThreatDetection/r6.2/llm-sequence-mi-remote/artifacts/transfer_package_r42"),
+        "source_root": Path("/homes/01/srangdembay/insider_threat/r4.2"),
+    },
+}
 
 
 def sha256_file(path: Path, chunk_size: int = 1024 * 1024) -> str:
@@ -58,7 +76,7 @@ def write_gzip_csv(path: Path, header: list[str], rows: list[list[str]]) -> None
         writer.writerows(rows)
 
 
-def build_shards(session_csv: Path, out_dir: Path, rows_per_shard: int) -> list[dict]:
+def build_shards(session_csv: Path, out_dir: Path, rows_per_shard: int, dataset_tag: str) -> list[dict]:
     rows_iter = iter_csv_rows(session_csv)
     try:
         header = next(rows_iter)
@@ -74,7 +92,7 @@ def build_shards(session_csv: Path, out_dir: Path, rows_per_shard: int) -> list[
         shard_rows.append(row)
         total_rows += 1
         if len(shard_rows) >= rows_per_shard:
-            shard_path = out_dir / f"sessionr6.2_shard_{shard_idx:03d}.csv.gz"
+            shard_path = out_dir / f"session{dataset_tag}_shard_{shard_idx:03d}.csv.gz"
             write_gzip_csv(shard_path, header, shard_rows)
             shard_meta.append(
                 {
@@ -88,7 +106,7 @@ def build_shards(session_csv: Path, out_dir: Path, rows_per_shard: int) -> list[
             shard_idx += 1
 
     if shard_rows:
-        shard_path = out_dir / f"sessionr6.2_shard_{shard_idx:03d}.csv.gz"
+        shard_path = out_dir / f"session{dataset_tag}_shard_{shard_idx:03d}.csv.gz"
         write_gzip_csv(shard_path, header, shard_rows)
         shard_meta.append(
             {
@@ -102,24 +120,65 @@ def build_shards(session_csv: Path, out_dir: Path, rows_per_shard: int) -> list[
     return shard_meta
 
 
+def generate_r42_user_map(source_root: Path, dataset_tag: str, out_dir: Path) -> Path:
+    ldap_dir = source_root / "LDAP"
+    if not ldap_dir.exists():
+        raise FileNotFoundError(ldap_dir)
+    user_order: list[str] = []
+    seen: set[str] = set()
+    allfiles = [f for f in os.listdir(ldap_dir) if (ldap_dir / f).is_file()]
+    for fname in allfiles:
+        fpath = ldap_dir / fname
+        df = pd.read_csv(fpath)
+        if "user_id" not in df.columns:
+            raise ValueError(f"{fpath} missing user_id column")
+        for user_id in df["user_id"].astype(str).tolist():
+            if user_id not in seen:
+                seen.add(user_id)
+                user_order.append(user_id)
+    if not user_order:
+        raise RuntimeError(f"No users found in LDAP dir: {ldap_dir}")
+    user_map_df = pd.DataFrame(
+        {
+            "user_code": list(range(len(user_order))),
+            "user_id": user_order,
+        }
+    )
+    target = out_dir / f"session{dataset_tag}_user_map.csv"
+    user_map_df.to_csv(target, index=False)
+    return target
+
+
+def resolve_defaults(dataset_tag: str) -> dict:
+    if dataset_tag not in DEFAULTS_BY_DATASET:
+        raise ValueError(f"Unsupported dataset_tag: {dataset_tag}")
+    return DEFAULTS_BY_DATASET[dataset_tag]
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--session-csv", type=Path, default=DEFAULT_SESSION_CSV)
-    ap.add_argument("--labels", type=Path, default=DEFAULT_LABELS)
-    ap.add_argument("--user-map", type=Path, default=DEFAULT_USER_MAP)
-    ap.add_argument("--out-dir", type=Path, default=DEFAULT_OUT)
+    ap.add_argument("--dataset-tag", type=str, default="r6.2", choices=sorted(DEFAULTS_BY_DATASET.keys()))
+    ap.add_argument("--session-csv", type=Path, default=None)
+    ap.add_argument("--labels", type=Path, default=None)
+    ap.add_argument("--user-map", type=Path, default=None)
+    ap.add_argument("--source-root", type=Path, default=None, help="Dataset source tree used for r4.2 user-map regeneration")
+    ap.add_argument("--out-dir", type=Path, default=None)
     ap.add_argument("--rows-per-shard", type=int, default=250_000)
     ap.add_argument("--force", action="store_true")
     args = ap.parse_args()
 
-    if not args.session_csv.exists():
-        raise FileNotFoundError(args.session_csv)
-    if not args.labels.exists():
-        raise FileNotFoundError(args.labels)
-    if not args.user_map.exists():
-        raise FileNotFoundError(args.user_map)
+    defaults = resolve_defaults(args.dataset_tag)
+    session_csv = args.session_csv or defaults["session_csv"]
+    labels = args.labels or defaults["labels"]
+    user_map = args.user_map or defaults["user_map"]
+    source_root = args.source_root or defaults["source_root"]
+    out_dir = args.out_dir or defaults["out_dir"]
 
-    out_dir = args.out_dir
+    if not session_csv.exists():
+        raise FileNotFoundError(session_csv)
+    if not labels.exists():
+        raise FileNotFoundError(labels)
+
     if out_dir.exists():
         if not args.force and any(out_dir.iterdir()):
             raise RuntimeError(f"Output dir is not empty: {out_dir}")
@@ -127,19 +186,30 @@ def main() -> None:
     else:
         out_dir.mkdir(parents=True, exist_ok=True)
 
-    shard_meta = build_shards(args.session_csv, out_dir, args.rows_per_shard)
+    if user_map is None:
+        if args.dataset_tag == "r4.2":
+            user_map = generate_r42_user_map(source_root, args.dataset_tag, out_dir)
+        else:
+            raise FileNotFoundError("User map must be provided for this dataset")
+    if not user_map.exists():
+        raise FileNotFoundError(user_map)
 
-    labels_target = out_dir / args.labels.name
-    shutil.copy2(args.labels, labels_target)
+    shard_meta = build_shards(session_csv, out_dir, args.rows_per_shard, args.dataset_tag)
+
+    labels_target = out_dir / labels.name
+    shutil.copy2(labels, labels_target)
     labels_sha = sha256_file(labels_target)
-    user_map_target = out_dir / args.user_map.name
-    shutil.copy2(args.user_map, user_map_target)
+    user_map_target = out_dir / user_map.name
+    if user_map.resolve() != user_map_target.resolve():
+        shutil.copy2(user_map, user_map_target)
     user_map_sha = sha256_file(user_map_target)
 
     manifest = {
-        "session_csv_source": str(args.session_csv),
-        "labels_source": str(args.labels),
-        "user_map_source": str(args.user_map),
+        "dataset_tag": args.dataset_tag,
+        "session_csv_source": str(session_csv),
+        "labels_source": str(labels),
+        "user_map_source": str(user_map),
+        "source_root": str(source_root),
         "rows_per_shard": args.rows_per_shard,
         "compression": "gzip",
         "num_shards": len(shard_meta),
@@ -167,6 +237,7 @@ def main() -> None:
     (out_dir / "sha256sums.txt").write_text("\n".join(checksum_entries) + "\n")
 
     print(json.dumps({
+        "dataset_tag": args.dataset_tag,
         "out_dir": str(out_dir),
         "num_shards": len(shard_meta),
         "rows_per_shard": args.rows_per_shard,
