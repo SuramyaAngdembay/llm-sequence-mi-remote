@@ -85,6 +85,10 @@ Each `submit_qwen3_8b_token_eval_bundle_anvil.sh` run launches:
 1. GPU token causal patch eval on the chosen SAE config
 2. dependent CPU bootstrap over the resulting best-row CSV
 
+The Anvil launcher defaults `BATCH_SIZE=8` for Qwen3-8B causal scoring. This is
+still conservative for H100 inference but avoids the very slow initial
+`BATCH_SIZE=4` setting.
+
 ## Expected Output Files
 
 Per config under:

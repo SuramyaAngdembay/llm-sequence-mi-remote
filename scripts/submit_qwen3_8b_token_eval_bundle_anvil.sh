@@ -18,7 +18,7 @@ TAG="${TAG:-l${LAYER}_m$(printf '%02d' "$LATENT_MULT")_k$(printf '%02d' "$TOPK")
 OUTPUT_DIR="${OUTPUT_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3_8b_mb12_gc_on_fresh/${TAG}}"
 BOOTSTRAP_DIR="${BOOTSTRAP_DIR:-${OUTPUT_DIR}/bootstrap}"
 
-BATCH_SIZE="${BATCH_SIZE:-4}"
+BATCH_SIZE="${BATCH_SIZE:-8}"
 SAE_BATCH_SIZE="${SAE_BATCH_SIZE:-2048}"
 CONTEXT_MODES="${CONTEXT_MODES:-team,role,project_role,dept_role}"
 TOP_SETS="${TOP_SETS:-top1,top3,top5}"
