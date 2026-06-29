@@ -12,7 +12,7 @@ import torch
 import torch.nn.functional as F
 
 from remote_common import dump_json, ensure_dir, load_yaml, read_jsonl
-from sae_core import TopKSAE, choose_feature_sets
+from sae_core import TopKSAE, add_active_control_feature_sets, choose_feature_sets
 
 
 CONTEXT_MODE_COLS: Dict[str, List[str]] = {
@@ -539,6 +539,8 @@ def main() -> None:
     ap.add_argument("--context-modes", default="team,role,project_role,dept_role")
     ap.add_argument("--top-sets", default="top1,top3,top5")
     ap.add_argument("--control-set", default="control3")
+    ap.add_argument("--active-control-min-frac", type=float, default=0.002)
+    ap.add_argument("--active-control-sizes", default="1,3,5")
     ap.add_argument("--alphas", default="0.25,0.5,0.75,1.0")
     ap.add_argument("--max-receivers", type=int, default=0)
     ap.add_argument("--max-candidate-donors", type=int, default=16)
@@ -555,6 +557,7 @@ def main() -> None:
 
     context_modes = parse_csv_list(args.context_modes)
     top_sets = parse_csv_list(args.top_sets)
+    active_control_sizes = [int(x) for x in parse_csv_list(args.active_control_sizes)]
     alphas = [float(x) for x in parse_csv_list(args.alphas)]
     control_set = str(args.control_set)
 
@@ -578,8 +581,15 @@ def main() -> None:
         raise ValueError(f"Frontier model bundle unit is {model_bundle.get('unit')}, expected token")
     feature_df = pd.read_csv(cfg_dir / "delta_sae_top_features.csv")
     feature_sets = choose_feature_sets(feature_df)
+    feature_sets = add_active_control_feature_sets(
+        feature_sets,
+        feature_df,
+        min_active_frac=float(args.active_control_min_frac),
+        sizes=active_control_sizes,
+    )
     if control_set not in feature_sets:
-        raise ValueError(f"Requested control set {control_set} missing from token SAE feature sets")
+        available = ", ".join(sorted(feature_sets))
+        raise ValueError(f"Requested control set {control_set} missing from token SAE feature sets. Available: {available}")
     for name in top_sets:
         if name not in feature_sets:
             raise ValueError(f"Requested top set {name} missing from token SAE feature sets")
@@ -757,6 +767,8 @@ def main() -> None:
         "n_token_rows": int(len(token_meta)),
         "top_sets": top_sets,
         "control_set": control_set,
+        "active_control_min_frac": float(args.active_control_min_frac),
+        "active_control_sizes": active_control_sizes,
         "context_modes": context_modes,
         "alphas": alphas,
         "candidate_rows": int(len(candidate_df)),

@@ -41,6 +41,7 @@ SAE_BATCH_SIZE="${SAE_BATCH_SIZE:-2048}"
 CONTEXT_MODES="${CONTEXT_MODES:-team,role,project_role,dept_role}"
 TOP_SETS="${TOP_SETS:-top1,top3,top5}"
 CONTROL_SET="${CONTROL_SET:-control3}"
+ACTIVE_CONTROL_MIN_FRAC="${ACTIVE_CONTROL_MIN_FRAC:-0.002}"
 ALPHAS="${ALPHAS:-0.25,0.5,0.75,1.0}"
 MAX_RECEIVERS="${MAX_RECEIVERS:-0}"
 MAX_CANDIDATE_DONORS="${MAX_CANDIDATE_DONORS:-16}"
@@ -60,6 +61,7 @@ python scripts/eval_token_delta_sae_causal.py \
   --context-modes "$CONTEXT_MODES" \
   --top-sets "$TOP_SETS" \
   --control-set "$CONTROL_SET" \
+  --active-control-min-frac "$ACTIVE_CONTROL_MIN_FRAC" \
   --alphas "$ALPHAS" \
   --max-receivers "$MAX_RECEIVERS" \
   --max-candidate-donors "$MAX_CANDIDATE_DONORS"

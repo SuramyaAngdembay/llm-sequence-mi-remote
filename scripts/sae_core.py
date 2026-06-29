@@ -178,6 +178,19 @@ def _choose_low_gap_ids(
     return chosen
 
 
+def _choose_active_low_gap_ids(
+    feature_df: pd.DataFrame,
+    *,
+    n: int,
+    min_active_frac: float,
+    exclude: Sequence[int] = (),
+) -> List[int]:
+    source = feature_df[feature_df["row_active_frac"] >= float(min_active_frac)].copy()
+    if source.empty:
+        return []
+    return _choose_low_gap_ids(source, n=n, exclude=exclude)
+
+
 def choose_feature_sets(feature_df: pd.DataFrame) -> Dict[str, List[int]]:
     top = feature_df.sort_values("row_gap", ascending=False).reset_index(drop=True)
     active = top[top["row_active_frac"] > 0.02].copy()
@@ -206,6 +219,27 @@ def choose_feature_sets(feature_df: pd.DataFrame) -> Dict[str, List[int]]:
         "control1": control1,
         "control3": control3,
     }
+
+
+def add_active_control_feature_sets(
+    feature_sets: Dict[str, List[int]],
+    feature_df: pd.DataFrame,
+    *,
+    min_active_frac: float,
+    sizes: Sequence[int] = (1, 3, 5),
+) -> Dict[str, List[int]]:
+    out = {name: list(ids) for name, ids in feature_sets.items()}
+    exclude = set(out.get("top5", []))
+    for size in sizes:
+        ids = _choose_active_low_gap_ids(
+            feature_df,
+            n=int(size),
+            min_active_frac=min_active_frac,
+            exclude=tuple(exclude),
+        )
+        if len(ids) == int(size):
+            out[f"control{int(size)}_active"] = ids
+    return out
 
 
 def decoder_overlap_stats(model: TopKSAE, top_feature_ids: Sequence[int], *, block_size: int = 512) -> Dict[str, float]:
