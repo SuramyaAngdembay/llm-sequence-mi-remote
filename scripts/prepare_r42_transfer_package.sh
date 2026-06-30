@@ -19,3 +19,6 @@ echo "  ${OUT_DIR}"
 echo
 echo "Next:"
 echo "  bash scripts/rsync_to_anvil.sh ${OUT_DIR}"
+echo
+echo "Default Anvil target for this package:"
+echo "  /anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/data/r4.2/"

@@ -7,6 +7,7 @@ This plan assumes the target is the Anvil project space described in:
 Primary destination:
 
 - `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/data/`
+- for `r4.2`, use `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/data/r4.2/`
 
 ## What To Transfer First
 
@@ -73,12 +74,27 @@ rsync -avP --partial \
   x-sangdembay@anvil.rcac.purdue.edu:/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/data/
 ```
 
+For the `r4.2` package, prefer the dedicated dataset subdirectory:
+
+```bash
+rsync -avP --partial \
+  /path/to/transfer_package_r42/ \
+  x-sangdembay@anvil.rcac.purdue.edu:/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/data/r4.2/
+```
+
 ## On Anvil After Transfer
 
 Verify checksums:
 
 ```bash
 cd /anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/data/
+sha256sum -c sha256sums.txt
+```
+
+For `r4.2`, verify in:
+
+```bash
+cd /anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/data/r4.2/
 sha256sum -c sha256sums.txt
 ```
 

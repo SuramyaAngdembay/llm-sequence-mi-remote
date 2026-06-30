@@ -142,10 +142,17 @@ cd /homes/01/srangdembay/InsiderThreatDetection/r6.2/llm-sequence-mi-remote
 bash scripts/rsync_to_anvil.sh artifacts/transfer_package_r42
 ```
 
+This now defaults to a dedicated dataset subdirectory on Anvil:
+
+- `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/data/r4.2/`
+
+That avoids mixing `r4.2` manifests/checksums with the existing `r6.2` package
+already stored at the project root.
+
 On Anvil:
 
 ```bash
-cd /anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/data/
+cd /anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/data/r4.2/
 sha256sum -c sha256sums.txt
 ```
 
