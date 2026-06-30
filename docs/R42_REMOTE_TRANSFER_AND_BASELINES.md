@@ -5,6 +5,10 @@ This note does two jobs:
 1. fixes the baseline set we will carry forward for the paper
 2. gives the concrete `r4.2` remote transfer path for the Anvil branch
 
+For the current transfer-complete handoff, see:
+
+- [HANDOFF_2026-06-29_R42_TRANSFER.md](./HANDOFF_2026-06-29_R42_TRANSFER.md)
+
 ## Baseline Set We Are Selecting
 
 We do **not** want a huge model zoo. We want a compact baseline set that tests
