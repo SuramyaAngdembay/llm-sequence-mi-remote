@@ -1,0 +1,20 @@
+{
+  "input_dir": "/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/data/r4.2",
+  "user_map": "/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/data/r4.2/sessionr4.2_user_map.csv",
+  "labels": "/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/data/r4.2/labels_daily.parquet",
+  "out_dir": "/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl_r42",
+  "n_examples": 330295,
+  "split_counts": {
+    "eval": 15442,
+    "train": 287827,
+    "val": 27026
+  },
+  "positive_counts": {
+    "eval": 1309,
+    "train": 0,
+    "val": 0
+  },
+  "max_sessions": 24,
+  "val_frac": 0.1,
+  "builder": "build_session_jsonl_fast"
+}

@@ -90,6 +90,62 @@ is still:
 4. Run the **targeted** token-SAE frontier.
 5. Run token-level causal patching on the best few configs.
 
+## Anvil Throughput/VRAM Gate Before Full Training
+
+Before launching the full `r4.2` QLoRA run, run a short real-data throughput
+benchmark to choose the per-GPU microbatch size. The target is roughly `70 GiB`
+reserved on one `80 GB` H100 without OOM, keeping the same Qwen3-8B QLoRA stack
+and gradient checkpointing.
+
+Anvil launcher:
+
+```bash
+bash scripts/submit_qwen3_8b_r42_throughput_benchmark_anvil.sh
+```
+
+Default benchmark settings:
+
+- build data first if needed:
+  `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl_r42`
+- one-H100 benchmark output:
+  `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/qwen3_8b_r42_throughput_benchmark`
+- candidate microbatches: `12,13,14`
+- sample mode: `longest`, so the probe stresses long session JSONL examples
+- gradient checkpointing: `on`
+- target: `70 GiB`, tolerance `2 GiB`
+
+Submitted on Anvil:
+
+- JSONL build: Slurm `18731194`
+- throughput benchmark: Slurm `18731195`, dependency `afterok:18731194`
+- high-range throughput benchmark: Slurm `18732132`
+
+Benchmark outcome:
+
+- no candidate OOMed
+- `micro_bs=28`: `66.611 GiB` peak reserved, `922.881` tokens/sec
+- `micro_bs=32`: `65.961 GiB` peak reserved, `955.737` tokens/sec
+- selected full-training setting: `MICRO_BS=28`, `GRAD_ACCUM=1`, `GC_MODE=on`
+
+The benchmark result bundle is committed under:
+
+- `results/qwen3_8b_r42_transfer/`
+
+Full transfer-training launcher:
+
+```bash
+bash scripts/submit_qwen3_8b_r42_targeted_pipeline_anvil.sh
+```
+
+Default full-run roots:
+
+- checkpoint:
+  `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/checkpoints/qwen3_8b_session_qlora_r42_ddp_mb28_gc_on`
+- token cache:
+  `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/token_delta_cache/qwen3_8b_session_token_deltas_r42_mb28_gc_on`
+- token-SAE frontier:
+  `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_frontier_qwen3_8b_r42_mb28_gc_on`
+
 ## Baseline Comparison Target
 
 The remote `r4.2` branch is meant to compare against the compact baseline set

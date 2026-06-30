@@ -1,0 +1,4 @@
+model,data_dir,micro_batch_size,sample_mode,max_train_examples,warmup_steps,bench_steps,completed_warmup_steps,completed_steps,gradient_checkpointing,attn_impl,status,elapsed_sec,examples_per_sec,tokens_per_sec,avg_tokens_per_example,peak_allocated_gib,peak_reserved_gib,device_total_gib,device_free_after_gib,error
+Qwen/Qwen3-8B,/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl_r42,12,longest,4096,2,8,2,8,True,sdpa,ok,85.502,1.123,916.718,816.469,33.108,33.963,79.179,44.482,
+Qwen/Qwen3-8B,/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl_r42,13,longest,4096,2,8,2,8,True,sdpa,ok,90.56,1.148,922.218,803.038,35.156,36.074,79.179,42.368,
+Qwen/Qwen3-8B,/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl_r42,14,longest,4096,2,8,2,8,True,sdpa,ok,94.679,1.183,929.773,785.982,37.173,38.098,79.179,40.345,

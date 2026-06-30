@@ -1,0 +1,9 @@
+{
+  "target_gib": 70.0,
+  "tolerance_gib": 2.0,
+  "recommended_micro_batch_size": 28,
+  "recommended_peak_reserved_gib": 66.611,
+  "recommended_tokens_per_sec": 922.881,
+  "reason": "highest OK peak_reserved_gib <= target+tolerance (70.0+2.0)",
+  "rows_csv": "/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/qwen3_8b_r42_throughput_benchmark_v2/qwen3_8b_r42_throughput_benchmark.csv"
+}

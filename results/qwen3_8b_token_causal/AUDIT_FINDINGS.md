@@ -92,3 +92,23 @@ So the remote token branch should now be advanced using:
 
 - `l18_m04_k08` as the conservative headline result
 - `l18_m04_k04` as a supporting upper-bound variant
+
+## Active-Control Follow-Up
+
+The active-control follow-up reran the two strongest configs with
+`control5_active`:
+
+- `l18_m04_k04_top5_control5_active`
+- `l18_m04_k08_top5_control5_active`
+
+Both completed successfully on Anvil. The best bootstrap rows were:
+
+| config | context | estimate | 95% CI |
+|---|---|---:|---:|
+| `l18_m04_k04_top5_control5_active` | `project_role` | `0.041975` | `[0.033279, 0.050582]` |
+| `l18_m04_k04_top5_control5_active` | `role` | `0.040655` | `[0.032362, 0.049114]` |
+| `l18_m04_k08_top5_control5_active` | `role` | `0.018653` | `[0.013396, 0.024391]` |
+| `l18_m04_k08_top5_control5_active` | `dept_role` | `0.016378` | `[0.012051, 0.021068]` |
+
+This follow-up preserves the conservative `l18_m04_k08` headline and reduces the
+concern that `l18_m04_k04` was only an inert-control artifact.

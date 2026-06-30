@@ -1,0 +1,4 @@
+layer,latent_mult,k,feature_set,n_features,feature_ids,mean_row_gap
+18,4,4,top5,5,"[6567, 13974, 4963, 11508, 4192]",0.1082441868708943
+18,4,4,control1,1,[33],0.0
+18,4,4,control5_active,5,"[7811, 10617, 2187, 5024, 8679]",-1.2468734128416335e-05

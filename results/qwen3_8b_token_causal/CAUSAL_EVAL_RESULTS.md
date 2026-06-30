@@ -95,6 +95,34 @@ So the conservative conclusion is now:
 - `l18_m04_k04` should be treated as an upper-bound variant because of the inert
   control
 
+## Active-Control Rerun
+
+The tightened active-control rerun completed on Anvil after the inert-control
+audit. It directly reran the two strongest layer-18 configs with
+`control5_active` instead of the weak `control3` comparison:
+
+| config | causal job | bootstrap job | control |
+|---|---:|---:|---|
+| `l18_m04_k04_top5_control5_active` | `18728774` | `18728775` | `control5_active` |
+| `l18_m04_k08_top5_control5_active` | `18728776` | `18728777` | `control5_active` |
+
+Top active-control bootstrap rows:
+
+| config | context | target | estimate | 95% CI |
+|---|---|---|---:|---:|
+| `l18_m04_k04_top5_control5_active` | `project_role` | `top5` | `0.041975` | `[0.033279, 0.050582]` |
+| `l18_m04_k04_top5_control5_active` | `dept_role` | `top5` | `0.040670` | `[0.032455, 0.049084]` |
+| `l18_m04_k04_top5_control5_active` | `role` | `top5` | `0.040655` | `[0.032362, 0.049114]` |
+| `l18_m04_k08_top5_control5_active` | `role` | `top5` | `0.018653` | `[0.013396, 0.024391]` |
+| `l18_m04_k08_top5_control5_active` | `dept_role` | `top5` | `0.016378` | `[0.012051, 0.021068]` |
+
+Lightweight active-control files are committed under:
+
+- `results/qwen3_8b_token_causal/active_control_v1/`
+
+This preserves the conservative headline (`l18_m04_k08`) and shows that the
+strong `l18_m04_k04` effect remains large when compared against active controls.
+
 ## Git Bundle
 
 Committed lightweight files for each full config:
