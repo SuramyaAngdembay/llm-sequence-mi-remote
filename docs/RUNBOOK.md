@@ -215,6 +215,18 @@ Recommended first `Qwen3-8B` causal suite:
 bash scripts/submit_qwen3_8b_recommended_causal_suite_anvil.sh
 ```
 
+`r4.2` causal-eval bundle:
+
+```bash
+bash scripts/submit_qwen3_8b_r42_token_eval_bundle_anvil.sh
+```
+
+Recommended first `r4.2` causal suite:
+
+```bash
+bash scripts/submit_qwen3_8b_r42_recommended_causal_suite_anvil.sh
+```
+
 ## Phase 6: Qwen3-8B Targeted Scale-Up
 
 This phase is justified only because the `3B` token branch already cleared the matched-comparison bar.

@@ -176,3 +176,12 @@ mechanistic result we now have on `r6.2`:
 
 The goal is not only better likelihood fit. The goal is to test whether the
 mechanistic conclusion transfers.
+
+## Causal-Prep Follow-On
+
+The `r4.2` causal bundle preparation now exists separately in:
+
+- [HANDOFF_2026-07-02_R42_CAUSAL_PREP.md](./HANDOFF_2026-07-02_R42_CAUSAL_PREP.md)
+
+That note covers the post-frontier token-patching launchers and the default
+first causal suite to run once the `r4.2` token-SAE outputs are ready.
