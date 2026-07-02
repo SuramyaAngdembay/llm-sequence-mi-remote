@@ -90,3 +90,31 @@ repeat the `r6.2` audit pattern:
 - rerun with an active control set if needed
 
 Do not assume the first strongest raw row is automatically the clean headline.
+
+## Anvil Submission Status
+
+Submitted from Anvil at `2026-07-02 18:36 EDT` while the token-SAE frontier
+job was still running.
+
+Frontier dependency:
+
+- `18755591 token_delta_sae`
+
+Queued causal jobs:
+
+- `18810245 token_delta_causal`: `l18_m04_k04`
+- `18810247 token_delta_causal`: `l18_m02_k04`
+- `18810249 token_delta_causal`: `l18_m04_k08`
+
+All three causal jobs were verified with:
+
+- `Dependency=afterok:18755591(unfulfilled)`
+
+Queued bootstrap jobs:
+
+- `18810246 tok_boot_cpu`: after `18810245`
+- `18810248 tok_boot_cpu`: after `18810247`
+- `18810250 tok_boot_cpu`: after `18810249`
+
+The causal suite should not begin until the R4.2 token-SAE frontier exits
+successfully.
