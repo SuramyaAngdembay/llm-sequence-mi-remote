@@ -5,7 +5,7 @@ REPO_DIR="${REPO_DIR:-$HOME/cert-qlora-MI/llm-sequence-mi-remote}"
 cd "$REPO_DIR"
 
 COMMON_OUTPUT_ROOT="${COMMON_OUTPUT_ROOT:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3_8b_r42_mb22_gc_on}"
-COMMON_CONTEXT_MODES="${COMMON_CONTEXT_MODES:-team,role,project_role,dept_role}"
+COMMON_CONTEXT_MODES="${COMMON_CONTEXT_MODES:-team,role,dept,dept_role}"
 COMMON_TOP_SETS="${COMMON_TOP_SETS:-top1,top3,top5}"
 COMMON_CONTROL_SET="${COMMON_CONTROL_SET:-control3}"
 COMMON_ACTIVE_CONTROL_MIN_FRAC="${COMMON_ACTIVE_CONTROL_MIN_FRAC:-0.002}"

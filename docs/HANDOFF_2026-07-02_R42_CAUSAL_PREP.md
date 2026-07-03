@@ -20,7 +20,7 @@ Keep the same causal protocol family that worked on `r6.2`:
 
 - token-level patching, not mean-pooled patching
 - matched donor/receiver selection
-- `team,role,project_role,dept_role` context modes
+- `team,role,dept,dept_role` context modes
 - top-vs-control comparison
 - active-control threshold available from the start
 - bootstrap on the best-row CSV output
@@ -65,6 +65,7 @@ If the finished frontier clearly points elsewhere, override the bundle inputs.
 
 ## Default Causal Settings
 
+- `CONTEXT_MODES=team,role,dept,dept_role`
 - `TOP_SETS=top1,top3,top5`
 - `CONTROL_SET=control3`
 - `ACTIVE_CONTROL_MIN_FRAC=0.002`
@@ -118,3 +119,42 @@ Queued bootstrap jobs:
 
 The causal suite should not begin until the R4.2 token-SAE frontier exits
 successfully.
+
+## Anvil Resubmission Status
+
+Checked on Anvil at `2026-07-03 19:07 EDT`.
+
+The first queued causal suite started after the frontier completed, but all
+three causal jobs failed quickly because the R4.2 structured JSONL context does
+not include a `project` column. The failing mode was `project_role`.
+
+Failed causal jobs:
+
+- `18810245 token_delta_causal`: `l18_m04_k04`, failed with missing `project`
+- `18810247 token_delta_causal`: `l18_m02_k04`, failed with missing `project`
+- `18810249 token_delta_causal`: `l18_m04_k08`, failed with missing `project`
+
+Their corresponding bootstrap jobs are now dependency-never-satisfied:
+
+- `18810246`
+- `18810248`
+- `18810250`
+
+The corrected suite was resubmitted with:
+
+- `COMMON_CONTEXT_MODES=team,role,dept,dept_role`
+
+Corrected causal jobs:
+
+- `18832356 token_delta_causal`: `l18_m04_k04`
+- `18832358 token_delta_causal`: `l18_m02_k04`
+- `18832360 token_delta_causal`: `l18_m04_k08`
+
+Corrected bootstrap jobs:
+
+- `18832357 tok_boot_cpu`: after `18832356`
+- `18832359 tok_boot_cpu`: after `18832358`
+- `18832361 tok_boot_cpu`: after `18832360`
+
+As of the resubmission check, the corrected causal jobs were pending on
+priority, with no remaining frontier dependency.
