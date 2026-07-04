@@ -158,3 +158,51 @@ Corrected bootstrap jobs:
 
 As of the resubmission check, the corrected causal jobs were pending on
 priority, with no remaining frontier dependency.
+
+## Anvil Memory Resubmission Status
+
+Checked on Anvil at `2026-07-03 22:06 EDT`.
+
+The corrected context-mode suite started, but all three causal jobs were killed
+by Slurm CPU-memory OOM. This was not a GPU VRAM failure and not another
+missing-column/config error.
+
+Failed causal jobs:
+
+- `18832356 token_delta_causal`: `l18_m04_k04`, `OUT_OF_MEMORY`
+- `18832358 token_delta_causal`: `l18_m02_k04`, `OUT_OF_MEMORY`
+- `18832360 token_delta_causal`: `l18_m04_k08`, `OUT_OF_MEMORY`
+
+Slurm accounting:
+
+- requested memory: `240G`
+- observed `MaxRSS`: about `251,657,000K`
+- failure point: about five minutes into each causal job
+
+The R4.2 causal wrapper now overrides the generic Slurm template memory with:
+
+- `CAUSAL_MEM=360G`
+
+This keeps the higher memory request scoped to R4.2 causal jobs rather than
+changing the shared token-causal template for every branch.
+
+Resubmitted at `2026-07-03 22:09 EDT` with `CAUSAL_MEM=360G`.
+
+Memory-resubmitted causal jobs:
+
+- `18835178 token_delta_causal`: `l18_m04_k04`
+- `18835180 token_delta_causal`: `l18_m02_k04`
+- `18835182 token_delta_causal`: `l18_m04_k08`
+
+Memory-resubmitted bootstrap jobs:
+
+- `18835179 tok_boot_cpu`: after `18835178`
+- `18835181 tok_boot_cpu`: after `18835180`
+- `18835183 tok_boot_cpu`: after `18835182`
+
+Verified Slurm submission detail on all three causal jobs:
+
+- `SubmitLine=sbatch --parsable --mem=360G --export=ALL slurm/eval_token_delta_sae_causal.template.sbatch`
+- `ReqTRES=cpu=24,mem=360G,node=1,billing=1,gres/gpu=1`
+
+As of submission, the three causal jobs were pending on priority.

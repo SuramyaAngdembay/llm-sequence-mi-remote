@@ -10,6 +10,7 @@ COMMON_TOP_SETS="${COMMON_TOP_SETS:-top1,top3,top5}"
 COMMON_CONTROL_SET="${COMMON_CONTROL_SET:-control3}"
 COMMON_ACTIVE_CONTROL_MIN_FRAC="${COMMON_ACTIVE_CONTROL_MIN_FRAC:-0.002}"
 COMMON_N_BOOTSTRAP="${COMMON_N_BOOTSTRAP:-4000}"
+COMMON_CAUSAL_MEM="${COMMON_CAUSAL_MEM:-360G}"
 
 run_bundle() {
   local layer="$1"
@@ -22,6 +23,7 @@ run_bundle() {
   CONTROL_SET="$COMMON_CONTROL_SET" \
   ACTIVE_CONTROL_MIN_FRAC="$COMMON_ACTIVE_CONTROL_MIN_FRAC" \
   N_BOOTSTRAP="$COMMON_N_BOOTSTRAP" \
+  CAUSAL_MEM="$COMMON_CAUSAL_MEM" \
   LAYER="$layer" \
   LATENT_MULT="$latent_mult" \
   TOPK="$topk" \
@@ -36,6 +38,7 @@ echo "context_modes=${COMMON_CONTEXT_MODES}"
 echo "top_sets=${COMMON_TOP_SETS}"
 echo "control_set=${COMMON_CONTROL_SET}"
 echo "active_control_min_frac=${COMMON_ACTIVE_CONTROL_MIN_FRAC}"
+echo "causal_mem=${COMMON_CAUSAL_MEM}"
 echo
 
 echo "[1/3] layer=18 latent_mult=4 k=4"
