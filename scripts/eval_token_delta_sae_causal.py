@@ -57,6 +57,7 @@ def load_token_layer_vectors(
     layer: int,
     *,
     keep_examples: set[int] | None = None,
+    delta_dtype: str = "float32",
 ) -> tuple[np.ndarray, np.ndarray, pd.DataFrame]:
     scores = pd.read_parquet(extract_dir / "example_scores.parquet").sort_values("example_idx").reset_index(drop=True)
     layer_dir = extract_dir / f"layer_{layer}"
@@ -85,15 +86,15 @@ def load_token_layer_vectors(
     if total_rows == 0 or d_model is None:
         raise RuntimeError(f"No token rows found for requested examples at layer {layer}")
 
-    # Keep deltas in float16 to avoid doubling RAM versus the on-disk cache.
-    x = np.empty((total_rows, d_model), dtype=np.float16)
+    np_delta_dtype = np.float16 if delta_dtype == "float16" else np.float32
+    x = np.empty((total_rows, d_model), dtype=np_delta_dtype)
     example_idx = np.empty(total_rows, dtype=np.int64)
     position = np.empty(total_rows, dtype=np.int32)
 
     cursor = 0
     for path in chunk_paths:
         obj = torch.load(path, map_location="cpu", weights_only=False)
-        vecs = np.asarray(obj["delta"], dtype=np.float16)
+        vecs = np.asarray(obj["delta"], dtype=np_delta_dtype)
         idx = np.asarray(obj["example_idx"], dtype=np.int64)
         pos = np.asarray(obj["position"], dtype=np.int32)
         if keep_arr is not None:
@@ -612,6 +613,7 @@ def main() -> None:
     ap.add_argument("--batch-size", type=int, default=8)
     ap.add_argument("--sae-batch-size", type=int, default=2048)
     ap.add_argument("--patch-chunk-size", type=int, default=0)
+    ap.add_argument("--token-delta-dtype", choices=["float32", "float16"], default="float32")
     ap.add_argument("--context-modes", default="team,role,project_role,dept_role")
     ap.add_argument("--top-sets", default="top1,top3,top5")
     ap.add_argument("--control-set", default="control3")
@@ -649,7 +651,12 @@ def main() -> None:
         seed=args.seed,
     )
     needed_examples = examples_from_pairs(candidate_pairs_by_key)
-    x, token_example_idx, _ = load_token_layer_vectors(args.extract_dir, args.layer, keep_examples=needed_examples)
+    x, token_example_idx, _ = load_token_layer_vectors(
+        args.extract_dir,
+        args.layer,
+        keep_examples=needed_examples,
+        delta_dtype=args.token_delta_dtype,
+    )
 
     cfg_dir = args.frontier_dir / f"layer_{args.layer}" / f"m{args.latent_mult:02d}_k{args.k:02d}"
     model_bundle = torch.load(cfg_dir / "delta_sae_model.pt", map_location="cpu", weights_only=False)
@@ -896,6 +903,7 @@ def main() -> None:
         "alphas": alphas,
         "candidate_rows": int(candidate_row_count),
         "patch_chunk_size": int(pair_batch_size),
+        "token_delta_dtype": str(args.token_delta_dtype),
     }
     dump_json(out_dir / "token_delta_sae_causal_summary.json", stats)
     print(json.dumps(stats, indent=2))

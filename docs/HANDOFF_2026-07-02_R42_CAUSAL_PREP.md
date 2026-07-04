@@ -340,13 +340,16 @@ What changed in `scripts/eval_token_delta_sae_causal.py`:
 
 - stop materializing a full `x_norm` copy of the needed token rows
 - stop materializing a full dense `sparse_all` latent matrix for all needed rows
-- keep extracted token deltas in `float16` in host RAM, then cast per batch
+- stream sparse SAE activations by pair batch instead of keeping all sparse
+  activations resident
 - build sparse SAE activations only for the current pair batch's unique examples
 - stop accumulating a full in-memory `candidate_rows` list; stream it directly to CSV
 - keep only the compact per-receiver best-row table in memory
 - Anvil follow-up: expose `PATCH_CHUNK_SIZE`/`COMMON_PATCH_CHUNK_SIZE` so patch
   construction can be reduced independently of model scoring batch size if host
   memory is still tight
+- Anvil follow-up: default `TOKEN_DELTA_DTYPE=float32` for final-table runs;
+  `float16` remains available only as an emergency memory fallback
 
 What did **not** change:
 
@@ -375,6 +378,9 @@ Submission settings:
 - `COMMON_MAX_CANDIDATE_DONORS=16`
 - `COMMON_CAUSAL_MEM=360G`
 - `COMMON_PATCH_CHUNK_SIZE=0` (`0` means use `BATCH_SIZE`, currently `8`)
+- `TOKEN_DELTA_DTYPE=float32` by evaluator default; new submissions can set
+  `COMMON_TOKEN_DELTA_DTYPE=float16` only if the `float32` streamed run still
+  exceeds host memory
 - output root:
   `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3_8b_r42_mb22_gc_on_stream_uncapped_v1`
 

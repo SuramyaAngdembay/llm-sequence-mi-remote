@@ -39,6 +39,7 @@ TOPK="${TOPK:-8}"
 BATCH_SIZE="${BATCH_SIZE:-8}"
 SAE_BATCH_SIZE="${SAE_BATCH_SIZE:-2048}"
 PATCH_CHUNK_SIZE="${PATCH_CHUNK_SIZE:-0}"
+TOKEN_DELTA_DTYPE="${TOKEN_DELTA_DTYPE:-float32}"
 CONTEXT_MODES="${CONTEXT_MODES:-team,role,project_role,dept_role}"
 TOP_SETS="${TOP_SETS:-top1,top3,top5}"
 CONTROL_SET="${CONTROL_SET:-control3}"
@@ -60,6 +61,7 @@ python scripts/eval_token_delta_sae_causal.py \
   --batch-size "$BATCH_SIZE" \
   --sae-batch-size "$SAE_BATCH_SIZE" \
   --patch-chunk-size "$PATCH_CHUNK_SIZE" \
+  --token-delta-dtype "$TOKEN_DELTA_DTYPE" \
   --context-modes "$CONTEXT_MODES" \
   --top-sets "$TOP_SETS" \
   --control-set "$CONTROL_SET" \
