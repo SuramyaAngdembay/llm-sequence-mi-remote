@@ -206,3 +206,97 @@ Verified Slurm submission detail on all three causal jobs:
 - `ReqTRES=cpu=24,mem=360G,node=1,billing=1,gres/gpu=1`
 
 As of submission, the three causal jobs were pending on priority.
+
+## Full-Run OOM Diagnosis
+
+Checked on Anvil at `2026-07-04 01:05 EDT`.
+
+The `CAUSAL_MEM=360G` retry also failed with CPU-memory OOM:
+
+- `18835178 token_delta_causal`: `l18_m04_k04`, `OUT_OF_MEMORY`
+- `18835180 token_delta_causal`: `l18_m02_k04`, `OUT_OF_MEMORY`
+- `18835182 token_delta_causal`: `l18_m04_k08`, `OUT_OF_MEMORY`
+
+Slurm accounting for the 360G retry:
+
+- requested memory: `360G`
+- observed `MaxRSS`: about `377,486,000K`
+- failure point: about five to six minutes into each causal job
+
+This confirms the issue is not a small under-request. The current causal
+evaluator materializes large dense arrays:
+
+- full layer-18 token rows: `11,860,673`
+- needed token rows for the full default R4.2 suite: `8,101,247`
+- token delta matrix `x`: about `123.62 GiB`
+- normalized copy `x_norm`: about `123.62 GiB`
+- dense m02 SAE activation matrix: about `247.23 GiB`
+- dense m04 SAE activation matrix: about `494.46 GiB`
+- largest per-inner-loop patch list: about `82.11 GiB`
+
+So the full default m04 run wants substantially more than `360G`, and likely
+more than is worth requesting blindly.
+
+Sizing estimates by receiver cap:
+
+| max receivers | total pairs | needed rows | x GiB | m02 dense GiB | m04 dense GiB | max patch list GiB | candidate rows |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 32 | 4,081 | 599,444 | 9.15 | 18.29 | 36.59 | 2.06 | 65,296 |
+| 64 | 8,171 | 1,109,244 | 16.93 | 33.85 | 67.70 | 4.17 | 130,736 |
+| 128 | 16,344 | 1,829,910 | 27.92 | 55.84 | 111.69 | 7.92 | 261,504 |
+| 256 | 32,592 | 3,110,190 | 47.46 | 94.92 | 189.83 | 16.92 | 521,472 |
+| 512 | 65,163 | 4,772,681 | 72.83 | 145.65 | 291.30 | 32.11 | 1,042,608 |
+| full | 166,627 | 8,101,247 | 123.62 | 247.23 | 494.46 | 82.11 | 2,666,032 |
+
+Recommended path:
+
+1. Run a bounded R4.2 causal probe with `COMMON_MAX_RECEIVERS=128` into a
+   separate output root. This should fit under the current `360G` request and
+   gives a fast signal without pretending it is the full headline result.
+2. Patch the evaluator for the full run so it does not materialize dense
+   `n_token_rows x d_latent` SAE activations or full `patch_list` arrays. The
+   better full-run design is to cache only token-level top-k SAE activations and
+   stream pair batches.
+3. After the memory-efficient evaluator exists, rerun the full uncapped suite.
+
+The R4.2 recommended launcher now exposes:
+
+- `COMMON_MAX_RECEIVERS`
+- `COMMON_MAX_CANDIDATE_DONORS`
+
+These default to the previous full-run behavior, but allow capped probes
+without editing the scripts again.
+
+## Receiver-Capped Probe Submission
+
+Submitted at `2026-07-04 01:16 EDT`.
+
+Purpose: get an end-to-end R4.2 causal signal while the full evaluator is being
+made memory efficient. This is a probe, not the final uncapped headline run.
+
+Submission settings:
+
+- `COMMON_MAX_RECEIVERS=128`
+- `COMMON_MAX_CANDIDATE_DONORS=16`
+- `COMMON_CAUSAL_MEM=360G`
+- output root:
+  `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3_8b_r42_mb22_gc_on_recv128`
+
+Probe causal jobs:
+
+- `18836313 token_delta_causal`: `l18_m04_k04`
+- `18836315 token_delta_causal`: `l18_m02_k04`
+- `18836317 token_delta_causal`: `l18_m04_k08`
+
+Probe bootstrap jobs:
+
+- `18836314 tok_boot_cpu`: after `18836313`
+- `18836316 tok_boot_cpu`: after `18836315`
+- `18836318 tok_boot_cpu`: after `18836317`
+
+Verified Slurm submission detail on all three probe causal jobs:
+
+- `SubmitLine=sbatch --parsable --mem=360G --export=ALL slurm/eval_token_delta_sae_causal.template.sbatch`
+- `ReqTRES=cpu=24,mem=360G,node=1,billing=1,gres/gpu=1`
+
+As of submission, all three probe causal jobs were pending on priority.

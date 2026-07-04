@@ -65,4 +65,6 @@ top_sets=${TOP_SETS}
 control_set=${CONTROL_SET}
 active_control_min_frac=${ACTIVE_CONTROL_MIN_FRAC}
 causal_mem=${CAUSAL_MEM}
+max_receivers=${MAX_RECEIVERS}
+max_candidate_donors=${MAX_CANDIDATE_DONORS}
 EOM
