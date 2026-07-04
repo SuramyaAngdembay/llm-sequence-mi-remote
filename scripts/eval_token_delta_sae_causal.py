@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 from pathlib import Path
 from typing import Any, Dict, List, Sequence, Tuple
@@ -56,25 +57,45 @@ def load_token_layer_vectors(
     layer: int,
     *,
     keep_examples: set[int] | None = None,
-) -> tuple[np.ndarray, pd.DataFrame, pd.DataFrame]:
+) -> tuple[np.ndarray, np.ndarray, pd.DataFrame]:
     scores = pd.read_parquet(extract_dir / "example_scores.parquet").sort_values("example_idx").reset_index(drop=True)
-    score_index = scores.set_index("example_idx", drop=False)
     layer_dir = extract_dir / f"layer_{layer}"
     chunk_paths = sorted(layer_dir.glob("chunk_*.pt"))
     if not chunk_paths:
         raise FileNotFoundError(f"No chunks found for layer {layer} in {layer_dir}")
 
-    all_vecs: List[np.ndarray] = []
-    all_idx: List[np.ndarray] = []
-    all_pos: List[np.ndarray] = []
     keep_arr = np.asarray(sorted(keep_examples), dtype=np.int64) if keep_examples else None
+    total_rows = 0
+    d_model: int | None = None
+
     for path in chunk_paths:
         obj = torch.load(path, map_location="cpu", weights_only=False)
         if "position" not in obj or obj["position"] is None:
             raise RuntimeError("Token-level causal eval requires token-level extraction with position arrays.")
-        vecs = np.asarray(obj["delta"], dtype=np.float32)
         idx = np.asarray(obj["example_idx"], dtype=np.int64)
+        if d_model is None:
+            d_model = int(np.asarray(obj["delta"]).shape[1])
         pos = np.asarray(obj["position"], dtype=np.int64)
+        del pos
+        if keep_arr is not None:
+            keep = np.isin(idx, keep_arr)
+            total_rows += int(np.count_nonzero(keep))
+        else:
+            total_rows += int(len(idx))
+    if total_rows == 0 or d_model is None:
+        raise RuntimeError(f"No token rows found for requested examples at layer {layer}")
+
+    # Keep deltas in float16 to avoid doubling RAM versus the on-disk cache.
+    x = np.empty((total_rows, d_model), dtype=np.float16)
+    example_idx = np.empty(total_rows, dtype=np.int64)
+    position = np.empty(total_rows, dtype=np.int32)
+
+    cursor = 0
+    for path in chunk_paths:
+        obj = torch.load(path, map_location="cpu", weights_only=False)
+        vecs = np.asarray(obj["delta"], dtype=np.float16)
+        idx = np.asarray(obj["example_idx"], dtype=np.int64)
+        pos = np.asarray(obj["position"], dtype=np.int32)
         if keep_arr is not None:
             keep = np.isin(idx, keep_arr)
             if not np.any(keep):
@@ -82,26 +103,24 @@ def load_token_layer_vectors(
             vecs = vecs[keep]
             idx = idx[keep]
             pos = pos[keep]
-        all_vecs.append(vecs)
-        all_idx.append(idx)
-        all_pos.append(pos)
-    if not all_vecs:
-        raise RuntimeError(f"No token rows found for requested examples at layer {layer}")
+        n_rows = int(len(idx))
+        if n_rows == 0:
+            continue
+        x[cursor : cursor + n_rows] = vecs
+        example_idx[cursor : cursor + n_rows] = idx
+        position[cursor : cursor + n_rows] = pos
+        cursor += n_rows
 
-    x = np.concatenate(all_vecs, axis=0)
-    example_idx = np.concatenate(all_idx, axis=0)
-    position = np.concatenate(all_pos, axis=0)
-    if not (len(x) == len(example_idx) == len(position)):
-        raise ValueError("Token delta rows / example_idx / position length mismatch")
+    if cursor != total_rows:
+        raise RuntimeError(f"Expected {total_rows} token rows, loaded {cursor}")
+    if len(example_idx) > 1:
+        if np.any(example_idx[1:] < example_idx[:-1]):
+            raise RuntimeError("Token chunks are not ordered by example_idx; causal eval requires ordered extraction chunks.")
+        same_example = example_idx[1:] == example_idx[:-1]
+        if np.any(position[1:][same_example] < position[:-1][same_example]):
+            raise RuntimeError("Token chunks are not ordered by token position within example; causal eval requires ordered extraction chunks.")
 
-    order = np.lexsort((position, example_idx))
-    x = x[order]
-    example_idx = example_idx[order]
-    position = position[order]
-    token_meta = score_index.loc[example_idx].reset_index(drop=True).copy()
-    token_meta["position"] = position.astype(np.int64)
-    token_meta["token_row_idx"] = np.arange(len(token_meta), dtype=int)
-    return x, token_meta, scores
+    return x, example_idx, scores
 
 
 def build_all_candidate_pairs(
@@ -330,6 +349,40 @@ def build_example_slices(example_idx: np.ndarray) -> Dict[int, slice]:
     return out
 
 
+def normalize_token_block(
+    token_block: np.ndarray,
+    x_mean: np.ndarray,
+    x_std: np.ndarray,
+) -> np.ndarray:
+    return ((np.asarray(token_block, dtype=np.float32) - x_mean) / x_std).astype(np.float32, copy=False)
+
+
+def build_sparse_cache_for_examples(
+    sae_model: TopKSAE,
+    x: np.ndarray,
+    token_slices: Dict[int, slice],
+    example_ids: Sequence[int],
+    *,
+    x_mean: np.ndarray,
+    x_std: np.ndarray,
+    device: torch.device,
+    batch_size: int,
+) -> Dict[int, np.ndarray]:
+    cache: Dict[int, np.ndarray] = {}
+    for example_id in example_ids:
+        token_slice = token_slices.get(int(example_id))
+        if token_slice is None:
+            continue
+        token_norm = normalize_token_block(x[token_slice], x_mean=x_mean, x_std=x_std)
+        cache[int(example_id)] = encode_sparse_vectors(
+            sae_model,
+            token_norm,
+            device=device,
+            batch_size=batch_size,
+        )
+    return cache
+
+
 def donor_feature_prototype(sparse_donor_tokens: np.ndarray, feature_ids: Sequence[int]) -> np.ndarray:
     if sparse_donor_tokens.size == 0:
         return np.zeros((len(feature_ids),), dtype=np.float32)
@@ -374,6 +427,7 @@ def build_token_patch_shift(
     device: torch.device,
     batch_size: int,
 ) -> tuple[np.ndarray, int]:
+    recv_delta_tokens = np.asarray(recv_delta_tokens, dtype=np.float32)
     if recv_delta_tokens.shape[0] != recv_sparse_tokens.shape[0]:
         raise ValueError("receiver token delta / sparse rows mismatch")
     if len(feature_ids) == 0:
@@ -594,7 +648,7 @@ def main() -> None:
         seed=args.seed,
     )
     needed_examples = examples_from_pairs(candidate_pairs_by_key)
-    x, token_meta, _ = load_token_layer_vectors(args.extract_dir, args.layer, keep_examples=needed_examples)
+    x, token_example_idx, _ = load_token_layer_vectors(args.extract_dir, args.layer, keep_examples=needed_examples)
 
     cfg_dir = args.frontier_dir / f"layer_{args.layer}" / f"m{args.latent_mult:02d}_k{args.k:02d}"
     model_bundle = torch.load(cfg_dir / "delta_sae_model.pt", map_location="cpu", weights_only=False)
@@ -625,9 +679,7 @@ def main() -> None:
     sae_model.eval()
     x_mean = np.asarray(model_bundle["x_mean"], dtype=np.float32)
     x_std = np.asarray(model_bundle["x_std"], dtype=np.float32)
-    x_norm = (x - x_mean) / x_std
-    sparse_all = encode_sparse_vectors(sae_model, x_norm.astype(np.float32), device=device, batch_size=args.sae_batch_size)
-    token_slices = build_example_slices(token_meta["example_idx"].to_numpy(dtype=np.int64))
+    token_slices = build_example_slices(token_example_idx.astype(np.int64, copy=False))
 
     import torch as _torch
 
@@ -667,101 +719,150 @@ def main() -> None:
 
     texts = example_meta["text"].tolist()
     base_scores = example_meta["adapted_nll"].to_numpy(dtype=np.float32)
-    candidate_rows: List[Dict[str, Any]] = []
+    candidate_path = out_dir / "token_delta_sae_causal_candidate_rows.csv"
+    candidate_fieldnames = [
+        "layer",
+        "latent_mult",
+        "k",
+        "context_mode",
+        "feature_set",
+        "donor_type",
+        "receiver_row_idx",
+        "donor_row_idx",
+        "receiver_example_id",
+        "donor_example_id",
+        "alpha",
+        "base_score",
+        "patched_score",
+        "delta",
+        "n_selected_features",
+        "n_active_receiver_tokens",
+        "selected_features",
+        "repair",
+        "strong_repair",
+    ]
+    best_rows_by_key: Dict[Tuple[int, int, int, str, str, str, int], Dict[str, Any]] = {}
+    candidate_row_count = 0
+    empty_sparse = np.zeros((0, int(model_bundle["d_latent"])), dtype=np.float32)
+    pair_batch_size = max(1, int(args.batch_size))
 
-    for context_mode in context_modes:
-        for donor_type in ["benign", "anomalous"]:
-            pairs = candidate_pairs_by_key[(context_mode, donor_type)]
-            if not pairs:
-                continue
-            recv_idx = np.asarray([p[0] for p in pairs], dtype=int)
-            donor_idx = np.asarray([p[1] for p in pairs], dtype=int)
-            receiver_texts = [texts[i] for i in recv_idx.tolist()]
-            base = base_scores[recv_idx]
+    with candidate_path.open("w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=candidate_fieldnames)
+        writer.writeheader()
 
-            for feature_set_name in top_sets + [control_set]:
-                ids = feature_sets[feature_set_name]
-                if not ids:
+        for context_mode in context_modes:
+            for donor_type in ["benign", "anomalous"]:
+                pairs = candidate_pairs_by_key[(context_mode, donor_type)]
+                if not pairs:
                     continue
-                for alpha in alphas:
-                    patch_list: List[np.ndarray] = []
-                    active_counts: List[int] = []
-                    for r_idx, d_idx in zip(recv_idx.tolist(), donor_idx.tolist()):
-                        recv_slice = token_slices.get(int(r_idx))
-                        donor_slice = token_slices.get(int(d_idx))
-                        if recv_slice is None:
-                            raise KeyError(f"Missing token slice for receiver example_idx={r_idx}")
-                        recv_delta_tokens = x[recv_slice]
-                        recv_sparse_tokens = sparse_all[recv_slice]
-                        donor_sparse_tokens = sparse_all[donor_slice] if donor_slice is not None else np.zeros((0, sparse_all.shape[1]), dtype=np.float32)
-                        shift, n_active = build_token_patch_shift(
-                            sae_model,
-                            recv_delta_tokens,
-                            recv_sparse_tokens,
-                            donor_sparse_tokens,
-                            ids,
-                            alpha,
-                            x_mean=x_mean,
-                            x_std=x_std,
-                            device=device,
-                            batch_size=args.sae_batch_size,
-                        )
-                        patch_list.append(shift)
-                        active_counts.append(n_active)
 
-                    patched_scores = score_with_token_patches(
-                        adapted_model,
-                        tokenizer,
-                        receiver_texts,
-                        patch_list,
-                        layer=args.layer,
-                        max_seq_len=int(cfg["training"]["max_seq_len"]),
-                        batch_size=args.batch_size,
+                for start in range(0, len(pairs), pair_batch_size):
+                    pair_batch = pairs[start : start + pair_batch_size]
+                    recv_idx = np.asarray([p[0] for p in pair_batch], dtype=int)
+                    donor_idx = np.asarray([p[1] for p in pair_batch], dtype=int)
+                    receiver_texts = [texts[i] for i in recv_idx.tolist()]
+                    base = base_scores[recv_idx]
+                    batch_example_ids = sorted(set(recv_idx.tolist()) | set(donor_idx.tolist()))
+                    sparse_cache = build_sparse_cache_for_examples(
+                        sae_model,
+                        x,
+                        token_slices,
+                        batch_example_ids,
+                        x_mean=x_mean,
+                        x_std=x_std,
+                        device=device,
+                        batch_size=args.sae_batch_size,
                     )
-                    deltas = patched_scores - base
-                    for i in range(len(recv_idx)):
-                        candidate_rows.append(
-                            {
-                                "layer": int(args.layer),
-                                "latent_mult": int(args.latent_mult),
-                                "k": int(args.k),
-                                "context_mode": context_mode,
-                                "feature_set": feature_set_name,
-                                "donor_type": donor_type,
-                                "receiver_row_idx": int(recv_idx[i]),
-                                "donor_row_idx": int(donor_idx[i]),
-                                "receiver_example_id": str(example_meta.iloc[recv_idx[i]]["example_id"]),
-                                "donor_example_id": str(example_meta.iloc[donor_idx[i]]["example_id"]),
-                                "alpha": float(alpha),
-                                "base_score": float(base[i]),
-                                "patched_score": float(patched_scores[i]),
-                                "delta": float(deltas[i]),
-                                "n_selected_features": int(len(ids)),
-                                "n_active_receiver_tokens": int(active_counts[i]),
-                                "selected_features": json.dumps([int(x) for x in ids]),
-                                "repair": bool(deltas[i] < 0.0),
-                                "strong_repair": bool(deltas[i] <= -args.repair_threshold),
-                            }
-                        )
 
-    candidate_df = pd.DataFrame(candidate_rows)
-    candidate_df.to_csv(out_dir / "token_delta_sae_causal_candidate_rows.csv", index=False)
+                    for feature_set_name in top_sets + [control_set]:
+                        ids = feature_sets[feature_set_name]
+                        if not ids:
+                            continue
+                        selected_json = json.dumps([int(fid) for fid in ids])
+                        for alpha in alphas:
+                            patch_list: List[np.ndarray] = []
+                            active_counts: List[int] = []
+                            for r_idx, d_idx in zip(recv_idx.tolist(), donor_idx.tolist()):
+                                recv_slice = token_slices.get(int(r_idx))
+                                donor_slice = token_slices.get(int(d_idx))
+                                if recv_slice is None:
+                                    raise KeyError(f"Missing token slice for receiver example_idx={r_idx}")
+                                recv_delta_tokens = np.asarray(x[recv_slice], dtype=np.float32)
+                                recv_sparse_tokens = sparse_cache[int(r_idx)]
+                                donor_sparse_tokens = sparse_cache.get(int(d_idx), empty_sparse) if donor_slice is not None else empty_sparse
+                                shift, n_active = build_token_patch_shift(
+                                    sae_model,
+                                    recv_delta_tokens,
+                                    recv_sparse_tokens,
+                                    donor_sparse_tokens,
+                                    ids,
+                                    alpha,
+                                    x_mean=x_mean,
+                                    x_std=x_std,
+                                    device=device,
+                                    batch_size=args.sae_batch_size,
+                                )
+                                patch_list.append(shift)
+                                active_counts.append(n_active)
 
-    if candidate_df.empty:
+                            patched_scores = score_with_token_patches(
+                                adapted_model,
+                                tokenizer,
+                                receiver_texts,
+                                patch_list,
+                                layer=args.layer,
+                                max_seq_len=int(cfg["training"]["max_seq_len"]),
+                                batch_size=args.batch_size,
+                            )
+                            deltas = patched_scores - base
+                            batch_rows: List[Dict[str, Any]] = []
+                            for i in range(len(recv_idx)):
+                                row = {
+                                    "layer": int(args.layer),
+                                    "latent_mult": int(args.latent_mult),
+                                    "k": int(args.k),
+                                    "context_mode": context_mode,
+                                    "feature_set": feature_set_name,
+                                    "donor_type": donor_type,
+                                    "receiver_row_idx": int(recv_idx[i]),
+                                    "donor_row_idx": int(donor_idx[i]),
+                                    "receiver_example_id": str(example_meta.iloc[recv_idx[i]]["example_id"]),
+                                    "donor_example_id": str(example_meta.iloc[donor_idx[i]]["example_id"]),
+                                    "alpha": float(alpha),
+                                    "base_score": float(base[i]),
+                                    "patched_score": float(patched_scores[i]),
+                                    "delta": float(deltas[i]),
+                                    "n_selected_features": int(len(ids)),
+                                    "n_active_receiver_tokens": int(active_counts[i]),
+                                    "selected_features": selected_json,
+                                    "repair": bool(deltas[i] < 0.0),
+                                    "strong_repair": bool(deltas[i] <= -args.repair_threshold),
+                                }
+                                batch_rows.append(row)
+                                key = (
+                                    int(args.layer),
+                                    int(args.latent_mult),
+                                    int(args.k),
+                                    str(context_mode),
+                                    str(feature_set_name),
+                                    str(donor_type),
+                                    int(recv_idx[i]),
+                                )
+                                prev = best_rows_by_key.get(key)
+                                if prev is None or float(row["delta"]) < float(prev["delta"]):
+                                    best_rows_by_key[key] = dict(row)
+                            writer.writerows(batch_rows)
+                            candidate_row_count += len(batch_rows)
+
+    best_df = pd.DataFrame(best_rows_by_key.values())
+    if best_df.empty:
         best_df = pd.DataFrame()
         summary_df = pd.DataFrame()
     else:
-        best_df = (
-            candidate_df.sort_values(
-                ["context_mode", "feature_set", "donor_type", "receiver_row_idx", "delta"],
-                ascending=[True, True, True, True, True],
-            )
-            .groupby(
-                ["layer", "latent_mult", "k", "context_mode", "feature_set", "donor_type", "receiver_row_idx"],
-                as_index=False,
-            )
-            .first()
-        )
+        best_df = best_df.sort_values(
+            ["context_mode", "feature_set", "donor_type", "receiver_row_idx", "delta"],
+            ascending=[True, True, True, True, True],
+        ).reset_index(drop=True)
         summary_df = summarize_best(best_df, top_sets=top_sets, control_set=control_set)
 
     selected_df = pd.DataFrame(selected_rows)
@@ -785,14 +886,14 @@ def main() -> None:
         "k": int(args.k),
         "n_examples": int(len(example_meta)),
         "n_positive_receivers": int((example_meta["y"] == 1).sum()),
-        "n_token_rows": int(len(token_meta)),
+        "n_token_rows": int(len(token_example_idx)),
         "top_sets": top_sets,
         "control_set": control_set,
         "active_control_min_frac": float(args.active_control_min_frac),
         "active_control_sizes": active_control_sizes,
         "context_modes": context_modes,
         "alphas": alphas,
-        "candidate_rows": int(len(candidate_df)),
+        "candidate_rows": int(candidate_row_count),
     }
     dump_json(out_dir / "token_delta_sae_causal_summary.json", stats)
     print(json.dumps(stats, indent=2))

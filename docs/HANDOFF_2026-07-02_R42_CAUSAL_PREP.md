@@ -312,3 +312,33 @@ Verified Slurm submission detail on all three probe causal jobs:
 - `ReqTRES=cpu=24,mem=360G,node=1,billing=1,gres/gpu=1`
 
 As of submission, all three probe causal jobs were pending on priority.
+
+## Follow-Up Evaluator Rewrite
+
+Prepared locally on Magnolia after the OOM diagnosis.
+
+Purpose: make the **full uncapped R4.2 causal estimate** feasible again without
+changing the causal protocol.
+
+What changed in `scripts/eval_token_delta_sae_causal.py`:
+
+- stop materializing a full `x_norm` copy of the needed token rows
+- stop materializing a full dense `sparse_all` latent matrix for all needed rows
+- keep extracted token deltas in `float16` in host RAM, then cast per batch
+- build sparse SAE activations only for the current pair batch's unique examples
+- stop accumulating a full in-memory `candidate_rows` list; stream it directly to CSV
+- keep only the compact per-receiver best-row table in memory
+
+What did **not** change:
+
+- same matched donor / receiver logic
+- same context modes
+- same feature-set selection logic
+- same token-level patching and scoring procedure
+- same bootstrap downstream on `token_delta_sae_causal_best_rows.csv`
+
+Interpretation:
+
+- this is a **memory-efficiency rewrite**, not a methodological change
+- if the uncapped rerun now fits, it should be valid to compare directly against
+  the prior capped probe and against the R6.2 full causal results
