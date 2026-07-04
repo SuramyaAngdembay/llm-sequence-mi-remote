@@ -611,6 +611,7 @@ def main() -> None:
     ap.add_argument("--k", type=int, required=True)
     ap.add_argument("--batch-size", type=int, default=8)
     ap.add_argument("--sae-batch-size", type=int, default=2048)
+    ap.add_argument("--patch-chunk-size", type=int, default=0)
     ap.add_argument("--context-modes", default="team,role,project_role,dept_role")
     ap.add_argument("--top-sets", default="top1,top3,top5")
     ap.add_argument("--control-set", default="control3")
@@ -744,7 +745,7 @@ def main() -> None:
     best_rows_by_key: Dict[Tuple[int, int, int, str, str, str, int], Dict[str, Any]] = {}
     candidate_row_count = 0
     empty_sparse = np.zeros((0, int(model_bundle["d_latent"])), dtype=np.float32)
-    pair_batch_size = max(1, int(args.batch_size))
+    pair_batch_size = max(1, int(args.patch_chunk_size or args.batch_size))
 
     with candidate_path.open("w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(fh, fieldnames=candidate_fieldnames)
@@ -894,6 +895,7 @@ def main() -> None:
         "context_modes": context_modes,
         "alphas": alphas,
         "candidate_rows": int(candidate_row_count),
+        "patch_chunk_size": int(pair_batch_size),
     }
     dump_json(out_dir / "token_delta_sae_causal_summary.json", stats)
     print(json.dumps(stats, indent=2))

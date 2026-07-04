@@ -237,6 +237,18 @@ evaluator materializes large dense arrays:
 So the full default m04 run wants substantially more than `360G`, and likely
 more than is worth requesting blindly.
 
+Why this failed on `r4.2` even though the `r6.2` raw token cache was larger:
+
+- the successful `r6.2` token-causal jobs had only `70` positive receivers
+- those jobs loaded `1,112,836` receiver/donor-relevant token rows
+- they produced `142,160` candidate rows
+- the full default `r4.2` suite needs `8,101,247` receiver/donor-relevant token
+  rows and `2,666,032` candidate rows
+
+So the raw extraction size is not the bottleneck. The bottleneck is the number
+of causal receiver/donor examples and their token rows after the matched-pair
+selection step.
+
 Sizing estimates by receiver cap:
 
 | max receivers | total pairs | needed rows | x GiB | m02 dense GiB | m04 dense GiB | max patch list GiB | candidate rows |
@@ -263,9 +275,11 @@ The R4.2 recommended launcher now exposes:
 
 - `COMMON_MAX_RECEIVERS`
 - `COMMON_MAX_CANDIDATE_DONORS`
+- `COMMON_PATCH_CHUNK_SIZE`
 
 These default to the previous full-run behavior, but allow capped probes
-without editing the scripts again.
+without editing the scripts again. `COMMON_PATCH_CHUNK_SIZE=0` means use the
+model scoring batch size as the patch-construction batch size.
 
 ## Receiver-Capped Probe Submission
 
@@ -328,6 +342,9 @@ What changed in `scripts/eval_token_delta_sae_causal.py`:
 - build sparse SAE activations only for the current pair batch's unique examples
 - stop accumulating a full in-memory `candidate_rows` list; stream it directly to CSV
 - keep only the compact per-receiver best-row table in memory
+- Anvil follow-up: expose `PATCH_CHUNK_SIZE`/`COMMON_PATCH_CHUNK_SIZE` so patch
+  construction can be reduced independently of model scoring batch size if host
+  memory is still tight
 
 What did **not** change:
 
