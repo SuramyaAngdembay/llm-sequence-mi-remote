@@ -274,6 +274,18 @@ Submitted at `2026-07-04 01:16 EDT`.
 Purpose: get an end-to-end R4.2 causal signal while the full evaluator is being
 made memory efficient. This is a probe, not the final uncapped headline run.
 
+Soundness note:
+
+- The receiver cap changes the estimand from the full R4.2 causal estimate to a
+  fixed receiver-sampled probe estimate. Treat it as a triage/sanity result, not
+  the final headline number.
+- The evaluator now samples capped positive receivers once per run seed and reuses
+  that same receiver set across context modes and benign/anomalous donor pools.
+  This keeps top/control and donor-label comparisons aligned inside the capped
+  probe instead of comparing different receiver subsets.
+- The full-strength result should still come from an uncapped rerun after the
+  memory-efficient evaluator rewrite.
+
 Submission settings:
 
 - `COMMON_MAX_RECEIVERS=128`

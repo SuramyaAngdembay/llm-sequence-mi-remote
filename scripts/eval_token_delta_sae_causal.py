@@ -113,7 +113,19 @@ def build_all_candidate_pairs(
     seed: int,
 ) -> Dict[Tuple[str, str], List[Tuple[int, int]]]:
     out: Dict[Tuple[str, str], List[Tuple[int, int]]] = {}
-    for context_mode in context_modes:
+    receiver_indices: np.ndarray | None = None
+    if max_receivers > 0:
+        positive_idx = example_meta.loc[example_meta["y"] == 1, "row_idx"].to_numpy(
+            dtype=int
+        )
+        if len(positive_idx) > max_receivers:
+            receiver_indices = np.sort(
+                np.random.default_rng(seed).choice(
+                    positive_idx, size=max_receivers, replace=False
+                )
+            )
+
+    for mode_i, context_mode in enumerate(context_modes):
         for donor_type, donor_label in [("benign", 0), ("anomalous", 1)]:
             out[(context_mode, donor_type)] = build_candidate_pairs(
                 example_meta,
@@ -121,7 +133,8 @@ def build_all_candidate_pairs(
                 context_mode=context_mode,
                 max_receivers=max_receivers,
                 max_candidate_donors=max_candidate_donors,
-                rng=np.random.default_rng(seed + donor_label),
+                rng=np.random.default_rng(seed + 1009 * mode_i + donor_label),
+                receiver_indices=receiver_indices,
             )
     return out
 
@@ -215,6 +228,7 @@ def build_candidate_pairs(
     max_receivers: int,
     max_candidate_donors: int,
     rng: np.random.Generator,
+    receiver_indices: np.ndarray | None = None,
 ) -> List[Tuple[int, int]]:
     ctx_cols = resolve_context_cols(meta, context_mode)
     primary_col = ctx_cols[0]
@@ -222,10 +236,17 @@ def build_candidate_pairs(
     work["ctx_key"] = context_key(work, context_mode)
 
     recv_df = work.loc[work["y"] == 1].copy()
-    recv_indices = recv_df["row_idx"].to_numpy(dtype=int)
-    if max_receivers > 0 and len(recv_indices) > max_receivers:
-        chosen = np.sort(rng.choice(recv_indices, size=max_receivers, replace=False))
-        recv_df = recv_df.set_index("row_idx").loc[chosen].reset_index()
+    if receiver_indices is not None:
+        recv_df = (
+            recv_df.set_index("row_idx")
+            .loc[np.asarray(receiver_indices, dtype=int)]
+            .reset_index()
+        )
+    else:
+        recv_indices = recv_df["row_idx"].to_numpy(dtype=int)
+        if max_receivers > 0 and len(recv_indices) > max_receivers:
+            chosen = np.sort(rng.choice(recv_indices, size=max_receivers, replace=False))
+            recv_df = recv_df.set_index("row_idx").loc[chosen].reset_index()
 
     donor_df = work.loc[work["y"] == donor_label].copy()
     donor_all = np.sort(donor_df["row_idx"].to_numpy(dtype=int))
