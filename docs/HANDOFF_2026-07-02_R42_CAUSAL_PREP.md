@@ -367,7 +367,7 @@ Interpretation:
 
 ## Final Uncapped Streamed Submission
 
-Submitted on Anvil at `2026-07-04 03:40 EDT`.
+Submitted on Anvil at `2026-07-04 03:48 EDT`.
 
 Purpose: produce the final-table-valid full `r4.2` causal estimate using the
 same receiver/donor estimand as the prior `r6.2` token-causal results.
@@ -376,28 +376,32 @@ Submission settings:
 
 - `COMMON_MAX_RECEIVERS=0`
 - `COMMON_MAX_CANDIDATE_DONORS=16`
-- `COMMON_CAUSAL_MEM=360G`
+- `COMMON_CAUSAL_MEM=480G`
 - `COMMON_PATCH_CHUNK_SIZE=0` (`0` means use `BATCH_SIZE`, currently `8`)
 - `TOKEN_DELTA_DTYPE=float32` by evaluator default; new submissions can set
   `COMMON_TOKEN_DELTA_DTYPE=float16` only if the `float32` streamed run still
   exceeds host memory
 - output root:
-  `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3_8b_r42_mb22_gc_on_stream_uncapped_v1`
+  `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3_8b_r42_mb22_gc_on_stream_uncapped_v2`
 
 Final causal jobs:
 
-- `18836629 token_delta_causal`: `l18_m04_k04`
-- `18836631 token_delta_causal`: `l18_m02_k04`
-- `18836638 token_delta_causal`: `l18_m04_k08`
+- `18836656 token_delta_causal`: `l18_m04_k04`
+- `18836658 token_delta_causal`: `l18_m02_k04`
+- `18836660 token_delta_causal`: `l18_m04_k08`
 
 Final bootstrap jobs:
 
-- `18836630 tok_boot_cpu`: after `18836629`
-- `18836632 tok_boot_cpu`: after `18836631`
-- `18836639 tok_boot_cpu`: after `18836638`
+- `18836657 tok_boot_cpu`: after `18836656`
+- `18836659 tok_boot_cpu`: after `18836658`
+- `18836661 tok_boot_cpu`: after `18836660`
 
 Verified Slurm submission detail on all three final causal jobs:
 
-- `SubmitLine=sbatch --parsable --mem=360G --export=ALL slurm/eval_token_delta_sae_causal.template.sbatch`
-- `ReqTRES=cpu=24,mem=360G,node=1,billing=1,gres/gpu=1`
+- `SubmitLine=sbatch --parsable --mem=480G --export=ALL slurm/eval_token_delta_sae_causal.template.sbatch`
+- `ReqTRES=cpu=24,mem=480G,node=1,billing=1,gres/gpu=1`
 - state at submission check: pending on priority
+
+The earlier `360G` final submission (`18836629`, `18836631`, `18836638` and
+dependent bootstraps) was cancelled while still pending with zero runtime, then
+replaced by the `480G` submission above for extra host-RAM margin.
