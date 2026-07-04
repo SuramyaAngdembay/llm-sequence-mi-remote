@@ -325,7 +325,9 @@ Verified Slurm submission detail on all three probe causal jobs:
 - `SubmitLine=sbatch --parsable --mem=360G --export=ALL slurm/eval_token_delta_sae_causal.template.sbatch`
 - `ReqTRES=cpu=24,mem=360G,node=1,billing=1,gres/gpu=1`
 
-As of submission, all three probe causal jobs were pending on priority.
+These receiver-capped probe jobs were cancelled on Anvil after the streamed
+uncapped evaluator became available, to avoid spending H100 SUs on non-final
+probe estimates.
 
 ## Follow-Up Evaluator Rewrite
 
@@ -359,3 +361,37 @@ Interpretation:
 - this is a **memory-efficiency rewrite**, not a methodological change
 - if the uncapped rerun now fits, it should be valid to compare directly against
   the prior capped probe and against the R6.2 full causal results
+
+## Final Uncapped Streamed Submission
+
+Submitted on Anvil at `2026-07-04 03:40 EDT`.
+
+Purpose: produce the final-table-valid full `r4.2` causal estimate using the
+same receiver/donor estimand as the prior `r6.2` token-causal results.
+
+Submission settings:
+
+- `COMMON_MAX_RECEIVERS=0`
+- `COMMON_MAX_CANDIDATE_DONORS=16`
+- `COMMON_CAUSAL_MEM=360G`
+- `COMMON_PATCH_CHUNK_SIZE=0` (`0` means use `BATCH_SIZE`, currently `8`)
+- output root:
+  `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3_8b_r42_mb22_gc_on_stream_uncapped_v1`
+
+Final causal jobs:
+
+- `18836629 token_delta_causal`: `l18_m04_k04`
+- `18836631 token_delta_causal`: `l18_m02_k04`
+- `18836638 token_delta_causal`: `l18_m04_k08`
+
+Final bootstrap jobs:
+
+- `18836630 tok_boot_cpu`: after `18836629`
+- `18836632 tok_boot_cpu`: after `18836631`
+- `18836639 tok_boot_cpu`: after `18836638`
+
+Verified Slurm submission detail on all three final causal jobs:
+
+- `SubmitLine=sbatch --parsable --mem=360G --export=ALL slurm/eval_token_delta_sae_causal.template.sbatch`
+- `ReqTRES=cpu=24,mem=360G,node=1,billing=1,gres/gpu=1`
+- state at submission check: pending on priority
