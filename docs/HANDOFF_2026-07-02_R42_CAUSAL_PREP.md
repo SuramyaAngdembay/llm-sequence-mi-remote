@@ -405,3 +405,42 @@ Verified Slurm submission detail on all three final causal jobs:
 The earlier `360G` final submission (`18836629`, `18836631`, `18836638` and
 dependent bootstraps) was cancelled while still pending with zero runtime, then
 replaced by the `480G` submission above for extra host-RAM margin.
+
+## Final Uncapped Streamed Completion
+
+Checked on Anvil at `2026-07-05`.
+
+All three final `480G` streamed uncapped causal jobs and their dependent CPU
+bootstrap jobs completed successfully:
+
+- `18836656 token_delta_causal`: `l18_m04_k04`, `COMPLETED`,
+  elapsed `19:26:21`, `MaxRSS=161448296K`
+- `18836658 token_delta_causal`: `l18_m02_k04`, `COMPLETED`,
+  elapsed `18:13:37`, `MaxRSS=161096088K`
+- `18836660 token_delta_causal`: `l18_m04_k08`, `COMPLETED`,
+  elapsed `19:17:14`, `MaxRSS=162296388K`
+- `18836657 tok_boot_cpu`: `l18_m04_k04` bootstrap, `COMPLETED`
+- `18836659 tok_boot_cpu`: `l18_m02_k04` bootstrap, `COMPLETED`
+- `18836661 tok_boot_cpu`: `l18_m04_k08` bootstrap, `COMPLETED`
+
+Committed lightweight result artifacts:
+
+- `results/qwen3_8b_r42_token_causal/stream_uncapped_v2/`
+
+Large `token_delta_sae_causal_candidate_rows.csv` files were not committed.
+They remain under the Anvil output root and can be rsynced to Magnolia if
+candidate-level audit is needed.
+
+Headline result:
+
+- all three final-table-valid uncapped R4.2 configs are negative on the
+  top-minus-control causal metric
+- `l18_m04_k04`: best bootstrap row `dept/top5`, estimate `-0.000941`,
+  CI `[-0.001167, -0.000719]`
+- `l18_m02_k04`: best bootstrap row `dept/top5`, estimate `-0.001047`,
+  CI `[-0.001488, -0.000635]`
+- `l18_m04_k08`: best bootstrap row `dept/top3`, estimate `-0.001132`,
+  CI `[-0.001438, -0.000820]`
+
+Current interpretation: the final valid R4.2 transfer run does not reproduce
+the positive R6.2 token-causal effect under the current top-vs-control metric.
