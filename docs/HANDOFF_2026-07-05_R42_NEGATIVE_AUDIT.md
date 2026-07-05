@@ -144,3 +144,30 @@ not yet:
 
 - remote token-causal vs local `r4.2` session-AE causal repair on the same
   dataset
+
+## Anvil Follow-Up Status
+
+Executed on Anvil at `2026-07-05`.
+
+Housekeeping:
+
+- canceled nine stale `tok_boot_cpu` jobs that were pending with
+  `DependencyNeverSatisfied` from earlier failed/canceled causal submissions
+
+Detector metrics:
+
+- materialized `qwen3_8b_r42` detector metrics under
+  `results/qwen3_8b_r42_token_causal/detector_metrics/`
+- `adapted_nll`: day PR-AUC `0.178786`, day ROC-AUC `0.675574`
+- `base_nll`: day PR-AUC `0.152894`, day ROC-AUC `0.662855`
+- `neg_delta_nll`: day PR-AUC `0.086712`, day ROC-AUC `0.531068`
+
+R6.2 streamed-evaluator confirmation:
+
+- submitted `scripts/submit_qwen3_8b_r6_stream_confirm_anvil.sh`
+- causal job: `18866598`
+- bootstrap job: `18866599`
+- output root:
+  `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3_8b_stream_confirm/l18_m04_k08_stream_confirm_v1`
+- initial queue state: causal pending on `Priority`; bootstrap pending on
+  dependency
