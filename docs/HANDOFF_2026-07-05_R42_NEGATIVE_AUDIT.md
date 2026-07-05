@@ -171,3 +171,18 @@ R6.2 streamed-evaluator confirmation:
   `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3_8b_stream_confirm/l18_m04_k08_stream_confirm_v1`
 - initial queue state: causal pending on `Priority`; bootstrap pending on
   dependency
+
+Completion update:
+
+- causal job `18866598` completed successfully in `01:26:08`
+- bootstrap job `18866599` completed successfully in `00:00:20`
+- best bootstrap row: `dept_role/top5`, estimate `0.018699`,
+  CI `[0.012729, 0.025157]`
+- second row: `role/top5`, estimate `0.018603`,
+  CI `[0.013329, 0.024236]`
+- committed lightweight artifacts under
+  `results/qwen3_8b_token_causal/stream_confirm/`
+
+Interpretation: the current streamed evaluator still reproduces a clearly
+positive `r6.2` result, so the negative `r4.2` result is unlikely to be caused
+by the streamed OOM rewrite.
