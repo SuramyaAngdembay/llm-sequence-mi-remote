@@ -145,6 +145,10 @@ not yet:
 - remote token-causal vs local `r4.2` session-AE causal repair on the same
   dataset
 
+See also:
+
+- [HANDOFF_2026-07-05_R42_VALID_COMPARATOR.md](./HANDOFF_2026-07-05_R42_VALID_COMPARATOR.md)
+
 ## Anvil Follow-Up Status
 
 Executed on Anvil at `2026-07-05`.
