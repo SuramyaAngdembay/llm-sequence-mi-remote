@@ -203,3 +203,10 @@ Remote `r6.2` streamed confirmation:
 
 That means the local `r4.2` mechanistic comparator is now the highest-value
 remaining experiment.
+
+Update after completion:
+
+- the local `r4.2` comparator is now complete and positive
+- the next remote step is no longer another transfer confirmation
+- it is the `r4.2`-native remote token search described in:
+  - [HANDOFF_2026-07-05_R42_NATIVE_TOKEN_SEARCH.md](./HANDOFF_2026-07-05_R42_NATIVE_TOKEN_SEARCH.md)
