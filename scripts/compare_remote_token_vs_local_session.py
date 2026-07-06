@@ -21,12 +21,16 @@ def table_text(df: pd.DataFrame) -> str:
 def build_fold_map(feature_path: Path, run_root: Path) -> pd.DataFrame:
     meta_all = pd.read_parquet(feature_path, columns=["user_id", "day_index"])
     rows: List[pd.DataFrame] = []
-    for bundle_path in sorted(run_root.glob("fold*/model_bundle.pt")):
+    bundle_paths = sorted(run_root.glob("fold*/model_bundle.pt"))
+    if not bundle_paths:
+        bundle_paths = sorted(run_root.glob("*/*/model_bundle.pt"))
+    for bundle_path in bundle_paths:
         bundle = torch.load(bundle_path, map_location="cpu", weights_only=False)
         fold = bundle["fold"]
         test_users = set(fold["test_users"])
         test_df = meta_all.loc[meta_all["user_id"].isin(test_users), ["user_id", "day_index"]].copy().reset_index(drop=True)
         test_df["receiver_row_idx"] = test_df.index.astype(int)
+        test_df["method"] = str(bundle.get("method", "plain"))
         test_df["fold"] = int(fold["fold"])
         test_df["heldout_pos_user"] = fold["heldout_pos_user"]
         rows.append(test_df)
@@ -35,7 +39,12 @@ def build_fold_map(feature_path: Path, run_root: Path) -> pd.DataFrame:
 
 def summarize_local_daylevel(best_path: Path, fold_map: pd.DataFrame, *, adaptive: bool) -> pd.DataFrame:
     best = pd.read_csv(best_path)
-    merged = best.merge(fold_map, on=["fold", "heldout_pos_user", "receiver_row_idx"], how="left", validate="many_to_one")
+    merged = best.merge(
+        fold_map,
+        on=["method", "fold", "heldout_pos_user", "receiver_row_idx"],
+        how="left",
+        validate="many_to_one",
+    )
     cfg_cols = ["method", "fold", "heldout_pos_user", "context_mode", "target", "intervention", "donor_type", "user_id", "day_index"]
     agg_index = ["method", "context_mode", "target"]
     if adaptive:
