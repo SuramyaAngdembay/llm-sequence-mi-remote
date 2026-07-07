@@ -1,0 +1,10 @@
+{
+  "target_gib": 70.0,
+  "target_fraction": 0.87,
+  "tolerance_gib": 2.0,
+  "recommended_batch_size": 32,
+  "recommended_peak_reserved_gib": 63.533,
+  "recommended_tokens_per_sec": 535.6,
+  "rows_csv": "/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/qwen3_8b_r42_causal_vram_probe/ai/token_causal_vram_probe.csv",
+  "reason": "highest OK peak_reserved_gib within target+tolerance"
+}

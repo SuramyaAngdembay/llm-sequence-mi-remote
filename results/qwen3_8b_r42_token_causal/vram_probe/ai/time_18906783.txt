@@ -1,0 +1,23 @@
+	Command being timed: "python scripts/benchmark_token_causal_vram.py --config configs/qwen3_8b_qlora_session_targeted.yaml --adapter-dir /anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/checkpoints/qwen3_8b_session_qlora_r42_ddp_mb22_gc_on/adapter --data-dir /anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl_r42 --out-dir /anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/qwen3_8b_r42_causal_vram_probe/ai --batch-sizes 8,12,16,20,24,28,32 --layer 26 --max-examples 4096 --warmup-steps 1 --bench-steps 2 --sample-mode longest --attn-impl auto --target-gib 70 --target-fraction 0.87 --target-tolerance-gib 2 --seed 42"
+	User time (seconds): 161.08
+	System time (seconds): 147.74
+	Percent of CPU this job got: 37%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 13:45.28
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 5218856
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 32637714
+	Voluntary context switches: 227775
+	Involuntary context switches: 1726
+	Swaps: 0
+	File system inputs: 312
+	File system outputs: 640
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

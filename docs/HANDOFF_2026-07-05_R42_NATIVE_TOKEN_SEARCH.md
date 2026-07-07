@@ -1,6 +1,64 @@
 # R4.2 Native Remote Token Search
 
-Status: this note defines the next `r4.2` remote mechanistic step after the
+Status: completed Anvil follow-up added on 2026-07-07.
+
+## Completion Update
+
+Anvil ran the first `r4.2`-native remote token-causal search from the existing
+frontier rather than launching a broader new frontier immediately.
+
+Tested full uncapped streamed causal configs:
+
+- `l26_m02_k04`
+- `l34_m04_k04`
+- `l26_m04_k04`
+- `l26_m04_k08`
+
+Final successful launcher setting:
+
+- `BATCH_SIZE=24`
+- `PATCH_CHUNK_SIZE=24`
+- `CAUSAL_MEM=480G`
+- `TOKEN_DELTA_DTYPE=float32`
+
+The attempted `BATCH_SIZE=32` rerun was faster but OOMed in the scoring loss
+step. The completed `BATCH_SIZE=24` jobs all finished inside the 24h walltime.
+
+Committed artifacts:
+
+- `results/qwen3_8b_r42_token_causal/native_search_v3_bs24/`
+- `results/qwen3_8b_r42_token_causal/vram_probe/`
+
+Headline result:
+
+| config | best context | target | estimate | CI low | CI high | read |
+| --- | --- | --- | ---: | ---: | ---: | --- |
+| `l26_m02_k04` | `team` | `top5` | `0.001307` | `0.000960` | `0.001663` | positive |
+| `l34_m04_k04` | `dept_role` | `top5` | `0.000119` | `-0.000038` | `0.000280` | weak/null |
+| `l26_m04_k04` | `dept` | `top3` | `0.000054` | `-0.000149` | `0.000269` | null |
+| `l26_m04_k08` | `role` | `top5` | `-0.000261` | `-0.000473` | `-0.000046` | negative |
+
+Updated interpretation:
+
+- direct `r6.2` token-mechanism transfer to `r4.2` failed
+- `r4.2` is not remote-token-mechanism-free
+- the native `r4.2` remote token mechanism is currently `layer 26, m02, k04`
+- the best native remote estimate is competitive with the local `r4.2`
+  adaptive comparator and close to the local residual comparator scale
+- the effect remains much smaller than the positive `r6.2` remote token result
+
+The full candidate-row CSVs were not committed because they are about
+`413-419 MB` per config. They remain on Anvil under:
+
+`/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3_8b_r42_native_search_v3_bs24/`
+
+If deeper audit is needed, start by rsyncing:
+
+- `l26_m02_k04/token_delta_sae_causal_candidate_rows.csv`
+
+## Original Planning Note
+
+The rest of this note defines the `r4.2` remote mechanistic step after the
 completed local-vs-remote comparator.
 
 ## Current State
@@ -160,4 +218,3 @@ The cleanest next mechanistic test remains:
 - if `r4.2`-native remote token-causal stays negative:
   - conclude that the remote token branch is dataset-sensitive mechanistically,
     even when detector transfer remains positive
-
