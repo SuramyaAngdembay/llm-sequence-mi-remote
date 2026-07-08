@@ -227,6 +227,12 @@ Recommended first `r4.2` causal suite:
 bash scripts/submit_qwen3_8b_r42_recommended_causal_suite_anvil.sh
 ```
 
+Native `r4.2` active-control audit on the discovered winner:
+
+```bash
+bash scripts/submit_qwen3_8b_r42_native_active_control_anvil.sh
+```
+
 ## Phase 6: Qwen3-8B Targeted Scale-Up
 
 This phase is justified only because the `3B` token branch already cleared the matched-comparison bar.

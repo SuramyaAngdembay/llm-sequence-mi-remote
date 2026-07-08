@@ -218,3 +218,22 @@ The cleanest next mechanistic test remains:
 - if `r4.2`-native remote token-causal stays negative:
   - conclude that the remote token branch is dataset-sensitive mechanistically,
     even when detector transfer remains positive
+
+## Next Robustness Check
+
+After the positive native search result, the next Anvil-side check is the
+active-control audit on the current winner:
+
+- `l26_m02_k04_top5_control5_active`
+
+Launch with:
+
+```bash
+cd ~/cert-qlora-MI/llm-sequence-mi-remote
+git pull origin main
+bash scripts/submit_qwen3_8b_r42_native_active_control_anvil.sh
+```
+
+See:
+
+- `docs/HANDOFF_2026-07-08_R42_NATIVE_ACTIVE_CONTROL.md`
