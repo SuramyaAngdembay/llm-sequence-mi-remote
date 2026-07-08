@@ -51,16 +51,19 @@ bash scripts/submit_qwen3_8b_r42_native_active_control_gpu_anvil.sh
 ```
 
 This launcher keeps the experimental specification unchanged, but uses the
-committed A100 causal-VRAM probe recommendation:
+committed A100 causal-VRAM probe and full-run result:
 
 - `partition=gpu`
 - `account=cis230270-gpu`
-- `BATCH_SIZE=16`
-- `PATCH_CHUNK_SIZE=16`
+- `BATCH_SIZE=12`
+- `PATCH_CHUNK_SIZE=12`
 - `CAUSAL_MEM=240G`
 
-The A100 probe found `BATCH_SIZE=16` as the highest clean point on 40GB A100;
-`BATCH_SIZE=20` and `24` OOMed.
+The short A100 probe found `BATCH_SIZE=16` as its highest clean point, but the
+full active-control evaluator job `18971394` OOMed after 1h27m when
+`logits.float()` plus cross-entropy requested a late 9.44 GiB allocation.
+`BATCH_SIZE=12` is therefore the full-run default; `16`, `20`, and `24` are not
+safe for this workload on a 40GB A100.
 
 ## Fixed Run Specification
 

@@ -6,8 +6,9 @@ cd "$REPO_DIR"
 
 # A100 version of submit_qwen3_8b_r42_native_active_control_anvil.sh.
 # Scientific settings match the Magnolia handoff; resource settings come from
-# the committed Anvil A100 causal-VRAM probe, where bs16 was the highest clean
-# Qwen3-8B token-causal point on 40GB A100.
+# the committed Anvil A100 causal-VRAM probe plus the full-run bs16 result.
+# The probe passed bs16, but the full evaluator later hit a 9.44 GiB
+# logits/cross-entropy allocation, so bs12 is the validated safe default.
 GPU_PARTITION="${GPU_PARTITION:-gpu}"
 GPU_ACCOUNT="${GPU_ACCOUNT:-cis230270-gpu}"
 GPU_CAUSAL_MEM="${GPU_CAUSAL_MEM:-240G}"
@@ -21,7 +22,7 @@ EXTRACT_DIR="${EXTRACT_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-
 FRONTIER_DIR="${FRONTIER_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_frontier_qwen3_8b_r42_mb22_gc_on}"
 
 COMMON_OUTPUT_ROOT="${COMMON_OUTPUT_ROOT:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3_8b_r42_native_active_control_gpu_v1}"
-TAG="${TAG:-l26_m02_k04_top5_control5_active_gpu_bs16}"
+TAG="${TAG:-l26_m02_k04_top5_control5_active_gpu_bs12}"
 OUTPUT_DIR="${OUTPUT_DIR:-${COMMON_OUTPUT_ROOT}/${TAG}}"
 BOOTSTRAP_DIR="${BOOTSTRAP_DIR:-${OUTPUT_DIR}/bootstrap}"
 
@@ -35,9 +36,9 @@ CONTEXT_MODES="${CONTEXT_MODES:-team,role,dept,dept_role}"
 N_BOOTSTRAP="${N_BOOTSTRAP:-4000}"
 SEED="${SEED:-42}"
 
-BATCH_SIZE="${BATCH_SIZE:-16}"
+BATCH_SIZE="${BATCH_SIZE:-12}"
 SAE_BATCH_SIZE="${SAE_BATCH_SIZE:-2048}"
-PATCH_CHUNK_SIZE="${PATCH_CHUNK_SIZE:-16}"
+PATCH_CHUNK_SIZE="${PATCH_CHUNK_SIZE:-12}"
 TOKEN_DELTA_DTYPE="${TOKEN_DELTA_DTYPE:-float32}"
 ALPHAS="${ALPHAS:-0.25,0.5,0.75,1.0}"
 MAX_RECEIVERS="${MAX_RECEIVERS:-0}"
