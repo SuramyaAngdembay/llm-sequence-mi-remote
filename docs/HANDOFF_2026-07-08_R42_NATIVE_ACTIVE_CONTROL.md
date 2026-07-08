@@ -39,6 +39,29 @@ git pull origin main
 bash scripts/submit_qwen3_8b_r42_native_active_control_anvil.sh
 ```
 
+### A100/GPU Partition Variant
+
+If AI/H100 SUs are scarce or the `ai` queue is unfavorable, Anvil can run the
+same active-control audit on the A100 `gpu` partition:
+
+```bash
+cd ~/cert-qlora-MI/llm-sequence-mi-remote
+git pull origin main
+bash scripts/submit_qwen3_8b_r42_native_active_control_gpu_anvil.sh
+```
+
+This launcher keeps the experimental specification unchanged, but uses the
+committed A100 causal-VRAM probe recommendation:
+
+- `partition=gpu`
+- `account=cis230270-gpu`
+- `BATCH_SIZE=16`
+- `PATCH_CHUNK_SIZE=16`
+- `CAUSAL_MEM=240G`
+
+The A100 probe found `BATCH_SIZE=16` as the highest clean point on 40GB A100;
+`BATCH_SIZE=20` and `24` OOMed.
+
 ## Fixed Run Specification
 
 This wrapper hard-codes the current native `r4.2` winner:
