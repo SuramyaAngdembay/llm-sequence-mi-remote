@@ -80,6 +80,27 @@ Headline wrappers:
 - `scripts/submit_qwen3_8b_token_necessity_bundle_anvil.sh`
 - `scripts/submit_qwen3_8b_r42_token_necessity_bundle_anvil.sh`
 
+Probe wrappers:
+
+- `scripts/submit_qwen3_8b_token_necessity_gpu_debug_probe_anvil.sh`
+- `scripts/submit_qwen3_8b_r42_token_necessity_gpu_debug_probe_anvil.sh`
+
+The probe wrappers submit short A100 jobs to Anvil `gpu-debug` with
+`MAX_PAIRS=16` by default. They exercise the real necessity evaluator path and
+record:
+
+- Slurm RSS via `sacct`
+- `/usr/bin/time -v` output in the probe output directory
+- `nvidia-smi` polling at `gpu_poll_${SLURM_JOB_ID}.csv`
+
+Hardware note:
+
+- Anvil `debug` is CPU-only.
+- Anvil `gpu-debug` is A100-only, 30-minute max walltime, and uses
+  `cis230270-gpu`.
+- There is no separate H100 `ai-debug` partition visible from Anvil, so H100
+  VRAM confirmation still requires a short normal `ai` job.
+
 ## Headline Run 1: R6.2 8B
 
 This is the audited `r6.2` headline branch:
@@ -96,6 +117,14 @@ Launch:
 cd ~/cert-qlora-MI/llm-sequence-mi-remote
 git pull origin main
 bash scripts/submit_qwen3_8b_token_necessity_bundle_anvil.sh
+```
+
+Recommended preflight probe:
+
+```bash
+cd ~/cert-qlora-MI/llm-sequence-mi-remote
+git pull origin main
+bash scripts/submit_qwen3_8b_token_necessity_gpu_debug_probe_anvil.sh
 ```
 
 Default output root:
@@ -124,6 +153,14 @@ If `gpu` / A100 scheduling is easier on Anvil, use:
 
 ```bash
 bash scripts/submit_qwen3_8b_r42_token_necessity_gpu_anvil.sh
+```
+
+Recommended preflight probe:
+
+```bash
+cd ~/cert-qlora-MI/llm-sequence-mi-remote
+git pull origin main
+bash scripts/submit_qwen3_8b_r42_token_necessity_gpu_debug_probe_anvil.sh
 ```
 
 Default output root:
