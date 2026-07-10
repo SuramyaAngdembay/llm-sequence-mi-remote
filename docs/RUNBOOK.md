@@ -233,6 +233,33 @@ Native `r4.2` active-control audit on the discovered winner:
 bash scripts/submit_qwen3_8b_r42_native_active_control_anvil.sh
 ```
 
+## Phase 5B: Necessity Evaluation
+
+After the headline sufficiency and active-control audits, run token-level
+negative interventions on the `8B` headline branches first.
+
+Remote necessity launchers:
+
+```bash
+bash scripts/submit_qwen3_8b_token_necessity_bundle_anvil.sh
+bash scripts/submit_qwen3_8b_r42_token_necessity_bundle_anvil.sh
+```
+
+Optional `r4.2` A100 path:
+
+```bash
+bash scripts/submit_qwen3_8b_r42_token_necessity_gpu_anvil.sh
+```
+
+Outputs per run:
+
+- `token_delta_sae_necessity_summary.csv`
+- `token_delta_sae_necessity_best_rows.csv`
+- `token_delta_sae_necessity_selected_sets.csv`
+- `TOKEN_DELTA_SAE_NECESSITY_REPORT.md`
+- `bootstrap/token_delta_sae_necessity_bootstrap_summary.csv`
+- `bootstrap/TOKEN_DELTA_SAE_NECESSITY_BOOTSTRAP_REPORT.md`
+
 ## Phase 6: Qwen3-8B Targeted Scale-Up
 
 This phase is justified only because the `3B` token branch already cleared the matched-comparison bar.
