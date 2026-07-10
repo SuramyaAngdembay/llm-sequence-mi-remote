@@ -247,6 +247,7 @@ def main() -> None:
     ap.add_argument("--latent-mult", type=int, required=True)
     ap.add_argument("--k", type=int, required=True)
     ap.add_argument("--batch-size", type=int, default=8)
+    ap.add_argument("--loss-batch-size", type=int, default=0)
     ap.add_argument("--sae-batch-size", type=int, default=2048)
     ap.add_argument("--patch-chunk-size", type=int, default=0)
     ap.add_argument("--token-delta-dtype", choices=["float32", "float16"], default="float32")
@@ -465,6 +466,7 @@ def main() -> None:
                             layer=args.layer,
                             max_seq_len=int(cfg["training"]["max_seq_len"]),
                             batch_size=args.batch_size,
+                            loss_batch_size=args.loss_batch_size,
                         )
 
                         batch_rows: List[Dict[str, Any]] = []

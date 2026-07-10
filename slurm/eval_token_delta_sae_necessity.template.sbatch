@@ -38,6 +38,7 @@ LAYER="${LAYER:-18}"
 LATENT_MULT="${LATENT_MULT:-2}"
 TOPK="${TOPK:-8}"
 BATCH_SIZE="${BATCH_SIZE:-8}"
+LOSS_BATCH_SIZE="${LOSS_BATCH_SIZE:-0}"
 SAE_BATCH_SIZE="${SAE_BATCH_SIZE:-2048}"
 PATCH_CHUNK_SIZE="${PATCH_CHUNK_SIZE:-0}"
 TOKEN_DELTA_DTYPE="${TOKEN_DELTA_DTYPE:-float32}"
@@ -70,6 +71,7 @@ cat > "$JOB_META" <<EOM
   "latent_mult": ${LATENT_MULT},
   "topk": ${TOPK},
   "batch_size": ${BATCH_SIZE},
+  "loss_batch_size": ${LOSS_BATCH_SIZE},
   "patch_chunk_size": ${PATCH_CHUNK_SIZE},
   "max_pairs": ${MAX_PAIRS},
   "context_modes": "${CONTEXT_MODES}",
@@ -98,7 +100,7 @@ if (( GPU_POLL_SEC > 0 )); then
   MONITOR_PID=$!
 fi
 
-echo "job=$SLURM_JOB_ID node=$(hostname) partition=${SLURM_JOB_PARTITION:-} batch_size=$BATCH_SIZE patch_chunk_size=$PATCH_CHUNK_SIZE max_pairs=$MAX_PAIRS"
+echo "job=$SLURM_JOB_ID node=$(hostname) partition=${SLURM_JOB_PARTITION:-} batch_size=$BATCH_SIZE loss_batch_size=$LOSS_BATCH_SIZE patch_chunk_size=$PATCH_CHUNK_SIZE max_pairs=$MAX_PAIRS"
 nvidia-smi --query-gpu=index,name,memory.total --format=csv,noheader
 
 set +e
@@ -114,6 +116,7 @@ set +e
   --latent-mult "$LATENT_MULT" \
   --k "$TOPK" \
   --batch-size "$BATCH_SIZE" \
+  --loss-batch-size "$LOSS_BATCH_SIZE" \
   --sae-batch-size "$SAE_BATCH_SIZE" \
   --patch-chunk-size "$PATCH_CHUNK_SIZE" \
   --token-delta-dtype "$TOKEN_DELTA_DTYPE" \

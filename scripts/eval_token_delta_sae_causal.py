@@ -39,17 +39,33 @@ def table_text(df: pd.DataFrame) -> str:
         return df.to_string(index=False)
 
 
-def per_example_nll(logits: torch.Tensor, input_ids: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
-    shift_logits = logits[:, :-1, :].contiguous()
-    shift_labels = input_ids[:, 1:].contiguous()
-    shift_mask = attention_mask[:, 1:].contiguous().float()
-    token_loss = F.cross_entropy(
-        shift_logits.view(-1, shift_logits.size(-1)),
-        shift_labels.view(-1),
-        reduction="none",
-    ).view(shift_labels.size())
-    denom = shift_mask.sum(dim=1).clamp_min(1.0)
-    return (token_loss * shift_mask).sum(dim=1) / denom
+def per_example_nll(
+    logits: torch.Tensor,
+    input_ids: torch.Tensor,
+    attention_mask: torch.Tensor,
+    *,
+    loss_batch_size: int = 0,
+) -> torch.Tensor:
+    """Compute per-example NLL while bounding the fp32 cross-entropy workspace."""
+    batch_size = int(logits.shape[0])
+    chunk_size = batch_size if int(loss_batch_size) <= 0 else min(batch_size, int(loss_batch_size))
+    out: List[torch.Tensor] = []
+    for start in range(0, batch_size, chunk_size):
+        end = min(start + chunk_size, batch_size)
+        shift_logits = logits[start:end, :-1, :].float().contiguous()
+        shift_labels = input_ids[start:end, 1:].contiguous()
+        shift_mask = attention_mask[start:end, 1:].contiguous().float()
+        token_loss = F.cross_entropy(
+            shift_logits.view(-1, shift_logits.size(-1)),
+            shift_labels.view(-1),
+            reduction="none",
+        ).view(shift_labels.size())
+        denom = shift_mask.sum(dim=1).clamp_min(1.0)
+        out.append((token_loss * shift_mask).sum(dim=1) / denom)
+        del shift_logits, shift_labels, shift_mask, token_loss, denom
+        if logits.device.type == "cuda":
+            torch.cuda.empty_cache()
+    return torch.cat(out, dim=0)
 
 
 def load_token_layer_vectors(
@@ -473,6 +489,7 @@ def score_with_token_patches(
     layer: int,
     max_seq_len: int,
     batch_size: int,
+    loss_batch_size: int = 0,
 ) -> np.ndarray:
     layer_module = get_layer_module(model, layer)
     device = next(model.parameters()).device
@@ -514,8 +531,8 @@ def score_with_token_patches(
             out = model(**tok, return_dict=True)
         finally:
             handle.remove()
-        logits = out.logits.float()
-        nll_t = per_example_nll(logits, tok["input_ids"], tok["attention_mask"])
+        logits = out.logits
+        nll_t = per_example_nll(logits, tok["input_ids"], tok["attention_mask"], loss_batch_size=loss_batch_size)
         nll = nll_t.cpu().numpy()
         out_scores.append(nll)
         del out, logits, nll_t, nll, tok, attn, batch_patch, batch_texts
@@ -624,6 +641,7 @@ def main() -> None:
     ap.add_argument("--latent-mult", type=int, required=True)
     ap.add_argument("--k", type=int, required=True)
     ap.add_argument("--batch-size", type=int, default=8)
+    ap.add_argument("--loss-batch-size", type=int, default=0)
     ap.add_argument("--sae-batch-size", type=int, default=2048)
     ap.add_argument("--patch-chunk-size", type=int, default=0)
     ap.add_argument("--token-delta-dtype", choices=["float32", "float16"], default="float32")
@@ -834,6 +852,7 @@ def main() -> None:
                                 layer=args.layer,
                                 max_seq_len=int(cfg["training"]["max_seq_len"]),
                                 batch_size=args.batch_size,
+                                loss_batch_size=args.loss_batch_size,
                             )
                             deltas = patched_scores - base
                             batch_rows: List[Dict[str, Any]] = []
