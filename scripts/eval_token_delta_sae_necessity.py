@@ -92,6 +92,10 @@ def decode_sparse_tokens(
         x_patch_norm = sae_model.decoder(z)
         x_patch = (x_patch_norm * x_std_t + x_mean_t).cpu().numpy().astype(np.float32)
         out.append(x_patch)
+        del z, x_patch_norm
+        if device.type == "cuda":
+            torch.cuda.empty_cache()
+    del x_mean_t, x_std_t
     return np.concatenate(out, axis=0) if out else np.empty((0, x_mean.shape[1]), dtype=np.float32)
 
 
