@@ -335,6 +335,9 @@ def encode_sparse_vectors(
         xb = torch.from_numpy(x_norm[start : start + batch_size]).to(device)
         z = sae_model.encode_sparse(xb).cpu().numpy().astype(np.float32)
         zs.append(z)
+        del xb, z
+        if device.type == "cuda":
+            torch.cuda.empty_cache()
     return np.concatenate(zs, axis=0)
 
 
@@ -412,6 +415,10 @@ def decode_sparse_tokens(
         x_patch_norm = sae_model.decoder(z)
         x_patch = (x_patch_norm * x_std_t + x_mean_t).cpu().numpy().astype(np.float32)
         out.append(x_patch)
+        del z, x_patch_norm
+        if device.type == "cuda":
+            torch.cuda.empty_cache()
+    del x_mean_t, x_std_t
     return np.concatenate(out, axis=0)
 
 
@@ -507,8 +514,14 @@ def score_with_token_patches(
             out = model(**tok, return_dict=True)
         finally:
             handle.remove()
-        nll = per_example_nll(out.logits.float(), tok["input_ids"], tok["attention_mask"]).cpu().numpy()
+        logits = out.logits.float()
+        nll_t = per_example_nll(logits, tok["input_ids"], tok["attention_mask"])
+        nll = nll_t.cpu().numpy()
         out_scores.append(nll)
+        del out, logits, nll_t, nll, tok, attn, batch_patch, batch_texts
+        if device.type == "cuda":
+            torch.cuda.synchronize(device)
+            torch.cuda.empty_cache()
 
     return np.concatenate(out_scores, axis=0)
 
