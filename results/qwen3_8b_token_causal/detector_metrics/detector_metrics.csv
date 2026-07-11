@@ -1,0 +1,4 @@
+run_name,score_name,n_eval,n_pos_days,day_pr_auc,day_roc_auc,day_top1pct_recall,n_eval_users,n_pos_users,user_pr_auc,user_roc_auc,user_top1pct_recall,heldout_user_rank_first_positive
+qwen3_8b_r62,adapted_nll,1361,70,0.08347871590922849,0.6809450038729667,0.0,5,4,1.0,1.0,0.25,1
+qwen3_8b_r62,base_nll,1361,70,0.0697787678497651,0.6388956512116852,0.0,5,4,1.0,1.0,0.25,1
+qwen3_8b_r62,neg_delta_nll,1361,70,0.06811291149658756,0.6159898196304083,0.0,5,4,1.0,1.0,0.25,1
