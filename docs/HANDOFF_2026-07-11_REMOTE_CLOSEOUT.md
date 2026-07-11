@@ -4,37 +4,24 @@ Status: after the `8B` necessity runs, the main CERT remote science is closed.
 The remaining Anvil-side work is table closeout and one optional `3B`
 appendix path.
 
-## What Must Still Be Run On Anvil
+## Current Must-Do Status
 
-Only one remote artifact is still missing for the main paper tables:
+The formal `r6.2` `Qwen3-8B` detector-metrics artifact has now been materialized,
+but it required an audit correction.
 
-1. formal `r6.2` `Qwen3-8B` detector metrics from `example_scores.parquet`
-
-This is bookkeeping, not a new training/casual-eval branch. It should produce:
-
-- `detector_metrics.csv`
-- `detector_metrics.json`
-- `DETECTOR_METRICS.md`
-
-under:
+Current detector artifact path:
 
 - `results/qwen3_8b_token_causal/detector_metrics/`
 
-Launch:
+Current detector audit note:
 
-```bash
-cd ~/cert-qlora-MI/llm-sequence-mi-remote
-git pull origin main
-bash scripts/submit_qwen3_8b_r62_detector_metrics_anvil.sh
-```
+- `docs/HANDOFF_2026-07-11_DETECTOR_METRICS_AUDIT.md`
 
-Default score source:
+So the remaining remote-side task is no longer “run detector metrics once.” It is:
 
-- `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/token_delta_cache/qwen3_8b_session_token_deltas_targeted_mb12_gc_on_fresh_v2/example_scores.parquet`
-
-Default run name:
-
-- `qwen3_8b_r62`
+1. use the corrected detector artifacts
+2. do not rely on the earlier `eval`-only detector read
+3. decide whether a fold-aligned remote detector benchmark is needed for the final paper table
 
 ## Good-To-Have Detector Row
 
@@ -57,6 +44,27 @@ Default output:
 
 This row is useful for the final detector table, but it is not a blocker for
 the main `8B` headline claim.
+
+## Detector Metrics Correction
+
+After the first detector-metrics commit, we found that the metric script had
+been run with:
+
+- `--split eval`
+
+even though the extracted `example_scores.parquet` already represents the
+remote `eval.jsonl` pool and contains both:
+
+- benign validation-user days (`split="val"`)
+- positive-user days (`split="eval"`)
+
+So the corrected detector-metric launchers now default to:
+
+- no extra split filter
+
+See:
+
+- `docs/HANDOFF_2026-07-11_DETECTOR_METRICS_AUDIT.md`
 
 ## What Does Not Need To Be Re-Run
 

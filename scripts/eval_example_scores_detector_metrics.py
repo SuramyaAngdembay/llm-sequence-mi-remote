@@ -80,7 +80,7 @@ def write_markdown(df: pd.DataFrame, out_path: Path, *, score_path: Path, split:
         "# Example Scores Detector Metrics",
         "",
         f"- score source: `{score_path}`",
-        f"- split filter: `{split}`",
+        f"- split filter: `{split if split else "<all rows in scores parquet>"}`",
         "",
         df.to_markdown(index=False),
         "",
@@ -92,7 +92,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--scores-parquet", type=Path, required=True)
     ap.add_argument("--run-name", required=True)
-    ap.add_argument("--split", default="eval")
+    ap.add_argument("--split", default="", help="Optional metadata split filter. Leave empty to score all rows in the parquet.")
     ap.add_argument("--out-dir", type=Path, required=True)
     args = ap.parse_args()
 

@@ -7,7 +7,7 @@ cd "$REPO_DIR"
 CONDA_ENV="${CONDA_ENV:-/anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert-qlora-qwen3}"
 SCORES_PARQUET="${SCORES_PARQUET:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/token_delta_cache/qwen3b_session_token_deltas_l18/example_scores.parquet}"
 RUN_NAME="${RUN_NAME:-qwen25_3b_r62}"
-SPLIT="${SPLIT:-eval}"
+SPLIT="${SPLIT:-}"
 OUT_DIR="${OUT_DIR:-results/qwen3b_pilot/detector_metrics}"
 
 export REPO_DIR CONDA_ENV SCORES_PARQUET RUN_NAME SPLIT OUT_DIR
