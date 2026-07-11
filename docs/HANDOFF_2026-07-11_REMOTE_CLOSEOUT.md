@@ -88,3 +88,7 @@ remote run is:
 
 That is an appendix-level scale-consistency check, not a main-paper blocker.
 The dedicated appendix launcher is added separately.
+
+See:
+
+- `docs/HANDOFF_2026-07-11_QWEN3B_APPENDIX.md`
