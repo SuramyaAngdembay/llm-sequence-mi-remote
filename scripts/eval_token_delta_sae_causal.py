@@ -68,6 +68,75 @@ def per_example_nll(
     return torch.cat(out, dim=0)
 
 
+def _load_pt_cpu(path: Path) -> Dict[str, Any]:
+    try:
+        return torch.load(path, map_location="cpu", weights_only=False, mmap=True)
+    except (TypeError, ValueError, RuntimeError):
+        return torch.load(path, map_location="cpu", weights_only=False)
+
+
+def _select_token_chunks(
+    extract_dir: Path,
+    layer: int,
+    chunk_paths: Sequence[Path],
+    keep_arr: np.ndarray | None,
+) -> List[Path]:
+    if keep_arr is None:
+        print(f"[token_load] layer={layer} keep_examples=all selected_chunks={len(chunk_paths)}/{len(chunk_paths)}")
+        return list(chunk_paths)
+
+    summary_path = extract_dir / "extract_summary.json"
+    manifest_path = extract_dir / "chunk_manifest.csv"
+    if not summary_path.exists() or not manifest_path.exists():
+        print(
+            f"[token_load] layer={layer} keep_examples={len(keep_arr)} selected_chunks={len(chunk_paths)}/{len(chunk_paths)} "
+            "(manifest unavailable; full scan)"
+        )
+        return list(chunk_paths)
+
+    try:
+        with summary_path.open("r", encoding="utf-8") as f:
+            summary = json.load(f)
+        chunk_examples = int(summary["chunk_examples"])
+        if chunk_examples <= 0:
+            raise ValueError(f"invalid chunk_examples={chunk_examples}")
+        manifest = pd.read_csv(manifest_path)
+        layer_manifest = manifest.loc[manifest["layer"].astype(int) == int(layer)].copy()
+        if layer_manifest.empty or "chunk_id" not in layer_manifest or "path" not in layer_manifest:
+            raise ValueError(f"missing layer {layer} manifest rows")
+    except Exception as exc:
+        print(
+            f"[token_load] layer={layer} keep_examples={len(keep_arr)} selected_chunks={len(chunk_paths)}/{len(chunk_paths)} "
+            f"(manifest read failed: {exc}; full scan)"
+        )
+        return list(chunk_paths)
+
+    needed_chunk_ids = set((keep_arr // chunk_examples).astype(np.int64).tolist())
+    layer_manifest["chunk_id"] = layer_manifest["chunk_id"].astype(int)
+    layer_manifest = layer_manifest.loc[layer_manifest["chunk_id"].isin(needed_chunk_ids)].sort_values("chunk_id")
+
+    selected: List[Path] = []
+    for text_path in layer_manifest["path"].tolist():
+        path = Path(str(text_path))
+        if not path.is_absolute():
+            path = extract_dir / path
+        if path.exists():
+            selected.append(path)
+
+    if not selected:
+        print(
+            f"[token_load] layer={layer} keep_examples={len(keep_arr)} selected_chunks=0/{len(chunk_paths)} "
+            "(no manifest paths matched requested examples)"
+        )
+        return []
+
+    print(
+        f"[token_load] layer={layer} keep_examples={len(keep_arr)} "
+        f"selected_chunks={len(selected)}/{len(chunk_paths)}"
+    )
+    return selected
+
+
 def load_token_layer_vectors(
     extract_dir: Path,
     layer: int,
@@ -82,11 +151,14 @@ def load_token_layer_vectors(
         raise FileNotFoundError(f"No chunks found for layer {layer} in {layer_dir}")
 
     keep_arr = np.asarray(sorted(keep_examples), dtype=np.int64) if keep_examples else None
+    chunk_paths = _select_token_chunks(extract_dir, layer, chunk_paths, keep_arr)
+    if not chunk_paths:
+        raise RuntimeError(f"No token chunks matched requested examples at layer {layer}")
     total_rows = 0
     d_model: int | None = None
 
     for path in chunk_paths:
-        obj = torch.load(path, map_location="cpu", weights_only=False)
+        obj = _load_pt_cpu(path)
         if "position" not in obj or obj["position"] is None:
             raise RuntimeError("Token-level causal eval requires token-level extraction with position arrays.")
         idx = np.asarray(obj["example_idx"], dtype=np.int64)
@@ -109,7 +181,7 @@ def load_token_layer_vectors(
 
     cursor = 0
     for path in chunk_paths:
-        obj = torch.load(path, map_location="cpu", weights_only=False)
+        obj = _load_pt_cpu(path)
         vecs = np.asarray(obj["delta"], dtype=np_delta_dtype)
         idx = np.asarray(obj["example_idx"], dtype=np.int64)
         pos = np.asarray(obj["position"], dtype=np.int32)

@@ -124,3 +124,41 @@ Checked at approximately 2026-07-12 02:33 EDT.
 5. Regenerate compare reports only after the replacement mechanistic outputs
    are available.
 
+## Debug Probe Timeout Audit
+
+Checked at approximately 2026-07-12 16:50 EDT.
+
+The first r6.2 same-user recovery probes did not measure useful A100 VRAM:
+
+- `19120013` causal probe timed out at 30 minutes, `MaxRSS=10088220K`.
+- `19120014` necessity probe timed out at 30 minutes, `MaxRSS=9133536K`.
+- Both GPU poll logs stayed at `0 MiB` for the full probe.
+
+Interpretation: this was not a GPU OOM and not evidence that the run only needs
+9-10 GiB. The probes were stuck before model scoring, in CPU-side token-cache
+loading. For r6.2, the layer-18 token-delta cache contains 278 chunk files and
+about 319 GiB. The old loader scanned every layer chunk twice even when
+`MAX_RECEIVERS` / `MAX_PAIRS` made the probe require only a small subset of
+examples.
+
+Optimization fix:
+
+- use `extract_summary.json` and `chunk_manifest.csv` as a chunk index when
+  `keep_examples` is known
+- load only chunk files whose example ranges can contain requested examples
+- retain the old full-scan fallback when the manifest is unavailable
+- keep the same receiver sample, donor matching, same-user exclusion, feature
+  sets, top/control sets, alpha grid, and metric
+
+This is an I/O optimization only. It does not change the causal estimand.
+
+External references checked:
+
+- PyTorch `torch.load(..., mmap=True)` supports memory-mapped loading rather
+  than eagerly loading all storages.
+- PyTorch data-loading guidance identifies GPU idle time from slow input
+  pipelines as a throughput problem.
+- Apache Arrow/Parquet row-group statistics are the analogous tabular pattern:
+  skip irrelevant chunks instead of decoding every group.
+- Zarr uses chunked N-dimensional arrays for selective array access.
+
