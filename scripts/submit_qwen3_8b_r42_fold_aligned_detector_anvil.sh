@@ -16,20 +16,34 @@ SEED="${SEED:-42}"
 BENIGN_TEST_USERS="${BENIGN_TEST_USERS:-800}"
 FOLD_LIMIT="${FOLD_LIMIT:-0}"
 BATCH_SIZE="${BATCH_SIZE:-16}"
+LOSS_BATCH_SIZE="${LOSS_BATCH_SIZE:-4}"
 MAX_EXAMPLES="${MAX_EXAMPLES:-0}"
 FLUSH_ROWS="${FLUSH_ROWS:-4096}"
 LOG_EVERY="${LOG_EVERY:-4096}"
 USERS_FILE="${USERS_FILE:-}"
 SKIP_SCORING="${SKIP_SCORING:-0}"
+GPU_PARTITION="${GPU_PARTITION:-gpu}"
+GPU_ACCOUNT="${GPU_ACCOUNT:-cis230270-gpu}"
+GPU_MEM="${GPU_MEM:-180G}"
+GPU_TIME="${GPU_TIME:-36:00:00}"
+GPU_CPUS="${GPU_CPUS:-24}"
+GPU_POLL_SEC="${GPU_POLL_SEC:-10}"
+SEPARATE_BASE_MODEL="${SEPARATE_BASE_MODEL:-0}"
 
 export REPO_DIR CONDA_ENV CONFIG JSONL_PATH ADAPTER_DIR OUTPUT_DIR="$SCORE_OUTPUT_DIR"
-export BATCH_SIZE MAX_EXAMPLES FLUSH_ROWS LOG_EVERY USERS_FILE
+export BATCH_SIZE LOSS_BATCH_SIZE MAX_EXAMPLES FLUSH_ROWS LOG_EVERY USERS_FILE GPU_POLL_SEC SEPARATE_BASE_MODEL
 
 if [[ "$SKIP_SCORING" == "1" || "$SKIP_SCORING" == "true" ]]; then
   SCORE_JOB=""
 else
   SCORE_JOB=$(
-    sbatch --parsable --export=ALL \
+    sbatch --parsable \
+      --partition="$GPU_PARTITION" \
+      --account="$GPU_ACCOUNT" \
+      --mem="$GPU_MEM" \
+      --time="$GPU_TIME" \
+      --cpus-per-task="$GPU_CPUS" \
+      --export=ALL \
       slurm/score_adapter_examples.template.sbatch
   )
 fi
@@ -61,5 +75,10 @@ seed=${SEED}
 benign_test_users=${BENIGN_TEST_USERS}
 fold_limit=${FOLD_LIMIT}
 batch_size=${BATCH_SIZE}
+loss_batch_size=${LOSS_BATCH_SIZE}
+gpu_partition=${GPU_PARTITION}
+gpu_account=${GPU_ACCOUNT}
+gpu_time=${GPU_TIME}
+gpu_mem=${GPU_MEM}
 users_file=${USERS_FILE}
 EOM

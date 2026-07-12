@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import nullcontext
 import json
 from pathlib import Path
 from typing import Any, Dict, Iterable, Iterator, List, Optional, Set
@@ -15,17 +16,39 @@ import torch.nn.functional as F
 from remote_common import dump_json, ensure_dir, load_yaml, read_jsonl
 
 
-def per_example_nll(logits: torch.Tensor, input_ids: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
-    shift_logits = logits[:, :-1, :].contiguous()
-    shift_labels = input_ids[:, 1:].contiguous()
-    shift_mask = attention_mask[:, 1:].contiguous().float()
-    token_loss = F.cross_entropy(
-        shift_logits.view(-1, shift_logits.size(-1)),
-        shift_labels.view(-1),
-        reduction="none",
-    ).view(shift_labels.size())
-    denom = shift_mask.sum(dim=1).clamp_min(1.0)
-    return (token_loss * shift_mask).sum(dim=1) / denom
+def clear_cuda(device: torch.device) -> None:
+    if device.type == "cuda":
+        torch.cuda.synchronize(device)
+        torch.cuda.empty_cache()
+
+
+def per_example_nll(
+    logits: torch.Tensor,
+    input_ids: torch.Tensor,
+    attention_mask: torch.Tensor,
+    *,
+    loss_batch_size: int = 0,
+) -> torch.Tensor:
+    """Compute per-example NLL while bounding the fp32 cross-entropy workspace."""
+    batch_size = int(logits.shape[0])
+    chunk_size = batch_size if int(loss_batch_size) <= 0 else min(batch_size, int(loss_batch_size))
+    out: List[torch.Tensor] = []
+    for start in range(0, batch_size, chunk_size):
+        end = min(start + chunk_size, batch_size)
+        shift_logits = logits[start:end, :-1, :].float().contiguous()
+        shift_labels = input_ids[start:end, 1:].contiguous()
+        shift_mask = attention_mask[start:end, 1:].contiguous().float()
+        token_loss = F.cross_entropy(
+            shift_logits.view(-1, shift_logits.size(-1)),
+            shift_labels.view(-1),
+            reduction="none",
+        ).view(shift_labels.size())
+        denom = shift_mask.sum(dim=1).clamp_min(1.0)
+        out.append((token_loss * shift_mask).sum(dim=1) / denom)
+        del shift_logits, shift_labels, shift_mask, token_loss, denom
+        if logits.device.type == "cuda":
+            torch.cuda.empty_cache()
+    return torch.cat(out, dim=0)
 
 
 def batched(rows: Iterable[Dict[str, Any]], batch_size: int) -> Iterator[List[Dict[str, Any]]]:
@@ -74,10 +97,12 @@ def main() -> None:
     ap.add_argument("--adapter-dir", type=Path, required=True)
     ap.add_argument("--output-dir", type=Path, required=True)
     ap.add_argument("--batch-size", type=int, default=8)
+    ap.add_argument("--loss-batch-size", type=int, default=4, help="Chunk size for fp32 cross-entropy workspace; <=0 disables chunking.")
     ap.add_argument("--max-examples", type=int, default=0)
     ap.add_argument("--flush-rows", type=int, default=4096)
     ap.add_argument("--users-file", type=Path, default=None, help="Optional newline-separated or JSON-array allowlist of user_ids.")
     ap.add_argument("--log-every", type=int, default=4096)
+    ap.add_argument("--separate-base-model", action="store_true", help="Load a second base model instead of disabling the adapter on the PEFT model.")
     args = ap.parse_args()
 
     cfg = load_yaml(args.config)
@@ -111,11 +136,40 @@ def main() -> None:
         torch_dtype=torch.bfloat16 if bool(cfg["training"].get("bf16", True)) else torch.float16,
         device_map="auto",
     )
-    base_model = AutoModelForCausalLM.from_pretrained(model_name, **common_kwargs)
     adapted_backbone = AutoModelForCausalLM.from_pretrained(model_name, **common_kwargs)
     adapted_model = PeftModel.from_pretrained(adapted_backbone, args.adapter_dir)
-    base_model.eval()
     adapted_model.eval()
+    adapted_model.config.use_cache = False
+    if hasattr(adapted_model, "base_model") and hasattr(adapted_model.base_model, "config"):
+        adapted_model.base_model.config.use_cache = False
+
+    use_separate_base_model = bool(args.separate_base_model)
+    if not use_separate_base_model and not hasattr(adapted_model, "disable_adapter"):
+        print("PeftModel.disable_adapter() is unavailable; loading a separate base model.", flush=True)
+        use_separate_base_model = True
+
+    base_model = None
+    if use_separate_base_model:
+        base_model = AutoModelForCausalLM.from_pretrained(model_name, **common_kwargs)
+        base_model.eval()
+        base_model.config.use_cache = False
+
+    model_device = adapted_model.device if hasattr(adapted_model, "device") else next(adapted_model.parameters()).device
+
+    def score_nll(model: torch.nn.Module, tok: Dict[str, torch.Tensor]) -> np.ndarray:
+        with torch.inference_mode():
+            out = model(**tok, return_dict=True, use_cache=False)
+        logits = out.logits
+        nll_t = per_example_nll(
+            logits,
+            tok["input_ids"],
+            tok["attention_mask"],
+            loss_batch_size=args.loss_batch_size,
+        )
+        nll = nll_t.detach().cpu().numpy()
+        del out, logits, nll_t
+        clear_cuda(model_device)
+        return nll
 
     def example_iter() -> Iterator[Dict[str, Any]]:
         n_seen = 0
@@ -140,12 +194,11 @@ def main() -> None:
             truncation=True,
             max_length=max_seq_len,
         )
-        tok = {k: v.to(base_model.device) for k, v in tok.items()}
-        with torch.no_grad():
-            base_out = base_model(**tok, return_dict=True)
-            adapted_out = adapted_model(**tok, return_dict=True)
-        base_nll = per_example_nll(base_out.logits.float(), tok["input_ids"], tok["attention_mask"]).cpu().numpy()
-        adapted_nll = per_example_nll(adapted_out.logits.float(), tok["input_ids"], tok["attention_mask"]).cpu().numpy()
+        tok = {k: v.to(model_device) for k, v in tok.items()}
+        base_context = nullcontext() if use_separate_base_model else adapted_model.disable_adapter()
+        with base_context:
+            base_nll = score_nll(base_model if base_model is not None else adapted_model, tok)
+        adapted_nll = score_nll(adapted_model, tok)
         n_tokens = tok["attention_mask"].sum(dim=1).cpu().numpy()
 
         for bi, ex in enumerate(batch):
@@ -172,6 +225,8 @@ def main() -> None:
             buffer = []
         if args.log_every > 0 and n_scored % args.log_every == 0:
             print(f"scored_examples={n_scored}", flush=True)
+        del tok, base_nll, adapted_nll, n_tokens
+        clear_cuda(model_device)
 
     if n_scored == 0:
         raise ValueError(f"no examples were scored from {args.jsonl_path}")
@@ -188,6 +243,8 @@ def main() -> None:
         "model_name_or_path": model_name,
         "n_examples": int(n_scored),
         "batch_size": int(args.batch_size),
+        "loss_batch_size": int(args.loss_batch_size),
+        "separate_base_model": bool(use_separate_base_model),
         "flush_rows": int(args.flush_rows),
         "max_examples": int(args.max_examples),
         "users_file": str(args.users_file) if args.users_file else "",
