@@ -21,7 +21,11 @@ So the remaining remote-side task is no longer “run detector metrics once.” 
 
 1. use the corrected detector artifacts
 2. do not rely on the earlier `eval`-only detector read
-3. decide whether a fold-aligned remote detector benchmark is needed for the final paper table
+3. run the fold-aligned remote detector benchmark if the final paper needs a fair remote-vs-local detector table
+
+Fold-aligned benchmark handoff:
+
+- `docs/HANDOFF_2026-07-11_FOLD_ALIGNED_REMOTE_DETECTOR.md`
 
 ## Good-To-Have Detector Row
 
