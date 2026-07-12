@@ -37,7 +37,14 @@ def build_fold_map(feature_path: Path, run_root: Path) -> pd.DataFrame:
     return pd.concat(rows, ignore_index=True)
 
 
-def summarize_local_daylevel(best_path: Path, fold_map: pd.DataFrame, *, adaptive: bool) -> pd.DataFrame:
+def summarize_local_daylevel(
+    best_path: Path,
+    fold_map: pd.DataFrame,
+    *,
+    adaptive: bool,
+    top_intervention: str,
+    control_intervention: str,
+) -> pd.DataFrame:
     best = pd.read_csv(best_path)
     merged = best.merge(
         fold_map,
@@ -78,8 +85,18 @@ def summarize_local_daylevel(best_path: Path, fold_map: pd.DataFrame, *, adaptiv
     nwide.columns = [f"{a}_{b}_n_receivers" for a, b in nwide.columns]
     nwide = nwide.reset_index()
     out = wide.merge(nwide, on=agg_index, how="left")
-    out["top_repair_advantage"] = out["top5_anomalous_mean_best_delta"] - out["top5_benign_mean_best_delta"]
-    out["control_repair_advantage"] = out["control3_anomalous_mean_best_delta"] - out["control3_benign_mean_best_delta"]
+    top_anom = f"{top_intervention}_anomalous_mean_best_delta"
+    top_ben = f"{top_intervention}_benign_mean_best_delta"
+    ctrl_anom = f"{control_intervention}_anomalous_mean_best_delta"
+    ctrl_ben = f"{control_intervention}_benign_mean_best_delta"
+    missing = [col for col in [top_anom, top_ben, ctrl_anom, ctrl_ben] if col not in out.columns]
+    if missing:
+        raise ValueError(
+            f"Missing expected local intervention columns in {best_path}: {missing}. "
+            f"Available mean-delta columns: {[c for c in out.columns if c.endswith('_mean_best_delta')]}"
+        )
+    out["top_repair_advantage"] = out[top_anom] - out[top_ben]
+    out["control_repair_advantage"] = out[ctrl_anom] - out[ctrl_ben]
     out["top_minus_control_advantage"] = out["top_repair_advantage"] - out["control_repair_advantage"]
     return out.sort_values("top_minus_control_advantage", ascending=False).reset_index(drop=True)
 
@@ -90,6 +107,8 @@ def write_report(
     adaptive_df: pd.DataFrame,
     residual_df: pd.DataFrame,
     remote_df: pd.DataFrame,
+    local_top_intervention: str,
+    local_control_intervention: str,
 ) -> None:
     top_local = adaptive_df.head(10).copy()
     top_resid = residual_df.head(10).copy()
@@ -99,6 +118,8 @@ def write_report(
         "",
         "Local session repair rows are aggregated to one value per `(user_id, day_index)` receiver by averaging the session-row best deltas within each positive day.",
         "This puts the local session branch on the same receiver unit as the remote token QLoRA branch.",
+        f"Local summaries use `intervention={local_top_intervention}` as the target set and `intervention={local_control_intervention}` as the control set.",
+        "Remote summaries are read from the provided remote summary CSV and may use a different control-set construction (for example `control5_active`).",
         "",
         "## Best Local Adaptive Day-Level Rows",
         "",
@@ -135,19 +156,40 @@ def main() -> None:
     ap.add_argument("--local-residual-best-rows", required=True)
     ap.add_argument("--remote-summary-csv", required=True)
     ap.add_argument("--out-dir", required=True)
+    ap.add_argument("--local-top-intervention", default="top5")
+    ap.add_argument("--local-control-intervention", default="control3")
     args = ap.parse_args()
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     fold_map = build_fold_map(Path(args.session_feature_path), Path(args.local_run_root))
-    adaptive_df = summarize_local_daylevel(Path(args.local_adaptive_best_rows), fold_map, adaptive=True)
-    residual_df = summarize_local_daylevel(Path(args.local_residual_best_rows), fold_map, adaptive=False)
+    adaptive_df = summarize_local_daylevel(
+        Path(args.local_adaptive_best_rows),
+        fold_map,
+        adaptive=True,
+        top_intervention=args.local_top_intervention,
+        control_intervention=args.local_control_intervention,
+    )
+    residual_df = summarize_local_daylevel(
+        Path(args.local_residual_best_rows),
+        fold_map,
+        adaptive=False,
+        top_intervention=args.local_top_intervention,
+        control_intervention=args.local_control_intervention,
+    )
     remote_df = pd.read_csv(args.remote_summary_csv).sort_values("top_minus_control_advantage", ascending=False).reset_index(drop=True)
 
     adaptive_df.to_csv(out_dir / "local_adaptive_daylevel_summary.csv", index=False)
     residual_df.to_csv(out_dir / "local_residual_daylevel_summary.csv", index=False)
-    write_report(out_dir / "REMOTE_VS_LOCAL_DAYLEVEL_REPORT.md", adaptive_df=adaptive_df, residual_df=residual_df, remote_df=remote_df)
+    write_report(
+        out_dir / "REMOTE_VS_LOCAL_DAYLEVEL_REPORT.md",
+        adaptive_df=adaptive_df,
+        residual_df=residual_df,
+        remote_df=remote_df,
+        local_top_intervention=args.local_top_intervention,
+        local_control_intervention=args.local_control_intervention,
+    )
 
     print("LOCAL ADAPTIVE TOP ROWS")
     print(adaptive_df.head(10).to_string(index=False))

@@ -15,7 +15,7 @@ set -euo pipefail
 REPO_DIR="${REPO_DIR:-$HOME/cert-qlora-MI/llm-sequence-mi-remote}"
 SCORES_PARQUET="${SCORES_PARQUET:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/token_delta_cache/qwen3_8b_session_token_deltas_targeted_mb12_gc_on_fresh_v2/example_scores.parquet}"
 RUN_NAME="${RUN_NAME:-qwen3_8b_r62}"
-SPLIT="${SPLIT:-eval}"
+SPLIT="${SPLIT-}"
 OUT_DIR="${OUT_DIR:-$REPO_DIR/results/qwen3_8b_token_causal/detector_metrics}"
 
 module load conda/2026.03
@@ -23,8 +23,13 @@ CONDA_ENV="${CONDA_ENV:-/anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert
 conda activate "$CONDA_ENV"
 
 cd "$REPO_DIR"
-python scripts/eval_example_scores_detector_metrics.py \
-  --scores-parquet "$SCORES_PARQUET" \
-  --run-name "$RUN_NAME" \
-  --split "$SPLIT" \
+ARGS=(
+  --scores-parquet "$SCORES_PARQUET"
+  --run-name "$RUN_NAME"
   --out-dir "$OUT_DIR"
+)
+if [[ -n "$SPLIT" ]]; then
+  ARGS+=(--split "$SPLIT")
+fi
+
+python scripts/eval_example_scores_detector_metrics.py "${ARGS[@]}"
