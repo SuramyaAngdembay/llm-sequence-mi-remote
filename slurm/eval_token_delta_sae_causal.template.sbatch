@@ -48,6 +48,12 @@ ACTIVE_CONTROL_MIN_FRAC="${ACTIVE_CONTROL_MIN_FRAC:-0.002}"
 ALPHAS="${ALPHAS:-0.25,0.5,0.75,1.0}"
 MAX_RECEIVERS="${MAX_RECEIVERS:-0}"
 MAX_CANDIDATE_DONORS="${MAX_CANDIDATE_DONORS:-16}"
+EXCLUDE_SAME_USER_DONORS="${EXCLUDE_SAME_USER_DONORS:-0}"
+
+EXTRA_ARGS=()
+if [[ "$EXCLUDE_SAME_USER_DONORS" == "1" || "$EXCLUDE_SAME_USER_DONORS" == "true" ]]; then
+  EXTRA_ARGS+=(--exclude-same-user-donors)
+fi
 
 python scripts/eval_token_delta_sae_causal.py \
   --config "$CONFIG" \
@@ -70,4 +76,5 @@ python scripts/eval_token_delta_sae_causal.py \
   --active-control-min-frac "$ACTIVE_CONTROL_MIN_FRAC" \
   --alphas "$ALPHAS" \
   --max-receivers "$MAX_RECEIVERS" \
-  --max-candidate-donors "$MAX_CANDIDATE_DONORS"
+  --max-candidate-donors "$MAX_CANDIDATE_DONORS" \
+  "${EXTRA_ARGS[@]}"

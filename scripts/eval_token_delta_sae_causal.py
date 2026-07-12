@@ -147,6 +147,7 @@ def build_all_candidate_pairs(
     max_receivers: int,
     max_candidate_donors: int,
     seed: int,
+    exclude_same_user: bool = False,
 ) -> Dict[Tuple[str, str], List[Tuple[int, int]]]:
     out: Dict[Tuple[str, str], List[Tuple[int, int]]] = {}
     receiver_indices: np.ndarray | None = None
@@ -171,6 +172,7 @@ def build_all_candidate_pairs(
                 max_candidate_donors=max_candidate_donors,
                 rng=np.random.default_rng(seed + 1009 * mode_i + donor_label),
                 receiver_indices=receiver_indices,
+                exclude_same_user=exclude_same_user,
             )
     return out
 
@@ -265,10 +267,11 @@ def build_candidate_pairs(
     max_candidate_donors: int,
     rng: np.random.Generator,
     receiver_indices: np.ndarray | None = None,
+    exclude_same_user: bool = False,
 ) -> List[Tuple[int, int]]:
     ctx_cols = resolve_context_cols(meta, context_mode)
     primary_col = ctx_cols[0]
-    work = meta[["row_idx", "y"] + ctx_cols].copy()
+    work = meta[["row_idx", "user_id", "y"] + ctx_cols].copy()
     work["ctx_key"] = context_key(work, context_mode)
 
     recv_df = work.loc[work["y"] == 1].copy()
@@ -294,17 +297,24 @@ def build_candidate_pairs(
         str(key): np.sort(sub["row_idx"].to_numpy(dtype=int))
         for key, sub in donor_df.groupby(primary_col, sort=False)
     }
+    donor_user_map = donor_df.set_index("row_idx")["user_id"].astype(str).to_dict()
 
     pairs: List[Tuple[int, int]] = []
     for _, row in recv_df.iterrows():
         recv_idx = int(row["row_idx"])
+        recv_user = str(row["user_id"])
         pool = donor_by_key.get(str(row["ctx_key"]))
         if pool is None or len(pool) == 0:
             pool = donor_by_primary.get(str(row[primary_col]))
         if pool is None or len(pool) == 0:
             pool = donor_all
-        if donor_label == 1 and len(pool) > 1:
-            pool = pool[pool != recv_idx]
+        if len(pool) > 0:
+            mask = np.ones(len(pool), dtype=bool)
+            if donor_label == 1:
+                mask &= pool != recv_idx
+            if exclude_same_user:
+                mask &= np.asarray([donor_user_map.get(int(d), "") != recv_user for d in pool], dtype=bool)
+            pool = pool[mask]
         if pool is None or len(pool) == 0:
             continue
         if max_candidate_donors > 0 and len(pool) > max_candidate_donors:
@@ -598,6 +608,7 @@ def write_report(
     latent_mult: int,
     k: int,
     control_set: str,
+    exclude_same_user: bool,
 ) -> None:
     lines = [
         "# Token Delta SAE Causal Eval",
@@ -607,6 +618,7 @@ def write_report(
         "Intervention protocol:",
         "- receivers = positive eval examples only",
         "- donors = matched benign donors and same-class anomalous donor controls",
+        f"- same-user donors excluded: `{bool(exclude_same_user)}`",
         "- feature sets = top sparse sets patched in token-level delta-SAE space, compared against the control set",
         "- only receiver token positions where the target sparse features are active are patched",
         "- patched token deltas move toward a donor token-feature prototype rather than a uniform sequence-wide broadcast",
@@ -655,6 +667,7 @@ def main() -> None:
     ap.add_argument("--max-candidate-donors", type=int, default=16)
     ap.add_argument("--repair-threshold", type=float, default=0.01)
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--exclude-same-user-donors", action="store_true")
     args = ap.parse_args()
 
     cfg = load_yaml(args.config)
@@ -680,6 +693,7 @@ def main() -> None:
         max_receivers=args.max_receivers,
         max_candidate_donors=args.max_candidate_donors,
         seed=args.seed,
+        exclude_same_user=bool(args.exclude_same_user_donors),
     )
     needed_examples = examples_from_pairs(candidate_pairs_by_key)
     x, token_example_idx, _ = load_token_layer_vectors(
@@ -918,6 +932,7 @@ def main() -> None:
         latent_mult=args.latent_mult,
         k=args.k,
         control_set=control_set,
+        exclude_same_user=bool(args.exclude_same_user_donors),
     )
 
     stats = {

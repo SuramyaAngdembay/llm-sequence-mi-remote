@@ -34,10 +34,11 @@ def build_receiver_pairs(
     context_mode: str,
     max_pairs: int,
     rng: np.random.Generator,
+    exclude_same_user: bool = False,
 ) -> List[Tuple[int, int, int]]:
     ctx_cols = resolve_context_cols(meta, context_mode)
     primary_col = ctx_cols[0]
-    work = meta[["row_idx", "y"] + ctx_cols].copy()
+    work = meta[["row_idx", "user_id", "y"] + ctx_cols].copy()
     work["ctx_key"] = context_key(work, context_mode)
 
     pos_df = work.loc[work["y"] == 1].copy()
@@ -56,16 +57,20 @@ def build_receiver_pairs(
         str(key): np.sort(sub["row_idx"].to_numpy(dtype=int))
         for key, sub in benign_df.groupby(primary_col, sort=False)
     }
+    benign_user_map = benign_df.set_index("row_idx")["user_id"].astype(str).to_dict()
 
     pairs: List[Tuple[int, int, int]] = []
     pair_idx = 0
     for _, row in pos_df.iterrows():
         pos_idx = int(row["row_idx"])
+        pos_user = str(row["user_id"])
         pool = benign_by_key.get(str(row["ctx_key"]))
         if pool is None or len(pool) == 0:
             pool = benign_by_primary.get(str(row[primary_col]))
         if pool is None or len(pool) == 0:
             pool = benign_all
+        if len(pool) > 0 and exclude_same_user:
+            pool = pool[np.asarray([benign_user_map.get(int(d), "") != pos_user for d in pool], dtype=bool)]
         if pool is None or len(pool) == 0:
             continue
         benign_idx = int(rng.choice(pool))
@@ -204,6 +209,7 @@ def write_report(
     latent_mult: int,
     k: int,
     control_set: str,
+    exclude_same_user_matches: bool,
 ) -> None:
     lines = [
         "# Token Delta SAE Necessity Eval",
@@ -212,6 +218,7 @@ def write_report(
         "",
         "Intervention protocol:",
         "- receivers = paired positive and matched benign eval examples",
+        f"- same-user benign matches excluded: `{bool(exclude_same_user_matches)}`",
         "- pairs are matched by requested context mode with fallback to broader benign pools",
         "- feature sets = top sparse sets ablated in token-level delta-SAE space, compared against the control set",
         "- only receiver token positions where the target sparse features are active are modified",
@@ -260,6 +267,7 @@ def main() -> None:
     ap.add_argument("--max-pairs", type=int, default=0)
     ap.add_argument("--effect-threshold", type=float, default=0.01)
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--exclude-same-user-matches", action="store_true")
     args = ap.parse_args()
 
     cfg = load_yaml(args.config)
@@ -288,6 +296,7 @@ def main() -> None:
             context_mode=context_mode,
             max_pairs=args.max_pairs,
             rng=np.random.default_rng(args.seed + 1009 * mode_i),
+            exclude_same_user=bool(args.exclude_same_user_matches),
         )
         pairs_by_context[context_mode] = pairs
         for pair_idx, pos_idx, benign_idx in pairs:
@@ -535,6 +544,7 @@ def main() -> None:
         latent_mult=args.latent_mult,
         k=args.k,
         control_set=control_set,
+        exclude_same_user_matches=bool(args.exclude_same_user_matches),
     )
 
     stats = {

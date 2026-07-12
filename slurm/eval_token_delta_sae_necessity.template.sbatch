@@ -49,6 +49,7 @@ ACTIVE_CONTROL_MIN_FRAC="${ACTIVE_CONTROL_MIN_FRAC:-0.002}"
 ALPHAS="${ALPHAS:-0.25,0.5,0.75,1.0}"
 MAX_PAIRS="${MAX_PAIRS:-0}"
 GPU_POLL_SEC="${GPU_POLL_SEC:-0}"
+EXCLUDE_SAME_USER_MATCHES="${EXCLUDE_SAME_USER_MATCHES:-0}"
 
 mkdir -p "$OUTPUT_DIR"
 GPU_LOG="${GPU_LOG:-${OUTPUT_DIR}/gpu_poll_${SLURM_JOB_ID}.csv}"
@@ -104,6 +105,10 @@ echo "job=$SLURM_JOB_ID node=$(hostname) partition=${SLURM_JOB_PARTITION:-} batc
 nvidia-smi --query-gpu=index,name,memory.total --format=csv,noheader
 
 set +e
+EXTRA_ARGS=()
+if [[ "$EXCLUDE_SAME_USER_MATCHES" == "1" || "$EXCLUDE_SAME_USER_MATCHES" == "true" ]]; then
+  EXTRA_ARGS+=(--exclude-same-user-matches)
+fi
 /usr/bin/time -v -o "$TIME_LOG" \
   python scripts/eval_token_delta_sae_necessity.py \
   --config "$CONFIG" \
@@ -125,7 +130,8 @@ set +e
   --control-set "$CONTROL_SET" \
   --active-control-min-frac "$ACTIVE_CONTROL_MIN_FRAC" \
   --alphas "$ALPHAS" \
-  --max-pairs "$MAX_PAIRS"
+  --max-pairs "$MAX_PAIRS" \
+  "${EXTRA_ARGS[@]}"
 RC=$?
 set -e
 
