@@ -162,3 +162,33 @@ External references checked:
   skip irrelevant chunks instead of decoding every group.
 - Zarr uses chunked N-dimensional arrays for selective array access.
 
+## Corrected Probe Submission
+
+Checked at approximately 2026-07-12 17:05 EDT.
+
+Ignore these first post-fix submissions:
+
+- `19122506` causal probe: canceled after 8 minutes 21 seconds.
+- `19122507` necessity probe: canceled before running.
+
+Reason: the manual `sbatch --export=...` command encoded comma-containing
+values such as `CONTEXT_MODES=team,role,project_role,dept_role` directly in the
+export list. Slurm split those commas, and `job_19122506.json` showed the
+malformed value `context_modes: "team"`. Those jobs should not be interpreted
+as valid probes or resource measurements.
+
+Corrected r6.2 chunk-index probes were resubmitted using shell environment
+exports plus `--export=ALL`, preserving comma-containing values:
+
+- `19122902` causal probe, `gpu-debug`, pending at check time.
+- `19122903` necessity probe, `gpu-debug`, pending at check time.
+
+Output root:
+
+`/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/same_user_recovery_debug_probes_chunkidx_v2`
+
+Current concurrent recovery job status at the same check:
+
+- `19105515` r6.2 fold-aligned detector scorer is still running on `gpu`
+  node `g004`, elapsed 15 hours 32 minutes.
+- `19105516` fold detector eval remains pending on dependency.
