@@ -185,6 +185,7 @@ def main() -> None:
     buffer: List[Dict[str, Any]] = []
     n_scored = 0
     n_tokens_total = 0
+    next_log_at = int(args.log_every) if int(args.log_every) > 0 else 0
     for batch in batched(example_iter(), args.batch_size):
         texts = [ex["text"] for ex in batch]
         tok = tokenizer(
@@ -223,8 +224,10 @@ def main() -> None:
         if len(buffer) >= args.flush_rows:
             writer = flush_rows(writer, parquet_path, buffer)
             buffer = []
-        if args.log_every > 0 and n_scored % args.log_every == 0:
+        if next_log_at > 0 and n_scored >= next_log_at:
             print(f"scored_examples={n_scored}", flush=True)
+            while next_log_at <= n_scored:
+                next_log_at += int(args.log_every)
         del tok, base_nll, adapted_nll, n_tokens
         clear_cuda(model_device)
 
