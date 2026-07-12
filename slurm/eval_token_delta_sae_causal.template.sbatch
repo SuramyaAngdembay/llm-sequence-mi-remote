@@ -25,6 +25,7 @@ conda activate "$CONDA_ENV"
 export HF_HOME=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/hf_cache
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+export TOKENIZERS_PARALLELISM=false
 
 CONFIG="${CONFIG:-configs/qwen3b_qlora_session.yaml}"
 DATA_DIR="${DATA_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl}"
@@ -49,13 +50,71 @@ ALPHAS="${ALPHAS:-0.25,0.5,0.75,1.0}"
 MAX_RECEIVERS="${MAX_RECEIVERS:-0}"
 MAX_CANDIDATE_DONORS="${MAX_CANDIDATE_DONORS:-16}"
 EXCLUDE_SAME_USER_DONORS="${EXCLUDE_SAME_USER_DONORS:-0}"
+GPU_POLL_SEC="${GPU_POLL_SEC:-0}"
+
+mkdir -p "$OUTPUT_DIR"
+GPU_LOG="${GPU_LOG:-${OUTPUT_DIR}/gpu_poll_${SLURM_JOB_ID}.csv}"
+TIME_LOG="${TIME_LOG:-${OUTPUT_DIR}/time_${SLURM_JOB_ID}.txt}"
+JOB_META="${JOB_META:-${OUTPUT_DIR}/job_${SLURM_JOB_ID}.json}"
+
+cat > "$JOB_META" <<EOM
+{
+  "job_id": "${SLURM_JOB_ID}",
+  "partition": "${SLURM_JOB_PARTITION:-}",
+  "account": "${SLURM_JOB_ACCOUNT:-}",
+  "node": "$(hostname)",
+  "config": "${CONFIG}",
+  "data_dir": "${DATA_DIR}",
+  "adapter_dir": "${ADAPTER_DIR}",
+  "extract_dir": "${EXTRACT_DIR}",
+  "frontier_dir": "${FRONTIER_DIR}",
+  "output_dir": "${OUTPUT_DIR}",
+  "layer": ${LAYER},
+  "latent_mult": ${LATENT_MULT},
+  "topk": ${TOPK},
+  "batch_size": ${BATCH_SIZE},
+  "loss_batch_size": ${LOSS_BATCH_SIZE},
+  "patch_chunk_size": ${PATCH_CHUNK_SIZE},
+  "max_receivers": ${MAX_RECEIVERS},
+  "max_candidate_donors": ${MAX_CANDIDATE_DONORS},
+  "context_modes": "${CONTEXT_MODES}",
+  "top_sets": "${TOP_SETS}",
+  "control_set": "${CONTROL_SET}",
+  "exclude_same_user_donors": "${EXCLUDE_SAME_USER_DONORS}"
+}
+EOM
+
+MONITOR_PID=""
+cleanup() {
+  if [[ -n "$MONITOR_PID" ]]; then
+    kill "$MONITOR_PID" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
+if (( GPU_POLL_SEC > 0 )); then
+  {
+    echo "timestamp,index,name,memory.used MiB,memory.total MiB,utilization.gpu %"
+    while true; do
+      nvidia-smi --query-gpu=timestamp,index,name,memory.used,memory.total,utilization.gpu \
+        --format=csv,noheader,nounits
+      sleep "$GPU_POLL_SEC"
+    done
+  } > "$GPU_LOG" &
+  MONITOR_PID=$!
+fi
 
 EXTRA_ARGS=()
 if [[ "$EXCLUDE_SAME_USER_DONORS" == "1" || "$EXCLUDE_SAME_USER_DONORS" == "true" ]]; then
   EXTRA_ARGS+=(--exclude-same-user-donors)
 fi
 
-python scripts/eval_token_delta_sae_causal.py \
+echo "job=$SLURM_JOB_ID node=$(hostname) partition=${SLURM_JOB_PARTITION:-} batch_size=$BATCH_SIZE loss_batch_size=$LOSS_BATCH_SIZE patch_chunk_size=$PATCH_CHUNK_SIZE max_receivers=$MAX_RECEIVERS"
+nvidia-smi --query-gpu=index,name,memory.total --format=csv,noheader
+
+set +e
+/usr/bin/time -v -o "$TIME_LOG" \
+  python scripts/eval_token_delta_sae_causal.py \
   --config "$CONFIG" \
   --data-dir "$DATA_DIR" \
   --adapter-dir "$ADAPTER_DIR" \
@@ -78,3 +137,8 @@ python scripts/eval_token_delta_sae_causal.py \
   --max-receivers "$MAX_RECEIVERS" \
   --max-candidate-donors "$MAX_CANDIDATE_DONORS" \
   "${EXTRA_ARGS[@]}"
+RC=$?
+set -e
+
+cleanup
+exit "$RC"
