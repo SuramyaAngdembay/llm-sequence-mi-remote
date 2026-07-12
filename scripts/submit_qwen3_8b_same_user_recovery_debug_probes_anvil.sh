@@ -12,7 +12,7 @@ cd "$REPO_DIR"
 GPU_DEBUG_PARTITION="${GPU_DEBUG_PARTITION:-gpu-debug}"
 GPU_ACCOUNT="${GPU_ACCOUNT:-cis230270-gpu}"
 GPU_MEM="${GPU_MEM:-240G}"
-GPU_TIME="${GPU_TIME:-00:45:00}"
+GPU_TIME="${GPU_TIME:-00:30:00}"
 GPU_CPUS="${GPU_CPUS:-24}"
 GPU_POLL_SEC="${GPU_POLL_SEC:-2}"
 
@@ -208,4 +208,3 @@ After completion:
   sacct -j ${R62_CAUSAL_JOB},${R62_NECESSITY_JOB},${R42_CAUSAL_JOB},${R42_NECESSITY_JOB} --format=JobID,JobName,Partition,State,Elapsed,ReqMem,MaxRSS,AveRSS,ExitCode -P
   find ${OUT_ROOT} -name 'gpu_poll_*.csv' -maxdepth 2 -print -exec tail -n 5 {} \\;
 EOM
-
