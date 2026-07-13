@@ -1,0 +1,38 @@
+[
+  {
+    "score_name": "adapted_nll",
+    "folds": 4,
+    "day_pr_auc_mean": 0.0007546312538853316,
+    "day_roc_auc_mean": 0.9531573564907055,
+    "day_top1_recall_mean": 0.0,
+    "user_pr_auc_mean": 0.0537037037037037,
+    "user_roc_auc_mean": 0.97125,
+    "user_top1pct_recall_mean": 0.0,
+    "heldout_user_rank_mean": 24.0,
+    "heldout_user_rank_median": 28.5
+  },
+  {
+    "score_name": "base_nll",
+    "folds": 4,
+    "day_pr_auc_mean": 5.656955882212322e-05,
+    "day_roc_auc_mean": 0.4605411291468847,
+    "day_top1_recall_mean": 0.0,
+    "user_pr_auc_mean": 0.009520204807148854,
+    "user_roc_auc_mean": 0.5321875,
+    "user_top1pct_recall_mean": 0.0,
+    "heldout_user_rank_mean": 375.25,
+    "heldout_user_rank_median": 385.5
+  },
+  {
+    "score_name": "neg_delta_nll",
+    "folds": 4,
+    "day_pr_auc_mean": 4.146633536741614e-05,
+    "day_roc_auc_mean": 0.20627025345091138,
+    "day_top1_recall_mean": 0.0,
+    "user_pr_auc_mean": 0.0013353295874922648,
+    "user_roc_auc_mean": 0.06499999999999997,
+    "user_top1pct_recall_mean": 0.0,
+    "heldout_user_rank_mean": 749.0,
+    "heldout_user_rank_median": 748.0
+  }
+]

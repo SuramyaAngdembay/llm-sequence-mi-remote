@@ -252,3 +252,46 @@ from each selected chunk instead of converting/filtering whole chunk tensors.
 This is an I/O/runtime optimization only: receiver sampling, donor matching,
 same-user exclusion, feature sets, control sets, alpha grid, and scoring are
 unchanged.
+
+## Completed Recovery Status
+
+Checked after `19105515`, `19105516`, `19136579`, and `19138934` completed.
+
+r6.2 fold-aligned detector:
+
+- scoring job `19105515` completed in `1-12:25:52`
+- fold eval job `19105516` completed in `00:00:36`
+- committed output directory:
+  `results/qwen3_8b_token_causal/detector_metrics_fold_aligned/`
+- adapted detector summary:
+  - day PR-AUC: `0.000754631`
+  - day ROC-AUC: `0.953157`
+  - user PR-AUC: `0.053704`
+  - user ROC-AUC: `0.97125`
+  - heldout user rank mean: `24.0`
+
+VRAM/runtime probes:
+
+- necessity `bs96` probe `19136579` completed in `00:06:20`
+  - output root:
+    `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/same_user_recovery_vram_probes/r62_necessity_l18_m04_k08_no_same_user_probe_bs96`
+  - peak GPU memory: `15377 MiB`
+  - active-average GPU memory: about `10.2-10.7 GiB`
+- causal `bs128`, `MAX_CANDIDATE_DONORS=16` row-select probe `19138934`
+  completed in `00:18:42`
+  - output root:
+    `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/same_user_recovery_vram_probes/r62_causal_l18_m04_k08_no_same_user_probe_bs128_donors16_rowselect`
+  - selected token rows: `308861`
+  - candidate rows: `9608`
+  - peak GPU memory: `23477 MiB`
+  - active-average GPU memory: about `16.2-16.7 GiB`
+
+Decision implication:
+
+- row-select loading fixed the causal pre-GPU timeout problem for the broader
+  donor fanout probe
+- VRAM remains below the requested 30 GiB average target, so further GPU
+  utilization work should focus on larger scoring batches or evaluator
+  batching changes
+- the immediate full-run risk is now less about OOM and more about total SU
+  cost versus remaining `cis230270-gpu` balance
