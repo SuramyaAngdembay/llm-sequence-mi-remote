@@ -223,3 +223,32 @@ Operational fix for debug/profiling:
 - make the debug causal probe use a smaller donor fanout by default
   (`MAX_CANDIDATE_DONORS_PROBE=2`)
 - keep full recovery run settings separate from debug/profiling settings
+
+## Causal I/O Optimization Follow-Up
+
+Checked after the `bs128` causal micro-probe.
+
+The `bs128` causal probe completed, but peak VRAM stayed low:
+
+- job `19136322`
+- `BATCH_SIZE=128`
+- `PATCH_CHUNK_SIZE=128`
+- peak GPU memory about `11.4 GiB`
+- active average GPU memory about `9.2-9.4 GiB`
+
+This means the immediate SU risk is not GPU capacity. The risk is paying A100
+time for token-cache extraction and low-utilization setup.
+
+Full r6.2 same-user-excluded causal footprint estimate:
+
+- `MAX_RECEIVERS=0` is equivalent to all 70 positive receivers for this branch
+- candidate pairs: `5176`
+- needed receiver/donor examples: `4056`
+- selected layer-18 token-cache chunks: `139/278`
+- selected chunk file size: about `161.1 GiB`
+
+The loader was updated to slice contiguous token rows for requested example IDs
+from each selected chunk instead of converting/filtering whole chunk tensors.
+This is an I/O/runtime optimization only: receiver sampling, donor matching,
+same-user exclusion, feature sets, control sets, alpha grid, and scoring are
+unchanged.

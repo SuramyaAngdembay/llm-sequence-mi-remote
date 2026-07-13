@@ -137,6 +137,42 @@ def _select_token_chunks(
     return selected
 
 
+def _selected_example_intervals(idx: np.ndarray, keep_arr: np.ndarray | None) -> List[Tuple[int, int]]:
+    if keep_arr is None:
+        return [(0, int(len(idx)))]
+    if len(idx) == 0 or len(keep_arr) == 0:
+        return []
+    lo_ex = int(idx[0])
+    hi_ex = int(idx[-1])
+    left = int(np.searchsorted(keep_arr, lo_ex, side="left"))
+    right = int(np.searchsorted(keep_arr, hi_ex, side="right"))
+    intervals: List[Tuple[int, int]] = []
+    for ex in keep_arr[left:right]:
+        start = int(np.searchsorted(idx, int(ex), side="left"))
+        end = int(np.searchsorted(idx, int(ex), side="right"))
+        if end > start:
+            intervals.append((start, end))
+    return intervals
+
+
+def _concat_selected_delta(delta: Any, intervals: Sequence[Tuple[int, int]], dtype: np.dtype[Any]) -> np.ndarray:
+    if not intervals:
+        shape = delta.shape if hasattr(delta, "shape") else np.asarray(delta).shape
+        return np.empty((0, int(shape[1])), dtype=dtype)
+    parts: List[np.ndarray] = []
+    for start, end in intervals:
+        if isinstance(delta, torch.Tensor):
+            arr = delta[start:end].cpu().numpy()
+            if arr.dtype != dtype:
+                arr = arr.astype(dtype, copy=False)
+        else:
+            arr = np.asarray(delta[start:end], dtype=dtype)
+        parts.append(arr)
+    if len(parts) == 1:
+        return np.asarray(parts[0], dtype=dtype)
+    return np.concatenate(parts, axis=0).astype(dtype, copy=False)
+
+
 def load_token_layer_vectors(
     extract_dir: Path,
     layer: int,
@@ -163,14 +199,10 @@ def load_token_layer_vectors(
             raise RuntimeError("Token-level causal eval requires token-level extraction with position arrays.")
         idx = np.asarray(obj["example_idx"], dtype=np.int64)
         if d_model is None:
-            d_model = int(np.asarray(obj["delta"]).shape[1])
-        pos = np.asarray(obj["position"], dtype=np.int64)
-        del pos
-        if keep_arr is not None:
-            keep = np.isin(idx, keep_arr)
-            total_rows += int(np.count_nonzero(keep))
-        else:
-            total_rows += int(len(idx))
+            delta_shape = obj["delta"].shape if hasattr(obj["delta"], "shape") else np.asarray(obj["delta"]).shape
+            d_model = int(delta_shape[1])
+        intervals = _selected_example_intervals(idx, keep_arr)
+        total_rows += int(sum(end - start for start, end in intervals))
     if total_rows == 0 or d_model is None:
         raise RuntimeError(f"No token rows found for requested examples at layer {layer}")
 
@@ -182,16 +214,14 @@ def load_token_layer_vectors(
     cursor = 0
     for path in chunk_paths:
         obj = _load_pt_cpu(path)
-        vecs = np.asarray(obj["delta"], dtype=np_delta_dtype)
         idx = np.asarray(obj["example_idx"], dtype=np.int64)
-        pos = np.asarray(obj["position"], dtype=np.int32)
-        if keep_arr is not None:
-            keep = np.isin(idx, keep_arr)
-            if not np.any(keep):
-                continue
-            vecs = vecs[keep]
-            idx = idx[keep]
-            pos = pos[keep]
+        intervals = _selected_example_intervals(idx, keep_arr)
+        if not intervals:
+            continue
+        vecs = _concat_selected_delta(obj["delta"], intervals, np_delta_dtype)
+        idx = np.concatenate([idx[start:end] for start, end in intervals]).astype(np.int64, copy=False)
+        pos_arr = np.asarray(obj["position"], dtype=np.int32)
+        pos = np.concatenate([pos_arr[start:end] for start, end in intervals]).astype(np.int32, copy=False)
         n_rows = int(len(idx))
         if n_rows == 0:
             continue
@@ -209,6 +239,7 @@ def load_token_layer_vectors(
         if np.any(position[1:][same_example] < position[:-1][same_example]):
             raise RuntimeError("Token chunks are not ordered by token position within example; causal eval requires ordered extraction chunks.")
 
+    print(f"[token_load] layer={layer} token_rows={int(total_rows)} d_model={int(d_model)}")
     return x, example_idx, scores
 
 
