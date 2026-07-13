@@ -192,3 +192,34 @@ Current concurrent recovery job status at the same check:
 - `19105515` r6.2 fold-aligned detector scorer is still running on `gpu`
   node `g004`, elapsed 15 hours 32 minutes.
 - `19105516` fold detector eval remains pending on dependency.
+
+## Causal Probe Timeout Diagnosis
+
+Checked after `19122902` timed out.
+
+The corrected causal probe preserved the intended context modes, but still
+timed out before reaching GPU work:
+
+- job `19122902`
+- `MAX_RECEIVERS=16`
+- `MAX_CANDIDATE_DONORS=16`
+- GPU poll stayed at `0 MiB`
+- no causal report/CSV files were written
+
+The reason is probe geometry, not CUDA memory and not malformed arguments.
+With same-user exclusion enabled, the causal pairing step produced 1,031 needed
+receiver/donor examples spread across `132/278` layer-18 token-cache chunks.
+Those selected chunks total about `152.1 GiB`; the current loader can touch the
+selected chunks twice before model scoring. That means the 30-minute
+`gpu-debug` walltime can be exhausted in pre-GPU token-cache I/O.
+
+The matching necessity probe completed because its `MAX_PAIRS=16` setting
+required only 106 examples and selected `51/278` chunks.
+
+Operational fix for debug/profiling:
+
+- run future Python evaluator jobs unbuffered so timeout logs preserve stage
+  progress
+- make the debug causal probe use a smaller donor fanout by default
+  (`MAX_CANDIDATE_DONORS_PROBE=2`)
+- keep full recovery run settings separate from debug/profiling settings

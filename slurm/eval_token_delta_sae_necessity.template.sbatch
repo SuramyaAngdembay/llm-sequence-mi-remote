@@ -26,6 +26,7 @@ export HF_HOME=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/hf_cache
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export TOKENIZERS_PARALLELISM=false
+export PYTHONUNBUFFERED=1
 
 CONFIG="${CONFIG:-configs/qwen3b_qlora_session.yaml}"
 DATA_DIR="${DATA_DIR:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl}"
@@ -110,7 +111,7 @@ if [[ "$EXCLUDE_SAME_USER_MATCHES" == "1" || "$EXCLUDE_SAME_USER_MATCHES" == "tr
   EXTRA_ARGS+=(--exclude-same-user-matches)
 fi
 /usr/bin/time -v -o "$TIME_LOG" \
-  python scripts/eval_token_delta_sae_necessity.py \
+  python -u scripts/eval_token_delta_sae_necessity.py \
   --config "$CONFIG" \
   --data-dir "$DATA_DIR" \
   --adapter-dir "$ADAPTER_DIR" \
