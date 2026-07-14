@@ -1,0 +1,23 @@
+	Command being timed: "python -u scripts/eval_token_delta_sae_causal.py --config configs/qwen3_8b_qlora_session_targeted.yaml --data-dir /anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/session_jsonl --adapter-dir /anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/checkpoints/qwen3_8b_session_qlora_ddp_mb12_gc_on_fresh/adapter --extract-dir /anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/token_delta_cache/qwen3_8b_session_token_deltas_targeted_mb12_gc_on_fresh_v2 --frontier-dir /anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_frontier_qwen3_8b_mb12_gc_on_fresh_v3_stream --out-dir /anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3_8b_mb12_gc_on_fresh_no_same_user/l18_m04_k08_top5_control5_active_no_same_user --layer 18 --latent-mult 4 --k 8 --batch-size 128 --loss-batch-size 1 --sae-batch-size 2048 --patch-chunk-size 128 --token-delta-dtype float32 --context-modes team,role,project_role,dept_role --top-sets top5 --control-set control5_active --active-control-min-frac 0.002 --alphas 0.25,0.5,0.75,1.0 --max-receivers 0 --max-candidate-donors 16 --exclude-same-user-donors"
+	User time (seconds): 2682.80
+	System time (seconds): 1217.43
+	Percent of CPU this job got: 105%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 1:01:46
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 28128668
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 16383302
+	Voluntary context switches: 185700
+	Involuntary context switches: 331129
+	Swaps: 0
+	File system inputs: 176
+	File system outputs: 96
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

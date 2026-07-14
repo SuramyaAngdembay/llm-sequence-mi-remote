@@ -295,3 +295,40 @@ Decision implication:
   batching changes
 - the immediate full-run risk is now less about OOM and more about total SU
   cost versus remaining `cis230270-gpu` balance
+
+## r6.2 Same-User-Excluded Full Causal Result
+
+Checked after GPU job `19173967` and bootstrap job `19173968` completed.
+
+Tracked result directory:
+
+`results/qwen3_8b_token_causal/same_user_recovery/l18_m04_k08_top5_control5_active_no_same_user/`
+
+Source output directory:
+
+`/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3_8b_mb12_gc_on_fresh_no_same_user/l18_m04_k08_top5_control5_active_no_same_user`
+
+Bootstrap results with same-user donors excluded:
+
+- `role / top5`: estimate `0.0068477`, CI `[0.0033618, 0.0107899]`
+- `dept_role / top5`: estimate `0.0068181`, CI `[0.0035410, 0.0103211]`
+- `project_role / top5`: estimate `0.0042006`, CI `[0.0015651, 0.0069792]`
+- `team / top5`: no finite estimate because the same-user-excluded donor pool
+  did not yield a valid anomalous-control comparison for that context
+
+Runtime and hardware:
+
+- wall time: `01:01:57`
+- CPU MaxRSS: about `44.4 GiB`
+- peak GPU memory: `29477 MiB`
+- active-average GPU memory: about `18.3 GiB`
+
+Decision implication:
+
+- the r6.2 causal result remains clearly positive after same-user donor
+  exclusion
+- the effect size is smaller than the earlier permissive-donor active-control
+  estimate, so the final paper should cite the same-user-excluded value as the
+  conservative headline
+- this closes the main same-user donor leakage concern for the r6.2 causal
+  branch, pending Magnolia review of the committed candidate rows
