@@ -332,3 +332,54 @@ Decision implication:
   conservative headline
 - this closes the main same-user donor leakage concern for the r6.2 causal
   branch, pending Magnolia review of the committed candidate rows
+
+## r4.2 Chunked-Logit Scorer Fix and Probes
+
+Checked after `gpu-debug` jobs `19219289` and `19219291`.
+
+Problem diagnosed:
+
+- r4.2 necessity OOMs at `BATCH_SIZE=128` and `BATCH_SIZE=192` were not CPU
+  RSS problems and were not the previous next-batch memory-retention symptom
+- both failures came from Qwen3 materializing a full `[batch, seq, vocab]`
+  logits tensor at the LM head
+- observed full-logits allocation request was about `32.78 GiB` on a 40GB A100
+
+Code change:
+
+- `scripts/eval_token_delta_sae_causal.py` now computes exact per-example NLL
+  from final hidden states with LM-head token-position chunking when estimated
+  full logits exceed `FULL_LOGITS_MAX_GIB`
+- `scripts/eval_token_delta_sae_necessity.py` uses the same shared scorer
+- Slurm templates expose `FULL_LOGITS_MAX_GIB` and `MAX_LOGIT_ELEMENTS`
+- a toy equivalence test comparing full logits to chunked logits gave
+  `max_abs_diff=0.0`
+
+Debug probe results:
+
+- necessity probe `19219289`
+  - settings: r4.2, layer `26`, `m02_k04`, `BATCH_SIZE=128`,
+    `PATCH_CHUNK_SIZE=128`, `MAX_PAIRS=64`, same-user matches excluded
+  - completed in `00:15:05`
+  - chunked logits activated with estimated full logits around `29.4-35.2 GiB`
+  - peak GPU memory: `33499 MiB`
+  - active-average GPU memory: about `24.1 GiB`
+  - CPU MaxRSS: about `9.4 GiB`
+- causal probe `19219291`
+  - settings: r4.2, layer `26`, `m02_k04`, `BATCH_SIZE=160`,
+    `PATCH_CHUNK_SIZE=160`, `MAX_RECEIVERS=16`, `MAX_CANDIDATE_DONORS=16`,
+    same-user donors excluded
+  - completed in `00:20:07`
+  - peak GPU memory: `31137 MiB`
+  - active-average GPU memory: about `21.2 GiB`
+  - CPU MaxRSS: about `27.7 GiB`
+
+Decision implication:
+
+- r4.2 necessity is now safe to submit after the scorer fix
+- r4.2 causal should use `BATCH_SIZE=160` to reach the requested roughly
+  30 GiB peak VRAM regime
+- updated r4.2 same-user launcher defaults:
+  - causal: `BATCH_SIZE=160`, `PATCH_CHUNK_SIZE=160`, `CAUSAL_TIME=36:00:00`
+  - necessity: `BATCH_SIZE=128`, `PATCH_CHUNK_SIZE=128`,
+    `CAUSAL_TIME=12:00:00`

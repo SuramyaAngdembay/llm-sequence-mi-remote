@@ -68,6 +68,48 @@ def per_example_nll(
     return torch.cat(out, dim=0)
 
 
+def per_example_nll_from_hidden(
+    lm_head: Any,
+    hidden_states: torch.Tensor,
+    input_ids: torch.Tensor,
+    attention_mask: torch.Tensor,
+    *,
+    max_logit_elements: int,
+) -> torch.Tensor:
+    """Compute exact per-example NLL while chunking the LM head over token positions."""
+    batch_size, seq_len, _ = hidden_states.shape
+    if seq_len <= 1:
+        return torch.zeros((batch_size,), device=hidden_states.device, dtype=torch.float32)
+
+    vocab_size = int(getattr(lm_head, "out_features", 0) or getattr(getattr(lm_head, "weight", None), "shape", [0])[0])
+    if vocab_size <= 0:
+        raise ValueError("Could not infer lm_head vocab size for chunked NLL")
+    token_chunk = max(1, int(max_logit_elements) // max(1, batch_size * vocab_size))
+    token_chunk = min(token_chunk, seq_len - 1)
+
+    losses = torch.zeros((batch_size,), device=hidden_states.device, dtype=torch.float32)
+    denom = attention_mask[:, 1:].float().sum(dim=1).clamp_min(1.0)
+
+    for pos_start in range(0, seq_len - 1, token_chunk):
+        pos_end = min(pos_start + token_chunk, seq_len - 1)
+        labels = input_ids[:, pos_start + 1 : pos_end + 1].contiguous()
+        mask = attention_mask[:, pos_start + 1 : pos_end + 1].contiguous().float()
+        if float(mask.sum().item()) == 0.0:
+            continue
+        logits = lm_head(hidden_states[:, pos_start:pos_end, :])
+        token_loss = F.cross_entropy(
+            logits.float().reshape(-1, logits.size(-1)),
+            labels.reshape(-1),
+            reduction="none",
+        ).view(labels.size())
+        losses += (token_loss * mask).sum(dim=1)
+        del logits, labels, mask, token_loss
+        if hidden_states.device.type == "cuda":
+            torch.cuda.empty_cache()
+
+    return losses / denom
+
+
 def _load_pt_cpu(path: Path) -> Dict[str, Any]:
     try:
         return torch.load(path, map_location="cpu", weights_only=False, mmap=True)
@@ -451,6 +493,20 @@ def get_layer_module(model: Any, hidden_state_layer: int) -> Any:
     return layers[block_idx]
 
 
+def estimate_full_logits_gib(model: Any, input_ids: torch.Tensor) -> float:
+    base = get_base_causal_lm(model)
+    vocab_size = int(getattr(getattr(base, "config", None), "vocab_size", 0))
+    if vocab_size <= 0 and hasattr(base, "get_output_embeddings"):
+        emb = base.get_output_embeddings()
+        vocab_size = int(getattr(emb, "out_features", 0) or getattr(getattr(emb, "weight", None), "shape", [0])[0])
+    if vocab_size <= 0:
+        return float("inf")
+    dtype = next(model.parameters()).dtype
+    dtype_bytes = 2 if dtype in {torch.float16, torch.bfloat16} else 4
+    elements = int(input_ids.shape[0]) * int(input_ids.shape[1]) * vocab_size
+    return float(elements * dtype_bytes / (1024**3))
+
+
 @torch.no_grad()
 def encode_sparse_vectors(
     sae_model: TopKSAE,
@@ -603,10 +659,13 @@ def score_with_token_patches(
     max_seq_len: int,
     batch_size: int,
     loss_batch_size: int = 0,
+    full_logits_max_gib: float = 28.0,
+    max_logit_elements: int = 536_870_912,
 ) -> np.ndarray:
     layer_module = get_layer_module(model, layer)
     device = next(model.parameters()).device
     out_scores: List[np.ndarray] = []
+    chunked_notice_emitted = False
 
     for start in range(0, len(texts), batch_size):
         batch_texts = list(texts[start : start + batch_size])
@@ -641,14 +700,45 @@ def score_with_token_patches(
 
         handle = layer_module.register_forward_hook(hook)
         try:
-            out = model(**tok, return_dict=True)
+            full_logits_gib = estimate_full_logits_gib(model, tok["input_ids"])
+            if full_logits_gib <= float(full_logits_max_gib):
+                out = model(**tok, return_dict=True)
+                logits = out.logits
+                nll_t = per_example_nll(logits, tok["input_ids"], tok["attention_mask"], loss_batch_size=loss_batch_size)
+                del out, logits
+            else:
+                if not chunked_notice_emitted:
+                    print(
+                        "[scoring] using chunked logits "
+                        f"estimated_full_logits_gib={full_logits_gib:.2f} "
+                        f"threshold_gib={float(full_logits_max_gib):.2f} "
+                        f"max_logit_elements={int(max_logit_elements)}",
+                        flush=True,
+                    )
+                    chunked_notice_emitted = True
+                base_model = get_base_causal_lm(model)
+                if not hasattr(base_model, "model") or not hasattr(base_model, "get_output_embeddings"):
+                    raise AttributeError("Chunked scoring requires a causal LM with .model and .get_output_embeddings()")
+                out = base_model.model(
+                    input_ids=tok["input_ids"],
+                    attention_mask=tok["attention_mask"],
+                    return_dict=True,
+                    use_cache=False,
+                )
+                hidden_states = out.last_hidden_state
+                nll_t = per_example_nll_from_hidden(
+                    base_model.get_output_embeddings(),
+                    hidden_states,
+                    tok["input_ids"],
+                    tok["attention_mask"],
+                    max_logit_elements=int(max_logit_elements),
+                )
+                del out, hidden_states
         finally:
             handle.remove()
-        logits = out.logits
-        nll_t = per_example_nll(logits, tok["input_ids"], tok["attention_mask"], loss_batch_size=loss_batch_size)
         nll = nll_t.cpu().numpy()
         out_scores.append(nll)
-        del out, logits, nll_t, nll, tok, attn, batch_patch, batch_texts
+        del nll_t, nll, tok, attn, batch_patch, batch_texts
         if device.type == "cuda":
             torch.cuda.synchronize(device)
             torch.cuda.empty_cache()
@@ -759,6 +849,8 @@ def main() -> None:
     ap.add_argument("--loss-batch-size", type=int, default=0)
     ap.add_argument("--sae-batch-size", type=int, default=2048)
     ap.add_argument("--patch-chunk-size", type=int, default=0)
+    ap.add_argument("--full-logits-max-gib", type=float, default=28.0)
+    ap.add_argument("--max-logit-elements", type=int, default=536_870_912)
     ap.add_argument("--token-delta-dtype", choices=["float32", "float16"], default="float32")
     ap.add_argument("--context-modes", default="team,role,project_role,dept_role")
     ap.add_argument("--top-sets", default="top1,top3,top5")
@@ -970,6 +1062,8 @@ def main() -> None:
                                 max_seq_len=int(cfg["training"]["max_seq_len"]),
                                 batch_size=args.batch_size,
                                 loss_batch_size=args.loss_batch_size,
+                                full_logits_max_gib=args.full_logits_max_gib,
+                                max_logit_elements=args.max_logit_elements,
                             )
                             deltas = patched_scores - base
                             batch_rows: List[Dict[str, Any]] = []

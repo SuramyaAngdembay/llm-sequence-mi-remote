@@ -257,6 +257,8 @@ def main() -> None:
     ap.add_argument("--loss-batch-size", type=int, default=0)
     ap.add_argument("--sae-batch-size", type=int, default=2048)
     ap.add_argument("--patch-chunk-size", type=int, default=0)
+    ap.add_argument("--full-logits-max-gib", type=float, default=28.0)
+    ap.add_argument("--max-logit-elements", type=int, default=536_870_912)
     ap.add_argument("--token-delta-dtype", choices=["float32", "float16"], default="float32")
     ap.add_argument("--context-modes", default="team,role,project_role,dept_role")
     ap.add_argument("--top-sets", default="top1,top3,top5")
@@ -476,6 +478,8 @@ def main() -> None:
                             max_seq_len=int(cfg["training"]["max_seq_len"]),
                             batch_size=args.batch_size,
                             loss_batch_size=args.loss_batch_size,
+                            full_logits_max_gib=args.full_logits_max_gib,
+                            max_logit_elements=args.max_logit_elements,
                         )
 
                         batch_rows: List[Dict[str, Any]] = []
