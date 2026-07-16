@@ -383,3 +383,40 @@ Decision implication:
   - causal: `BATCH_SIZE=160`, `PATCH_CHUNK_SIZE=160`, `CAUSAL_TIME=36:00:00`
   - necessity: `BATCH_SIZE=128`, `PATCH_CHUNK_SIZE=128`,
     `CAUSAL_TIME=12:00:00`
+
+## r4.2 Full Run Status Follow-Up
+
+Checked on July 16, 2026 after full jobs `19222729` and `19222733`.
+
+r4.2 necessity:
+
+- job `19222733` completed in `02:12:55`
+- bootstrap job `19222735` completed in `00:00:38`
+- peak GPU memory: `39717 MiB`
+- active-average GPU memory: about `23.7 GiB`
+- CPU MaxRSS: about `49.6 GiB` from Slurm accounting
+- result direction is positive for `dept_role` and `role`:
+  - `dept_role / top5`: estimate `0.00292177`, CI
+    `[0.00145958, 0.00437872]`
+  - `role / top5`: estimate `0.00207545`, CI
+    `[0.000678829, 0.00341792]`
+
+r4.2 causal:
+
+- job `19222729` failed after `01:56:39`
+- failure was a CUDA OOM inside the Qwen3 transformer MLP on a long-sequence
+  batch, not the previous full-logits allocation path
+- peak GPU memory reached `40435 MiB`
+- partial candidate output had `113920` rows and is not a final result
+
+Decision implication:
+
+- keep the chunked-logit scorer fix
+- r4.2 necessity is complete and scientifically usable pending result commit
+- r4.2 causal should be resubmitted with a more conservative batch regime
+  because the full uncapped receiver/donor set contains longer sequence
+  batches than the debug sample
+- updated r4.2 causal launcher default after this failure:
+  - `BATCH_SIZE=96`
+  - `PATCH_CHUNK_SIZE=96`
+  - `CAUSAL_TIME=48:00:00`
