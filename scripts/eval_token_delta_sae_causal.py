@@ -764,6 +764,7 @@ def summarize_best(best_df: pd.DataFrame, top_sets: Sequence[str], control_set: 
         work.columns = [f"{a}_{b}" for a, b in work.columns]
         work = work.reset_index()
         for top_set in top_sets:
+            needed = [f"{top_set}_benign", f"{top_set}_anomalous", f"{control_set}_benign", f"{control_set}_anomalous"]
             row = {
                 "layer": int(layer),
                 "latent_mult": int(latent_mult),
@@ -772,16 +773,23 @@ def summarize_best(best_df: pd.DataFrame, top_sets: Sequence[str], control_set: 
                 "target": top_set,
                 "n_receivers": int(len(work)),
             }
-            for col in [f"{top_set}_benign", f"{top_set}_anomalous", f"{control_set}_benign", f"{control_set}_anomalous"]:
+            for col in needed:
                 if col not in work.columns:
                     work[col] = float("nan")
-            row["top_benign_mean_best_delta"] = float(work[f"{top_set}_benign"].mean())
-            row["top_anomalous_mean_best_delta"] = float(work[f"{top_set}_anomalous"].mean())
-            row["control_benign_mean_best_delta"] = float(work[f"{control_set}_benign"].mean())
-            row["control_anomalous_mean_best_delta"] = float(work[f"{control_set}_anomalous"].mean())
-            row["top_repair_advantage"] = row["top_anomalous_mean_best_delta"] - row["top_benign_mean_best_delta"]
-            row["control_repair_advantage"] = row["control_anomalous_mean_best_delta"] - row["control_benign_mean_best_delta"]
-            row["top_minus_control_advantage"] = row["top_repair_advantage"] - row["control_repair_advantage"]
+            complete = work.dropna(subset=needed)
+            row["n_complete_receivers"] = int(len(complete))
+            row["top_benign_mean_best_delta"] = float(complete[f"{top_set}_benign"].mean())
+            row["top_anomalous_mean_best_delta"] = float(complete[f"{top_set}_anomalous"].mean())
+            row["control_benign_mean_best_delta"] = float(complete[f"{control_set}_benign"].mean())
+            row["control_anomalous_mean_best_delta"] = float(complete[f"{control_set}_anomalous"].mean())
+            row["top_repair_advantage"] = float((complete[f"{top_set}_anomalous"] - complete[f"{top_set}_benign"]).mean())
+            row["control_repair_advantage"] = float((complete[f"{control_set}_anomalous"] - complete[f"{control_set}_benign"]).mean())
+            row["top_minus_control_advantage"] = float(
+                (
+                    (complete[f"{top_set}_anomalous"] - complete[f"{top_set}_benign"])
+                    - (complete[f"{control_set}_anomalous"] - complete[f"{control_set}_benign"])
+                ).mean()
+            )
             rows.append(row)
     if not rows:
         return pd.DataFrame()
@@ -815,6 +823,7 @@ def write_report(
         "- feature sets = top sparse sets patched in token-level delta-SAE space, compared against the control set",
         "- only receiver token positions where the target sparse features are active are patched",
         "- patched token deltas move toward a donor token-feature prototype rather than a uniform sequence-wide broadcast",
+        "- summary advantages are paired receiver-level contrasts over receivers with complete top/control and benign/anomalous donor support",
         "",
         f"Control comparison: `{control_set}`",
         "",

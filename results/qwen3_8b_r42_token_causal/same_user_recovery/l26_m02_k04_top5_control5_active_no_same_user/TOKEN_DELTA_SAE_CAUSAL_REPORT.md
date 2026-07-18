@@ -9,17 +9,18 @@ Intervention protocol:
 - feature sets = top sparse sets patched in token-level delta-SAE space, compared against the control set
 - only receiver token positions where the target sparse features are active are patched
 - patched token deltas move toward a donor token-feature prototype rather than a uniform sequence-wide broadcast
+- summary advantages are paired receiver-level contrasts over receivers with complete top/control and benign/anomalous donor support
 
 Control comparison: `control5_active`
 
 ## Summary
 
-|   layer |   latent_mult |   k | context_mode   | target   |   n_receivers |   top_benign_mean_best_delta |   top_anomalous_mean_best_delta |   control_benign_mean_best_delta |   control_anomalous_mean_best_delta |   top_repair_advantage |   control_repair_advantage |   top_minus_control_advantage |
-|--------:|--------------:|----:|:---------------|:---------|--------------:|-----------------------------:|--------------------------------:|---------------------------------:|------------------------------------:|-----------------------:|---------------------------:|------------------------------:|
-|      26 |             2 |   4 | role           | top5     |          1119 |                  0.0042316   |                      0.00646608 |                       0.0107808  |                          0.0119029  |             0.00223447 |                0.00112204  |                   0.00111243  |
-|      26 |             2 |   4 | dept_role      | top5     |          1039 |                 -5.94575e-05 |                      0.00163607 |                       0.0064481  |                          0.00705722 |             0.00169553 |                0.000609122 |                   0.00108641  |
-|      26 |             2 |   4 | team           | top5     |          1301 |                  0.00344192  |                      0.00135538 |                       0.00925979 |                          0.006259   |            -0.00208653 |               -0.00300078  |                   0.000914247 |
-|      26 |             2 |   4 | dept           | top5     |          1199 |                  0.000828352 |                      0.00104829 |                       0.0071347  |                          0.00648041 |             0.00021994 |               -0.000654287 |                   0.000874227 |
+|   layer |   latent_mult |   k | context_mode   | target   |   n_receivers |   n_complete_receivers |   top_benign_mean_best_delta |   top_anomalous_mean_best_delta |   control_benign_mean_best_delta |   control_anomalous_mean_best_delta |   top_repair_advantage |   control_repair_advantage |   top_minus_control_advantage |
+|--------:|--------------:|----:|:---------------|:---------|--------------:|-----------------------:|-----------------------------:|--------------------------------:|---------------------------------:|------------------------------------:|-----------------------:|---------------------------:|------------------------------:|
+|      26 |             2 |   4 | team           | top5     |          1301 |                   1052 |                 -0.000192052 |                      0.00135538 |                       0.00613002 |                          0.006259   |             0.00154743 |                0.000128985 |                   0.00141845  |
+|      26 |             2 |   4 | role           | top5     |          1119 |                   1110 |                  0.00521034  |                      0.00646608 |                       0.0117586  |                          0.0119029  |             0.00125574 |                0.000144227 |                   0.00111151  |
+|      26 |             2 |   4 | dept_role      | top5     |          1039 |                   1034 |                  0.000444374 |                      0.00163607 |                       0.00693289 |                          0.00705722 |             0.0011917  |                0.00012433  |                   0.00106737  |
+|      26 |             2 |   4 | dept           | top5     |          1199 |                   1157 |                 -4.43505e-05 |                      0.00104829 |                       0.00636966 |                          0.00648041 |             0.00109264 |                0.000110757 |                   0.000981886 |
 
 ## Selected Feature Sets
 

@@ -18,12 +18,17 @@ same-user donor/match validity audit.
 - Source output:
   `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_causal_qwen3_8b_r42_native_active_control_no_same_user/l26_m02_k04_top5_control5_active_no_same_user`
 
-| context_mode | n_receivers | estimate | 95% CI |
-| --- | ---: | ---: | ---: |
-| team | 1301 | 0.001418 | [0.001139, 0.001690] |
-| role | 1119 | 0.001112 | [0.000826, 0.001391] |
-| dept_role | 1039 | 0.001067 | [0.000824, 0.001305] |
-| dept | 1199 | 0.000982 | [0.000751, 0.001215] |
+| context_mode | n_receivers | n_complete_receivers | estimate | 95% CI |
+| --- | ---: | ---: | ---: | ---: |
+| team | 1301 | 1052 | 0.001418 | [0.001139, 0.001690] |
+| role | 1119 | 1110 | 0.001112 | [0.000826, 0.001391] |
+| dept_role | 1039 | 1034 | 0.001067 | [0.000824, 0.001305] |
+| dept | 1199 | 1157 | 0.000982 | [0.000751, 0.001215] |
+
+The estimate is the paired complete receiver-level top-vs-control contrast,
+matching the bootstrap estimand. `n_receivers` is the available positive
+receiver count for the context; `n_complete_receivers` is the count with all
+top/control and benign/anomalous donor values present.
 
 Runtime:
 

@@ -9,17 +9,18 @@ Intervention protocol:
 - feature sets = top sparse sets ablated in token-level delta-SAE space, compared against the control set
 - only receiver token positions where the target sparse features are active are modified
 - ablation shrinks selected sparse feature activations toward zero by alpha
+- summary advantages are paired contrasts over pairs with complete top/control and positive/benign support
 
 Control comparison: `control5_active`
 
 ## Summary
 
-|   layer |   latent_mult |   k | context_mode   | target   |   n_pairs |   top_positive_mean_best_delta |   top_benign_mean_best_delta |   control_positive_mean_best_delta |   control_benign_mean_best_delta |   top_necessity_advantage |   control_necessity_advantage |   top_minus_control_necessity |
-|--------:|--------------:|----:|:---------------|:---------|----------:|-------------------------------:|-----------------------------:|-----------------------------------:|---------------------------------:|--------------------------:|------------------------------:|------------------------------:|
-|      18 |             4 |   8 | project_role   | top5     |        70 |                     -0.0581652 |                  -0.0033418  |                        -0.00716735 |                      -0.0175324  |                 0.0548234 |                   -0.0103651  |                     0.0651885 |
-|      18 |             4 |   8 | role           | top5     |        70 |                     -0.0592412 |                  -0.00146433 |                        -0.0079581  |                      -0.0123481  |                 0.0577769 |                   -0.00438998 |                     0.0621669 |
-|      18 |             4 |   8 | dept_role      | top5     |        70 |                     -0.0592412 |                  -0.00442777 |                        -0.0079581  |                      -0.00974737 |                 0.0548134 |                   -0.00178927 |                     0.0566027 |
-|      18 |             4 |   8 | team           | top5     |        70 |                     -0.0592412 |                  -0.0150535  |                        -0.0079581  |                      -0.0160042  |                 0.0441877 |                   -0.00804606 |                     0.0522338 |
+|   layer |   latent_mult |   k | context_mode   | target   |   n_pairs |   n_complete_pairs |   top_positive_mean_best_delta |   top_benign_mean_best_delta |   control_positive_mean_best_delta |   control_benign_mean_best_delta |   top_necessity_advantage |   control_necessity_advantage |   top_minus_control_necessity |
+|--------:|--------------:|----:|:---------------|:---------|----------:|-------------------:|-------------------------------:|-----------------------------:|-----------------------------------:|---------------------------------:|--------------------------:|------------------------------:|------------------------------:|
+|      18 |             4 |   8 | project_role   | top5     |        70 |                 70 |                     -0.0581652 |                  -0.0033418  |                        -0.00716735 |                      -0.0175324  |                 0.0548234 |                   -0.0103651  |                     0.0651885 |
+|      18 |             4 |   8 | role           | top5     |        70 |                 70 |                     -0.0592412 |                  -0.00146433 |                        -0.0079581  |                      -0.0123481  |                 0.0577769 |                   -0.00438998 |                     0.0621669 |
+|      18 |             4 |   8 | dept_role      | top5     |        70 |                 70 |                     -0.0592412 |                  -0.00442777 |                        -0.0079581  |                      -0.00974737 |                 0.0548134 |                   -0.00178927 |                     0.0566027 |
+|      18 |             4 |   8 | team           | top5     |        70 |                 70 |                     -0.0592412 |                  -0.0150535  |                        -0.0079581  |                      -0.0160042  |                 0.0441877 |                   -0.00804606 |                     0.0522338 |
 
 ## Selected Feature Sets
 

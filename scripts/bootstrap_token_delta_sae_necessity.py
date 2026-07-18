@@ -36,6 +36,7 @@ def summarize_best(best_df: pd.DataFrame, top_sets: List[str], control_set: str)
         work.columns = [f"{a}_{b}" for a, b in work.columns]
         work = work.reset_index()
         for top_set in top_sets:
+            needed = [f"{top_set}_positive", f"{top_set}_benign", f"{control_set}_positive", f"{control_set}_benign"]
             row = {
                 "layer": int(layer),
                 "latent_mult": int(latent_mult),
@@ -44,21 +45,25 @@ def summarize_best(best_df: pd.DataFrame, top_sets: List[str], control_set: str)
                 "target": str(top_set),
                 "n_pairs": int(len(work)),
             }
-            for col in [
-                f"{top_set}_positive",
-                f"{top_set}_benign",
-                f"{control_set}_positive",
-                f"{control_set}_benign",
-            ]:
+            for col in needed:
                 if col not in work.columns:
                     work[col] = float("nan")
-            row["top_positive_mean_best_delta"] = float(work[f"{top_set}_positive"].mean())
-            row["top_benign_mean_best_delta"] = float(work[f"{top_set}_benign"].mean())
-            row["control_positive_mean_best_delta"] = float(work[f"{control_set}_positive"].mean())
-            row["control_benign_mean_best_delta"] = float(work[f"{control_set}_benign"].mean())
-            row["top_necessity_advantage"] = row["top_benign_mean_best_delta"] - row["top_positive_mean_best_delta"]
-            row["control_necessity_advantage"] = row["control_benign_mean_best_delta"] - row["control_positive_mean_best_delta"]
-            row["top_minus_control_necessity"] = row["top_necessity_advantage"] - row["control_necessity_advantage"]
+            complete = work.dropna(subset=needed)
+            row["n_complete_pairs"] = int(len(complete))
+            row["top_positive_mean_best_delta"] = float(complete[f"{top_set}_positive"].mean())
+            row["top_benign_mean_best_delta"] = float(complete[f"{top_set}_benign"].mean())
+            row["control_positive_mean_best_delta"] = float(complete[f"{control_set}_positive"].mean())
+            row["control_benign_mean_best_delta"] = float(complete[f"{control_set}_benign"].mean())
+            row["top_necessity_advantage"] = float((complete[f"{top_set}_benign"] - complete[f"{top_set}_positive"]).mean())
+            row["control_necessity_advantage"] = float(
+                (complete[f"{control_set}_benign"] - complete[f"{control_set}_positive"]).mean()
+            )
+            row["top_minus_control_necessity"] = float(
+                (
+                    (complete[f"{top_set}_benign"] - complete[f"{top_set}_positive"])
+                    - (complete[f"{control_set}_benign"] - complete[f"{control_set}_positive"])
+                ).mean()
+            )
             rows.append(row)
     return pd.DataFrame(rows).sort_values(
         ["top_minus_control_necessity", "top_necessity_advantage", "context_mode", "target"],
@@ -84,7 +89,7 @@ def bootstrap_metric(
     ).to_numpy(dtype=float)
     metric = metric[np.isfinite(metric)]
     if metric.size == 0:
-        return {"estimate": float("nan"), "ci_low": float("nan"), "ci_high": float("nan")}
+        return {"n_complete_pairs": 0, "estimate": float("nan"), "ci_low": float("nan"), "ci_high": float("nan")}
     rng = np.random.default_rng(seed)
     draws = np.empty(n_bootstrap, dtype=np.float64)
     n = metric.size
@@ -92,6 +97,7 @@ def bootstrap_metric(
         idx = rng.integers(0, n, size=n)
         draws[i] = float(metric[idx].mean())
     return {
+        "n_complete_pairs": int(metric.size),
         "estimate": float(metric.mean()),
         "ci_low": float(np.quantile(draws, 0.025)),
         "ci_high": float(np.quantile(draws, 0.975)),
@@ -102,7 +108,7 @@ def write_report(summary_df: pd.DataFrame, out_path: Path, *, control_set: str, 
     lines = [
         "# Token Delta SAE Necessity Bootstrap Stats",
         "",
-        f"Bootstrap confidence intervals over matched positive/benign receiver pairs for token-level necessity ablation. Control comparison: `{control_set}`. Bootstrap draws: `{n_bootstrap}`.",
+        f"Bootstrap confidence intervals over complete matched positive/benign receiver-pair contrasts for token-level necessity ablation. Control comparison: `{control_set}`. Bootstrap draws: `{n_bootstrap}`.",
         "",
         "## Summary",
         "",

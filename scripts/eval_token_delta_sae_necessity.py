@@ -161,6 +161,12 @@ def summarize_best(best_df: pd.DataFrame, top_sets: Sequence[str], control_set: 
         work.columns = [f"{a}_{b}" for a, b in work.columns]
         work = work.reset_index()
         for top_set in top_sets:
+            needed = [
+                f"{top_set}_positive",
+                f"{top_set}_benign",
+                f"{control_set}_positive",
+                f"{control_set}_benign",
+            ]
             row = {
                 "layer": int(layer),
                 "latent_mult": int(latent_mult),
@@ -169,26 +175,24 @@ def summarize_best(best_df: pd.DataFrame, top_sets: Sequence[str], control_set: 
                 "target": str(top_set),
                 "n_pairs": int(len(work)),
             }
-            for col in [
-                f"{top_set}_positive",
-                f"{top_set}_benign",
-                f"{control_set}_positive",
-                f"{control_set}_benign",
-            ]:
+            for col in needed:
                 if col not in work.columns:
                     work[col] = float("nan")
-            row["top_positive_mean_best_delta"] = float(work[f"{top_set}_positive"].mean())
-            row["top_benign_mean_best_delta"] = float(work[f"{top_set}_benign"].mean())
-            row["control_positive_mean_best_delta"] = float(work[f"{control_set}_positive"].mean())
-            row["control_benign_mean_best_delta"] = float(work[f"{control_set}_benign"].mean())
-            row["top_necessity_advantage"] = (
-                row["top_benign_mean_best_delta"] - row["top_positive_mean_best_delta"]
+            complete = work.dropna(subset=needed)
+            row["n_complete_pairs"] = int(len(complete))
+            row["top_positive_mean_best_delta"] = float(complete[f"{top_set}_positive"].mean())
+            row["top_benign_mean_best_delta"] = float(complete[f"{top_set}_benign"].mean())
+            row["control_positive_mean_best_delta"] = float(complete[f"{control_set}_positive"].mean())
+            row["control_benign_mean_best_delta"] = float(complete[f"{control_set}_benign"].mean())
+            row["top_necessity_advantage"] = float((complete[f"{top_set}_benign"] - complete[f"{top_set}_positive"]).mean())
+            row["control_necessity_advantage"] = float(
+                (complete[f"{control_set}_benign"] - complete[f"{control_set}_positive"]).mean()
             )
-            row["control_necessity_advantage"] = (
-                row["control_benign_mean_best_delta"] - row["control_positive_mean_best_delta"]
-            )
-            row["top_minus_control_necessity"] = (
-                row["top_necessity_advantage"] - row["control_necessity_advantage"]
+            row["top_minus_control_necessity"] = float(
+                (
+                    (complete[f"{top_set}_benign"] - complete[f"{top_set}_positive"])
+                    - (complete[f"{control_set}_benign"] - complete[f"{control_set}_positive"])
+                ).mean()
             )
             rows.append(row)
     if not rows:
@@ -223,6 +227,7 @@ def write_report(
         "- feature sets = top sparse sets ablated in token-level delta-SAE space, compared against the control set",
         "- only receiver token positions where the target sparse features are active are modified",
         "- ablation shrinks selected sparse feature activations toward zero by alpha",
+        "- summary advantages are paired contrasts over pairs with complete top/control and positive/benign support",
         "",
         f"Control comparison: `{control_set}`",
         "",
