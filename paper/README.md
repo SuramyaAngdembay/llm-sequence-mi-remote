@@ -50,16 +50,6 @@ to repeated `pdflatex`/`bibtex`.
 
 ## Important draft note
 
-The `r4.2` same-user-excluded causal bundle currently contains a reporting
-inconsistency between the top-level `RESULTS.md` narrative and the underlying
-`token_delta_sae_causal_summary.csv`. This draft avoids locking a single
-bootstrap headline scalar from that inconsistent pair and instead phrases the
-`r4.2` causal result conservatively as positive across contexts, with the
-regenerated no-same-user compare report used for the explicit remote-vs-local
-comparison row.
-
-Before submission, reconcile:
-
-- `results/qwen3_8b_r42_token_causal/same_user_recovery/RESULTS.md`
-- `results/qwen3_8b_r42_token_causal/same_user_recovery/l26_m02_k04_top5_control5_active_no_same_user/token_delta_sae_causal_summary.csv`
-
+The repaired same-user-excluded causal rows should be interpreted using the
+complete receiver-level top-vs-control contrast that matches the bootstrap
+estimand. The paper generator follows that repaired bundle convention.

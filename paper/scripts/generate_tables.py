@@ -92,9 +92,9 @@ def write_mech_table() -> None:
             "r4.2",
             "Remote native causal",
             "Same-user excluded",
-            "positive across contexts",
-            "0.001112*",
-            "see compare report",
+            "team",
+            "0.001418",
+            "[0.001139, 0.001690]",
             "remote > local adaptive (0.000909)",
         ],
         [
@@ -109,7 +109,7 @@ def write_mech_table() -> None:
     ]
     write_table(
         TABLES / "cert_mechanistic_summary.tex",
-        "Mechanistic summary after the same-user recovery audit. The asterisk marks the current regenerated compare-report row used for the r4.2 causal comparison while the no-same-user causal bundle is still being harmonized internally.",
+        "Mechanistic summary after the same-user recovery audit. Point estimates use the repaired bundle summaries; confidence intervals come from the corresponding bootstrap reports.",
         "tab:cert_mechanistic",
         "lllllll",
         ["Dataset", "Branch", "Protocol", "Context", "Effect", "95\\% CI", "Read"],
@@ -144,4 +144,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
