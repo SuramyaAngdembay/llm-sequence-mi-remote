@@ -420,3 +420,46 @@ Decision implication:
   - `BATCH_SIZE=96`
   - `PATCH_CHUNK_SIZE=96`
   - `CAUSAL_TIME=48:00:00`
+
+## r4.2 Same-User Recovery Completed
+
+Checked after retry causal job `19271697` and bootstrap job `19271698`.
+
+Tracked result directories:
+
+- `results/qwen3_8b_r42_token_causal/same_user_recovery/l26_m02_k04_top5_control5_active_no_same_user/`
+- `results/qwen3_8b_r42_token_necessity/same_user_recovery/l26_m02_k04_top5_control5_active_necessity_no_same_user/`
+
+r4.2 causal:
+
+- job `19271697` completed in `15:53:04`
+- bootstrap job `19271698` completed in `00:00:17`
+- `team / top5`: estimate `0.00141845`, CI
+  `[0.00113942, 0.00168969]`
+- `role / top5`: estimate `0.00111151`, CI
+  `[0.000825634, 0.00139119]`
+- `dept_role / top5`: estimate `0.00106737`, CI
+  `[0.000824039, 0.00130497]`
+- `dept / top5`: estimate `0.000981886`, CI
+  `[0.000751466, 0.00121531]`
+
+r4.2 necessity:
+
+- job `19222733` completed in `02:12:55`
+- bootstrap job `19222735` completed in `00:00:38`
+- `dept_role / top5`: estimate `0.00292177`, CI
+  `[0.00145958, 0.00437872]`
+- `role / top5`: estimate `0.00207545`, CI
+  `[0.000678829, 0.00341792]`
+- `dept / top5`: estimate `0.00115490`, CI
+  `[-0.000242226, 0.00253638]`
+- `team / top5`: estimate `0.000661806`, CI
+  `[-0.000880060, 0.00223591]`
+
+Decision implication:
+
+- r4.2 native same-user recovery is positive for causal and necessity
+- the older negative r4.2 direct-transfer result remains valid as a transfer
+  failure, not as evidence that r4.2 lacks a token mechanism
+- the paper can now state that the r4.2 mechanism exists but is native and
+  smaller than the r6.2 token mechanism
