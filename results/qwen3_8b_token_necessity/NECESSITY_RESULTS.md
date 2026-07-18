@@ -51,6 +51,46 @@ Raw candidate rows were not committed to avoid unnecessary repo growth. If Magno
 
 - `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_necessity_qwen3_8b_gpu/l18_m04_k08_top5_control5_active_necessity_gpu_bs24_loss4/token_delta_sae_necessity_candidate_rows.csv`
 
+## r6.2 Same-User Recovery
+
+Committed result directory:
+
+- `results/qwen3_8b_token_necessity/same_user_recovery/l18_m04_k08_top5_control5_active_necessity_no_same_user/`
+
+Anvil output directory:
+
+- `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_necessity_qwen3_8b_no_same_user/l18_m04_k08_top5_control5_active_necessity_no_same_user/`
+
+Jobs:
+
+- evaluator: `19173969`, completed, elapsed `00:12:04`, MaxRSS `26663160K`
+- bootstrap: `19173971`, completed, elapsed `00:00:21`
+- peak GPU memory poll: `25517 MiB`
+
+Settings:
+
+- `LAYER=18`
+- `LATENT_MULT=4`
+- `TOPK=8`
+- `BATCH_SIZE=96`
+- `PATCH_CHUNK_SIZE=96`
+- `LOSS_BATCH_SIZE=4`
+- same-user benign matches excluded: yes
+- candidate rows: `4480`
+
+Bootstrap estimates:
+
+| context | estimate | CI low | CI high |
+|---|---:|---:|---:|
+| project_role | 0.065188 | 0.055145 | 0.075023 |
+| role | 0.062167 | 0.050265 | 0.073364 |
+| dept_role | 0.056603 | 0.044996 | 0.068990 |
+| team | 0.052234 | 0.042054 | 0.061397 |
+
+Interpretation: the r6.2 token branch remains strongly necessity-positive
+after same-user benign matches are excluded. This should supersede the older
+permissive-match r6.2 necessity row for final paper tables.
+
 ## r4.2
 
 Committed result directory:

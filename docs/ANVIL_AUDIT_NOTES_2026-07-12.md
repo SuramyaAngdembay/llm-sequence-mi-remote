@@ -333,6 +333,42 @@ Decision implication:
 - this closes the main same-user donor leakage concern for the r6.2 causal
   branch, pending Magnolia review of the committed candidate rows
 
+## r6.2 Same-User-Excluded Full Necessity Result
+
+Checked after GPU job `19173969` and bootstrap job `19173971` completed.
+
+Tracked result directory:
+
+`results/qwen3_8b_token_necessity/same_user_recovery/l18_m04_k08_top5_control5_active_necessity_no_same_user/`
+
+Source output directory:
+
+`/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_necessity_qwen3_8b_no_same_user/l18_m04_k08_top5_control5_active_necessity_no_same_user`
+
+Bootstrap results with same-user benign matches excluded:
+
+- `project_role / top5`: estimate `0.0651885`, CI
+  `[0.0551452, 0.0750226]`
+- `role / top5`: estimate `0.0621669`, CI `[0.0502648, 0.0733641]`
+- `dept_role / top5`: estimate `0.0566027`, CI
+  `[0.0449963, 0.0689897]`
+- `team / top5`: estimate `0.0522338`, CI `[0.0420541, 0.0613970]`
+
+Runtime and hardware:
+
+- wall time: `00:12:04`
+- CPU MaxRSS: about `26.7 GiB`
+- peak GPU memory: `25517 MiB`
+- active-average GPU memory: about `16.5 GiB`
+
+Decision implication:
+
+- the r6.2 necessity result remains strongly positive after same-user match
+  exclusion
+- this closes the same-user leakage concern for the r6.2 necessity branch
+- the final paper should cite the same-user-excluded necessity result rather
+  than the older permissive-match row
+
 ## r4.2 Chunked-Logit Scorer Fix and Probes
 
 Checked after `gpu-debug` jobs `19219289` and `19219291`.
