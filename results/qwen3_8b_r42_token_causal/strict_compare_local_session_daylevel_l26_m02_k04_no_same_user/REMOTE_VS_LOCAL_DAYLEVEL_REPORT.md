@@ -36,14 +36,14 @@ method context_mode       target  control3_anomalous_mean_best_delta  control3_b
 
 ## Remote Token Summary
 
- layer  latent_mult  k context_mode target  n_receivers  top_benign_mean_best_delta  top_anomalous_mean_best_delta  control_benign_mean_best_delta  control_anomalous_mean_best_delta  top_repair_advantage  control_repair_advantage  top_minus_control_advantage
-    26            2  4         role   top5         1119                    0.004232                       0.006466                        0.010781                           0.011903              0.002234                  0.001122                     0.001112
-    26            2  4    dept_role   top5         1039                   -0.000059                       0.001636                        0.006448                           0.007057              0.001696                  0.000609                     0.001086
-    26            2  4         team   top5         1301                    0.003442                       0.001355                        0.009260                           0.006259             -0.002087                 -0.003001                     0.000914
-    26            2  4         dept   top5         1199                    0.000828                       0.001048                        0.007135                           0.006480              0.000220                 -0.000654                     0.000874
+ layer  latent_mult  k context_mode target  n_receivers  n_complete_receivers  top_benign_mean_best_delta  top_anomalous_mean_best_delta  control_benign_mean_best_delta  control_anomalous_mean_best_delta  top_repair_advantage  control_repair_advantage  top_minus_control_advantage
+    26            2  4         team   top5         1301                  1052                   -0.000192                       0.001355                        0.006130                           0.006259              0.001547                  0.000129                     0.001418
+    26            2  4         role   top5         1119                  1110                    0.005210                       0.006466                        0.011759                           0.011903              0.001256                  0.000144                     0.001112
+    26            2  4    dept_role   top5         1039                  1034                    0.000444                       0.001636                        0.006933                           0.007057              0.001192                  0.000124                     0.001067
+    26            2  4         dept   top5         1199                  1157                   -0.000044                       0.001048                        0.006370                           0.006480              0.001093                  0.000111                     0.000982
 
 ## Read
 
 - best local adaptive day-level advantage: `0.000909`
-- best remote token advantage: `0.001112`
+- best remote token advantage: `0.001418`
 - best local residual day-level advantage: `0.000811`
