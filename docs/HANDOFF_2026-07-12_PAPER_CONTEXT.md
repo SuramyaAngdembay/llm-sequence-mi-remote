@@ -54,9 +54,9 @@ Status:
 
 Support:
 
-- `results/qwen3_8b_token_causal/active_control_v1/ACTIVE_CONTROL_RESULTS.md`
-- `results/qwen3_8b_token_necessity/NECESSITY_RESULTS.md`
-- `results/qwen3_8b_token_causal/stream_confirm/RESULTS.md`
+- `results/qwen3_8b_token_causal/same_user_recovery/RESULTS.md`
+- `results/qwen3_8b_token_necessity/same_user_recovery/RESULTS.md`
+- `results/qwen3_8b_token_causal/strict_compare_remote70_daylevel_l18_m04_k08_no_same_user/REMOTE_VS_LOCAL_DAYLEVEL_REPORT.md`
 
 Current headline branch:
 
@@ -75,8 +75,8 @@ Read:
 Status:
 
 - scientifically strong
-- **not final-table-safe yet** until the same-user-excluded reruns preserve the
-  sign and broad scale
+- final-table-safe on the remote mechanistic side
+- use the `same_user_recovery/` bundles, not the older permissive-donor rows
 
 ### Claim C: direct remote token-mechanism transfer from `r6.2` to `r4.2` fails
 
@@ -102,8 +102,9 @@ Support:
 - `docs/HANDOFF_2026-07-05_R42_NATIVE_TOKEN_SEARCH.md`
 - `results/qwen3_8b_r42_token_causal/native_search_v3_bs24/RESULTS.md`
 - `results/qwen3_8b_r42_token_causal/native_active_control_v1/ACTIVE_CONTROL_RESULTS.md`
-- `results/qwen3_8b_token_necessity/NECESSITY_RESULTS.md`
-- `results/qwen3_8b_r42_token_causal/strict_compare_local_session_daylevel_l26_m02_k04/REMOTE_VS_LOCAL_DAYLEVEL_REPORT.md`
+- `results/qwen3_8b_r42_token_causal/same_user_recovery/RESULTS.md`
+- `results/qwen3_8b_r42_token_necessity/same_user_recovery/RESULTS.md`
+- `results/qwen3_8b_r42_token_causal/strict_compare_local_session_daylevel_l26_m02_k04_no_same_user/REMOTE_VS_LOCAL_DAYLEVEL_REPORT.md`
 
 Current headline branch:
 
@@ -123,8 +124,8 @@ Read:
 Status:
 
 - scientifically meaningful
-- **not final-table-safe yet** until the same-user-excluded reruns preserve the
-  sign
+- final-table-safe on the remote mechanistic side
+- use the `same_user_recovery/` bundles, not the older permissive-donor rows
 
 ### Claim E: the remote detector is competitive with local detector baselines
 
@@ -138,7 +139,9 @@ Intended support:
 
 Status:
 
-- **currently uncertain / pending**
+- scientifically usable only through the fold-aligned detector artifacts
+- detector quality is mixed / weak on day PR-AUC relative to the stronger local
+  Magnolia baselines
 - the old `results/*/detector_metrics/DETECTOR_METRICS.md` artifacts are
   audit-only and are **not** headline detector rows
 
@@ -148,6 +151,7 @@ Do **not** make these claims:
 
 - the remote detector is competitive based on the old `detector_metrics/`
   artifacts
+- a strong detector-superiority claim on CERT
 - direct token-mechanism transfer succeeds across CERT benchmarks
 - the same sparse mechanism transfers unchanged across datasets
 - `r4.2` necessity is equally strong as `r6.2`
@@ -374,14 +378,14 @@ Audit-only / not headline detector rows:
 - `results/qwen3_8b_token_causal/detector_metrics/`
 - `results/qwen3_8b_r42_token_causal/detector_metrics/`
 
-Headline-safe mechanistic rows, once no-same-user reruns succeed:
+Headline-safe mechanistic rows:
 
 - `r6.2` remote:
-  - `results/qwen3_8b_token_causal/active_control_v1/`
-  - `results/qwen3_8b_token_necessity/`
+  - `results/qwen3_8b_token_causal/same_user_recovery/`
+  - `results/qwen3_8b_token_necessity/same_user_recovery/`
 - `r4.2` remote:
-  - `results/qwen3_8b_r42_token_causal/native_active_control_v1/`
-  - `results/qwen3_8b_r42_token_necessity/`
+  - `results/qwen3_8b_r42_token_causal/same_user_recovery/`
+  - `results/qwen3_8b_r42_token_necessity/same_user_recovery/`
 
 Supporting / appendix / historical context:
 
@@ -393,13 +397,16 @@ Supporting / appendix / historical context:
 
 ### Compare reports
 
-Any cited `REMOTE_VS_LOCAL_DAYLEVEL_REPORT.md` should be regenerated after the
-compare-script clarification in commit `ee6a75a`.
+Any cited `REMOTE_VS_LOCAL_DAYLEVEL_REPORT.md` should come from the regenerated
+post-`ee6a75a` reports.
 
-The current reports may still be numerically fine, but they were
-under-specified about the local target/control convention.
+Headline-safe regenerated reports:
 
-Regenerate if cited:
+- `results/qwen3_8b_token_causal/strict_compare_remote70_daylevel_l18_m04_k08_no_same_user/REMOTE_VS_LOCAL_DAYLEVEL_REPORT.md`
+- `results/qwen3_8b_r42_token_causal/strict_compare_local_session_daylevel_l26_m02_k04_no_same_user/REMOTE_VS_LOCAL_DAYLEVEL_REPORT.md`
+
+Historical compare reports are appendix / audit-only unless explicitly
+re-regenerated:
 
 - `results/qwen3_8b_token_causal/strict_compare_remote70_daylevel_*`
 - `results/qwen3_8b_r42_token_causal/strict_compare_local_session_daylevel_*`

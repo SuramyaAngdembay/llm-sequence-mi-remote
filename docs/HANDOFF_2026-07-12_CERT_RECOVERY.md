@@ -65,9 +65,13 @@ bash scripts/submit_qwen3_8b_r42_necessity_no_same_user_anvil.sh
 ## Step 3: Regenerate Cited Compare Reports
 
 The compare script is now explicit about the local target/control assumptions.
-Regenerate any cited reports after the remote recovery results land.
+Use the regenerated no-same-user compare reports for any paper citation.
 
-Especially regenerate if cited:
+Headline-safe compare reports:
+- `results/qwen3_8b_token_causal/strict_compare_remote70_daylevel_l18_m04_k08_no_same_user/REMOTE_VS_LOCAL_DAYLEVEL_REPORT.md`
+- `results/qwen3_8b_r42_token_causal/strict_compare_local_session_daylevel_l26_m02_k04_no_same_user/REMOTE_VS_LOCAL_DAYLEVEL_REPORT.md`
+
+Historical compare outputs are audit-only unless explicitly re-regenerated:
 - `results/qwen3_8b_token_causal/strict_compare_remote70_daylevel_*`
 - `results/qwen3_8b_r42_token_causal/strict_compare_local_session_daylevel_*`
 - `results/qwen3b_pilot/strict_compare_remote70_daylevel_controlfix/*`

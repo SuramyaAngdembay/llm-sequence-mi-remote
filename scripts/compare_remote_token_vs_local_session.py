@@ -120,6 +120,7 @@ def write_report(
         "This puts the local session branch on the same receiver unit as the remote token QLoRA branch.",
         f"Local summaries use `intervention={local_top_intervention}` as the target set and `intervention={local_control_intervention}` as the control set.",
         "Remote summaries are read from the provided remote summary CSV and may use a different control-set construction (for example `control5_active`).",
+        "Remote summaries may also reflect stricter receiver/donor matching rules such as same-user exclusion, so `n_receivers` can be smaller than the full positive-day pool.",
         "",
         "## Best Local Adaptive Day-Level Rows",
         "",
