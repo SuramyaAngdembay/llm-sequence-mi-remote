@@ -1,0 +1,203 @@
+\documentclass[twoside,11pt]{article}
+\usepackage[preprint]{jmlr2e}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows}
+\usepackage{url}
+\hypersetup{hidelinks}
+
+\jmlrheading{0}{2026}{1-1}{7/26}{7/26}{TMLR-SUBMISSION}{Anonymous Authors}
+\ShortHeadings{Benchmark-Specific Causal Structure in Session LLMs}{Anonymous Authors}
+\firstpageno{1}
+
+\title{Benign-Trained Session Language Models Recover Benchmark-Specific Causal Structure on Insider-Threat Benchmarks}
+
+\author{\name Anonymous Authors \\
+\addr Anonymous Institution}
+
+\editor{Under Review by TMLR}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}% keep trailing percent for jmlr2e
+We study whether a benign-trained session language model can be both
+mechanistically analyzable and empirically meaningful on insider-threat-style
+enterprise benchmarks. Our current paper-safe evidence centers on a
+QLoRA-adapted Qwen3-8B model evaluated on two CERT benchmarks, r6.2 and r4.2.
+After a July 2026 audit corrected detector evaluation and tightened the
+mechanistic protocol, the detector story is mixed: fold-aligned remote detector
+performance shows strong ROC and ranking behavior but weaker day PR-AUC than the
+strongest local baselines. The mechanistic story is stronger. On r6.2, a
+same-user-excluded token-level causal patching effect remains clearly positive
+and the corresponding necessity effect is large. On r4.2, direct transfer of
+the r6.2 mechanism fails, but a native r4.2 token mechanism can still be
+rediscovered under the stricter same-user-excluded protocol. The resulting
+scientific claim is not universal detector superiority or a universal sparse
+insider-threat circuit. Instead, the current evidence supports a more specific
+finding: benign-trained session LLMs can recover benchmark-specific causal
+structure on insider-threat benchmarks, direct mechanism transfer can fail, and
+native rediscovery can succeed.
+\end{abstract}
+
+\begin{keywords}
+insider threat, anomaly detection, mechanistic interpretability, language
+models, one-class learning, causal patching
+\end{keywords}
+
+\section{Introduction}
+Enterprise anomaly detection is often evaluated only as a ranking problem, but
+high-stakes insider-threat settings also require a usable answer to ``why did
+the model fire?'' A detector that produces a score without any localized,
+behaviorally meaningful mechanism is difficult to audit, hard to compare across
+benchmarks, and easy to overclaim \citep{chandola2009anomaly}.
+
+This draft focuses on a narrower question than universal anomaly detection:
+whether a benign-trained session language model can recover stable,
+benchmark-specific causal structure on insider-threat-style CERT benchmarks. The
+current remote branch is a QLoRA-adapted Qwen3-8B session model trained only on
+benign users. Its evaluation has two parts. First, a detector benchmark asks
+how the remote score behaves under the same leave-one-malicious-user-out folds
+used by the local baselines. Second, a mechanistic benchmark asks whether
+sparse token feature sets show causal sufficiency and necessity under active
+controls and after same-user exclusions. The model family itself is still a
+transformer-based sequence model \citep{vaswani2017attention}.
+
+The current evidence supports three points. First, benign-only remote training
+is valid one-class training under the implemented protocol. Second, the remote
+mechanistic branch is genuinely positive on r6.2 after the stricter same-user
+repair. Third, r4.2 rejects a universal transfer story but still supports
+native rediscovery of a smaller remote mechanism. What the evidence does not
+support is a strong detector-superiority claim on CERT.
+
+\input{figures/pipeline.tex}
+
+\paragraph{Contributions.}
+\begin{enumerate}[leftmargin=1.3em]
+\item We provide a repaired, paper-safe CERT evaluation policy that separates
+fold-aligned detector benchmarking from same-user-excluded mechanistic
+evaluation.
+\item We show that the remote token mechanism on r6.2 remains positive after the
+same-user donor/match audit.
+\item We show that direct token-mechanism transfer from r6.2 to r4.2 fails, but
+a native r4.2 mechanism can still be recovered.
+\item We show that detector competitiveness and mechanistic interpretability
+need not move together: the mechanistic claim is stronger than the detector
+claim in the current repaired evidence.
+\end{enumerate}
+
+\section{Setup and Evaluation Protocol}
+\subsection{Remote model and data protocol}
+The remote branch is a benign-trained Qwen3-8B QLoRA session model. Positive
+users are assigned to the remote evaluation split, while training and validation
+use benign users only. This makes the remote branch a one-class detector in the
+sense that the model is never trained on malicious examples.
+
+\subsection{Datasets}
+We focus on two CERT benchmarks. The r6.2 branch has 70 remote positive
+receiver-days in the current mechanistic evaluation. The r4.2 branch is larger,
+with 1309 remote positive receiver-days in the repaired native-mechanism
+evaluation. Both datasets also have local Magnolia baselines and local
+session-AE mechanistic comparators \citep{certdataset}.
+
+\subsection{Detector benchmark}
+After the July 2026 audit, remote detector rows are considered valid only when
+they use full-population scoring on \texttt{all.jsonl} followed by fold-aligned
+evaluation on the same leave-one-malicious-user-out test-user construction as
+the local baselines. This protocol fixes the earlier split-filter bug that had
+made the old \texttt{detector\_metrics/} artifacts too optimistic.
+
+\subsection{Mechanistic estimands}
+The causal branch measures a token-level repair advantage:
+top sparse feature sets are patched into positive receivers and compared against
+an active control set. The necessity branch measures whether ablating the top
+feature set hurts anomalous examples more than ablating the active control.
+Final mechanistic rows are taken only from the repaired same-user-excluded
+runs.
+
+\input{figures/story.tex}
+
+\section{Results}
+\subsection{Detector results are mixed under the corrected protocol}
+The corrected detector table is fold-aligned and therefore scientifically usable
+for remote-vs-local comparison. It changes the story materially: the remote
+detector has strong ROC and some useful user-ranking behavior, but it is not
+stronger than the best local Magnolia baselines on day PR-AUC, including the
+Deep SVDD reference baseline \citep{ruff2018deepsvdd}.
+
+\input{tables/cert_detector_comparison.tex}
+
+The consequence is straightforward. Detector evidence should stay in the paper,
+but not as the headline claim. The strongest safe reading is that the remote
+detector remains nontrivial and behaviorally structured, not that it dominates
+the local baselines.
+
+\subsection{r6.2 retains a strong remote mechanism after repair}
+The repaired r6.2 same-user-excluded causal run remains clearly positive for the
+main organization-context rows, and the matched necessity effect remains large.
+The repaired remote-vs-local day-level comparison also shows that the remote
+causal effect remains larger than the local session-AE comparator scale.
+
+\subsection{r4.2 rejects direct transfer but supports native rediscovery}
+Transferred layer-18 r6.2 token configurations remained negative on r4.2, so
+the data do not support a universal transferable sparse circuit. However, the
+native r4.2 search found a positive layer-26 token branch, and that branch
+remained positive under the stricter same-user-excluded recovery. The native
+necessity result is weaker than r6.2 and is strongest for \texttt{dept\_role}
+and \texttt{role}.
+
+\input{tables/cert_mechanistic_summary.tex}
+
+\subsection{The paper claim is now narrower but cleaner}
+After the recovery work, the project has a more defensible paper shape:
+mechanistic evidence is the center, detector performance is a qualified
+background result, and direct transfer failure becomes part of the scientific
+finding rather than a flaw to hide.
+
+\input{tables/claim_status.tex}
+
+\section{Discussion}
+The repaired evidence supports a paper about benchmark-specific causal structure
+in benign-trained session language models. That is a meaningful result on its
+own. It says that the learned signal is not merely a detector score but can be
+localized to sparse token-level mechanisms, even if those mechanisms are not
+portable across benchmarks without rediscovery.
+
+This also clarifies what should \emph{not} be claimed. The current detector
+results do not justify a strong ``better detector'' paper. The current
+mechanistic results also do not justify a universal insider-threat circuit.
+Instead, the strongest supported message is that the same modeling family can
+recover different, benchmark-specific mechanisms under a common remote
+pipeline.
+
+\section{Limitations}
+This is still a first draft and not a final submission package. Two limitations
+matter immediately. First, the detector story is weaker than the mechanistic
+story and should be framed that way. Second, one r4.2 same-user-excluded causal
+bundle currently contains an internal reporting inconsistency between the
+top-level narrative and the underlying summary CSV; the current draft avoids
+hard-coding that disputed scalar and instead relies on the regenerated
+no-same-user compare report plus the bundle-level qualitative read.
+
+\section{Broader Impact Statement}
+Insider-threat detection can reduce harm from credential misuse, data exfiltration,
+and risky internal behavior, but it also creates surveillance risks. A model
+that is operationally deployed without strong governance could be used to
+escalate normal employee variation, over-monitor specific workers, or justify
+opaque automated action. The current work modestly improves that situation by
+favoring benign-only training, explicit evaluation policies, and mechanistic
+auditing over purely opaque score maximization. Even so, none of these results
+should be interpreted as a justification for autonomous disciplinary action.
+Human review, documented appeal processes, and careful organizational policy are
+required for any responsible deployment.
+
+\acks{This anonymized draft omits acknowledgements for submission. The final
+camera-ready version should add funding, disclosure, and acknowledgements as
+required by the venue.}
+
+\bibliography{references}
+
+\end{document}

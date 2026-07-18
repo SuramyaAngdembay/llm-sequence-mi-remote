@@ -1,0 +1,23 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, minimum width=3.0cm, minimum height=0.95cm},
+  arrow/.style={->, thick}
+]
+\node[box] (data) {CERT session-day logs\\r6.2 and r4.2};
+\node[box, right=1.2cm of data] (train) {Benign-only QLoRA training\\Qwen3-8B session model};
+\node[box, below=1.2cm of train] (det) {Fold-aligned detector eval\\fixed remote model};
+\node[box, below=1.2cm of data] (sae) {Token SAE feature sets\\top5 vs control5\_active};
+\node[box, right=1.2cm of sae] (mech) {Causal patching and necessity\\same-user excluded};
+\node[box, below=1.2cm of mech] (compare) {Local session-AE comparator\\day-level repair summary};
+
+\draw[arrow] (data) -- (train);
+\draw[arrow] (train) -- (det);
+\draw[arrow] (data) -- (sae);
+\draw[arrow] (train) -- (mech);
+\draw[arrow] (sae) -- (mech);
+\draw[arrow] (mech) -- (compare);
+\end{tikzpicture}
+\caption{Current paper pipeline. The remote branch is trained benign-only, detector evaluation is fold-aligned to the local benchmark, and mechanistic results use the repaired same-user-excluded protocol.}
+\label{fig:pipeline}
+\end{figure}
