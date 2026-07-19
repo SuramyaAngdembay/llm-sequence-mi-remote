@@ -97,11 +97,12 @@ def main() -> None:
     discovery_users = {
         ln.strip() for ln in args.discovery_user_file.read_text().splitlines() if ln.strip()
     }
+    # example_idx in the token cache indexes eval.jsonl row order; the scores
+    # parquet is keyed by that same index and carries user_id and y directly.
+    # Do NOT join against example_metadata.csv (it covers all splits in a
+    # different row order).
     scores = pd.read_parquet(args.extract_dir / "example_scores.parquet")
-    meta = pd.read_csv(args.data_dir / "example_metadata.csv")
-    if "example_idx" not in meta.columns:
-        meta = meta.reset_index().rename(columns={"index": "example_idx"})
-    user_by_example = dict(zip(meta["example_idx"].astype(int), meta["user_id"].astype(str)))
+    user_by_example = dict(zip(scores["example_idx"].astype(int), scores["user_id"].astype(str)))
     y_by_example = dict(zip(scores["example_idx"].astype(int), scores["y"].astype(int)))
 
     bundle = torch.load(src_cfg / "delta_sae_model.pt", map_location="cpu", weights_only=False)
@@ -121,6 +122,12 @@ def main() -> None:
         benign_sample_prob=args.benign_sample_prob,
         seed=args.seed,
     )
+    total_pos = stats["n_positive_rows_kept"] + stats["n_positive_rows_dropped_confirmation"]
+    if total_pos and stats["n_positive_rows_kept"] < 0.05 * total_pos:
+        raise RuntimeError(
+            f"Implausible split: kept {stats['n_positive_rows_kept']} of {total_pos} positive rows — "
+            "user mapping is probably misaligned"
+        )
     x -= x_mean
     x /= x_std
 
