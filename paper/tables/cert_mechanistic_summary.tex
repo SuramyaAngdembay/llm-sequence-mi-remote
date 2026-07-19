@@ -1,17 +1,17 @@
 \begin{table}[t]
 \centering
 \small
-\begin{tabular}{lllllll}
+\begin{tabular}{lllccl}
 \toprule
-Dataset & Branch & Protocol & Context & Effect & 95\% CI & Read \\
+Dataset & Estimand & Context & Effect & 95\% CI & Note \\
 \midrule
-r6.2 & Token-SAE causal & Same-user excluded & role & 0.006848 & [0.003362, 0.010790] & exceeds session-AE comparator (0.001133) \\
-r6.2 & Token-SAE necessity & Same-user excluded & project\_role & 0.065188 & [0.055145, 0.075023] & strong positive necessity \\
-r4.2 & Transferred causal & Layer-18 r6.2 config & multiple & negative & all audited configs < 0 & direct transfer fails \\
-r4.2 & Native token-SAE causal & Same-user excluded & team & 0.001418 & [0.001139, 0.001690] & exceeds session-AE comparator (0.000909) \\
-r4.2 & Native token-SAE necessity & Same-user excluded & dept\_role & 0.002922 & [0.001460, 0.004379] & role/dept\_role strongest \\
+r6.2 & Token-SAE causal & role & 0.006848 & [0.003362, 0.010790] & $6.0\times$ comparator \\
+r6.2 & Token-SAE necessity & project$\times$role & 0.065188 & [0.055145, 0.075023] & all contexts positive \\
+r4.2 & Transferred causal & multiple & $<0$ & all audited configs $<0$ & direct transfer fails \\
+r4.2 & Native token-SAE causal & team & 0.001418 & [0.001139, 0.001690] & $1.6\times$ comparator \\
+r4.2 & Native token-SAE necessity & dept$\times$role & 0.002922 & [0.001460, 0.004379] & necessity partial \\
 \bottomrule
 \end{tabular}
-\caption{Mechanistic summary under the same-user-excluded protocol. Point estimates are paired complete-case contrasts; confidence intervals come from the corresponding bootstrap reports.}
+\caption{Mechanistic summary (best context mode per estimand). All rows use the same-user-excluded protocol with active-control feature sets; the transferred row applies the r6.2 layer-18 configuration to r4.2 without re-fitting. Effects are paired complete-case top-versus-control contrasts with 95\% bootstrap confidence intervals. Comparator ratios are relative to the best matched session-autoencoder contrast on the same receivers (r6.2: 0.001133; r4.2: 0.000909).}
 \label{tab:cert_mechanistic}
 \end{table}
