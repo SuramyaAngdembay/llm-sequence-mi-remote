@@ -312,8 +312,6 @@ draws, and reported point estimates equal the bootstrap estimand: complete
 paired contrasts, not differences of marginal means, which diverge when donor
 availability is asymmetric.
 
-\input{figures/story.tex}
-
 \section{Results}
 \label{sec:results}
 
@@ -334,6 +332,17 @@ Forest on both datasets.
 
 \input{tables/cert_detector_comparison.tex}
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/detector_dissociation.pdf}
+\caption{Ranking--precision dissociation under the fold-aligned protocol. Each
+point is one detector; the adapted session LLM (blue) attains the highest
+day-level ROC-AUC on both benchmarks while remaining mid-pack on day-level
+PR-AUC (log scale) at extreme base rates.}
+\label{fig:detector_dissociation}
+\end{figure}
+
+Figure~\ref{fig:detector_dissociation} summarizes the pattern.
 The consequence for interpretation is direct: the adapted session LLM is a
 nontrivial, behaviorally structured detector, but the evidence does not support
 a detector-superiority claim. We therefore treat detection as background and
@@ -342,6 +351,20 @@ ask what internal structure the benign-only adaptation induced.
 \subsection{\rsix{}: a sparse token mechanism that survives strengthened controls}
 \label{sec:r62}
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/mech_effects.pdf}
+\caption{Mechanistic effects under same-user exclusion, by benchmark and
+estimand (note the panel-specific scales, all in units of $10^{-3}$
+adapted-NLL). Points are paired complete-case top-versus-control contrasts;
+horizontal lines are $95\%$ bootstrap confidence intervals ($4000$
+receiver- or pair-level draws); open markers denote intervals that cross zero.
+In the causal panels, the dashed line marks the best matched local
+session-autoencoder comparator contrast on the same receivers.}
+\label{fig:mech_effects}
+\end{figure}
+
+Figure~\ref{fig:mech_effects} shows all headline mechanistic effects.
 Under the same-user-excluded protocol on all $70$ positive receivers, the
 layer-18 top-5 feature set shows clearly positive causal patching contrasts for
 the main organizational context modes: $0.0068$ for role

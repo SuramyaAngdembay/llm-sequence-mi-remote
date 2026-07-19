@@ -53,3 +53,26 @@ to repeated `pdflatex`/`bibtex`.
 The repaired same-user-excluded causal rows should be interpreted using the
 complete receiver-level top-vs-control contrast that matches the bootstrap
 estimand. The paper generator follows that repaired bundle convention.
+
+## Overleaf
+
+The package compiles on Overleaf with:
+
+- compiler: `pdfLaTeX`
+- bibliography: `BibTeX`
+- main document: `main.tex`
+
+Two ways to get it there:
+
+1. **Zip upload (recommended):** run `make overleaf` from `paper/`, then in
+   Overleaf use *New Project -> Upload Project* with `build/overleaf.zip`.
+   The zip contains only what Overleaf needs (`main.tex`, `jmlr2e.sty`,
+   `references.bib`, `figures/`, `tables/`).
+2. **GitHub import:** import the repo and set `paper/main.tex` as the main
+   document (Menu -> Settings -> Main document).
+
+Data figures (`figures/*.pdf`) are pre-generated vector PDFs produced by
+`scripts/generate_figures.py` (matplotlib) from the tracked result bundles;
+Overleaf does not run Python, so regenerate them locally (`make figures`)
+and re-upload if the numbers change. The pipeline diagram stays TikZ and
+compiles natively on Overleaf.

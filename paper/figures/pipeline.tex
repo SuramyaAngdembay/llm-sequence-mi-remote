@@ -1,23 +1,30 @@
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[
-  box/.style={draw, rounded corners, align=center, minimum width=3.0cm, minimum height=0.95cm},
-  arrow/.style={->, thick}
+  box/.style={draw=black!60, rounded corners=2pt, align=center, minimum height=0.9cm, inner sep=5pt, font=\small},
+  stage/.style={box, fill=black!4},
+  evalbox/.style={box, fill=blue!6},
+  arrow/.style={->, thick, black!65}
 ]
-\node[box] (data) {CERT session-day logs\\r6.2 and r4.2};
-\node[box, right=1.2cm of data] (train) {Benign-only QLoRA training\\Qwen3-8B session model};
-\node[box, below=1.2cm of train] (det) {Fold-aligned detector eval\\fixed remote model};
-\node[box, below=1.2cm of data] (sae) {Token SAE feature sets\\top5 vs control5\_active};
-\node[box, right=1.2cm of sae] (mech) {Causal patching and necessity\\same-user excluded};
-\node[box, below=1.2cm of mech] (compare) {Local session-AE comparator\\day-level repair summary};
+\node[stage] (data) {CERT \rsix{} / \rfour{}\\session logs};
+\node[stage, right=0.9cm of data] (serial) {serialized\\user-days};
+\node[stage, right=0.9cm of serial] (train) {benign-only QLoRA\\(Qwen3-8B)};
+\node[stage, right=0.9cm of train] (delta) {token adapter deltas\\$\delta_t = h^{\mathrm{ada}}_t - h^{\mathrm{base}}_t$};
 
-\draw[arrow] (data) -- (train);
-\draw[arrow] (train) -- (det);
-\draw[arrow] (data) -- (sae);
-\draw[arrow] (train) -- (mech);
+\node[stage, below=0.9cm of delta] (sae) {top-$k$ delta-SAE\\top-5 vs.\ active control};
+\node[evalbox, below=0.9cm of train] (mech) {causal patching \&\\necessity ablation};
+\node[evalbox, below=0.9cm of serial] (det) {fold-aligned\\detector eval};
+\node[box, below=0.9cm of data] (local) {local one-class\\baselines \& comparator};
+
+\draw[arrow] (data) -- (serial);
+\draw[arrow] (serial) -- (train);
+\draw[arrow] (train) -- (delta);
+\draw[arrow] (delta) -- (sae);
 \draw[arrow] (sae) -- (mech);
-\draw[arrow] (mech) -- (compare);
+\draw[arrow] (train) -- (det);
+\draw[arrow] (local) -- (det);
+\draw[arrow] (local) -- (mech);
 \end{tikzpicture}
-\caption{Current paper pipeline. The remote branch is trained benign-only, detector evaluation is fold-aligned to the local benchmark, and mechanistic results use the repaired same-user-excluded protocol.}
+\caption{Overview. Session logs are serialized into structured user-day text and used to adapt Qwen3-8B on benign users only. Token-level adapter deltas feed sparse top-$k$ autoencoders whose feature sets are evaluated by causal patching and necessity ablation against active controls with same-user donors excluded. Detector comparisons against local one-class baselines use a shared fold-aligned protocol.}
 \label{fig:pipeline}
 \end{figure}

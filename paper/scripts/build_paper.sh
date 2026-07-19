@@ -5,7 +5,9 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 mkdir -p build
-python scripts/generate_tables.py
+PY="$(command -v python3 || command -v python)"
+"$PY" scripts/generate_tables.py
+"$PY" scripts/generate_figures.py
 
 if command -v latexmk >/dev/null 2>&1; then
   latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=build main.tex

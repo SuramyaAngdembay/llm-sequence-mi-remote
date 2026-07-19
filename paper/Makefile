@@ -1,16 +1,29 @@
 SHELL := /bin/bash
+PY := $(shell command -v python3 || command -v python)
 
-.PHONY: all tables pdf clean
+.PHONY: all tables figures pdf overleaf clean
 
 all: pdf
 
 tables:
-	python scripts/generate_tables.py
+	$(PY) scripts/generate_tables.py
 
-pdf: tables
+figures:
+	$(PY) scripts/generate_figures.py
+
+pdf: tables figures
 	bash scripts/build_paper.sh
+
+# Self-contained zip for direct upload to Overleaf (New Project -> Upload Project).
+# Compiler: pdfLaTeX, bibliography: BibTeX, main document: main.tex.
+overleaf: tables figures
+	mkdir -p build
+	rm -f build/overleaf.zip
+	zip -q build/overleaf.zip main.tex jmlr2e.sty references.bib \
+		figures/*.tex figures/*.pdf tables/*.tex
+	@echo "Overleaf package: build/overleaf.zip"
 
 clean:
 	rm -rf build
 	rm -f tables/*.tex
-
+	rm -f figures/*.pdf figures/*_preview.png
