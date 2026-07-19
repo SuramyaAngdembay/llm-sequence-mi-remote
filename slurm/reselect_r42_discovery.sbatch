@@ -4,7 +4,7 @@
 # confirmation-user causal/necessity evals.
 #SBATCH -A cis230270-gpu
 #SBATCH -p gpu-debug
-#SBATCH --gpus=1
+#SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=180G
 #SBATCH --time=00:30:00

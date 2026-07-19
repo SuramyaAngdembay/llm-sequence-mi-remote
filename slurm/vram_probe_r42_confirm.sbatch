@@ -5,7 +5,7 @@
 # 40GB A100 — run this BEFORE committing the long confirmation job.
 #SBATCH -A cis230270-gpu
 #SBATCH -p gpu-debug
-#SBATCH --gpus=1
+#SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=120G
 #SBATCH --time=00:30:00
