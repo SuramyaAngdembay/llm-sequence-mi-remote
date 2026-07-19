@@ -20,7 +20,8 @@ PROJ=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI
 
 module load conda/2026.03
 conda activate "${CONDA_ENV:-/anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert-qlora-qwen3}"
-export HF_HUB_OFFLINE=1
+export HF_HOME=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/hf_cache
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 
 cd "$REPO_DIR"
 python scripts/benchmark_token_causal_vram.py \
