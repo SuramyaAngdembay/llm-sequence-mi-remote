@@ -293,6 +293,7 @@ def build_all_candidate_pairs(
     max_candidate_donors: int,
     seed: int,
     exclude_same_user: bool = False,
+    receiver_users: set[str] | None = None,
 ) -> Dict[Tuple[str, str], List[Tuple[int, int]]]:
     out: Dict[Tuple[str, str], List[Tuple[int, int]]] = {}
     receiver_indices: np.ndarray | None = None
@@ -313,6 +314,7 @@ def build_all_candidate_pairs(
                 example_meta,
                 donor_label=donor_label,
                 context_mode=context_mode,
+                receiver_users=receiver_users,
                 max_receivers=max_receivers,
                 max_candidate_donors=max_candidate_donors,
                 rng=np.random.default_rng(seed + 1009 * mode_i + donor_label),
@@ -413,6 +415,7 @@ def build_candidate_pairs(
     rng: np.random.Generator,
     receiver_indices: np.ndarray | None = None,
     exclude_same_user: bool = False,
+    receiver_users: set[str] | None = None,
 ) -> List[Tuple[int, int]]:
     ctx_cols = resolve_context_cols(meta, context_mode)
     primary_col = ctx_cols[0]
@@ -420,6 +423,8 @@ def build_candidate_pairs(
     work["ctx_key"] = context_key(work, context_mode)
 
     recv_df = work.loc[work["y"] == 1].copy()
+    if receiver_users is not None:
+        recv_df = recv_df[recv_df["user_id"].astype(str).isin(receiver_users)].copy()
     if receiver_indices is not None:
         recv_df = (
             recv_df.set_index("row_idx")
@@ -872,6 +877,7 @@ def main() -> None:
     ap.add_argument("--repair-threshold", type=float, default=0.01)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--exclude-same-user-donors", action="store_true")
+    ap.add_argument("--receiver-user-file", type=Path, default=None)
     args = ap.parse_args()
 
     cfg = load_yaml(args.config)
@@ -891,6 +897,14 @@ def main() -> None:
     scores = pd.read_parquet(args.extract_dir / "example_scores.parquet").sort_values("example_idx").reset_index(drop=True)
     example_meta = load_eval_examples(args.data_dir, scores)
     _ = required_context_cols(example_meta, context_modes)
+    receiver_users = None
+    if args.receiver_user_file is not None:
+        receiver_users = {
+            ln.strip()
+            for ln in Path(args.receiver_user_file).read_text(encoding="utf-8").splitlines()
+            if ln.strip()
+        }
+        print(f"[receivers] restricted to {len(receiver_users)} users from {args.receiver_user_file}", flush=True)
     candidate_pairs_by_key = build_all_candidate_pairs(
         example_meta,
         context_modes,
@@ -898,6 +912,7 @@ def main() -> None:
         max_candidate_donors=args.max_candidate_donors,
         seed=args.seed,
         exclude_same_user=bool(args.exclude_same_user_donors),
+        receiver_users=receiver_users,
     )
     needed_examples = examples_from_pairs(candidate_pairs_by_key)
     x, token_example_idx, _ = load_token_layer_vectors(

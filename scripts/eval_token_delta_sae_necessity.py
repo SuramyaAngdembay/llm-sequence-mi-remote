@@ -35,6 +35,7 @@ def build_receiver_pairs(
     max_pairs: int,
     rng: np.random.Generator,
     exclude_same_user: bool = False,
+    receiver_users: set[str] | None = None,
 ) -> List[Tuple[int, int, int]]:
     ctx_cols = resolve_context_cols(meta, context_mode)
     primary_col = ctx_cols[0]
@@ -42,6 +43,8 @@ def build_receiver_pairs(
     work["ctx_key"] = context_key(work, context_mode)
 
     pos_df = work.loc[work["y"] == 1].copy()
+    if receiver_users is not None:
+        pos_df = pos_df[pos_df["user_id"].astype(str).isin(receiver_users)].copy()
     pos_indices = pos_df["row_idx"].to_numpy(dtype=int)
     if max_pairs > 0 and len(pos_indices) > max_pairs:
         chosen = np.sort(rng.choice(pos_indices, size=max_pairs, replace=False))
@@ -275,6 +278,7 @@ def main() -> None:
     ap.add_argument("--effect-threshold", type=float, default=0.01)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--exclude-same-user-matches", action="store_true")
+    ap.add_argument("--receiver-user-file", type=Path, default=None)
     args = ap.parse_args()
 
     cfg = load_yaml(args.config)
@@ -295,6 +299,14 @@ def main() -> None:
     example_meta = load_eval_examples(args.data_dir, scores)
     _ = required_context_cols(example_meta, context_modes)
 
+    receiver_users = None
+    if args.receiver_user_file is not None:
+        receiver_users = {
+            ln.strip()
+            for ln in Path(args.receiver_user_file).read_text(encoding="utf-8").splitlines()
+            if ln.strip()
+        }
+        print(f"[receivers] restricted to {len(receiver_users)} users from {args.receiver_user_file}", flush=True)
     pairs_by_context: Dict[str, List[Tuple[int, int, int]]] = {}
     needed_examples: set[int] = set()
     for mode_i, context_mode in enumerate(context_modes):
@@ -304,6 +316,7 @@ def main() -> None:
             max_pairs=args.max_pairs,
             rng=np.random.default_rng(args.seed + 1009 * mode_i),
             exclude_same_user=bool(args.exclude_same_user_matches),
+            receiver_users=receiver_users,
         )
         pairs_by_context[context_mode] = pairs
         for pair_idx, pos_idx, benign_idx in pairs:
