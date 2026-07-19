@@ -8,11 +8,15 @@ ROOT = Path(__file__).resolve().parents[1]
 TABLES = ROOT / "tables"
 
 
-def write_table(path: Path, caption: str, label: str, colspec: str, header: list[str], rows: list[list[str]]) -> None:
+def write_table(path: Path, caption: str, label: str, colspec: str, header: list[str], rows: list[list[str]], size: str = r"\small", colsep: str | None = None) -> None:
     lines = [
         r"\begin{table}[t]",
         r"\centering",
-        r"\small",
+        size,
+    ]
+    if colsep:
+        lines.append(rf"\setlength{{\tabcolsep}}{{{colsep}}}")
+    lines += [
         rf"\begin{{tabular}}{{{colspec}}}",
         r"\toprule",
         " & ".join(header) + r" \\",
@@ -38,12 +42,12 @@ def fmt(x: float, digits: int = 4) -> str:
 
 def write_detector_table() -> None:
     rows = [
-        ["r6.2", "Qwen3-8B session LM (adapted NLL)", fmt(0.000754631, 4), fmt(0.953157, 3), fmt(0.0537037, 3), fmt(24.0, 1)],
+        ["r6.2", "Session LM (adapted NLL)", fmt(0.000754631, 4), fmt(0.953157, 3), fmt(0.0537037, 3), fmt(24.0, 1)],
         ["r6.2", "Deep SVDD", fmt(0.0115455, 4), fmt(0.627919, 3), fmt(0.211455, 3), fmt(83.25, 1)],
         ["r6.2", "GRU AE", fmt(0.00572239, 4), fmt(0.765776, 3), fmt(0.0814103, 3), fmt(24.75, 1)],
         ["r6.2", "LSTM AE", fmt(0.00206543, 4), fmt(0.767738, 3), fmt(0.0574767, 3), fmt(24.25, 1)],
         ["r6.2", "Isolation Forest", fmt(0.000210794, 4), fmt(0.712505, 3), fmt(0.0126207, 3), fmt(153.0, 1)],
-        ["r4.2", "Qwen3-8B session LM (adapted NLL)", fmt(0.0134474, 4), fmt(0.964124, 3), fmt(0.100838, 3), fmt(26.45, 1)],
+        ["r4.2", "Session LM (adapted NLL)", fmt(0.0134474, 4), fmt(0.964124, 3), fmt(0.100838, 3), fmt(26.45, 1)],
         ["r4.2", "Deep SVDD", fmt(0.0337171, 4), fmt(0.742914, 3), fmt(0.381529, 3), fmt(53.4167, 1)],
         ["r4.2", "GRU AE", fmt(0.0254413, 4), fmt(0.695754, 3), fmt(0.12435, 3), fmt(86.5833, 1)],
         ["r4.2", "LSTM AE", fmt(0.0236354, 4), fmt(0.714125, 3), fmt(0.119657, 3), fmt(92.0833, 1)],
@@ -56,6 +60,8 @@ def write_detector_table() -> None:
         "llcccc",
         ["Dataset", "Method", "Day PR-AUC", "Day ROC-AUC", "User PR-AUC", "Held-out rank"],
         rows,
+        size=r"\footnotesize",
+        colsep="4.5pt",
     )
 
 
