@@ -49,12 +49,13 @@ fold-aligned full-population scoring shared with the feature-based one-class bas
 find a clear dissociation between detection strength and mechanistic structure.
 As a detector, the adapted model shows strong ranking behavior (day-level ROC-AUC
 $0.95$--$0.96$ on both benchmarks) but weaker day-level PR-AUC than the strongest
-feature-based baselines. Mechanistically, \rsix{} supports a robust sparse token
-mechanism: causal patching effects remain clearly positive under same-user
-exclusion, and necessity effects are large. Transferring the \rsix{} mechanism
-configuration directly to \rfour{} fails, yet a native \rfour{} mechanism can be
-rediscovered at a different layer and sparsity, with smaller but significantly
-positive causal effects. The evidence supports a specific conclusion:
+feature-based baselines. Mechanistically, \rsix{} necessity effects are large
+and consistent across malicious users, while its causal patching effect, though
+positive for every user, is concentrated in one heavily active user.
+Transferring the \rsix{} mechanism configuration directly to \rfour{} fails,
+yet a native \rfour{} mechanism can be recovered at a different layer and
+sparsity, with smaller causal effects that remain positive under user-level
+cluster uncertainty across roughly fifty malicious users. The evidence supports a specific conclusion:
 benign-trained session LLMs can recover benchmark-specific causal structure,
 direct mechanism transfer across related benchmarks can fail, and native
 rediscovery can succeed.
@@ -94,7 +95,7 @@ Concretely, we adapt Qwen3-8B \citep{qwen3} with QLoRA
 users only. We isolate the adapter's token-level effect as the difference
 between adapted and base residual-stream states, train top-$k$ sparse
 autoencoders \citep{gao2024scaling} on these adapter deltas, and subject
-selected sparse feature sets to two preregistered-style estimands: a causal
+selected sparse feature sets to two intervention estimands: a causal
 patching effect measured against matched active-control feature sets, and a
 necessity effect from targeted ablation. Donor matching excludes same-user
 donors so that repair cannot be explained by borrowing a user's own benign
@@ -105,9 +106,10 @@ The resulting evidence supports three findings. First, benign-only session
 adaptation produces a detector with strong ranking behavior but mixed
 precision: day-level ROC-AUC is $0.95$--$0.96$ on both benchmarks, while
 day-level PR-AUC remains below the strongest feature-based one-class baselines. Second,
-the mechanistic story is stronger than the detector story: on \rsix{}, sparse
-token-level features show causal patching effects that survive same-user
-exclusion and large necessity effects. Third, the mechanism is
+the mechanistic story is stronger than the detector story: on \rsix{},
+ablating sparse token-level features consistently disrupts anomaly evidence
+across malicious users, and causal patching effects survive same-user
+exclusion, though they concentrate in the most active user. Third, the mechanism is
 benchmark-specific: the \rsix{} configuration transfers negatively to \rfour{},
 yet a native \rfour{} mechanism exists at a different layer and sparsity and
 passes the same strengthened controls.
@@ -124,9 +126,10 @@ and necessity ablation under active controls and same-user donor exclusion.
 benchmarking from mechanistic evaluation, and we show why weaker protocols
 (population re-filtering, permissive donor matching) overstate both stories.
 \item We show that the recovered mechanism is benchmark-specific: direct
-transfer of the \rsix{} token mechanism to \rfour{} fails, while native
-rediscovery on \rfour{} succeeds with smaller but significantly positive
-effects.
+transfer of the \rsix{} token mechanism to \rfour{} fails, while an
+exploratory native search on \rfour{} identifies a smaller candidate
+mechanism whose causal effects remain positive under user-level cluster
+uncertainty.
 \item We document a dissociation between detection strength and mechanistic
 structure: the same model that trails the feature-based baselines on day-level
 PR-AUC supports causal effects up to six times larger than a matched
@@ -311,10 +314,13 @@ runs found nontrivial same-user matching rates; all mechanistic results
 reported here come from reruns with same-user exclusion enforced and verified.
 
 \paragraph{Uncertainty.}
-Confidence intervals use $4000$ receiver-level (or pair-level) bootstrap
-draws, and reported point estimates equal the bootstrap estimand: complete
-paired contrasts, not differences of marginal means, which diverge when donor
-availability is asymmetric.
+Point estimates are complete paired contrasts, not differences of marginal
+means, which diverge when donor availability is asymmetric. Because multiple
+positive days from the same user are not independent, headline confidence
+intervals use a \emph{user-level cluster bootstrap} ($10{,}000$ draws with the
+malicious user as the resampling unit); we additionally report per-user
+estimates and leave-one-user-out effects. Receiver-level (day-level) bootstrap
+intervals are narrower and are reported only as supplementary material.
 
 \section{Results}
 \label{sec:results}
@@ -352,7 +358,7 @@ nontrivial, behaviorally structured detector, but the evidence does not support
 a detector-superiority claim. We therefore treat detection as background and
 ask what internal structure the benign-only adaptation induced.
 
-\subsection{\rsix{}: a sparse token mechanism that survives strengthened controls}
+\subsection{\rsix{}: necessity is consistent across users; causal effects concentrate in one user}
 \label{sec:r62}
 
 \begin{figure}[t]
@@ -369,17 +375,22 @@ session-autoencoder comparator contrast on the same receivers.}
 \end{figure}
 
 Figure~\ref{fig:mech_effects} shows all headline mechanistic effects.
-Under the same-user-excluded protocol on all $70$ positive receivers, the
-layer-18 top-5 feature set shows clearly positive causal patching contrasts for
-the main organizational context modes: $0.0068$ for role
-($95\%$ CI $[0.0034, 0.0108]$), $0.0068$ for department$\times$role
-($[0.0035, 0.0103]$), and $0.0042$ for project$\times$role
-($[0.0016, 0.0070]$). The team context yields no finite estimate because
-same-user exclusion leaves no valid anomalous-donor comparison in that stratum;
-we report it as unavailable rather than imputing it. Necessity effects are
-larger and uniformly positive across all four context modes, ranging from
-$0.052$ (team, $[0.042, 0.061]$) to $0.065$ (project$\times$role,
-$[0.055, 0.075]$).
+The $70$ positive receiver-days on \rsix{} come from only four malicious
+users, with highly unequal day counts ($46/18/5/1$), so we treat per-user
+structure as part of the result rather than pooling days as independent units.
+The necessity side is the strongest \rsix{} finding: ablating the layer-18
+top-5 features harms anomaly evidence more than ablating matched active
+controls for \emph{every} malicious user in the project$\times$role context
+(per-user effects $0.019$--$0.103$; pooled $0.065$, cluster CI
+$[0.026, 0.083]$), and the role context also survives clustering ($0.062$,
+$[0.016, 0.083]$). The causal patching side is positive but concentrated:
+the pooled role-context contrast is $0.0068$ with cluster CI
+$[0.0001, 0.0100]$, positive for all four users individually, yet dominated by
+the most active user ($0.010$ versus $0.0001$--$0.0005$ for the other three),
+and the department$\times$role and project$\times$role intervals cross zero
+under user-level resampling. The team context yields no finite causal estimate
+because same-user exclusion leaves no valid anomalous-donor comparison in that
+stratum; we report it as unavailable rather than imputing it.
 
 Two comparisons calibrate these magnitudes. First, the strengthened protocol
 matters: same-user exclusion reduced the causal point estimates relative to
@@ -395,24 +406,33 @@ $0.0011$, roughly six times smaller than the best token-SAE contrast.
 Applying the \rsix{} mechanism configuration (layer 18, its SAE, and its
 feature sets) directly to \rfour{} produces negative top-versus-control
 contrasts across all audited transfer configurations under full uncapped
-evaluation. The data reject a universal transferable sparse insider-threat
-circuit at the level of literal feature identity.
+evaluation on all $1309$ receivers: the best transferred configuration per
+sparsity setting reaches $-0.00094$ $[-0.00117, -0.00072]$,
+$-0.00105$ $[-0.00149, -0.00064]$, and $-0.00113$ $[-0.00144, -0.00082]$.
+The data reject a universal transferable sparse insider-threat circuit at the
+level of literal feature identity in this training run.
 
-A native search over layers and SAE hyperparameters on \rfour{}, however,
-recovers a positive mechanism at layer 26 with a smaller dictionary ($m=2$,
-$k=4$). Under same-user exclusion, on populations of $1039$--$1301$ available
-receivers per context mode (of which $1034$--$1157$ are complete cases), causal
-contrasts are positive with confidence intervals excluding zero for all four
-context modes: team $0.00142$ $[0.00114, 0.00169]$, role $0.00111$
-$[0.00083, 0.00139]$, department$\times$role $0.00107$ $[0.00082, 0.00131]$,
-and department $0.00098$ $[0.00075, 0.00122]$. The session-autoencoder
-comparator's best day-level contrast on the same receivers is $0.00091$.
-Necessity is positive but partial: department$\times$role ($0.0029$,
-$[0.0015, 0.0044]$) and role ($0.0021$, $[0.0007, 0.0034]$) are significant,
-while department and team are directionally positive with intervals crossing
-zero. The \rfour{} mechanism is thus real but weaker and less uniform than its
-\rsix{} counterpart---approximately five times smaller in causal contrast, at a
-different depth, with a sparser dictionary.
+An exploratory search over layers and SAE hyperparameters on \rfour{},
+however, identifies a candidate mechanism at layer 26 with a smaller
+dictionary ($m=2$, $k=4$). Under same-user exclusion, on populations of
+$1039$--$1301$ available receivers from $49$--$54$ malicious users per context
+mode, causal contrasts are positive with user-level cluster confidence
+intervals excluding zero for all four context modes: team $0.00142$
+$[0.00097, 0.00186]$, role $0.00111$ $[0.00064, 0.00154]$,
+department$\times$role $0.00107$ $[0.00066, 0.00147]$, and department
+$0.00098$ $[0.00058, 0.00136]$; mean-of-user-means intervals also exclude
+zero. The session-autoencoder comparator's best day-level contrast on the same
+receivers is $0.00091$. Necessity is positive but partial:
+department$\times$role ($0.0029$, $[0.0009, 0.0050]$) and role ($0.0021$,
+$[0.0001, 0.0042]$) remain positive under clustering, while department and
+team cross zero. Because the configuration was selected by searching the same
+positive population, we label this mechanism a \emph{candidate}: a
+discovery/confirmation protocol that re-selects features on half of the
+malicious users and estimates effects only on the held-out half is the
+appropriate confirmatory test. The \rfour{} mechanism is smaller than its
+\rsix{} counterpart---approximately five times smaller in causal
+contrast---at a different depth, with a sparser dictionary, but rests on a far
+broader user population.
 
 \input{tables/cert_mechanistic_summary.tex}
 
@@ -481,9 +501,14 @@ organizational fields they expose have no real-world measurement counterpart;
 results may not transfer to operational telemetry. The serializer omits four
 file-transfer fields from the observation space, so claims about the mechanism
 concern the serialized field set only. Day-level PR-AUC of the adapted session LM
-is weak in absolute terms at realistic base rates, and \rsix{} mechanistic
-estimates rest on $70$ receivers from $4$ malicious users, with one context
-mode (team) unavailable under strict donor rules. All mechanistic results
+is weak in absolute terms at realistic base rates. \rsix{} mechanistic
+estimates rest on $70$ receivers from $4$ malicious users with highly unequal
+day counts, so its causal effect is dominated by a single user and one context
+mode (team) is unavailable under strict donor rules; we report cluster
+intervals, per-user effects, and leave-one-user-out results for this reason.
+The \rfour{} native configuration was found by search over the same positive
+population it is evaluated on; held-out-user confirmation is required before
+its effects can be read as confirmatory rather than exploratory. All mechanistic results
 concern feature-level interventions at a single layer under a specific SAE
 family; they localize causal structure but do not constitute a complete
 circuit-level account \citep{chan2022causal}. Finally, our evidence covers one

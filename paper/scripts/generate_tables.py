@@ -71,12 +71,12 @@ def write_detector_table() -> None:
 
 def write_mech_table() -> None:
     rows = [
-        ["r6.2", "Token-SAE causal", "role", "0.006848", "[0.003362, 0.010790]", "$6.0\\times$ comparator"],
-        ["r6.2", "Token-SAE necessity", "project$\\times$role", "0.065188", "[0.055145, 0.075023]", "all contexts positive"],
+        ["r6.2", "Token-SAE causal", "role", "0.006848", "[0.000092, 0.010000]", "4/4 users positive"],
+        ["r6.2", "Token-SAE necessity", "project$\\times$role", "0.065188", "[0.026059, 0.082920]", "4/4 users positive"],
         ["---"],
         ["r4.2", "Transferred causal", "multiple", "$<0$", "all audited configs $<0$", "direct transfer fails"],
-        ["r4.2", "Native token-SAE causal", "team", "0.001418", "[0.001139, 0.001690]", "$1.6\\times$ comparator"],
-        ["r4.2", "Native token-SAE necessity", "dept$\\times$role", "0.002922", "[0.001460, 0.004379]", "necessity partial"],
+        ["r4.2", "Native token-SAE causal", "team", "0.001418", "[0.000967, 0.001863]", "all contexts positive"],
+        ["r4.2", "Native token-SAE necessity", "dept$\\times$role", "0.002922", "[0.000911, 0.005005]", "necessity partial"],
     ]
     write_table(
         TABLES / "cert_mechanistic_summary.tex",

@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Generate the paper's data figures as vector PDFs.
 
+Mechanistic CIs are USER-LEVEL cluster bootstrap intervals
+(results/*/same_user_recovery/*/cluster_bootstrap/).
+
 Numbers are transcribed from the final tracked result bundles:
 - results/qwen3_8b_token_causal/same_user_recovery/RESULTS.md
 - results/qwen3_8b_token_necessity/same_user_recovery/RESULTS.md
@@ -48,27 +51,27 @@ plt.rcParams.update(
 # (label, estimate, lo, hi) — order top-to-bottom as displayed.
 MECH = {
     ("r6.2", "Causal patching"): [
-        ("role", 0.006848, 0.003362, 0.010790),
-        ("dept x role", 0.006818, 0.003541, 0.010321),
-        ("project x role", 0.004201, 0.001565, 0.006979),
+        ("role", 0.006848, 0.000092, 0.009996),
+        ("dept x role", 0.006818, -0.000230, 0.009955),
+        ("project x role", 0.004201, -0.000058, 0.005892),
     ],
     ("r6.2", "Necessity ablation"): [
-        ("project x role", 0.065188, 0.055145, 0.075023),
-        ("role", 0.062167, 0.050265, 0.073364),
-        ("dept x role", 0.056603, 0.044996, 0.068990),
-        ("team", 0.052234, 0.042054, 0.061397),
+        ("project x role", 0.065188, 0.026059, 0.082920),
+        ("role", 0.062167, 0.016480, 0.082691),
+        ("dept x role", 0.056603, -0.001859, 0.077447),
+        ("team", 0.052234, -0.018468, 0.070531),
     ],
     ("r4.2", "Causal patching"): [
-        ("team", 0.001418, 0.001139, 0.001690),
-        ("role", 0.001112, 0.000826, 0.001391),
-        ("dept x role", 0.001067, 0.000824, 0.001305),
-        ("dept", 0.000982, 0.000751, 0.001215),
+        ("team", 0.001418, 0.000967, 0.001863),
+        ("role", 0.001112, 0.000638, 0.001541),
+        ("dept x role", 0.001067, 0.000656, 0.001467),
+        ("dept", 0.000982, 0.000583, 0.001360),
     ],
     ("r4.2", "Necessity ablation"): [
-        ("dept x role", 0.002922, 0.001460, 0.004379),
-        ("role", 0.002075, 0.000679, 0.003418),
-        ("dept", 0.001155, -0.000242, 0.002536),
-        ("team", 0.000662, -0.000880, 0.002236),
+        ("dept x role", 0.002922, 0.000911, 0.005005),
+        ("role", 0.002075, 0.000133, 0.004192),
+        ("dept", 0.001155, -0.000943, 0.003196),
+        ("team", 0.000662, -0.001316, 0.002761),
     ],
 }
 
