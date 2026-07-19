@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 ROOT = Path(__file__).resolve().parents[1]
 FIGS = ROOT / "figures"
 
-ACCENT = "#2F5FA5"      # remote model / effect marks
+ACCENT = "#2F5FA5"      # session-LM / effect marks
 MUTED = "#98A0AA"       # baseline marks
 INK = "#1F2937"         # primary text
 INK_2 = "#6B7280"       # secondary text
@@ -77,14 +77,14 @@ LOCAL_REF = {"r6.2": 0.001133, "r4.2": 0.000909}
 
 DETECTOR = {
     "r6.2": [
-        ("Remote Qwen3-8B", 0.000754631, 0.953157),
+        ("Qwen3-8B session LM", 0.000754631, 0.953157),
         ("Deep SVDD", 0.0115455, 0.627919),
         ("GRU AE", 0.00572239, 0.765776),
         ("LSTM AE", 0.00206543, 0.767738),
         ("Isolation Forest", 0.000210794, 0.712505),
     ],
     "r4.2": [
-        ("Remote Qwen3-8B", 0.0134474, 0.964124),
+        ("Qwen3-8B session LM", 0.0134474, 0.964124),
         ("Deep SVDD", 0.0337171, 0.742914),
         ("GRU AE", 0.0254413, 0.695754),
         ("LSTM AE", 0.0236354, 0.714125),
@@ -146,12 +146,12 @@ def detector_dissociation() -> None:
     fig, axes = plt.subplots(1, 2, figsize=(6.0, 2.5), sharey=True)
     # Per-panel label nudges (points): keep short labels clear of the marks.
     offsets = {
-        ("r6.2", "Remote Qwen3-8B"): (0, 7),
+        ("r6.2", "Qwen3-8B session LM"): (0, 7),
         ("r6.2", "Deep SVDD"): (0, 7),
         ("r6.2", "GRU AE"): (16, 7),
         ("r6.2", "LSTM AE"): (-16, 7),
         ("r6.2", "Isolation Forest"): (2, 7),
-        ("r4.2", "Remote Qwen3-8B"): (0, 7),
+        ("r4.2", "Qwen3-8B session LM"): (0, 7),
         ("r4.2", "Deep SVDD"): (-8, 7),
         ("r4.2", "GRU AE"): (-24, 2),
         ("r4.2", "LSTM AE"): (14, -10),
@@ -159,7 +159,7 @@ def detector_dissociation() -> None:
     }
     for ax, dataset in zip(axes, ["r6.2", "r4.2"]):
         for name, pr, roc in DETECTOR[dataset]:
-            remote = name.startswith("Remote")
+            remote = name.startswith("Qwen")
             ax.plot(
                 pr, roc, marker="o",
                 markersize=5.5 if remote else 4.5,

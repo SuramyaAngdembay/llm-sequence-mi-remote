@@ -38,12 +38,12 @@ def fmt(x: float, digits: int = 4) -> str:
 
 def write_detector_table() -> None:
     rows = [
-        ["r6.2", "Remote Qwen3-8B adapted NLL", fmt(0.000754631, 4), fmt(0.953157, 3), fmt(0.0537037, 3), fmt(24.0, 1)],
+        ["r6.2", "Qwen3-8B session LM (adapted NLL)", fmt(0.000754631, 4), fmt(0.953157, 3), fmt(0.0537037, 3), fmt(24.0, 1)],
         ["r6.2", "Deep SVDD", fmt(0.0115455, 4), fmt(0.627919, 3), fmt(0.211455, 3), fmt(83.25, 1)],
         ["r6.2", "GRU AE", fmt(0.00572239, 4), fmt(0.765776, 3), fmt(0.0814103, 3), fmt(24.75, 1)],
         ["r6.2", "LSTM AE", fmt(0.00206543, 4), fmt(0.767738, 3), fmt(0.0574767, 3), fmt(24.25, 1)],
         ["r6.2", "Isolation Forest", fmt(0.000210794, 4), fmt(0.712505, 3), fmt(0.0126207, 3), fmt(153.0, 1)],
-        ["r4.2", "Remote Qwen3-8B adapted NLL", fmt(0.0134474, 4), fmt(0.964124, 3), fmt(0.100838, 3), fmt(26.45, 1)],
+        ["r4.2", "Qwen3-8B session LM (adapted NLL)", fmt(0.0134474, 4), fmt(0.964124, 3), fmt(0.100838, 3), fmt(26.45, 1)],
         ["r4.2", "Deep SVDD", fmt(0.0337171, 4), fmt(0.742914, 3), fmt(0.381529, 3), fmt(53.4167, 1)],
         ["r4.2", "GRU AE", fmt(0.0254413, 4), fmt(0.695754, 3), fmt(0.12435, 3), fmt(86.5833, 1)],
         ["r4.2", "LSTM AE", fmt(0.0236354, 4), fmt(0.714125, 3), fmt(0.119657, 3), fmt(92.0833, 1)],
@@ -51,7 +51,7 @@ def write_detector_table() -> None:
     ]
     write_table(
         TABLES / "cert_detector_comparison.tex",
-        "Fold-aligned detector comparison on CERT. The remote Qwen3-8B branch has strong ROC and ranking behavior, but day PR-AUC remains below the stronger local Magnolia baselines on both datasets.",
+        "Fold-aligned detector comparison on CERT. The Qwen3-8B session LM shows strong ROC and ranking behavior, but its day-level PR-AUC remains below the stronger feature-based baselines on both datasets.",
         "tab:cert_detector",
         "llcccc",
         ["Dataset", "Method", "Day PR-AUC", "Day ROC-AUC", "User PR-AUC", "Held-out rank"],
@@ -63,16 +63,16 @@ def write_mech_table() -> None:
     rows = [
         [
             "r6.2",
-            "Remote causal",
+            "Token-SAE causal",
             "Same-user excluded",
             "role",
             "0.006848",
             "[0.003362, 0.010790]",
-            "remote > local adaptive (0.001133)",
+            "exceeds session-AE comparator (0.001133)",
         ],
         [
             "r6.2",
-            "Remote necessity",
+            "Token-SAE necessity",
             "Same-user excluded",
             "project\\_role",
             "0.065188",
@@ -90,16 +90,16 @@ def write_mech_table() -> None:
         ],
         [
             "r4.2",
-            "Remote native causal",
+            "Native token-SAE causal",
             "Same-user excluded",
             "team",
             "0.001418",
             "[0.001139, 0.001690]",
-            "remote > local adaptive (0.000909)",
+            "exceeds session-AE comparator (0.000909)",
         ],
         [
             "r4.2",
-            "Remote native necessity",
+            "Native token-SAE necessity",
             "Same-user excluded",
             "dept\\_role",
             "0.002922",
@@ -109,7 +109,7 @@ def write_mech_table() -> None:
     ]
     write_table(
         TABLES / "cert_mechanistic_summary.tex",
-        "Mechanistic summary after the same-user recovery audit. Point estimates use the repaired bundle summaries; confidence intervals come from the corresponding bootstrap reports.",
+        "Mechanistic summary under the same-user-excluded protocol. Point estimates are paired complete-case contrasts; confidence intervals come from the corresponding bootstrap reports.",
         "tab:cert_mechanistic",
         "lllllll",
         ["Dataset", "Branch", "Protocol", "Context", "Effect", "95\\% CI", "Read"],
@@ -120,10 +120,10 @@ def write_mech_table() -> None:
 def write_claims_table() -> None:
     rows = [
         ["Benign-only QLoRA training is valid one-class training", "Supported"],
-        ["r6.2 has strong remote causal structure", "Supported"],
+        ["r6.2 has strong token-level causal structure", "Supported"],
         ["Direct token-mechanism transfer from r6.2 to r4.2 succeeds", "Rejected"],
-        ["r4.2 has a native rediscovered remote mechanism", "Supported"],
-        ["Remote detector is strongly superior on CERT", "Not supported"],
+        ["r4.2 has a native rediscovered token mechanism", "Supported"],
+        ["The session LM detector is strongly superior on CERT", "Not supported"],
     ]
     write_table(
         TABLES / "claim_status.tex",

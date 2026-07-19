@@ -39,11 +39,11 @@ evaluate selected sparse feature sets with two intervention estimands: a causal
 patching effect measured against matched active-control features, and a
 necessity effect from targeted ablation. Both estimands use donor-matching
 protocols that exclude same-user donors, and all detector comparisons use
-fold-aligned full-population scoring shared with local one-class baselines. We
+fold-aligned full-population scoring shared with the feature-based one-class baselines. We
 find a clear dissociation between detection strength and mechanistic structure.
 As a detector, the adapted model shows strong ranking behavior (day-level ROC-AUC
 $0.95$--$0.96$ on both benchmarks) but weaker day-level PR-AUC than the strongest
-local baselines. Mechanistically, \rsix{} supports a robust sparse token
+feature-based baselines. Mechanistically, \rsix{} supports a robust sparse token
 mechanism: causal patching effects remain clearly positive under same-user
 exclusion, and necessity effects are large. Transferring the \rsix{} mechanism
 configuration directly to \rfour{} fails, yet a native \rfour{} mechanism can be
@@ -98,12 +98,12 @@ patching effect measured against matched active-control feature sets, and a
 necessity effect from targeted ablation. Donor matching excludes same-user
 donors so that repair cannot be explained by borrowing a user's own benign
 style, and every detector comparison uses full-population scoring under the
-same leave-one-malicious-user-out fold construction as the local baselines.
+same leave-one-malicious-user-out fold construction as the baseline detectors.
 
 The resulting evidence supports three findings. First, benign-only session
 adaptation produces a detector with strong ranking behavior but mixed
 precision: day-level ROC-AUC is $0.95$--$0.96$ on both benchmarks, while
-day-level PR-AUC remains below the strongest local one-class baselines. Second,
+day-level PR-AUC remains below the strongest feature-based one-class baselines. Second,
 the mechanistic story is stronger than the detector story: on \rsix{}, sparse
 token-level features show causal patching effects that survive same-user
 exclusion and large necessity effects. Third, the mechanism is
@@ -127,9 +127,9 @@ transfer of the \rsix{} token mechanism to \rfour{} fails, while native
 rediscovery on \rfour{} succeeds with smaller but significantly positive
 effects.
 \item We document a dissociation between detection strength and mechanistic
-structure: the same model that trails local baselines on day-level PR-AUC
-supports causal effects up to six times larger than a matched local
-session-autoencoder comparator.
+structure: the same model that trails the feature-based baselines on day-level
+PR-AUC supports causal effects up to six times larger than a matched
+session-autoencoder mechanistic comparator.
 \end{enumerate}
 
 \section{Related Work}
@@ -140,7 +140,7 @@ are the standard public benchmarks for user-behavior-based insider-threat
 detection. Prior work spans unsupervised deep models over aggregated user-day
 features \citep{tuor2017deep}, systematic studies of data granularity
 \citep{le2020analyzing}, and a broad deep-learning literature reviewed by
-\citet{yuan2021deep}. Our local baselines follow this tradition: one-class
+\citet{yuan2021deep}. Our baseline detectors follow this tradition: one-class
 detectors (Deep SVDD \citep{ruff2018deepsvdd}, GRU and LSTM autoencoders,
 Isolation Forest \citep{liu2008isolation}) over session-level behavioral
 features. Our contribution is orthogonal to detector engineering: we ask
@@ -181,7 +181,7 @@ benign-only fine-tuning adds to the base model.
 \paragraph{Datasets.}
 We use CERT \rsix{} and \rfour{} \citep{glasser2013bridging,certdataset},
 simulated enterprise environments with ground-truth insider incidents.
-Following the LC-DAL feature-extraction line used by our local baselines, raw
+Following the LC-DAL feature-extraction line used by our baseline detectors, raw
 event logs are aggregated into per-session behavioral feature vectors
 (logon/logoff structure, file, device, HTTP, and email activity), grouped into
 user-days. Each example in our corpus is one user-day.
@@ -251,15 +251,18 @@ positive examples.
 \subsection{Fold-aligned detector benchmark}
 \label{sec:detprotocol}
 
-Remote and local detectors are compared under an identical fold construction:
+The adapted session LM and the feature-based baselines are compared under an
+identical fold construction:
 one held-out malicious user per fold, $800$ sampled benign test users per fold
 (fixed seed), day-level metrics over all test-user rows, and user-level metrics
 after max-aggregation over days. The adapted model is trained once on the
-benign population and held fixed across folds; local baselines retrain per fold
+benign population and held fixed across folds; the feature-based baselines
+retrain per fold
 on non-test benign users. Scoring uses the full corpus, and fold masks are
 applied only afterward. We adopted this protocol after finding that an earlier
 pipeline, which re-filtered an already-filtered score file, silently dropped
-the benign validation slice and overstated remote detector precision; all
+the benign validation slice and overstated the session LM's detector
+precision; all
 detector numbers reported here use the corrected full-population path.
 
 \subsection{Mechanistic estimands}
@@ -359,7 +362,7 @@ estimand (note the panel-specific scales, all in units of $10^{-3}$
 adapted-NLL). Points are paired complete-case top-versus-control contrasts;
 horizontal lines are $95\%$ bootstrap confidence intervals ($4000$
 receiver- or pair-level draws); open markers denote intervals that cross zero.
-In the causal panels, the dashed line marks the best matched local
+In the causal panels, the dashed line marks the best matched
 session-autoencoder comparator contrast on the same receivers.}
 \label{fig:mech_effects}
 \end{figure}
@@ -381,9 +384,9 @@ Two comparisons calibrate these magnitudes. First, the strengthened protocol
 matters: same-user exclusion reduced the causal point estimates relative to
 earlier permissive-donor runs, so part of the earlier effect was inflated
 exactly as the audit hypothesized---but the effect does not vanish. Second,
-against a matched local session-autoencoder comparator evaluated on the same
-receivers at the same day-level unit, the best local adaptive contrast is
-$0.0011$, roughly six times smaller than the best remote token contrast.
+against a matched session-autoencoder comparator evaluated on the same
+receivers at the same day-level unit, the best comparator contrast is
+$0.0011$, roughly six times smaller than the best token-SAE contrast.
 
 \subsection{\rfour{}: direct transfer fails; native rediscovery succeeds}
 \label{sec:r42}
@@ -401,7 +404,7 @@ receivers per context mode (of which $1034$--$1157$ are complete cases), causal
 contrasts are positive with confidence intervals excluding zero for all four
 context modes: team $0.00142$ $[0.00114, 0.00169]$, role $0.00111$
 $[0.00083, 0.00139]$, department$\times$role $0.00107$ $[0.00082, 0.00131]$,
-and department $0.00098$ $[0.00075, 0.00122]$. The corresponding local
+and department $0.00098$ $[0.00075, 0.00122]$. The session-autoencoder
 comparator's best day-level contrast on the same receivers is $0.00091$.
 Necessity is positive but partial: department$\times$role ($0.0029$,
 $[0.0015, 0.0044]$) and role ($0.0021$, $[0.0007, 0.0034]$) are significant,
@@ -433,9 +436,9 @@ necessary for every anomaly mode.
 \label{sec:discussion}
 
 \paragraph{What the dissociation means.}
-The same adapted model that trails local baselines on day-level PR-AUC supports
-causal effects several times larger than a matched local mechanistic
-comparator. Detection strength and mechanistic structure are therefore
+The same adapted model that trails the feature-based baselines on day-level
+PR-AUC supports causal effects several times larger than a matched
+session-autoencoder mechanistic comparator. Detection strength and mechanistic structure are therefore
 separable properties of an anomaly model, and evaluating either one alone gives
 an incomplete account. For security applications, this matters in both
 directions: a model need not dominate detection leaderboards for its internal
@@ -476,7 +479,7 @@ compared methods. The CERT benchmarks are simulations, and the psychometric and
 organizational fields they expose have no real-world measurement counterpart;
 results may not transfer to operational telemetry. The serializer omits four
 file-transfer fields from the observation space, so claims about the mechanism
-concern the serialized field set only. Day-level PR-AUC of the remote detector
+concern the serialized field set only. Day-level PR-AUC of the adapted session LM
 is weak in absolute terms at realistic base rates, and \rsix{} mechanistic
 estimates rest on $70$ receivers from $4$ malicious users, with one context
 mode (team) unavailable under strict donor rules. All mechanistic results
