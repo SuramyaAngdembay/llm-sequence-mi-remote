@@ -12,6 +12,9 @@
 \ShortHeadings{Benchmark-Specific Causal Structure in Session LLMs}{Anonymous Authors}
 \firstpageno{1}
 
+\newcommand{\rsix}{r6.2}
+\newcommand{\rfour}{r4.2}
+
 \title{Benign-Trained Session Language Models Recover Benchmark-Specific Causal Structure on Insider-Threat Benchmarks}
 
 \author{\name Anonymous Authors \\
@@ -24,173 +27,470 @@
 \maketitle
 
 \begin{abstract}% keep trailing percent for jmlr2e
-We study whether a benign-trained session language model can be both
-mechanistically analyzable and empirically meaningful on insider-threat-style
-enterprise benchmarks. Our current paper-safe evidence centers on a
-QLoRA-adapted Qwen3-8B model evaluated on two CERT benchmarks, r6.2 and r4.2.
-After a July 2026 audit corrected detector evaluation and tightened the
-mechanistic protocol, the detector story is mixed: fold-aligned remote detector
-performance shows strong ROC and ranking behavior but weaker day PR-AUC than the
-strongest local baselines. The mechanistic story is stronger. On r6.2, a
-same-user-excluded token-level causal patching effect remains clearly positive
-and the corresponding necessity effect is large. On r4.2, direct transfer of
-the r6.2 mechanism fails, but a native r4.2 token mechanism can still be
-rediscovered under the stricter same-user-excluded protocol. The resulting
-scientific claim is not universal detector superiority or a universal sparse
-insider-threat circuit. Instead, the current evidence supports a more specific
-finding: benign-trained session LLMs can recover benchmark-specific causal
-structure on insider-threat benchmarks, direct mechanism transfer can fail, and
-native rediscovery can succeed.
+Mechanistic interpretability has largely been developed on natural-language
+tasks; whether its intervention-based tools carry over to anomaly detection on
+structured enterprise behavior logs is an open question. We study this question
+on two CERT insider-threat benchmarks (\rsix{} and \rfour{}) using a Qwen3-8B
+session language model adapted with QLoRA on benign users only, so that the
+model is a one-class detector never exposed to malicious examples. We extract
+token-level adapter effects as the difference between adapted and base
+residual-stream states, train sparse top-$k$ autoencoders on these deltas, and
+evaluate selected sparse feature sets with two intervention estimands: a causal
+patching effect measured against matched active-control features, and a
+necessity effect from targeted ablation. Both estimands use donor-matching
+protocols that exclude same-user donors, and all detector comparisons use
+fold-aligned full-population scoring shared with local one-class baselines. We
+find a clear dissociation between detection strength and mechanistic structure.
+As a detector, the adapted model shows strong ranking behavior (day-level ROC-AUC
+$0.95$--$0.96$ on both benchmarks) but weaker day-level PR-AUC than the strongest
+local baselines. Mechanistically, \rsix{} supports a robust sparse token
+mechanism: causal patching effects remain clearly positive under same-user
+exclusion, and necessity effects are large. Transferring the \rsix{} mechanism
+configuration directly to \rfour{} fails, yet a native \rfour{} mechanism can be
+rediscovered at a different layer and sparsity, with smaller but significantly
+positive causal effects. The evidence supports a specific conclusion:
+benign-trained session LLMs can recover benchmark-specific causal structure,
+direct mechanism transfer across related benchmarks can fail, and native
+rediscovery can succeed.
 \end{abstract}
 
 \begin{keywords}
 insider threat, anomaly detection, mechanistic interpretability, language
-models, one-class learning, causal patching
+models, one-class learning, sparse autoencoders, causal patching
 \end{keywords}
 
 \section{Introduction}
-Enterprise anomaly detection is often evaluated only as a ranking problem, but
-high-stakes insider-threat settings also require a usable answer to ``why did
-the model fire?'' A detector that produces a score without any localized,
-behaviorally meaningful mechanism is difficult to audit, hard to compare across
-benchmarks, and easy to overclaim \citep{chandola2009anomaly}.
 
-This draft focuses on a narrower question than universal anomaly detection:
-whether a benign-trained session language model can recover stable,
-benchmark-specific causal structure on insider-threat-style CERT benchmarks. The
-current remote branch is a QLoRA-adapted Qwen3-8B session model trained only on
-benign users. Its evaluation has two parts. First, a detector benchmark asks
-how the remote score behaves under the same leave-one-malicious-user-out folds
-used by the local baselines. Second, a mechanistic benchmark asks whether
-sparse token feature sets show causal sufficiency and necessity under active
-controls and after same-user exclusions. The model family itself is still a
-transformer-based sequence model \citep{vaswani2017attention}.
+Enterprise anomaly detection is usually evaluated as a ranking problem: a model
+assigns scores, and the question is whether malicious activity ranks above
+benign activity. In high-stakes settings such as insider-threat monitoring,
+however, a score alone is not enough. An alert that cannot be traced to a
+localized, behaviorally meaningful mechanism is difficult to audit, hard to
+compare across benchmarks, and easy to overclaim
+\citep{chandola2009anomaly,yuan2021deep}. Mechanistic interpretability offers a
+candidate remedy: if the internal computation that raises an anomaly score can
+be localized to sparse, causally validated features, then detections become
+auditable objects rather than opaque numbers
+\citep{olah2020zoom,bricken2023monosemanticity}.
 
-The current evidence supports three points. First, benign-only remote training
-is valid one-class training under the implemented protocol. Second, the remote
-mechanistic branch is genuinely positive on r6.2 after the stricter same-user
-repair. Third, r4.2 rejects a universal transfer story but still supports
-native rediscovery of a smaller remote mechanism. What the evidence does not
-support is a strong detector-superiority claim on CERT.
+Most mechanistic-interpretability evidence to date comes from natural-language
+tasks and curated model behaviors \citep{meng2022locating,wang2023interpretability}.
+This paper asks whether the same intervention-based toolkit---sparse
+dictionary learning followed by causal patching and ablation
+\citep{cunningham2023sparse,zhang2023best}---produces stable, decision-relevant
+structure in a different regime: language models trained on serialized
+enterprise session logs for one-class anomaly detection. Two properties make
+this regime a demanding test. First, the training signal is benign-only, so any
+mechanism associated with anomalous behavior must emerge without the model ever
+seeing a positive example. Second, insider-threat benchmarks come in families
+(here, CERT \rsix{} and \rfour{}) that share a data-generating philosophy but
+differ in scale and scenario mix \citep{glasser2013bridging}, which lets us ask a
+question that single-benchmark studies cannot: is the recovered mechanism a
+property of the domain, or of the specific benchmark?
+
+Concretely, we adapt Qwen3-8B \citep{qwen3} with QLoRA
+\citep{hu2022lora,dettmers2023qlora} on structured session sequences from benign
+users only. We isolate the adapter's token-level effect as the difference
+between adapted and base residual-stream states, train top-$k$ sparse
+autoencoders \citep{gao2024scaling} on these adapter deltas, and subject
+selected sparse feature sets to two preregistered-style estimands: a causal
+patching effect measured against matched active-control feature sets, and a
+necessity effect from targeted ablation. Donor matching excludes same-user
+donors so that repair cannot be explained by borrowing a user's own benign
+style, and every detector comparison uses full-population scoring under the
+same leave-one-malicious-user-out fold construction as the local baselines.
+
+The resulting evidence supports three findings. First, benign-only session
+adaptation produces a detector with strong ranking behavior but mixed
+precision: day-level ROC-AUC is $0.95$--$0.96$ on both benchmarks, while
+day-level PR-AUC remains below the strongest local one-class baselines. Second,
+the mechanistic story is stronger than the detector story: on \rsix{}, sparse
+token-level features show causal patching effects that survive same-user
+exclusion and large necessity effects. Third, the mechanism is
+benchmark-specific: the \rsix{} configuration transfers negatively to \rfour{},
+yet a native \rfour{} mechanism exists at a different layer and sparsity and
+passes the same strengthened controls.
 
 \input{figures/pipeline.tex}
 
 \paragraph{Contributions.}
 \begin{enumerate}[leftmargin=1.3em]
-\item We provide a repaired, paper-safe CERT evaluation policy that separates
-fold-aligned detector benchmarking from same-user-excluded mechanistic
-evaluation.
-\item We show that the remote token mechanism on r6.2 remains positive after the
-same-user donor/match audit.
-\item We show that direct token-mechanism transfer from r6.2 to r4.2 fails, but
-a native r4.2 mechanism can still be recovered.
-\item We show that detector competitiveness and mechanistic interpretability
-need not move together: the mechanistic claim is stronger than the detector
-claim in the current repaired evidence.
+\item We present, to our knowledge, the first intervention-based mechanistic
+analysis of a benign-trained session language model on insider-threat
+benchmarks, combining adapter-delta sparse autoencoders with causal patching
+and necessity ablation under active controls and same-user donor exclusion.
+\item We introduce an evaluation policy that separates fold-aligned detector
+benchmarking from mechanistic evaluation, and we show why weaker protocols
+(population re-filtering, permissive donor matching) overstate both stories.
+\item We show that the recovered mechanism is benchmark-specific: direct
+transfer of the \rsix{} token mechanism to \rfour{} fails, while native
+rediscovery on \rfour{} succeeds with smaller but significantly positive
+effects.
+\item We document a dissociation between detection strength and mechanistic
+structure: the same model that trails local baselines on day-level PR-AUC
+supports causal effects up to six times larger than a matched local
+session-autoencoder comparator.
 \end{enumerate}
 
-\section{Setup and Evaluation Protocol}
-\subsection{Remote model and data protocol}
-The remote branch is a benign-trained Qwen3-8B QLoRA session model. Positive
-users are assigned to the remote evaluation split, while training and validation
-use benign users only. This makes the remote branch a one-class detector in the
-sense that the model is never trained on malicious examples.
+\section{Related Work}
 
-\subsection{Datasets}
-We focus on two CERT benchmarks. The r6.2 branch has 70 remote positive
-receiver-days in the current mechanistic evaluation. The r4.2 branch is larger,
-with 1309 remote positive receiver-days in the repaired native-mechanism
-evaluation. Both datasets also have local Magnolia baselines and local
-session-AE mechanistic comparators \citep{certdataset}.
+\paragraph{Insider-threat detection.}
+The CERT insider-threat test datasets \citep{glasser2013bridging,certdataset}
+are the standard public benchmarks for user-behavior-based insider-threat
+detection. Prior work spans unsupervised deep models over aggregated user-day
+features \citep{tuor2017deep}, systematic studies of data granularity
+\citep{le2020analyzing}, and a broad deep-learning literature reviewed by
+\citet{yuan2021deep}. Our local baselines follow this tradition: one-class
+detectors (Deep SVDD \citep{ruff2018deepsvdd}, GRU and LSTM autoencoders,
+Isolation Forest \citep{liu2008isolation}) over session-level behavioral
+features. Our contribution is orthogonal to detector engineering: we ask
+whether a sequence-native language model trained on the same benign population
+admits a causal, feature-level account of its anomaly evidence.
 
-\subsection{Detector benchmark}
-After the July 2026 audit, remote detector rows are considered valid only when
-they use full-population scoring on \texttt{all.jsonl} followed by fold-aligned
-evaluation on the same leave-one-malicious-user-out test-user construction as
-the local baselines. This protocol fixes the earlier split-filter bug that had
-made the old \texttt{detector\_metrics/} artifacts too optimistic.
+\paragraph{Language models over logs.}
+Treating system and behavior logs as sequences for anomaly detection predates
+modern LLMs \citep{du2017deeplog,guo2021logbert}. These approaches inherit the
+transformer's sequence modeling capacity \citep{vaswani2017attention} but are
+typically evaluated only as detectors. We instead use parameter-efficient
+adaptation \citep{hu2022lora,dettmers2023qlora} of a general-purpose LLM
+\citep{qwen3} and center the evaluation on the internal structure induced by
+adaptation rather than on detection leaderboards.
+
+\paragraph{Mechanistic interpretability.}
+Sparse autoencoders and dictionary learning decompose model activations into
+sparse, more interpretable features
+\citep{cunningham2023sparse,bricken2023monosemanticity,gao2024scaling}.
+Intervention-based validation---activation patching, causal mediation, and
+ablation---provides the causal counterpart
+\citep{vig2020investigating,meng2022locating,zhang2023best,heimersheim2024use},
+with causal scrubbing formalizing hypothesis testing over internal computations
+\citep{chan2022causal}. Circuit-level studies have largely targeted curated
+natural-language behaviors \citep{wang2023interpretability}. Two design choices
+in our protocol follow explicit recommendations from this literature: effects
+are always measured against matched active controls rather than in isolation
+\citep{zhang2023best}, and we treat cross-dataset transfer of a mechanism as an
+empirical claim to be tested rather than assumed---connecting to the question
+of universality of learned structure \citep{olah2020zoom,chughtai2023toy}. A
+distinctive aspect of our setting is that the sparse decomposition targets
+\emph{adapter-induced deltas} rather than raw activations, isolating what
+benign-only fine-tuning adds to the base model.
+
+\section{Benchmarks and Session Modeling}
+\label{sec:data}
+
+\paragraph{Datasets.}
+We use CERT \rsix{} and \rfour{} \citep{glasser2013bridging,certdataset},
+simulated enterprise environments with ground-truth insider incidents.
+Following the LC-DAL feature-extraction line used by our local baselines, raw
+event logs are aggregated into per-session behavioral feature vectors
+(logon/logoff structure, file, device, HTTP, and email activity), grouped into
+user-days. Each example in our corpus is one user-day.
+
+\paragraph{Evaluation population.}
+All results are stated over the \emph{matched active-session} domain: user-days
+that appear in the LC-DAL session-feature extraction. This domain is smaller
+than the raw answer key, because some labeled incidents fall outside active
+session coverage. For \rsix{}, the matched domain contains $70$ positive
+user-days across $4$ malicious users (the answer key lists $99$ positive rows
+across $5$ users); for \rfour{}, it contains $1309$ positive user-days across
+$60$ users (answer key: $1883$ rows across $70$ users). We report this
+explicitly because population re-filtering is a common source of silent
+optimism in insider-threat evaluation.
+
+\paragraph{Serialization.}
+Each user-day is rendered as structured text: a \texttt{DAY} header with
+organizational context (week, project, role, business and functional unit,
+department, team, IT-administrator flag), a \texttt{PSY} line with the five
+simulated psychometric traits, a session-count line, and one \texttt{SES} line
+per session listing its numeric LC-DAL features as \texttt{key=value} pairs.
+The serialization is deliberately non-prose: the model must learn behavioral
+regularities from structured key-value sequences, not natural-language cues.
+Four hyphenated file-transfer columns are dropped by the serializer due to a
+column-naming constraint; we treat the serialized field set, not the full
+LC-DAL schema, as the model's observation space.
+
+\paragraph{Splits.}
+Users with any positive day are assigned entirely to an evaluation split;
+benign users are hashed to a validation split with probability $0.10$ and
+otherwise to training. Training and early stopping therefore never see
+malicious users, making the adapted model a one-class detector at the
+population level, not merely at the label level.
+
+\section{Model and Sparse Feature Extraction}
+\label{sec:model}
+
+\paragraph{Benign-only adaptation.}
+We adapt Qwen3-8B \citep{qwen3} with QLoRA \citep{dettmers2023qlora}: the base
+model is quantized to 4-bit NF4 with double quantization and bfloat16 compute,
+and low-rank adapters \citep{hu2022lora} with rank $16$, scaling $\alpha=32$,
+and dropout $0.05$ are attached to all attention and MLP projection matrices.
+Training minimizes next-token negative log-likelihood on benign training
+user-days only (sequence length $2048$, effective batch size $8$, one epoch,
+learning rate $1.5\times10^{-4}$ with cosine decay and $3\%$ warmup). The
+per-example anomaly score is the length-normalized NLL of the serialized
+user-day under the adapted model (\emph{adapted NLL}); we also report base-model
+NLL and their difference as reference scores.
+
+\paragraph{Token-level adapter deltas.}
+For a layer $\ell$, let $h^{\mathrm{ada}}_{t}$ and $h^{\mathrm{base}}_{t}$ be
+the residual-stream states of token $t$ under the adapted and base model on the
+same input. The \emph{adapter delta} $\delta_t = h^{\mathrm{ada}}_{t} -
+h^{\mathrm{base}}_{t}$ isolates what benign-only adaptation changed about the
+representation of token $t$. We train top-$k$ sparse autoencoders
+\citep{gao2024scaling} on benign token deltas: a ReLU encoder followed by a
+top-$k$ mask and an untied linear decoder, with latent dimension a multiplier
+$m$ of the model width. The headline \rsix{} configuration uses layer $18$,
+$m=4$, $k=8$; the headline \rfour{} configuration, found by native search
+(Section~\ref{sec:r42}), uses layer $26$, $m=2$, $k=4$. Candidate feature sets
+are the top-$5$ features ranked by association between feature activity and
+positive examples.
+
+\section{Evaluation Protocol}
+\label{sec:protocol}
+
+\subsection{Fold-aligned detector benchmark}
+\label{sec:detprotocol}
+
+Remote and local detectors are compared under an identical fold construction:
+one held-out malicious user per fold, $800$ sampled benign test users per fold
+(fixed seed), day-level metrics over all test-user rows, and user-level metrics
+after max-aggregation over days. The adapted model is trained once on the
+benign population and held fixed across folds; local baselines retrain per fold
+on non-test benign users. Scoring uses the full corpus, and fold masks are
+applied only afterward. We adopted this protocol after finding that an earlier
+pipeline, which re-filtered an already-filtered score file, silently dropped
+the benign validation slice and overstated remote detector precision; all
+detector numbers reported here use the corrected full-population path.
 
 \subsection{Mechanistic estimands}
-The causal branch measures a token-level repair advantage:
-top sparse feature sets are patched into positive receivers and compared against
-an active control set. The necessity branch measures whether ablating the top
-feature set hurts anomalous examples more than ablating the active control.
-Final mechanistic rows are taken only from the repaired same-user-excluded
-runs.
+\label{sec:mechprotocol}
+
+Both estimands operate on \emph{receivers} (positive user-day examples) and
+report effects of intervening on a selected sparse feature set $S$ relative to
+a matched \emph{active control} set $C$ of equally many features drawn from
+those with nontrivial activation support (activation frequency at least
+$0.002$). Inert controls make intervention effects look artificially large, so
+control activity is a precondition, not an afterthought \citep{zhang2023best}.
+
+\paragraph{Causal patching (sufficiency).}
+For each receiver we select donor user-days matched on an organizational
+context mode (role, department$\times$role, project$\times$role, team, or
+department), drawn either from benign users or---as a same-class control---from
+other anomalous user-days. At token positions where features in $S$ are
+active, we patch the delta-SAE features toward the donor prototype and measure
+the resulting change in adapted NLL, keeping each receiver's best donor. Let
+$\Delta^{S}_{\mathrm{ben}}$ and $\Delta^{S}_{\mathrm{anom}}$ denote a
+receiver's best NLL change under benign and anomalous donors. The
+\emph{repair advantage} of $S$ is
+$\mathrm{RA}(S) = \overline{\Delta^{S}_{\mathrm{anom}}} -
+\overline{\Delta^{S}_{\mathrm{ben}}}$,
+and the reported estimand is the paired contrast
+$\mathrm{RA}(S) - \mathrm{RA}(C)$ computed over receivers with complete
+top/control and benign/anomalous donor values. A positive value means the
+selected features carry anomaly-specific repairable structure beyond what
+matched control features carry.
+
+\paragraph{Necessity (ablation).}
+For each positive receiver paired with a context-matched benign receiver, we
+ablate the selected features and measure the NLL change on both. The
+\emph{necessity advantage} is the paired top-versus-control contrast of
+(benign minus positive) ablation effects: positive values mean ablating $S$
+disrupts anomaly evidence on positive examples more than on matched benign
+examples, and more than ablating $C$ does.
+
+\paragraph{Same-user exclusion.}
+In both estimands, donors and benign matches from the receiver's own user are
+excluded. Without this restriction, patching can ``repair'' an anomalous day by
+borrowing the same user's benign signature, which inflates effects for reasons
+unrelated to the hypothesized mechanism. An audit of earlier permissive-donor
+runs found nontrivial same-user matching rates; all mechanistic results
+reported here come from reruns with same-user exclusion enforced and verified.
+
+\paragraph{Uncertainty.}
+Confidence intervals use $4000$ receiver-level (or pair-level) bootstrap
+draws, and reported point estimates equal the bootstrap estimand: complete
+paired contrasts, not differences of marginal means, which diverge when donor
+availability is asymmetric.
 
 \input{figures/story.tex}
 
 \section{Results}
-\subsection{Detector results are mixed under the corrected protocol}
-The corrected detector table is fold-aligned and therefore scientifically usable
-for remote-vs-local comparison. It changes the story materially: the remote
-detector has strong ROC and some useful user-ranking behavior, but it is not
-stronger than the best local Magnolia baselines on day PR-AUC, including the
-Deep SVDD reference baseline \citep{ruff2018deepsvdd}.
+\label{sec:results}
+
+\subsection{Detection: strong ranking, weak day-level precision}
+\label{sec:detresults}
+
+Table~\ref{tab:cert_detector} reports the fold-aligned comparison. The adapted
+NLL score ranks strongly: day-level ROC-AUC is $0.953$ on \rsix{} and $0.964$
+on \rfour{}, user-level ROC-AUC is $0.97$ on both, and the held-out malicious
+user ranks in the top $3.5\%$ of $801$ test users on average (mean rank $24.0$
+on \rsix{}, $26.4$ on \rfour{}). Adaptation carries the signal: base-model NLL
+achieves day ROC-AUC of only $0.461$ (\rsix{}) and $0.581$ (\rfour{}).
+Day-level PR-AUC tells a different story: at extreme base rates
+($\sim$$10^{-5}$ positive on \rsix{}) the adapted model reaches only
+$0.00075$ on \rsix{} and $0.0134$ on \rfour{}, below Deep SVDD
+($0.0115$ and $0.0337$) and the recurrent autoencoders, though above Isolation
+Forest on both datasets.
 
 \input{tables/cert_detector_comparison.tex}
 
-The consequence is straightforward. Detector evidence should stay in the paper,
-but not as the headline claim. The strongest safe reading is that the remote
-detector remains nontrivial and behaviorally structured, not that it dominates
-the local baselines.
+The consequence for interpretation is direct: the adapted session LLM is a
+nontrivial, behaviorally structured detector, but the evidence does not support
+a detector-superiority claim. We therefore treat detection as background and
+ask what internal structure the benign-only adaptation induced.
 
-\subsection{r6.2 retains a strong remote mechanism after repair}
-The repaired r6.2 same-user-excluded causal run remains clearly positive for the
-main organization-context rows, and the matched necessity effect remains large.
-The repaired remote-vs-local day-level comparison also shows that the remote
-causal effect remains larger than the local session-AE comparator scale.
+\subsection{\rsix{}: a sparse token mechanism that survives strengthened controls}
+\label{sec:r62}
 
-\subsection{r4.2 rejects direct transfer but supports native rediscovery}
-Transferred layer-18 r6.2 token configurations remained negative on r4.2, so
-the data do not support a universal transferable sparse circuit. However, the
-native r4.2 search found a positive layer-26 token branch, and that branch
-remained positive under the stricter same-user-excluded recovery. The native
-necessity result is weaker than r6.2 and is strongest for \texttt{dept\_role}
-and \texttt{role}.
+Under the same-user-excluded protocol on all $70$ positive receivers, the
+layer-18 top-5 feature set shows clearly positive causal patching contrasts for
+the main organizational context modes: $0.0068$ for role
+($95\%$ CI $[0.0034, 0.0108]$), $0.0068$ for department$\times$role
+($[0.0035, 0.0103]$), and $0.0042$ for project$\times$role
+($[0.0016, 0.0070]$). The team context yields no finite estimate because
+same-user exclusion leaves no valid anomalous-donor comparison in that stratum;
+we report it as unavailable rather than imputing it. Necessity effects are
+larger and uniformly positive across all four context modes, ranging from
+$0.052$ (team, $[0.042, 0.061]$) to $0.065$ (project$\times$role,
+$[0.055, 0.075]$).
+
+Two comparisons calibrate these magnitudes. First, the strengthened protocol
+matters: same-user exclusion reduced the causal point estimates relative to
+earlier permissive-donor runs, so part of the earlier effect was inflated
+exactly as the audit hypothesized---but the effect does not vanish. Second,
+against a matched local session-autoencoder comparator evaluated on the same
+receivers at the same day-level unit, the best local adaptive contrast is
+$0.0011$, roughly six times smaller than the best remote token contrast.
+
+\subsection{\rfour{}: direct transfer fails; native rediscovery succeeds}
+\label{sec:r42}
+
+Applying the \rsix{} mechanism configuration (layer 18, its SAE, and its
+feature sets) directly to \rfour{} produces negative top-versus-control
+contrasts across all audited transfer configurations under full uncapped
+evaluation. The data reject a universal transferable sparse insider-threat
+circuit at the level of literal feature identity.
+
+A native search over layers and SAE hyperparameters on \rfour{}, however,
+recovers a positive mechanism at layer 26 with a smaller dictionary ($m=2$,
+$k=4$). Under same-user exclusion, on populations of $1039$--$1301$ available
+receivers per context mode (of which $1034$--$1157$ are complete cases), causal
+contrasts are positive with confidence intervals excluding zero for all four
+context modes: team $0.00142$ $[0.00114, 0.00169]$, role $0.00111$
+$[0.00083, 0.00139]$, department$\times$role $0.00107$ $[0.00082, 0.00131]$,
+and department $0.00098$ $[0.00075, 0.00122]$. The corresponding local
+comparator's best day-level contrast on the same receivers is $0.00091$.
+Necessity is positive but partial: department$\times$role ($0.0029$,
+$[0.0015, 0.0044]$) and role ($0.0021$, $[0.0007, 0.0034]$) are significant,
+while department and team are directionally positive with intervals crossing
+zero. The \rfour{} mechanism is thus real but weaker and less uniform than its
+\rsix{} counterpart---approximately five times smaller in causal contrast, at a
+different depth, with a sparser dictionary.
 
 \input{tables/cert_mechanistic_summary.tex}
 
-\subsection{The paper claim is now narrower but cleaner}
-After the recovery work, the project has a more defensible paper shape:
-mechanistic evidence is the center, detector performance is a qualified
-background result, and direct transfer failure becomes part of the scientific
-finding rather than a flaw to hide.
+\subsection{Cross-benchmark reading}
+\label{sec:cross}
+
+Taken together, the two benchmarks yield a coherent picture
+(Table~\ref{tab:claim_status}). Benign-only adaptation induces sparse
+token-level structure that is causally implicated in anomaly evidence on both
+benchmarks; the structure is benchmark-specific in depth, sparsity, and
+magnitude; and sufficiency-style transfer of literal features across benchmarks
+fails even when native mechanisms exist on both sides. On the necessity side,
+\rsix{} exhibits strong, uniform effects while \rfour{} shows context-dependent
+partial necessity---consistent with \rfour{}'s larger and more heterogeneous
+positive population ($60$ malicious users spanning multiple scenarios, versus
+$4$ on \rsix{}), in which no small fixed feature set should be expected to be
+necessary for every anomaly mode.
 
 \input{tables/claim_status.tex}
 
 \section{Discussion}
-The repaired evidence supports a paper about benchmark-specific causal structure
-in benign-trained session language models. That is a meaningful result on its
-own. It says that the learned signal is not merely a detector score but can be
-localized to sparse token-level mechanisms, even if those mechanisms are not
-portable across benchmarks without rediscovery.
+\label{sec:discussion}
 
-This also clarifies what should \emph{not} be claimed. The current detector
-results do not justify a strong ``better detector'' paper. The current
-mechanistic results also do not justify a universal insider-threat circuit.
-Instead, the strongest supported message is that the same modeling family can
-recover different, benchmark-specific mechanisms under a common remote
-pipeline.
+\paragraph{What the dissociation means.}
+The same adapted model that trails local baselines on day-level PR-AUC supports
+causal effects several times larger than a matched local mechanistic
+comparator. Detection strength and mechanistic structure are therefore
+separable properties of an anomaly model, and evaluating either one alone gives
+an incomplete account. For security applications, this matters in both
+directions: a model need not dominate detection leaderboards for its internal
+structure to be useful for auditing and hypothesis generation, and a strong
+detector may offer no localized mechanism at all.
+
+\paragraph{Benchmark-specificity as a finding, not a failure.}
+A natural hope for mechanistic approaches to security is a universal
+``insider-threat circuit'' that transfers across environments. Our transfer
+experiment is a direct test of the strongest version of that hope, and it
+fails: \rsix{} features do not transfer to \rfour{} despite the benchmarks
+sharing a simulation lineage. Yet native rediscovery succeeds on both. This
+mirrors observations about universality elsewhere in interpretability, where
+networks trained on related tasks learn analogous but not identical internal
+structure \citep{chughtai2023toy}. The practical implication is a
+\emph{rediscovery protocol}: rather than shipping fixed features across
+environments, ship the pipeline that finds them---sparse decomposition of
+adapter deltas plus intervention-based validation under active controls.
+
+\paragraph{Why the strengthened protocol is load-bearing.}
+Three protocol elements changed conclusions materially during this work:
+full-population scoring (an earlier re-filtering bug overstated detector
+precision), same-user donor exclusion (permissive matching inflated causal
+effects), and paired complete-case estimands (marginal-mean differences
+diverged from the bootstrap estimand when donor availability was asymmetric).
+None of these are exotic; all are easy to get silently wrong. We report them as
+part of the contribution because intervention-based interpretability applied to
+security data inherits both the pitfalls of interpretability
+\citep{heimersheim2024use} and the base-rate pathologies of anomaly detection
+\citep{chandola2009anomaly}.
 
 \section{Limitations}
-This is still a first draft and not a final submission package. Two limitations
-matter immediately. First, the detector story is weaker than the mechanistic
-story and should be framed that way. Second, this draft still uses generated
-tables and simple placeholder figures rather than the polished final visual
-package that a submission would need.
+\label{sec:limitations}
+
+Our evaluation population is the matched active-session domain, not the full
+CERT answer key; incidents outside session coverage are invisible to all
+compared methods. The CERT benchmarks are simulations, and the psychometric and
+organizational fields they expose have no real-world measurement counterpart;
+results may not transfer to operational telemetry. The serializer omits four
+file-transfer fields from the observation space, so claims about the mechanism
+concern the serialized field set only. Day-level PR-AUC of the remote detector
+is weak in absolute terms at realistic base rates, and \rsix{} mechanistic
+estimates rest on $70$ receivers from $4$ malicious users, with one context
+mode (team) unavailable under strict donor rules. All mechanistic results
+concern feature-level interventions at a single layer under a specific SAE
+family; they localize causal structure but do not constitute a complete
+circuit-level account \citep{chan2022causal}. Finally, our evidence covers one
+model family at one scale with single training runs; seed-level and
+architecture-level robustness remain to be established.
 
 \section{Broader Impact Statement}
-Insider-threat detection can reduce harm from credential misuse, data exfiltration,
-and risky internal behavior, but it also creates surveillance risks. A model
-that is operationally deployed without strong governance could be used to
-escalate normal employee variation, over-monitor specific workers, or justify
-opaque automated action. The current work modestly improves that situation by
-favoring benign-only training, explicit evaluation policies, and mechanistic
-auditing over purely opaque score maximization. Even so, none of these results
-should be interpreted as a justification for autonomous disciplinary action.
-Human review, documented appeal processes, and careful organizational policy are
-required for any responsible deployment.
+
+Insider-threat detection can reduce harm from credential misuse and data
+exfiltration, but it is also employee surveillance, and interpretability tools
+cut both ways: mechanisms that make alerts auditable can also make monitoring
+more invasive or lend unearned credibility to weak evidence. Two properties of
+this work partially mitigate these risks: training is benign-only, so the
+system models normal behavior rather than profiling individuals against
+incident templates, and the mechanistic protocol is designed to make claims
+falsifiable (active controls, exclusion rules, preregistered-style estimands)
+rather than persuasive. Nothing here justifies autonomous action against
+individuals. Deployments would require human review, documented appeal
+processes, and governance appropriate to workplace monitoring, and our results
+are on simulated data---they establish methodology, not operational readiness.
+
+\section*{Reproducibility Statement}
+
+All experiments derive from tracked artifacts in the project repository:
+dataset construction and split assignment
+(\texttt{build\_session\_jsonl.py}, deterministic user-hash splits), training
+configurations (Section~\ref{sec:model} lists all hyperparameters),
+full-population scoring and fold-aligned detector evaluation (fixed fold seed,
+$800$ benign test users per fold), and causal/necessity evaluation with
+bootstrap reports whose estimands match the reported tables. Dataset rebuilds
+were verified byte-identical from checksummed transfer shards, and final
+mechanistic artifacts were audited for zero same-user donor rows and non-inert
+controls. An anonymized code and artifact package will be released upon
+publication.
 
 \acks{This anonymized draft omits acknowledgements for submission. The final
 camera-ready version should add funding, disclosure, and acknowledgements as
