@@ -1,5 +1,4 @@
 build/
-tables/*.tex
 *.aux
 *.bbl
 *.blg
@@ -8,4 +7,3 @@ tables/*.tex
 *.log
 *.out
 *.toc
-

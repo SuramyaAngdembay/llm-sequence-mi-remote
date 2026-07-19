@@ -1,0 +1,17 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lllllll}
+\toprule
+Dataset & Branch & Protocol & Context & Effect & 95\% CI & Read \\
+\midrule
+r6.2 & Remote causal & Same-user excluded & role & 0.006848 & [0.003362, 0.010790] & remote > local adaptive (0.001133) \\
+r6.2 & Remote necessity & Same-user excluded & project\_role & 0.065188 & [0.055145, 0.075023] & strong positive necessity \\
+r4.2 & Transferred causal & Layer-18 r6.2 config & multiple & negative & all audited configs < 0 & direct transfer fails \\
+r4.2 & Remote native causal & Same-user excluded & team & 0.001418 & [0.001139, 0.001690] & remote > local adaptive (0.000909) \\
+r4.2 & Remote native necessity & Same-user excluded & dept\_role & 0.002922 & [0.001460, 0.004379] & role/dept\_role strongest \\
+\bottomrule
+\end{tabular}
+\caption{Mechanistic summary after the same-user recovery audit. Point estimates use the repaired bundle summaries; confidence intervals come from the corresponding bootstrap reports.}
+\label{tab:cert_mechanistic}
+\end{table}
