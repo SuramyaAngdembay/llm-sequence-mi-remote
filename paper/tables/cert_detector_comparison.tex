@@ -1,4 +1,6 @@
 \begin{table}[t]
+\caption{Fold-aligned detector comparison on CERT. Bold marks the best value per metric within each dataset (held-out rank: lower is better). The Qwen3-8B session LM shows strong ROC and ranking behavior, but its day-level PR-AUC remains below the stronger feature-based baselines.}
+\label{tab:cert_detector}
 \centering
 \footnotesize
 \setlength{\tabcolsep}{4.5pt}
@@ -6,18 +8,17 @@
 \toprule
 Dataset & Method & Day PR-AUC & Day ROC-AUC & User PR-AUC & Held-out rank \\
 \midrule
-r6.2 & Session LM (adapted NLL) & 0.0008 & 0.953 & 0.054 & 24.0 \\
-r6.2 & Deep SVDD & 0.0115 & 0.628 & 0.211 & 83.2 \\
-r6.2 & GRU AE & 0.0057 & 0.766 & 0.081 & 24.8 \\
-r6.2 & LSTM AE & 0.0021 & 0.768 & 0.057 & 24.2 \\
-r6.2 & Isolation Forest & 0.0002 & 0.713 & 0.013 & 153.0 \\
-r4.2 & Session LM (adapted NLL) & 0.0134 & 0.964 & 0.101 & 26.4 \\
-r4.2 & Deep SVDD & 0.0337 & 0.743 & 0.382 & 53.4 \\
-r4.2 & GRU AE & 0.0254 & 0.696 & 0.124 & 86.6 \\
-r4.2 & LSTM AE & 0.0236 & 0.714 & 0.120 & 92.1 \\
-r4.2 & Isolation Forest & 0.0003 & 0.715 & 0.008 & 186.4 \\
+r6.2 & Session LM (adapted NLL) & 0.0008 & \textbf{0.953} & 0.054 & \textbf{24.0} \\
+ & Deep SVDD & \textbf{0.0115} & 0.628 & \textbf{0.211} & 83.2 \\
+ & GRU AE & 0.0057 & 0.766 & 0.081 & 24.8 \\
+ & LSTM AE & 0.0021 & 0.768 & 0.057 & 24.2 \\
+ & Isolation Forest & 0.0002 & 0.713 & 0.013 & 153.0 \\
+\midrule
+r4.2 & Session LM (adapted NLL) & 0.0134 & \textbf{0.964} & 0.101 & \textbf{26.4} \\
+ & Deep SVDD & \textbf{0.0337} & 0.743 & \textbf{0.382} & 53.4 \\
+ & GRU AE & 0.0254 & 0.696 & 0.124 & 86.6 \\
+ & LSTM AE & 0.0236 & 0.714 & 0.120 & 92.1 \\
+ & Isolation Forest & 0.0003 & 0.715 & 0.008 & 186.4 \\
 \bottomrule
 \end{tabular}
-\caption{Fold-aligned detector comparison on CERT. The Qwen3-8B session LM shows strong ROC and ranking behavior, but its day-level PR-AUC remains below the stronger feature-based baselines on both datasets.}
-\label{tab:cert_detector}
 \end{table}

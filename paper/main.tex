@@ -1,32 +1,38 @@
-\documentclass[twoside,11pt]{article}
-\usepackage[preprint]{jmlr2e}
+\documentclass[10pt]{article} % For LaTeX2e
+\usepackage{tmlr}
+% If accepted, instead use the following line for the camera-ready submission:
+% \usepackage[accepted]{tmlr}
+% To de-anonymize for preprint servers:
+% \usepackage[preprint]{tmlr}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
 \usepackage{enumitem}
+\usepackage{graphicx}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows}
+\usepackage{hyperref}
 \usepackage{url}
 \hypersetup{hidelinks}
-
-\jmlrheading{0}{2026}{1-1}{7/26}{7/26}{TMLR-SUBMISSION}{Anonymous Authors}
-\ShortHeadings{Benchmark-Specific Causal Structure in Session LLMs}{Anonymous Authors}
-\firstpageno{1}
 
 \newcommand{\rsix}{r6.2}
 \newcommand{\rfour}{r4.2}
 
+\def\month{07}
+\def\year{2026}
+\def\openreview{\url{https://openreview.net/forum?id=XXXX}}
+
 \title{Benign-Trained Session Language Models Recover Benchmark-Specific Causal Structure on Insider-Threat Benchmarks}
 
-\author{\name Anonymous Authors \\
+% Author block is hidden automatically while the tmlr package is used
+% without the [accepted] or [preprint] options.
+\author{\name Anonymous Authors \email anonymous@example.com \\
 \addr Anonymous Institution}
-
-\editor{Under Review by TMLR}
 
 \begin{document}
 
 \maketitle
 
-\begin{abstract}% keep trailing percent for jmlr2e
+\begin{abstract}
 Mechanistic interpretability has largely been developed on natural-language
 tasks; whether its intervention-based tools carry over to anomaly detection on
 structured enterprise behavior logs is an open question. We study this question
@@ -53,11 +59,6 @@ benign-trained session LLMs can recover benchmark-specific causal structure,
 direct mechanism transfer across related benchmarks can fail, and native
 rediscovery can succeed.
 \end{abstract}
-
-\begin{keywords}
-insider threat, anomaly detection, mechanistic interpretability, language
-models, one-class learning, sparse autoencoders, causal patching
-\end{keywords}
 
 \section{Introduction}
 
@@ -518,10 +519,10 @@ mechanistic artifacts were audited for zero same-user donor rows and non-inert
 controls. An anonymized code and artifact package will be released upon
 publication.
 
-\acks{This anonymized draft omits acknowledgements for submission. The final
-camera-ready version should add funding, disclosure, and acknowledgements as
-required by the venue.}
+% Camera-ready only: add an Acknowledgments section (funding, disclosures)
+% after acceptance, per TMLR policy.
 
 \bibliography{references}
+\bibliographystyle{tmlr}
 
 \end{document}

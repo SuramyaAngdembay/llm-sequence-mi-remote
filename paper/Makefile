@@ -19,7 +19,7 @@ pdf: tables figures
 overleaf: tables figures
 	mkdir -p build
 	rm -f build/overleaf.zip
-	zip -q build/overleaf.zip main.tex jmlr2e.sty references.bib \
+	zip -q build/overleaf.zip main.tex tmlr.sty tmlr.bst fancyhdr.sty references.bib \
 		figures/*.tex figures/*.pdf tables/*.tex
 	@echo "Overleaf package: build/overleaf.zip"
 

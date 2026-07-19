@@ -11,6 +11,8 @@ TABLES = ROOT / "tables"
 def write_table(path: Path, caption: str, label: str, colspec: str, header: list[str], rows: list[list[str]], size: str = r"\small", colsep: str | None = None) -> None:
     lines = [
         r"\begin{table}[t]",
+        rf"\caption{{{caption}}}",
+        rf"\label{{{label}}}",
         r"\centering",
         size,
     ]
@@ -23,13 +25,14 @@ def write_table(path: Path, caption: str, label: str, colspec: str, header: list
         r"\midrule",
     ]
     for row in rows:
-        lines.append(" & ".join(row) + r" \\")
+        if row == ["---"]:
+            lines.append(r"\midrule")
+        else:
+            lines.append(" & ".join(row) + r" \\")
     lines.extend(
         [
             r"\bottomrule",
             r"\end{tabular}",
-            rf"\caption{{{caption}}}",
-            rf"\label{{{label}}}",
             r"\end{table}",
         ]
     )
@@ -42,20 +45,21 @@ def fmt(x: float, digits: int = 4) -> str:
 
 def write_detector_table() -> None:
     rows = [
-        ["r6.2", "Session LM (adapted NLL)", fmt(0.000754631, 4), fmt(0.953157, 3), fmt(0.0537037, 3), fmt(24.0, 1)],
-        ["r6.2", "Deep SVDD", fmt(0.0115455, 4), fmt(0.627919, 3), fmt(0.211455, 3), fmt(83.25, 1)],
-        ["r6.2", "GRU AE", fmt(0.00572239, 4), fmt(0.765776, 3), fmt(0.0814103, 3), fmt(24.75, 1)],
-        ["r6.2", "LSTM AE", fmt(0.00206543, 4), fmt(0.767738, 3), fmt(0.0574767, 3), fmt(24.25, 1)],
-        ["r6.2", "Isolation Forest", fmt(0.000210794, 4), fmt(0.712505, 3), fmt(0.0126207, 3), fmt(153.0, 1)],
-        ["r4.2", "Session LM (adapted NLL)", fmt(0.0134474, 4), fmt(0.964124, 3), fmt(0.100838, 3), fmt(26.45, 1)],
-        ["r4.2", "Deep SVDD", fmt(0.0337171, 4), fmt(0.742914, 3), fmt(0.381529, 3), fmt(53.4167, 1)],
-        ["r4.2", "GRU AE", fmt(0.0254413, 4), fmt(0.695754, 3), fmt(0.12435, 3), fmt(86.5833, 1)],
-        ["r4.2", "LSTM AE", fmt(0.0236354, 4), fmt(0.714125, 3), fmt(0.119657, 3), fmt(92.0833, 1)],
-        ["r4.2", "Isolation Forest", fmt(0.000254408, 4), fmt(0.714632, 3), fmt(0.00794344, 3), fmt(186.417, 1)],
+        ["r6.2", "Session LM (adapted NLL)", "0.0008", r"\textbf{0.953}", "0.054", r"\textbf{24.0}"],
+        ["", "Deep SVDD", r"\textbf{0.0115}", "0.628", r"\textbf{0.211}", "83.2"],
+        ["", "GRU AE", "0.0057", "0.766", "0.081", "24.8"],
+        ["", "LSTM AE", "0.0021", "0.768", "0.057", "24.2"],
+        ["", "Isolation Forest", "0.0002", "0.713", "0.013", "153.0"],
+        ["---"],
+        ["r4.2", "Session LM (adapted NLL)", "0.0134", r"\textbf{0.964}", "0.101", r"\textbf{26.4}"],
+        ["", "Deep SVDD", r"\textbf{0.0337}", "0.743", r"\textbf{0.382}", "53.4"],
+        ["", "GRU AE", "0.0254", "0.696", "0.124", "86.6"],
+        ["", "LSTM AE", "0.0236", "0.714", "0.120", "92.1"],
+        ["", "Isolation Forest", "0.0003", "0.715", "0.008", "186.4"],
     ]
     write_table(
         TABLES / "cert_detector_comparison.tex",
-        "Fold-aligned detector comparison on CERT. The Qwen3-8B session LM shows strong ROC and ranking behavior, but its day-level PR-AUC remains below the stronger feature-based baselines on both datasets.",
+        "Fold-aligned detector comparison on CERT. Bold marks the best value per metric within each dataset (held-out rank: lower is better). The Qwen3-8B session LM shows strong ROC and ranking behavior, but its day-level PR-AUC remains below the stronger feature-based baselines.",
         "tab:cert_detector",
         "llcccc",
         ["Dataset", "Method", "Day PR-AUC", "Day ROC-AUC", "User PR-AUC", "Held-out rank"],
@@ -69,6 +73,7 @@ def write_mech_table() -> None:
     rows = [
         ["r6.2", "Token-SAE causal", "role", "0.006848", "[0.003362, 0.010790]", "$6.0\\times$ comparator"],
         ["r6.2", "Token-SAE necessity", "project$\\times$role", "0.065188", "[0.055145, 0.075023]", "all contexts positive"],
+        ["---"],
         ["r4.2", "Transferred causal", "multiple", "$<0$", "all audited configs $<0$", "direct transfer fails"],
         ["r4.2", "Native token-SAE causal", "team", "0.001418", "[0.001139, 0.001690]", "$1.6\\times$ comparator"],
         ["r4.2", "Native token-SAE necessity", "dept$\\times$role", "0.002922", "[0.001460, 0.004379]", "necessity partial"],

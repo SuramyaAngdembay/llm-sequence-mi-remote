@@ -6,7 +6,7 @@ current CERT-focused `llm-sequence-mi-remote` paper.
 ## What it is
 
 - anonymized submission-style LaTeX draft
-- official `jmlr2e.sty` vendored locally
+- official TMLR style files (`tmlr.sty`, `tmlr.bst`, `fancyhdr.sty`) vendored locally
 - generated tables sourced from the current paper-safe CERT artifacts
 - simple TikZ figures so the draft is not text-only
 
@@ -66,8 +66,8 @@ Two ways to get it there:
 
 1. **Zip upload (recommended):** run `make overleaf` from `paper/`, then in
    Overleaf use *New Project -> Upload Project* with `build/overleaf.zip`.
-   The zip contains only what Overleaf needs (`main.tex`, `jmlr2e.sty`,
-   `references.bib`, `figures/`, `tables/`).
+   The zip contains only what Overleaf needs (`main.tex`, `tmlr.sty`,
+   `tmlr.bst`, `fancyhdr.sty`, `references.bib`, `figures/`, `tables/`).
 2. **GitHub import:** import the repo and set `paper/main.tex` as the main
    document (Menu -> Settings -> Main document).
 
