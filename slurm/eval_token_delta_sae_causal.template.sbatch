@@ -111,6 +111,10 @@ EXTRA_ARGS=()
 if [[ "$EXCLUDE_SAME_USER_DONORS" == "1" || "$EXCLUDE_SAME_USER_DONORS" == "true" ]]; then
   EXTRA_ARGS+=(--exclude-same-user-donors)
 fi
+RECEIVER_USER_FILE="${RECEIVER_USER_FILE:-}"
+if [[ -n "$RECEIVER_USER_FILE" ]]; then
+  EXTRA_ARGS+=(--receiver-user-file "$RECEIVER_USER_FILE")
+fi
 
 echo "job=$SLURM_JOB_ID node=$(hostname) partition=${SLURM_JOB_PARTITION:-} batch_size=$BATCH_SIZE loss_batch_size=$LOSS_BATCH_SIZE patch_chunk_size=$PATCH_CHUNK_SIZE max_receivers=$MAX_RECEIVERS"
 nvidia-smi --query-gpu=index,name,memory.total --format=csv,noheader

@@ -112,6 +112,10 @@ EXTRA_ARGS=()
 if [[ "$EXCLUDE_SAME_USER_MATCHES" == "1" || "$EXCLUDE_SAME_USER_MATCHES" == "true" ]]; then
   EXTRA_ARGS+=(--exclude-same-user-matches)
 fi
+RECEIVER_USER_FILE="${RECEIVER_USER_FILE:-}"
+if [[ -n "$RECEIVER_USER_FILE" ]]; then
+  EXTRA_ARGS+=(--receiver-user-file "$RECEIVER_USER_FILE")
+fi
 /usr/bin/time -v -o "$TIME_LOG" \
   python -u scripts/eval_token_delta_sae_necessity.py \
   --config "$CONFIG" \
