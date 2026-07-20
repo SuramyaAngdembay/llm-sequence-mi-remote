@@ -54,8 +54,10 @@ and consistent across malicious users, while its causal patching effect, though
 positive for every user, is concentrated in one heavily active user.
 Transferring the \rsix{} mechanism configuration directly to \rfour{} fails,
 yet a native \rfour{} mechanism can be recovered at a different layer and
-sparsity, with smaller causal effects that remain positive under user-level
-cluster uncertainty across roughly fifty malicious users. The evidence supports a specific conclusion:
+sparsity and survives a held-out confirmation: with features selected on half
+of the malicious users, causal effects on the untouched half remain positive
+in all four organizational contexts, at roughly half the exploratory
+magnitude. The evidence supports a specific conclusion:
 benign-trained session LLMs can recover benchmark-specific causal structure,
 direct mechanism transfer across related benchmarks can fail, and native
 rediscovery can succeed.
@@ -425,14 +427,28 @@ zero. The session-autoencoder comparator's best day-level contrast on the same
 receivers is $0.00091$. Necessity is positive but partial:
 department$\times$role ($0.0029$, $[0.0009, 0.0050]$) and role ($0.0021$,
 $[0.0001, 0.0042]$) remain positive under clustering, while department and
-team cross zero. Because the configuration was selected by searching the same
-positive population, we label this mechanism a \emph{candidate}: a
-discovery/confirmation protocol that re-selects features on half of the
-malicious users and estimates effects only on the held-out half is the
-appropriate confirmatory test. The \rfour{} mechanism is smaller than its
-\rsix{} counterpart---approximately five times smaller in causal
-contrast---at a different depth, with a sparser dictionary, but rests on a far
-broader user population.
+team cross zero.
+
+Because this configuration was selected by searching the same positive
+population it is evaluated on, we ran a held-out confirmation. The malicious
+users were split $30/30$ (by seeded shuffle; $671$ versus $638$ positive
+days); features were re-selected using discovery-user positives only---the
+resulting top-5 set shares four of five features with the full-population
+selection, indicating stable selection across disjoint user subsets---and
+effects were then estimated exclusively on the $30$ held-out users with the
+configuration frozen. All four causal contexts remain positive on held-out
+users, at roughly half the exploratory magnitude
+($0.00034$--$0.00076$), which is the expected signature of selection
+inflation in the exploratory estimates. The department context is significant
+under user-level cluster resampling ($0.00076$, cluster CI
+$[0.00035, 0.00121]$; $21$ of $29$ users positive), department$\times$role
+under receiver-level resampling ($[0.00006, 0.00084]$), and department and
+team under mean-of-user-means weighting. Held-out necessity replicates for
+department$\times$role and role under user-mean weighting, while team is a
+confirmed null. The \rfour{} mechanism is thus confirmed in direction on
+untouched users---though smaller than its \rsix{} counterpart, at a
+different depth, with a sparser dictionary---and rests on a far broader user
+population.
 
 \input{tables/cert_mechanistic_summary.tex}
 
@@ -506,9 +522,12 @@ estimates rest on $70$ receivers from $4$ malicious users with highly unequal
 day counts, so its causal effect is dominated by a single user and one context
 mode (team) is unavailable under strict donor rules; we report cluster
 intervals, per-user effects, and leave-one-user-out results for this reason.
-The \rfour{} native configuration was found by search over the same positive
-population it is evaluated on; held-out-user confirmation is required before
-its effects can be read as confirmatory rather than exploratory. All mechanistic results
+The \rfour{} native configuration was found by search, so we report a
+held-out-user confirmation alongside the exploratory estimates; the confirmed
+effect sizes are roughly half the exploratory ones, and only the department
+context is individually significant under the strictest user-level resampling.
+\rsix{} has too few malicious users for an analogous split, and its
+leave-one-user-out confirmation remains future work. All mechanistic results
 concern feature-level interventions at a single layer under a specific SAE
 family; they localize causal structure but do not constitute a complete
 circuit-level account \citep{chan2022causal}. Finally, our evidence covers one
