@@ -1,0 +1,45 @@
+{
+  "source_frontier": "/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/token_delta_sae_frontier_qwen3_8b_mb12_gc_on_fresh_v3_stream/layer_18/m04_k08",
+  "discovery_user_file": "/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/outputs/user_splits_r62/louo_CMP2946_discovery_users.txt",
+  "n_discovery_users": 3,
+  "benign_sample_prob": 0.05,
+  "row_stats": {
+    "n_rows": 2096407,
+    "n_positive_rows_kept": 14341,
+    "n_positive_rows_dropped_confirmation": 7199,
+    "n_benign_rows": 2082066
+  },
+  "eval_stats": {
+    "recon_mse": 0.05563867600373911,
+    "active_frac": 0.00048736523077229577,
+    "effective_l0": 7.984991940973294,
+    "dead_feature_frac": 0.00732421875,
+    "top10_row_gap_mean": 0.1278162608032869,
+    "top1_row_gap": 0.17281172640754075
+  },
+  "feature_sets": {
+    "top1": [
+      14358
+    ],
+    "top3": [
+      14358,
+      12848,
+      4196
+    ],
+    "top5": [
+      14358,
+      12848,
+      4196,
+      13580,
+      1554
+    ],
+    "control1": [
+      4062
+    ],
+    "control3": [
+      4062,
+      13083,
+      5489
+    ]
+  }
+}

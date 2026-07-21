@@ -51,7 +51,9 @@ As a detector, the adapted model shows strong ranking behavior (day-level ROC-AU
 $0.95$--$0.96$ on both benchmarks) but weaker day-level PR-AUC than the strongest
 feature-based baselines. Mechanistically, \rsix{} necessity effects are large
 and consistent across malicious users, while its causal patching effect, though
-positive for every user, is concentrated in one heavily active user.
+positive for every user, is concentrated in one heavily active user---yet a
+leave-one-user-out test recovers a significant causal effect on that user from
+features selected without any of their data.
 Transferring the \rsix{} mechanism configuration directly to \rfour{} fails,
 yet a native \rfour{} mechanism can be recovered at a different layer and
 sparsity and survives a held-out confirmation: with features selected on half
@@ -402,6 +404,26 @@ against a matched session-autoencoder comparator evaluated on the same
 receivers at the same day-level unit, the best comparator contrast is
 $0.0011$, roughly six times smaller than the best token-SAE contrast.
 
+Because four users cannot support a split-half confirmation, we ran
+leave-one-user-out (LOUO) discovery/confirmation: for each fold, features are
+re-selected using only the other three users' positives and effects are
+estimated on the held-out user with the configuration frozen. Feature
+selection itself proved user-sensitive: the three folds that retain the
+dominant user select nearly identical top-5 sets, while the fold that holds
+out the dominant user selects a fully disjoint set---\rsix{}'s feature
+identity is largely defined by that user's data. The causal effect
+nevertheless passes its hardest test: the disjoint features, chosen from the
+other users' $24$ days, produce a significant repair effect on the dominant
+user's $46$ held-out days ($+0.0037$ to $+0.0038$ across contexts, e.g.
+project$\times$role $[0.0020, 0.0056]$), while held-out effects on the
+low-activity users are near zero. Held-out necessity is asymmetric: it
+replicates on the two multi-day low-activity users (up to $+0.043$,
+$[0.030, 0.055]$) but is negative on the dominant-user fold. Sufficiency
+therefore transfers across users while necessity is user-specific: the SAE
+space contains multiple causally sufficient repair directions discoverable
+from disjoint user subsets, but which features are \emph{necessary} for a
+given user's anomaly evidence depends on that user.
+
 \subsection{\rfour{}: direct transfer fails; native rediscovery succeeds}
 \label{sec:r42}
 
@@ -526,8 +548,10 @@ The \rfour{} native configuration was found by search, so we report a
 held-out-user confirmation alongside the exploratory estimates; the confirmed
 effect sizes are roughly half the exploratory ones, and only the department
 context is individually significant under the strictest user-level resampling.
-\rsix{} has too few malicious users for an analogous split, and its
-leave-one-user-out confirmation remains future work. All mechanistic results
+For \rsix{}, the analogous leave-one-user-out confirmation recovers a
+significant held-out causal effect on the dominant user but near-zero causal
+effects on the low-activity users, and held-out necessity does not transfer
+to the dominant user; \rsix{} claims should be read at that resolution. All mechanistic results
 concern feature-level interventions at a single layer under a specific SAE
 family; they localize causal structure but do not constitute a complete
 circuit-level account \citep{chan2022causal}. Finally, our evidence covers one
