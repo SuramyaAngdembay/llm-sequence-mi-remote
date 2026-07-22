@@ -1,0 +1,44 @@
+[
+  {
+    "source": "r62_seed42",
+    "target": "r62_seed43",
+    "top5_best_match_mean": 0.8875834345817566,
+    "top5_best_match_min": 0.7580997347831726,
+    "top5_best_matches": [
+      0.894,
+      0.9427,
+      0.8593,
+      0.9838,
+      0.7581
+    ],
+    "all_features_best_match_median": 0.5861132144927979
+  },
+  {
+    "source": "r62_seed43",
+    "target": "r62_seed42",
+    "top5_best_match_mean": 0.928561806678772,
+    "top5_best_match_min": 0.8592772483825684,
+    "top5_best_matches": [
+      0.9838,
+      0.963,
+      0.894,
+      0.9427,
+      0.8593
+    ],
+    "all_features_best_match_median": 0.5867794752120972
+  },
+  {
+    "source": "r62_seed42",
+    "target": "r42_seed42",
+    "top5_best_match_mean": 0.08247629553079605,
+    "top5_best_match_min": 0.0683085024356842,
+    "top5_best_matches": [
+      0.0739,
+      0.0713,
+      0.1047,
+      0.0683,
+      0.0942
+    ],
+    "all_features_best_match_median": 0.0748143419623375
+  }
+]
