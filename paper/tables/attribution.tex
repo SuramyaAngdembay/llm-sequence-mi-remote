@@ -1,0 +1,24 @@
+\begin{table}[t]
+\caption{Token attribution of the top-5 causal features (positive examples). Columns are activation-mass fractions by serialization line class; PSY enrich is mass fraction over token share for the psychometric line. r6.2 features are profile-bound; four of five r4.2 features are behavioral (SES enrichment 1.33x over a 0.75 token share).}
+\label{tab:attribution}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4.5pt}
+\begin{tabular}{llccccl}
+\toprule
+Bench & Feature & PSY mass & DAY mass & SES mass & PSY enrich & Top tokens \\
+\midrule
+r6.2 & 14358 & 0.998 & 0.000 & 0.002 & 13.4$\times$ & psychometric values \\
+r6.2 & 12848 & 0.999 & 0.000 & 0.001 & 13.4$\times$ & psychometric values \\
+r6.2 & 4196 & 1.000 & 0.000 & 0.000 & 13.4$\times$ & psychometric values \\
+r6.2 & 13580 & 0.000 & 0.999 & 0.001 & $\approx$0 & org header \\
+r6.2 & 11292 & 1.000 & 0.000 & 0.000 & 13.4$\times$ & psychometric values \\
+\midrule
+r4.2 & 4596 & 0.001 & 0.000 & 0.999 & $\approx$0 & session values \\
+r4.2 & 3673 & 0.000 & 0.000 & 1.000 & $\approx$0 & session durations \\
+r4.2 & 2302 & 0.001 & 0.998 & 0.001 & $\approx$0 & org header \\
+r4.2 & 3455 & 0.000 & 0.000 & 1.000 & $\approx$0 & session values \\
+r4.2 & 1268 & 0.000 & 0.000 & 1.000 & $\approx$0 & session values \\
+\bottomrule
+\end{tabular}
+\end{table}

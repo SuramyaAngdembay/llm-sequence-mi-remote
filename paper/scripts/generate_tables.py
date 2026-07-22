@@ -97,17 +97,68 @@ def write_mech_table() -> None:
 def write_claims_table() -> None:
     rows = [
         ["Benign-only QLoRA training is valid one-class training", "Supported"],
-        ["r6.2 has strong token-level causal structure", "Supported"],
-        ["Direct token-mechanism transfer from r6.2 to r4.2 succeeds", "Rejected"],
-        ["r4.2 has a native rediscovered token mechanism", "Supported"],
+        ["Both benchmarks admit causally validated sparse mechanisms (held-out confirmed)", "Supported"],
+        ["The r6.2 mechanism encodes behavioral session content", "Rejected (profile tokens)"],
+        ["The r4.2 mechanism encodes behavioral session content", "Supported (4/5 features)"],
+        ["Literal feature transfer across benchmarks succeeds", "Rejected"],
+        ["Transfer failure is explained by SAE seed non-identifiability", "Rejected (alignment controls)"],
         ["The session LM detector is strongly superior on CERT", "Not supported"],
     ]
     write_table(
         TABLES / "claim_status.tex",
-        "Summary of claims and their evidential status.",
+        "Audit claim map: what the evidence supports, rejects, and fails to support.",
         "tab:claim_status",
-        "lp{5.5cm}",
+        "p{9.5cm}l",
         ["Claim", "Status"],
+        rows,
+    )
+
+
+def write_attribution_table() -> None:
+    rows = [
+        ["r6.2", "14358", "0.998", "0.000", "0.002", "13.4$\\times$", "psychometric values"],
+        ["r6.2", "12848", "0.999", "0.000", "0.001", "13.4$\\times$", "psychometric values"],
+        ["r6.2", "4196", "1.000", "0.000", "0.000", "13.4$\\times$", "psychometric values"],
+        ["r6.2", "13580", "0.000", "0.999", "0.001", "$\\approx$0", "org header"],
+        ["r6.2", "11292", "1.000", "0.000", "0.000", "13.4$\\times$", "psychometric values"],
+        ["---"],
+        ["r4.2", "4596", "0.001", "0.000", "0.999", "$\\approx$0", "session values"],
+        ["r4.2", "3673", "0.000", "0.000", "1.000", "$\\approx$0", "session durations"],
+        ["r4.2", "2302", "0.001", "0.998", "0.001", "$\\approx$0", "org header"],
+        ["r4.2", "3455", "0.000", "0.000", "1.000", "$\\approx$0", "session values"],
+        ["r4.2", "1268", "0.000", "0.000", "1.000", "$\\approx$0", "session values"],
+    ]
+    write_table(
+        TABLES / "attribution.tex",
+        "Token attribution of the top-5 causal features (positive examples). "
+        "Columns are activation-mass fractions by serialization line class; PSY enrich "
+        "is mass fraction over token share for the psychometric line. r6.2 features are "
+        "profile-bound; four of five r4.2 features are behavioral (SES enrichment 1.33x "
+        "over a 0.75 token share).",
+        "tab:attribution",
+        "llccccl",
+        ["Bench", "Feature", "PSY mass", "DAY mass", "SES mass", "PSY enrich", "Top tokens"],
+        rows,
+        size=r"\footnotesize",
+        colsep="4.5pt",
+    )
+
+
+def write_alignment_table() -> None:
+    rows = [
+        ["within r6.2 (3 seed pairs)", "0.881--0.929", "0.579--0.586"],
+        ["within r4.2 (3 seed pairs)", "0.881--0.955", "0.635--0.645"],
+        ["across benchmarks (both directions, 3 seeds/side)", "0.079--0.112", "0.075--0.093"],
+    ]
+    write_table(
+        TABLES / "alignment.tex",
+        "Decoder-space feature alignment. Best-match $|\\cos|$ of each source SAE's "
+        "top-5 features into a target dictionary, versus the whole-dictionary median "
+        "(chance). Within-benchmark cross-seed alignment is far above chance; "
+        "cross-benchmark alignment is at chance.",
+        "tab:alignment",
+        "lcc",
+        ["Comparison", "Top-5 best-match $|\\cos|$", "Chance baseline"],
         rows,
     )
 
@@ -117,6 +168,8 @@ def main() -> None:
     write_detector_table()
     write_mech_table()
     write_claims_table()
+    write_attribution_table()
+    write_alignment_table()
 
 
 if __name__ == "__main__":

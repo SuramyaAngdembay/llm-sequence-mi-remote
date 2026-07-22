@@ -1,0 +1,15 @@
+\begin{table}[t]
+\caption{Decoder-space feature alignment. Best-match $|\cos|$ of each source SAE's top-5 features into a target dictionary, versus the whole-dictionary median (chance). Within-benchmark cross-seed alignment is far above chance; cross-benchmark alignment is at chance.}
+\label{tab:alignment}
+\centering
+\small
+\begin{tabular}{lcc}
+\toprule
+Comparison & Top-5 best-match $|\cos|$ & Chance baseline \\
+\midrule
+within r6.2 (3 seed pairs) & 0.881--0.929 & 0.579--0.586 \\
+within r4.2 (3 seed pairs) & 0.881--0.955 & 0.635--0.645 \\
+across benchmarks (both directions, 3 seeds/side) & 0.079--0.112 & 0.075--0.093 \\
+\bottomrule
+\end{tabular}
+\end{table}

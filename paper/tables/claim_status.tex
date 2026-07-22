@@ -1,16 +1,18 @@
 \begin{table}[t]
-\caption{Summary of claims and their evidential status.}
+\caption{Audit claim map: what the evidence supports, rejects, and fails to support.}
 \label{tab:claim_status}
 \centering
 \small
-\begin{tabular}{lp{5.5cm}}
+\begin{tabular}{p{9.5cm}l}
 \toprule
 Claim & Status \\
 \midrule
 Benign-only QLoRA training is valid one-class training & Supported \\
-r6.2 has strong token-level causal structure & Supported \\
-Direct token-mechanism transfer from r6.2 to r4.2 succeeds & Rejected \\
-r4.2 has a native rediscovered token mechanism & Supported \\
+Both benchmarks admit causally validated sparse mechanisms (held-out confirmed) & Supported \\
+The r6.2 mechanism encodes behavioral session content & Rejected (profile tokens) \\
+The r4.2 mechanism encodes behavioral session content & Supported (4/5 features) \\
+Literal feature transfer across benchmarks succeeds & Rejected \\
+Transfer failure is explained by SAE seed non-identifiability & Rejected (alignment controls) \\
 The session LM detector is strongly superior on CERT & Not supported \\
 \bottomrule
 \end{tabular}

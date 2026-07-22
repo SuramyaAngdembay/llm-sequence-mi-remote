@@ -21,7 +21,7 @@
 \def\year{2026}
 \def\openreview{\url{https://openreview.net/forum?id=XXXX}}
 
-\title{Benign-Trained Session Language Models Recover Benchmark-Specific Causal Structure on Insider-Threat Benchmarks}
+\title{What Do Benign-Trained Session Language Models Actually Detect? \\ A Mechanistic Audit on Insider-Threat Benchmarks}
 
 % Author block is hidden automatically while the tmlr package is used
 % without the [accepted] or [preprint] options.
@@ -33,111 +33,101 @@
 \maketitle
 
 \begin{abstract}
-Mechanistic interpretability has largely been developed on natural-language
-tasks; whether its intervention-based tools carry over to anomaly detection on
-structured enterprise behavior logs is an open question. We study this question
-on two CERT insider-threat benchmarks (\rsix{} and \rfour{}) using a Qwen3-8B
-session language model adapted with QLoRA on benign users only, so that the
-model is a one-class detector never exposed to malicious examples. We extract
-token-level adapter effects as the difference between adapted and base
-residual-stream states, train sparse top-$k$ autoencoders on these deltas, and
-evaluate selected sparse feature sets with two intervention estimands: a causal
-patching effect measured against matched active-control features, and a
-necessity effect from targeted ablation. Both estimands use donor-matching
-protocols that exclude same-user donors, and all detector comparisons use
-fold-aligned full-population scoring shared with the feature-based one-class baselines. We
-find a clear dissociation between detection strength and mechanistic structure.
-As a detector, the adapted model shows strong ranking behavior (day-level ROC-AUC
-$0.95$--$0.96$ on both benchmarks) but weaker day-level PR-AUC than the strongest
-feature-based baselines. Mechanistically, \rsix{} necessity effects are large
-and consistent across malicious users, while its causal patching effect, though
-positive for every user, is concentrated in one heavily active user---yet a
-leave-one-user-out test recovers a significant causal effect on that user from
-features selected without any of their data.
-Transferring the \rsix{} mechanism configuration directly to \rfour{} fails,
-yet a native \rfour{} mechanism can be recovered at a different layer and
-sparsity and survives a held-out confirmation: with features selected on half
-of the malicious users, causal effects on the untouched half remain positive
-in all four organizational contexts, at roughly half the exploratory
-magnitude. The evidence supports a specific conclusion:
-benign-trained session LLMs can recover benchmark-specific causal structure,
-direct mechanism transfer across related benchmarks can fail, and native
-rediscovery can succeed.
+Score-level evaluation cannot reveal \emph{what} an anomaly detector has
+learned to detect. We develop an intervention-based mechanistic audit for
+anomaly language models and apply it to a Qwen3-8B model adapted with QLoRA on
+benign users only, across two CERT insider-threat benchmarks (\rsix{} and
+\rfour{}). The audit combines sparse top-$k$ autoencoders over token-level
+adapter deltas with causal patching and necessity ablation against matched
+active controls, user-level cluster uncertainty, held-out-user
+discovery/confirmation splits, SAE-seed stability controls, and token-level
+feature attribution. The audit first establishes that both benchmarks admit
+causally validated sparse mechanisms: \rsix{} effects survive same-user
+exclusion and a leave-one-user-out confirmation; \rfour{}'s natively
+rediscovered mechanism remains positive on thirty held-out malicious users
+with features selected from the other thirty. It then reveals what those
+mechanisms are: on \rsix{} (four malicious users), the top causal features
+place $99.8$--$100\%$ of their activation mass on static profile
+tokens---simulated psychometric traits and organizational identifiers---making
+the mechanism a \emph{user-profile novelty detector}; on \rfour{} (sixty
+malicious users), four of five top features are behavioral, concentrated on
+session-event tokens such as durations. Cross-seed decoder alignment shows
+each mechanism is a stable subspace of its own model ($|\cos|~0.88$--$0.96$
+across seeds, versus chance-level $0.08$--$0.11$ across benchmarks), ruling
+out dictionary non-identifiability as the source of transfer failure. The
+audit thus surfaces a failure mode invisible to leaderboards---anomaly
+evidence resting on identity metadata rather than behavior---together with a
+boundary condition: what a benign-trained session model encodes tracks the
+structure of the benchmark's malicious population.
 \end{abstract}
 
 \section{Introduction}
 
 Enterprise anomaly detection is usually evaluated as a ranking problem: a model
 assigns scores, and the question is whether malicious activity ranks above
-benign activity. In high-stakes settings such as insider-threat monitoring,
-however, a score alone is not enough. An alert that cannot be traced to a
-localized, behaviorally meaningful mechanism is difficult to audit, hard to
-compare across benchmarks, and easy to overclaim
-\citep{chandola2009anomaly,yuan2021deep}. Mechanistic interpretability offers a
-candidate remedy: if the internal computation that raises an anomaly score can
-be localized to sparse, causally validated features, then detections become
-auditable objects rather than opaque numbers
+benign activity. In high-stakes settings such as insider-threat monitoring, a
+score alone answers the wrong question. Two detectors with identical ROC
+curves can rest on entirely different evidence---one on anomalous
+\emph{behavior}, another on incidental properties of who the malicious users
+happen to be---and no amount of score-level evaluation can tell them apart
+\citep{chandola2009anomaly,yuan2021deep}. Mechanistic interpretability offers
+the missing instrument: if the internal computation that raises an anomaly
+score can be localized to sparse, causally validated features, then what the
+detector actually detects becomes an empirical question
 \citep{olah2020zoom,bricken2023monosemanticity}.
 
-Most mechanistic-interpretability evidence to date comes from natural-language
-tasks and curated model behaviors \citep{meng2022locating,wang2023interpretability}.
-This paper asks whether the same intervention-based toolkit---sparse
-dictionary learning followed by causal patching and ablation
-\citep{cunningham2023sparse,zhang2023best}---produces stable, decision-relevant
-structure in a different regime: language models trained on serialized
-enterprise session logs for one-class anomaly detection. Two properties make
-this regime a demanding test. First, the training signal is benign-only, so any
-mechanism associated with anomalous behavior must emerge without the model ever
-seeing a positive example. Second, insider-threat benchmarks come in families
-(here, CERT \rsix{} and \rfour{}) that share a data-generating philosophy but
-differ in scale and scenario mix \citep{glasser2013bridging}, which lets us ask a
-question that single-benchmark studies cannot: is the recovered mechanism a
-property of the domain, or of the specific benchmark?
+This paper develops that instrument as a \emph{mechanistic audit} and reports
+what it finds on the standard insider-threat benchmarks. We adapt Qwen3-8B
+\citep{qwen3} with QLoRA \citep{hu2022lora,dettmers2023qlora} on structured
+session logs from benign users only, isolate the adapter's token-level effect
+as residual-stream deltas, decompose those deltas with top-$k$ sparse
+autoencoders \citep{gao2024scaling}, and subject selected feature sets to
+causal patching and necessity ablation against matched active controls
+\citep{zhang2023best}. Because intervention effects on observational
+populations are easily inflated, the audit carries its own validity program:
+user-level cluster uncertainty, same-user donor exclusion, held-out-user
+discovery/confirmation splits, and SAE-seed stability controls. Finally---and
+decisively---token-level attribution asks where the causally implicated
+features actually fire in the serialized input.
 
-Concretely, we adapt Qwen3-8B \citep{qwen3} with QLoRA
-\citep{hu2022lora,dettmers2023qlora} on structured session sequences from benign
-users only. We isolate the adapter's token-level effect as the difference
-between adapted and base residual-stream states, train top-$k$ sparse
-autoencoders \citep{gao2024scaling} on these adapter deltas, and subject
-selected sparse feature sets to two intervention estimands: a causal
-patching effect measured against matched active-control feature sets, and a
-necessity effect from targeted ablation. Donor matching excludes same-user
-donors so that repair cannot be explained by borrowing a user's own benign
-style, and every detector comparison uses full-population scoring under the
-same leave-one-malicious-user-out fold construction as the baseline detectors.
-
-The resulting evidence supports three findings. First, benign-only session
-adaptation produces a detector with strong ranking behavior but mixed
-precision: day-level ROC-AUC is $0.95$--$0.96$ on both benchmarks, while
-day-level PR-AUC remains below the strongest feature-based one-class baselines. Second,
-the mechanistic story is stronger than the detector story: on \rsix{},
-ablating sparse token-level features consistently disrupts anomaly evidence
-across malicious users, and causal patching effects survive same-user
-exclusion, though they concentrate in the most active user. Third, the mechanism is
-benchmark-specific: the \rsix{} configuration transfers negatively to \rfour{},
-yet a native \rfour{} mechanism exists at a different layer and sparsity and
-passes the same strengthened controls.
+The audit's findings are a dissociation. On CERT \rsix{}, whose evaluation
+population contains four malicious users, the causally validated mechanism is
+a \emph{user-profile novelty detector}: its top features place essentially all
+of their activation mass on static psychometric and organizational tokens, not
+on behavioral session events. On CERT \rfour{}, whose population contains
+sixty malicious users, the natively rediscovered mechanism is
+\emph{behavioral}: four of five top features concentrate on session-event
+tokens such as durations. Both mechanisms are causally real---each survives
+held-out-user confirmation---and each is a stable, seed-robust subspace of its
+own model with no counterpart in the other benchmark's dictionary. What
+differs is what they encode, and the natural explanation is the structure of
+the malicious population: with four positive users, user identity is the
+cheapest separator; with sixty, the identity shortcut dilutes and behavioral
+structure carries the evidence.
 
 \input{figures/pipeline.tex}
 
 \paragraph{Contributions.}
 \begin{enumerate}[leftmargin=1.3em]
-\item We present, to our knowledge, the first intervention-based mechanistic
-analysis of a benign-trained session language model on insider-threat
-benchmarks, combining adapter-delta sparse autoencoders with causal patching
-and necessity ablation under active controls and same-user donor exclusion.
-\item We introduce an evaluation policy that separates fold-aligned detector
-benchmarking from mechanistic evaluation, and we show why weaker protocols
-(population re-filtering, permissive donor matching) overstate both stories.
-\item We show that the recovered mechanism is benchmark-specific: direct
-transfer of the \rsix{} token mechanism to \rfour{} fails, while an
-exploratory native search on \rfour{} identifies a smaller candidate
-mechanism whose causal effects remain positive under user-level cluster
-uncertainty.
-\item We document a dissociation between detection strength and mechanistic
-structure: the same model that trails the feature-based baselines on day-level
-PR-AUC supports causal effects up to six times larger than a matched
-session-autoencoder mechanistic comparator.
+\item We assemble an intervention-based \emph{mechanistic audit} for anomaly
+language models---adapter-delta sparse autoencoders, causal patching and
+necessity ablation under active controls, cluster-level uncertainty,
+held-out-user confirmation, seed-stability controls, and token-level feature
+attribution---and validate each component on two CERT benchmarks.
+\item Using the audit, we show that the same architecture and pipeline learns
+mechanisms of different \emph{kinds} on related benchmarks: a user-profile
+novelty detector on \rsix{} ($99.8$--$100\%$ of top-feature activation mass on
+psychometric and organizational tokens) versus behavioral session features on
+\rfour{}---a failure mode and its boundary condition, both invisible to
+score-level evaluation.
+\item We show the two mechanisms are stable subspaces of their own models
+(cross-seed decoder alignment $0.88$--$0.96$ against $\sim$$0.6$ chance) with
+chance-level correspondence across benchmarks, ruling out SAE
+non-identifiability as the explanation for transfer failure.
+\item We document the audit's validity program---why receiver-level
+uncertainty, permissive donor matching, and search-then-evaluate selection
+each overstate mechanistic evidence, and how cluster bootstraps, same-user
+exclusion, and discovery/confirmation splits repair them.
 \end{enumerate}
 
 \section{Related Work}
@@ -474,60 +464,133 @@ population.
 
 \input{tables/cert_mechanistic_summary.tex}
 
+\subsection{What the mechanisms encode: profile novelty versus behavior}
+\label{sec:attribution}
+
+The estimands above establish that causally relevant sparse structure exists;
+they do not say what it represents. We therefore attribute each headline
+feature's post-top-$k$ activation mass to the serialization's line classes
+(\texttt{DAY} organizational header, \texttt{PSY} psychometrics,
+\texttt{SES} behavioral session events) on all positive examples, with a
+benign contrast set, normalizing by each class's token share
+(Table~\ref{tab:attribution}).
+
+The result is unambiguous and opposite between benchmarks. On \rsix{}, the
+five top causal features place $99.8$--$100\%$ of their activation mass on
+profile tokens---four on the \texttt{PSY} line (enrichment $\approx$$13\times$
+over token share; the highest-activating tokens are the psychometric digit
+values themselves) and one on the \texttt{DAY} header---while behavioral
+\texttt{SES} tokens, $78\%$ of the input, carry $\leq 0.2\%$ of the mass.
+The \rsix{} mechanism is a \emph{user-profile novelty detector}: the
+benign-only adapter learned the benign population's profile distribution, and
+unseen malicious users' profile fields produce large adapter deltas. This
+single fact retroactively explains the \rsix{} phenomenology: causal repair
+concentrates in the dominant user (patching profile tokens toward a
+context-matched donor makes the profile look familiar), necessity does not
+transfer across users (each user's profile is constant), and feature identity
+flips when the dominant user leaves the selection set.
+
+On \rfour{}, four of the five top features are \emph{behavioral}: they place
+$99.9$--$100\%$ of their mass on \texttt{SES} tokens (enrichment $1.33\times$
+over the $75\%$ token share) with essentially zero psychometric mass, and one
+fires specifically on session-duration fields; the fifth is
+\texttt{DAY}-bound. The natural explanation for the contrast is the malicious
+population's structure: with four positive users, user identity is the
+cheapest separator of positives from benigns; with sixty, the identity
+shortcut dilutes and behavioral regularities carry the anomaly evidence.
+
+\input{tables/attribution.tex}
+
+\subsection{Seed-stability controls: the dissociation is not dictionary noise}
+\label{sec:seeds}
+
+Sparse dictionaries are not identifiable: literal feature coordinates can fail
+to transfer even between two SAE seeds on the same data, so cross-benchmark
+transfer failure could in principle say nothing about benchmarks. We retrained
+the headline SAE configuration with two fresh seeds per benchmark on the same
+cached deltas. Because every SAE decodes into the same $d_{\mathrm{model}}$
+residual space, feature correspondence is measurable as decoder cosine
+similarity (Table~\ref{tab:alignment}): within a benchmark, each seed's top-5
+features have close counterparts in every other seed's dictionary
+($|\cos|$ $0.88$--$0.96$ against dictionary-median baselines of
+$\sim$$0.58$--$0.65$); across benchmarks, best matches sit at the chance
+floor ($0.08$--$0.11$) in both directions for all three seeds per side.
+Causal rediscovery is likewise seed-robust: fresh-seed SAEs with their own
+re-selected features reproduce positive \rsix{} contrasts in every finite
+context (e.g., role $0.0071$ and $0.0019$ under seeds 43 and 44, versus
+$0.0068$ originally). The profile-novelty and behavioral subspaces are each
+stable properties of their models; their non-correspondence across benchmarks
+is a property of the benchmarks. (The cross-benchmark comparison is at each
+benchmark's native layer, 18 versus 26; the matched-depth case is covered
+causally by the direct transfer experiment above.)
+
+\input{tables/alignment.tex}
+
 \subsection{Cross-benchmark reading}
 \label{sec:cross}
 
-Taken together, the two benchmarks yield a coherent picture
-(Table~\ref{tab:claim_status}). Benign-only adaptation induces sparse
-token-level structure that is causally implicated in anomaly evidence on both
-benchmarks; the structure is benchmark-specific in depth, sparsity, and
-magnitude; and sufficiency-style transfer of literal features across benchmarks
-fails even when native mechanisms exist on both sides. On the necessity side,
-\rsix{} exhibits strong, uniform effects while \rfour{} shows context-dependent
-partial necessity---consistent with \rfour{}'s larger and more heterogeneous
-positive population ($60$ malicious users spanning multiple scenarios, versus
-$4$ on \rsix{}), in which no small fixed feature set should be expected to be
-necessary for every anomaly mode.
+Taken together (Table~\ref{tab:claim_status}): benign-only adaptation induces
+sparse token-level structure that is causally implicated in anomaly evidence
+on both benchmarks and survives held-out confirmation on both; the structure
+is benchmark-specific not merely in coordinates but in \emph{kind}---identity
+metadata on \rsix{}, behavior on \rfour{}---and this difference tracks the
+malicious-population structure. A score-time ablation that masks profile
+fields and rescores both populations with the frozen model is in progress and
+will quantify each benchmark's score-level dependence on profile tokens.
+% TODO(masking): insert masking ablation table + numbers when the Aquaman
+% scorings complete; design already described in the audit protocol.
 
 \input{tables/claim_status.tex}
 
 \section{Discussion}
 \label{sec:discussion}
 
-\paragraph{What the dissociation means.}
-The same adapted model that trails the feature-based baselines on day-level
-PR-AUC supports causal effects several times larger than a matched
-session-autoencoder mechanistic comparator. Detection strength and mechanistic structure are therefore
-separable properties of an anomaly model, and evaluating either one alone gives
-an incomplete account. For security applications, this matters in both
-directions: a model need not dominate detection leaderboards for its internal
-structure to be useful for auditing and hypothesis generation, and a strong
-detector may offer no localized mechanism at all.
+\paragraph{Audits, not leaderboards.}
+Every component of this audit was necessary to reach the finding. Score-level
+evaluation showed strong ROC on both benchmarks; the intervention estimands
+showed causally real mechanisms on both; the confirmation splits showed those
+mechanisms survive on held-out users; the seed controls showed they are stable
+subspaces. Only token-level attribution revealed that one of them detects
+\emph{who a user is} rather than \emph{what they did}. Any prefix of the audit
+would have licensed a stronger---and wrong---behavioral interpretation. We
+take this as the central methodological lesson: for anomaly models trained on
+metadata-rich telemetry, causal validation and semantic attribution are
+separate obligations, and only their conjunction says what a detector detects.
 
-\paragraph{Benchmark-specificity as a finding, not a failure.}
-A natural hope for mechanistic approaches to security is a universal
-``insider-threat circuit'' that transfers across environments. Our transfer
-experiment is a direct test of the strongest version of that hope, and it
-fails: \rsix{} features do not transfer to \rfour{} despite the benchmarks
-sharing a simulation lineage. Yet native rediscovery succeeds on both. This
-mirrors observations about universality elsewhere in interpretability, where
-networks trained on related tasks learn analogous but not identical internal
-structure \citep{chughtai2023toy}. The practical implication is a
-\emph{rediscovery protocol}: rather than shipping fixed features across
-environments, ship the pipeline that finds them---sparse decomposition of
-adapter deltas plus intervention-based validation under active controls.
+\paragraph{A failure mode and its boundary condition.}
+The profile-novelty mechanism is not a bug in the model; it is the optimal
+solution to \rsix{}'s separation problem, where four malicious users make
+identity the cheapest signal. The same pipeline on \rfour{}, with sixty
+malicious users, lands on behavioral features. For benchmark design, the
+implication is concrete: insider-threat benchmarks that expose static per-user
+metadata---especially simulated psychometrics with no operational
+counterpart---and small malicious populations will drive learned detectors
+toward identity proxies, and score-level evaluation will not notice. For
+deployment, the implication is sharper still: an identity-proxy detector
+generalizes to \emph{new users being unusual}, not to insider behavior.
+
+\paragraph{Benchmark-specificity, revisited.}
+Cross-benchmark transfer of literal features fails while native rediscovery
+succeeds on both sides, and the seed controls locate the failure in the
+benchmarks rather than in dictionary randomness. The universality question
+familiar from interpretability \citep{olah2020zoom,chughtai2023toy} thus
+reappears here with a mechanistic answer: the two benchmarks do not share a
+sparse insider-threat circuit because they do not even share a \emph{kind} of
+anomaly evidence. What transfers is the audit itself---the pipeline that
+finds, validates, and identifies mechanisms---not the mechanisms.
 
 \paragraph{Why the strengthened protocol is load-bearing.}
-Three protocol elements changed conclusions materially during this work:
+Four protocol elements changed conclusions materially during this work:
 full-population scoring (an earlier re-filtering bug overstated detector
 precision), same-user donor exclusion (permissive matching inflated causal
-effects), and paired complete-case estimands (marginal-mean differences
-diverged from the bootstrap estimand when donor availability was asymmetric).
-None of these are exotic; all are easy to get silently wrong. We report them as
-part of the contribution because intervention-based interpretability applied to
-security data inherits both the pitfalls of interpretability
-\citep{heimersheim2024use} and the base-rate pathologies of anomaly detection
-\citep{chandola2009anomaly}.
+effects), user-level cluster uncertainty and discovery/confirmation splits
+(receiver-level intervals and search-then-evaluate selection overstated
+significance), and token-level attribution (without it, the profile mechanism
+reads as behavioral). None are exotic; all are easy to omit silently. We
+report them as part of the contribution because intervention-based
+interpretability applied to security data inherits both the pitfalls of
+interpretability \citep{heimersheim2024use} and the base-rate pathologies of
+anomaly detection \citep{chandola2009anomaly}.
 
 \section{Limitations}
 \label{sec:limitations}
@@ -554,9 +617,16 @@ effects on the low-activity users, and held-out necessity does not transfer
 to the dominant user; \rsix{} claims should be read at that resolution. All mechanistic results
 concern feature-level interventions at a single layer under a specific SAE
 family; they localize causal structure but do not constitute a complete
-circuit-level account \citep{chan2022causal}. Finally, our evidence covers one
-model family at one scale with single training runs; seed-level and
-architecture-level robustness remain to be established.
+circuit-level account \citep{chan2022causal}. Attribution is based on activation mass over line classes; it identifies
+where features fire, not a complete account of what they compute, and the
+score-level profile-masking ablation that quantifies detection's dependence on
+profile tokens is in progress. SAE-seed robustness is established
+(Section~\ref{sec:seeds}), but adapter-seed and architecture-level robustness
+are not: our evidence covers one model family at one scale with one adapter
+training run per benchmark. Finally, the population-structure explanation for
+the profile/behavior dissociation is supported by two benchmarks; testing it
+requires benchmarks with varied malicious-population sizes and, ultimately,
+real telemetry without simulated psychometrics.
 
 \section{Broader Impact Statement}
 
