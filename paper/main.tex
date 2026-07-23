@@ -57,10 +57,13 @@ malicious users), four of five top features are behavioral, concentrated on
 session-event tokens such as durations. Cross-seed decoder alignment shows
 each mechanism is a stable subspace of its own model ($|\cos|~0.88$--$0.96$
 across seeds, versus chance-level $0.08$--$0.11$ across benchmarks), ruling
-out dictionary non-identifiability as the source of transfer failure. The
-audit thus surfaces a failure mode invisible to leaderboards---anomaly
-evidence resting on identity metadata rather than behavior---and motivates a
-population-structure hypothesis: that what such mechanisms encode tracks the
+out dictionary non-identifiability as the source of transfer failure. A
+score-level sensitivity analysis completes the picture: against never-trained
+benign users, day-level ROC collapses to $0.55$ (\rsix{}) and $0.67$
+(\rfour{}), so the apparent detection strength is largely a
+seen-versus-unseen-user effect. The audit thus surfaces failure modes
+invisible to leaderboards---anomaly evidence resting on identity and novelty
+rather than behavior---and motivates a population-structure hypothesis: that what such mechanisms encode tracks the
 size and structure of the benchmark's malicious population. Confirmatory
 tests of this hypothesis (malicious-population subsampling within one
 benchmark, and score-level profile masking) are reported as work in
@@ -269,11 +272,15 @@ retrain per fold on non-test benign users. This asymmetry matters and we
 state it plainly: the session LM's training corpus covers roughly $90\%$ of
 benign users, so most sampled benign test users were seen (as benign
 sequences) during adaptation, whereas the baselines exclude test users from
-training. The likely bias direction favors the session LM---familiar benign
-users score lower, making unseen positives stand out more---so its detector
-numbers should be read as an upper bound; a sensitivity analysis restricted
-to never-trained validation-split benign users is reported in the appendix
-materials. Scoring uses the full corpus, and fold masks are
+training. The bias is not hypothetical: restricting the benign comparison population
+to never-trained validation-split users collapses day-level ROC-AUC from
+$0.954$ to $0.545$ on \rsix{} and from $0.959$ to $0.668$ on \rfour{}
+(user-level: $0.970\!\to\!0.546$ and $0.969\!\to\!0.565$). Since
+malicious users are unseen by construction, the unseen-versus-unseen
+comparison is the fair test of behavior detection, and it shows the
+fold-aligned ROC advantage is largely a \emph{seen-versus-unseen-user}
+effect. The fold-aligned numbers below follow the local baselines' protocol
+for comparability, but should be read with this in mind. Scoring uses the full corpus, and fold masks are
 applied only afterward. We adopted this protocol after finding that an earlier
 pipeline, which re-filtered an already-filtered score file, silently dropped
 the benign validation slice and overstated the session LM's detector
@@ -363,11 +370,15 @@ PR-AUC (log scale) at extreme base rates.}
 \label{fig:detector_dissociation}
 \end{figure}
 
-Figure~\ref{fig:detector_dissociation} summarizes the pattern.
-The consequence for interpretation is direct: the adapted session LLM is a
-nontrivial, behaviorally structured detector, but the evidence does not support
-a detector-superiority claim. We therefore treat detection as background and
-ask what internal structure the benign-only adaptation induced.
+Figure~\ref{fig:detector_dissociation} summarizes the pattern. Combined
+with the never-trained-benign sensitivity above, the score-level conclusion
+anticipates the mechanistic one: the model's ranking strength is largely user
+novelty rather than behavioral discrimination---on \rsix{} almost entirely so,
+on \rfour{} with a residual behavioral component ($0.668$ day ROC against
+unseen benigns). This also explains the ranking--precision dissociation: user
+novelty separates users (ROC) but cannot rank a user's malicious days above
+their benign days (PR). We therefore treat detection as background and ask
+what internal structure the benign-only adaptation induced.
 
 \subsection{\rsix{}: necessity is consistent across users; causal effects concentrate in one user}
 \label{sec:r62}
