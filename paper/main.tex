@@ -42,10 +42,13 @@ adapter deltas with causal patching and necessity ablation against matched
 active controls, user-level cluster uncertainty, held-out-user
 discovery/confirmation splits, SAE-seed stability controls, and token-level
 feature attribution. The audit first establishes that both benchmarks admit
-causally validated sparse mechanisms: \rsix{} effects survive same-user
-exclusion and a leave-one-user-out confirmation; \rfour{}'s natively
-rediscovered mechanism remains positive on thirty held-out malicious users
-with features selected from the other thirty. It then reveals what those
+causally relevant sparse mechanisms: \rsix{} effects survive same-user
+exclusion, with leave-one-user-out replication of the causal effect on the
+dominant user; \rfour{}'s natively rediscovered mechanism replicates in
+direction on thirty held-out malicious users with features re-selected from
+the other thirty (the SAE configuration itself was fixed by the earlier
+exploratory search, so this is feature-level, not configuration-level,
+independence). It then reveals what those
 mechanisms are: on \rsix{} (four malicious users), the top causal features
 place $99.8$--$100\%$ of their activation mass on static profile
 tokens---simulated psychometric traits and organizational identifiers---making
@@ -56,9 +59,12 @@ each mechanism is a stable subspace of its own model ($|\cos|~0.88$--$0.96$
 across seeds, versus chance-level $0.08$--$0.11$ across benchmarks), ruling
 out dictionary non-identifiability as the source of transfer failure. The
 audit thus surfaces a failure mode invisible to leaderboards---anomaly
-evidence resting on identity metadata rather than behavior---together with a
-boundary condition: what a benign-trained session model encodes tracks the
-structure of the benchmark's malicious population.
+evidence resting on identity metadata rather than behavior---and motivates a
+population-structure hypothesis: that what such mechanisms encode tracks the
+size and structure of the benchmark's malicious population. Confirmatory
+tests of this hypothesis (malicious-population subsampling within one
+benchmark, and score-level profile masking) are reported as work in
+progress.
 \end{abstract}
 
 \section{Introduction}
@@ -97,13 +103,16 @@ of their activation mass on static psychometric and organizational tokens, not
 on behavioral session events. On CERT \rfour{}, whose population contains
 sixty malicious users, the natively rediscovered mechanism is
 \emph{behavioral}: four of five top features concentrate on session-event
-tokens such as durations. Both mechanisms are causally real---each survives
-held-out-user confirmation---and each is a stable, seed-robust subspace of its
-own model with no counterpart in the other benchmark's dictionary. What
-differs is what they encode, and the natural explanation is the structure of
-the malicious population: with four positive users, user identity is the
-cheapest separator; with sixty, the identity shortcut dilutes and behavioral
-structure carries the evidence.
+tokens such as durations. Both mechanisms are causally real---each replicates in
+direction on held-out users---and each is a stable, seed-robust subspace of
+its own model with no counterpart in the other benchmark's dictionary. What
+differs is what they encode. Our working hypothesis is that the malicious
+population's structure drives this: with four positive users, user identity
+is the cheapest separator; with sixty, the identity shortcut dilutes and
+behavioral structure carries the evidence. Because the two benchmarks differ
+in many respects simultaneously, we treat this as a hypothesis under active
+test---by subsampling malicious populations within a single benchmark---rather
+than an established boundary condition.
 
 \input{figures/pipeline.tex}
 
@@ -118,16 +127,17 @@ attribution---and validate each component on two CERT benchmarks.
 mechanisms of different \emph{kinds} on related benchmarks: a user-profile
 novelty detector on \rsix{} ($99.8$--$100\%$ of top-feature activation mass on
 psychometric and organizational tokens) versus behavioral session features on
-\rfour{}---a failure mode and its boundary condition, both invisible to
-score-level evaluation.
+\rfour{}---a failure mode invisible to score-level evaluation, together
+with a population-structure hypothesis for when it arises.
 \item We show the two mechanisms are stable subspaces of their own models
-(cross-seed decoder alignment $0.88$--$0.96$ against $\sim$$0.6$ chance) with
-chance-level correspondence across benchmarks, ruling out SAE
+(cross-seed decoder alignment $0.88$--$0.96$, far above the empirical
+dictionary-wide best-match baseline of $\sim$$0.6$) while cross-benchmark
+alignment is indistinguishable from that null baseline, ruling out SAE
 non-identifiability as the explanation for transfer failure.
 \item We document the audit's validity program---why receiver-level
 uncertainty, permissive donor matching, and search-then-evaluate selection
 each overstate mechanistic evidence, and how cluster bootstraps, same-user
-exclusion, and discovery/confirmation splits repair them.
+exclusion, and feature-level discovery/confirmation splits repair them.
 \end{enumerate}
 
 \section{Related Work}
@@ -255,8 +265,15 @@ one held-out malicious user per fold, $800$ sampled benign test users per fold
 (fixed seed), day-level metrics over all test-user rows, and user-level metrics
 after max-aggregation over days. The adapted model is trained once on the
 benign population and held fixed across folds; the feature-based baselines
-retrain per fold
-on non-test benign users. Scoring uses the full corpus, and fold masks are
+retrain per fold on non-test benign users. This asymmetry matters and we
+state it plainly: the session LM's training corpus covers roughly $90\%$ of
+benign users, so most sampled benign test users were seen (as benign
+sequences) during adaptation, whereas the baselines exclude test users from
+training. The likely bias direction favors the session LM---familiar benign
+users score lower, making unseen positives stand out more---so its detector
+numbers should be read as an upper bound; a sensitivity analysis restricted
+to never-trained validation-split benign users is reported in the appendix
+materials. Scoring uses the full corpus, and fold masks are
 applied only afterward. We adopted this protocol after finding that an earlier
 pipeline, which re-filtered an already-filtered score file, silently dropped
 the benign validation slice and overstated the session LM's detector
@@ -361,10 +378,12 @@ ask what internal structure the benign-only adaptation induced.
 \caption{Mechanistic effects under same-user exclusion, by benchmark and
 estimand (note the panel-specific scales, all in units of $10^{-3}$
 adapted-NLL). Points are paired complete-case top-versus-control contrasts;
-horizontal lines are $95\%$ bootstrap confidence intervals ($4000$
-receiver- or pair-level draws); open markers denote intervals that cross zero.
-In the causal panels, the dashed line marks the best matched
-session-autoencoder comparator contrast on the same receivers.}
+horizontal lines are $95\%$ user-level cluster bootstrap intervals
+($10{,}000$ draws with the malicious user as resampling unit; the prespecified
+primary analysis); open markers denote intervals that cross zero. In the
+causal panels, the dashed line marks the best matched session-autoencoder
+comparator contrast on the same receivers (indicative only; the comparator
+operates on a different score scale).}
 \label{fig:mech_effects}
 \end{figure}
 
@@ -375,9 +394,11 @@ structure as part of the result rather than pooling days as independent units.
 The necessity side is the strongest \rsix{} finding: ablating the layer-18
 top-5 features harms anomaly evidence more than ablating matched active
 controls for \emph{every} malicious user in the project$\times$role context
-(per-user effects $0.019$--$0.103$; pooled $0.065$, cluster CI
-$[0.026, 0.083]$), and the role context also survives clustering ($0.062$,
-$[0.016, 0.083]$). The causal patching side is positive but concentrated:
+(per-user effects $0.019$--$0.103$; pooled $0.065$; cluster interval
+$[0.026, 0.083]$, though with only four clusters such intervals are
+descriptive rather than conventionally inferential), and the role context is
+consistent as well ($0.062$, $[0.016, 0.083]$; three of four users
+positive). The causal patching side is positive but concentrated:
 the pooled role-context contrast is $0.0068$ with cluster CI
 $[0.0001, 0.0100]$, positive for all four users individually, yet dominated by
 the most active user ($0.010$ versus $0.0001$--$0.0005$ for the other three),
@@ -389,10 +410,11 @@ stratum; we report it as unavailable rather than imputing it.
 Two comparisons calibrate these magnitudes. First, the strengthened protocol
 matters: same-user exclusion reduced the causal point estimates relative to
 earlier permissive-donor runs, so part of the earlier effect was inflated
-exactly as the audit hypothesized---but the effect does not vanish. Second,
-against a matched session-autoencoder comparator evaluated on the same
-receivers at the same day-level unit, the best comparator contrast is
-$0.0011$, roughly six times smaller than the best token-SAE contrast.
+exactly as the audit hypothesized---but the effect does not vanish. Second, a matched session-autoencoder comparator evaluated on the same
+receivers at the same day-level unit yields a best contrast of $0.0011$;
+because the comparator's score is on a different scale (autoencoder
+reconstruction error rather than NLL), we report this as context rather than
+as a ratio, and defer standardized cross-model effect sizes to future work.
 
 Because four users cannot support a split-half confirmation, we ran
 leave-one-user-out (LOUO) discovery/confirmation: for each fold, features are
@@ -436,7 +458,8 @@ $[0.00097, 0.00186]$, role $0.00111$ $[0.00064, 0.00154]$,
 department$\times$role $0.00107$ $[0.00066, 0.00147]$, and department
 $0.00098$ $[0.00058, 0.00136]$; mean-of-user-means intervals also exclude
 zero. The session-autoencoder comparator's best day-level contrast on the same
-receivers is $0.00091$. Necessity is positive but partial:
+receivers is $0.00091$ (different score scale; context only). Necessity is
+positive but partial:
 department$\times$role ($0.0029$, $[0.0009, 0.0050]$) and role ($0.0021$,
 $[0.0001, 0.0042]$) remain positive under clustering, while department and
 team cross zero.
@@ -448,19 +471,20 @@ days); features were re-selected using discovery-user positives only---the
 resulting top-5 set shares four of five features with the full-population
 selection, indicating stable selection across disjoint user subsets---and
 effects were then estimated exclusively on the $30$ held-out users with the
-configuration frozen. All four causal contexts remain positive on held-out
-users, at roughly half the exploratory magnitude
-($0.00034$--$0.00076$), which is the expected signature of selection
-inflation in the exploratory estimates. The department context is significant
-under user-level cluster resampling ($0.00076$, cluster CI
-$[0.00035, 0.00121]$; $21$ of $29$ users positive), department$\times$role
-under receiver-level resampling ($[0.00006, 0.00084]$), and department and
-team under mean-of-user-means weighting. Held-out necessity replicates for
-department$\times$role and role under user-mean weighting, while team is a
-confirmed null. The \rfour{} mechanism is thus confirmed in direction on
-untouched users---though smaller than its \rsix{} counterpart, at a
-different depth, with a sparser dictionary---and rests on a far broader user
-population.
+configuration frozen. Under the prespecified primary analysis (user-level cluster bootstrap),
+all four causal point estimates are positive on held-out users at roughly
+half the exploratory magnitude ($0.00034$--$0.00076$)---the expected
+signature of selection inflation---but only the department context
+individually excludes zero ($0.00076$, cluster CI $[0.00035, 0.00121]$;
+$21$ of $29$ users positive). We read this as \emph{directional replication}
+with one individually significant context, not as confirmation of all four.
+Held-out necessity is directionally positive for department$\times$role and
+role, while team is a confirmed null. Two caveats bound the claim: the SAE
+configuration (layer, dictionary size, sparsity) was fixed by the earlier
+full-population search, so independence holds at the feature level only; and
+secondary uncertainty procedures (receiver-level, mean-of-user-means) give
+more favorable readings that we report in supplementary material rather than
+in the headline.
 
 \input{tables/cert_mechanistic_summary.tex}
 
@@ -475,9 +499,13 @@ feature's post-top-$k$ activation mass to the serialization's line classes
 benign contrast set, normalizing by each class's token share
 (Table~\ref{tab:attribution}).
 
-The result is unambiguous and opposite between benchmarks. On \rsix{}, the
-five top causal features place $99.8$--$100\%$ of their activation mass on
-profile tokens---four on the \texttt{PSY} line (enrichment $\approx$$13\times$
+The result is unambiguous and opposite between benchmarks. The benign
+contrast sharpens it: on benign examples the same \rsix{} features place
+essentially zero mass on \texttt{PSY} tokens (e.g., the top feature:
+$0\%$ benign versus $99.8\%$ positive), so profile-token firing is specific
+to unfamiliar profiles rather than to psychometric tokens per se. On
+\rsix{}, the five top causal features place $99.8$--$100\%$ of their
+activation mass on profile tokens---four on the \texttt{PSY} line (enrichment $\approx$$13\times$
 over token share; the highest-activating tokens are the psychometric digit
 values themselves) and one on the \texttt{DAY} header---while behavioral
 \texttt{SES} tokens, $78\%$ of the input, carry $\leq 0.2\%$ of the mass.
@@ -512,9 +540,10 @@ cached deltas. Because every SAE decodes into the same $d_{\mathrm{model}}$
 residual space, feature correspondence is measurable as decoder cosine
 similarity (Table~\ref{tab:alignment}): within a benchmark, each seed's top-5
 features have close counterparts in every other seed's dictionary
-($|\cos|$ $0.88$--$0.96$ against dictionary-median baselines of
-$\sim$$0.58$--$0.65$); across benchmarks, best matches sit at the chance
-floor ($0.08$--$0.11$) in both directions for all three seeds per side.
+($|\cos|$ $0.88$--$0.96$ against empirical dictionary-wide best-match
+baselines of $\sim$$0.58$--$0.65$); across benchmarks, best matches are
+indistinguishable from that null baseline ($0.08$--$0.11$ against
+$0.075$--$0.093$) in both directions for all three seeds per side.
 Causal rediscovery is likewise seed-robust: fresh-seed SAEs with their own
 re-selected features reproduce positive \rsix{} contrasts in every finite
 context (e.g., role $0.0071$ and $0.0019$ under seeds 43 and 44, versus
@@ -534,9 +563,13 @@ sparse token-level structure that is causally implicated in anomaly evidence
 on both benchmarks and survives held-out confirmation on both; the structure
 is benchmark-specific not merely in coordinates but in \emph{kind}---identity
 metadata on \rsix{}, behavior on \rfour{}---and this difference tracks the
-malicious-population structure. A score-time ablation that masks profile
-fields and rescores both populations with the frozen model is in progress and
-will quantify each benchmark's score-level dependence on profile tokens.
+malicious-population structure. Two confirmatory experiments are in progress: a score-time ablation that
+masks profile fields and rescores both populations with the frozen model,
+quantifying score-level dependence on profile tokens; and a
+malicious-population subsampling study on \rfour{} (resampled positive
+populations of $4$--$60$ users under a fixed model and benchmark) that
+directly tests whether small malicious populations drive selection toward
+profile-bound features.
 % TODO(masking): insert masking ablation table + numbers when the Aquaman
 % scorings complete; design already described in the audit protocol.
 
@@ -599,9 +632,15 @@ Our evaluation population is the matched active-session domain, not the full
 CERT answer key; incidents outside session coverage are invisible to all
 compared methods. The CERT benchmarks are simulations, and the psychometric and
 organizational fields they expose have no real-world measurement counterpart;
-results may not transfer to operational telemetry. The serializer omits four
-file-transfer fields from the observation space, so claims about the mechanism
-concern the serialized field set only. Day-level PR-AUC of the adapted session LM
+results may not transfer to operational telemetry. The serializer omits four file-\emph{routing} sub-count fields
+(to-USB, from-USB, file-activity-type, and disk transfer counts) due to a
+column-naming constraint, while retaining the principal behavioral signals:
+total USB events and mean USB session duration, total and executable file
+counts, e-mail volumes and attachment statistics, off-hours and weekend
+flags, session durations, and HTTP category counts including leak- and
+hacking-site visits. Claims about the mechanism concern this serialized field
+set; a serializer-repaired rerun at smaller scale is the planned robustness
+check. Day-level PR-AUC of the adapted session LM
 is weak in absolute terms at realistic base rates. \rsix{} mechanistic
 estimates rest on $70$ receivers from $4$ malicious users with highly unequal
 day counts, so its causal effect is dominated by a single user and one context
