@@ -33,21 +33,29 @@ def per_example_nll(
     batch_size = int(logits.shape[0])
     chunk_size = batch_size if int(loss_batch_size) <= 0 else min(batch_size, int(loss_batch_size))
     out: List[torch.Tensor] = []
+    seq_chunk = 512  # bound fp32 CE workspace over the sequence dimension too
     for start in range(0, batch_size, chunk_size):
         end = min(start + chunk_size, batch_size)
-        shift_logits = logits[start:end, :-1, :].float().contiguous()
         shift_labels = input_ids[start:end, 1:].contiguous()
         shift_mask = attention_mask[start:end, 1:].contiguous().float()
-        token_loss = F.cross_entropy(
-            shift_logits.view(-1, shift_logits.size(-1)),
-            shift_labels.view(-1),
-            reduction="none",
-        ).view(shift_labels.size())
+        seq_len = shift_labels.shape[1]
+        loss_sum = torch.zeros(end - start, device=logits.device, dtype=torch.float32)
+        for s0 in range(0, seq_len, seq_chunk):
+            s1 = min(s0 + seq_chunk, seq_len)
+            chunk_logits = logits[start:end, s0:s1, :].float().contiguous()
+            chunk_labels = shift_labels[:, s0:s1]
+            token_loss = F.cross_entropy(
+                chunk_logits.view(-1, chunk_logits.size(-1)),
+                chunk_labels.reshape(-1),
+                reduction="none",
+            ).view(chunk_labels.size())
+            loss_sum += (token_loss * shift_mask[:, s0:s1]).sum(dim=1)
+            del chunk_logits, chunk_labels, token_loss
+            if logits.device.type == "cuda":
+                torch.cuda.empty_cache()
         denom = shift_mask.sum(dim=1).clamp_min(1.0)
-        out.append((token_loss * shift_mask).sum(dim=1) / denom)
-        del shift_logits, shift_labels, shift_mask, token_loss, denom
-        if logits.device.type == "cuda":
-            torch.cuda.empty_cache()
+        out.append(loss_sum / denom)
+        del shift_labels, shift_mask, loss_sum, denom
     return torch.cat(out, dim=0)
 
 
@@ -103,6 +111,7 @@ def main() -> None:
     ap.add_argument("--users-file", type=Path, default=None, help="Optional newline-separated or JSON-array allowlist of user_ids.")
     ap.add_argument("--log-every", type=int, default=4096)
     ap.add_argument("--separate-base-model", action="store_true", help="Load a second base model instead of disabling the adapter on the PEFT model.")
+    ap.add_argument("--resume", action="store_true", help="Skip example_ids already present in the output parquet and merge at the end.")
     args = ap.parse_args()
 
     cfg = load_yaml(args.config)
@@ -171,10 +180,21 @@ def main() -> None:
         clear_cuda(model_device)
         return nll
 
+    done_ids: Set[str] = set()
+    resume_part: Optional[Path] = None
+    if args.resume and parquet_path.exists():
+        prev = pq.read_table(parquet_path).to_pandas()
+        done_ids = set(prev["example_id"].astype(str))
+        resume_part = out_dir / "example_scores_part0.parquet"
+        parquet_path.rename(resume_part)
+        print(f"[resume] {len(done_ids)} examples already scored; appending", flush=True)
+
     def example_iter() -> Iterator[Dict[str, Any]]:
         n_seen = 0
         for ex in read_jsonl(args.jsonl_path):
             if allowed_users is not None and str(ex["user_id"]) not in allowed_users:
+                continue
+            if done_ids and str(ex["example_id"]) in done_ids:
                 continue
             yield ex
             n_seen += 1
@@ -237,6 +257,15 @@ def main() -> None:
         writer = flush_rows(writer, parquet_path, buffer)
     if writer is not None:
         writer.close()
+    if args.resume and resume_part is not None:
+        import pandas as _pd
+        parts = [ _pd.read_parquet(resume_part) ]
+        if parquet_path.exists():
+            parts.append(_pd.read_parquet(parquet_path))
+        merged = _pd.concat(parts, ignore_index=True).drop_duplicates(subset=["example_id"], keep="first")
+        merged.to_parquet(parquet_path, index=False)
+        resume_part.unlink()
+        print(f"[resume] merged {len(merged)} total rows", flush=True)
 
     summary = {
         "config": str(args.config),
