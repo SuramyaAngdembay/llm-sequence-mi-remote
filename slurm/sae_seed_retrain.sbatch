@@ -17,10 +17,10 @@ conda activate "${CONDA_ENV:-/anvil/projects/x-cis230270/x-sangdembay/conda_envs
 cd "$REPO_DIR"
 if [ "$DATASET" = "r62" ]; then
   EXTRACT=$PROJ/token_delta_cache/qwen3_8b_session_token_deltas_targeted_mb12_gc_on_fresh_v2
-  LAYERS=18; LM=4; KV=8
+  LAYERS=${LAYERS:-18}; LM=${LM:-4}; KV=${KV:-8}
 else
   EXTRACT=$PROJ/token_delta_cache/qwen3_8b_session_token_deltas_r42_mb22_gc_on
-  LAYERS=26; LM=2; KV=4
+  LAYERS=${LAYERS:-26}; LM=${LM:-2}; KV=${KV:-4}
 fi
 python scripts/train_delta_sae_frontier.py \
   --config configs/token_delta_sae_frontier.yaml \
