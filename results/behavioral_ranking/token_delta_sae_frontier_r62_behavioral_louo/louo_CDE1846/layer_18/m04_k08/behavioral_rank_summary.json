@@ -1,0 +1,46 @@
+{
+  "fold": "louo_CDE1846_discovery_users.txt",
+  "n_features_total": 16384,
+  "n_behavioral": 15393,
+  "profile_mass_max": 0.5,
+  "eval_stats": {
+    "recon_mse": 0.050879477275256116,
+    "active_frac": 0.0004879588209848132,
+    "effective_l0": 7.99471732301518,
+    "dead_feature_frac": 0.012451171875,
+    "top10_row_gap_mean": 0.05711128265171802,
+    "top1_row_gap": 0.06522954378691052
+  },
+  "feature_sets": {
+    "top1": [
+      15278
+    ],
+    "top3": [
+      15278,
+      10807,
+      4593
+    ],
+    "top5": [
+      15278,
+      10807,
+      4593,
+      4916,
+      866
+    ],
+    "control1": [
+      5255
+    ],
+    "control3": [
+      5255,
+      13633,
+      5489
+    ]
+  },
+  "top5_profile_mass": [
+    0.0,
+    0.0,
+    0.0,
+    0.0175,
+    0.0003
+  ]
+}

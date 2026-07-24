@@ -1,0 +1,46 @@
+{
+  "fold": "louo_MBG3183_discovery_users.txt",
+  "n_features_total": 16384,
+  "n_behavioral": 15393,
+  "profile_mass_max": 0.5,
+  "eval_stats": {
+    "recon_mse": 0.05081400267649049,
+    "active_frac": 0.0004879583757824211,
+    "effective_l0": 7.9947100288191875,
+    "dead_feature_frac": 0.0123291015625,
+    "top10_row_gap_mean": 0.025665844773532627,
+    "top1_row_gap": 0.036945036378880636
+  },
+  "feature_sets": {
+    "top1": [
+      11574
+    ],
+    "top3": [
+      11574,
+      866,
+      109
+    ],
+    "top5": [
+      11574,
+      866,
+      109,
+      4593,
+      10368
+    ],
+    "control1": [
+      5489
+    ],
+    "control3": [
+      5489,
+      13633,
+      2044
+    ]
+  },
+  "top5_profile_mass": [
+    0.0,
+    0.0003,
+    0.0,
+    0.0,
+    0.0
+  ]
+}

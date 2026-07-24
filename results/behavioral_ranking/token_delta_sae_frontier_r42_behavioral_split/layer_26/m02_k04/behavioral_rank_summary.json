@@ -1,0 +1,46 @@
+{
+  "fold": "discovery_users.txt",
+  "n_features_total": 8192,
+  "n_behavioral": 6834,
+  "profile_mass_max": 0.5,
+  "eval_stats": {
+    "recon_mse": 0.1032421290071224,
+    "active_frac": 0.0004882302745048171,
+    "effective_l0": 3.9995824087434615,
+    "dead_feature_frac": 0.01220703125,
+    "top10_row_gap_mean": 0.06942054340132081,
+    "top1_row_gap": 0.10619028549757951
+  },
+  "feature_sets": {
+    "top1": [
+      4596
+    ],
+    "top3": [
+      4596,
+      7693,
+      3673
+    ],
+    "top5": [
+      4596,
+      7693,
+      3673,
+      3455,
+      1268
+    ],
+    "control1": [
+      16
+    ],
+    "control3": [
+      16,
+      19,
+      106
+    ]
+  },
+  "top5_profile_mass": [
+    0.0008,
+    0.013,
+    0.0,
+    0.0,
+    0.0
+  ]
+}

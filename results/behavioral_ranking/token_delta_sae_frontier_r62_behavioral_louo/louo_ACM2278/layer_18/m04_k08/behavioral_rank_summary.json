@@ -1,0 +1,46 @@
+{
+  "fold": "louo_ACM2278_discovery_users.txt",
+  "n_features_total": 16384,
+  "n_behavioral": 15393,
+  "profile_mass_max": 0.5,
+  "eval_stats": {
+    "recon_mse": 0.050774977880132695,
+    "active_frac": 0.00048795833968380277,
+    "effective_l0": 7.9947094373794245,
+    "dead_feature_frac": 0.0123291015625,
+    "top10_row_gap_mean": 0.02828555405278091,
+    "top1_row_gap": 0.04421731615211433
+  },
+  "feature_sets": {
+    "top1": [
+      11574
+    ],
+    "top3": [
+      11574,
+      10368,
+      4593
+    ],
+    "top5": [
+      11574,
+      10368,
+      4593,
+      1625,
+      11739
+    ],
+    "control1": [
+      5489
+    ],
+    "control3": [
+      5489,
+      4062,
+      5255
+    ]
+  },
+  "top5_profile_mass": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ]
+}

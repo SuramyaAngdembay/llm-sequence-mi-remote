@@ -1,0 +1,46 @@
+{
+  "fold": "louo_CMP2946_discovery_users.txt",
+  "n_features_total": 16384,
+  "n_behavioral": 15393,
+  "profile_mass_max": 0.5,
+  "eval_stats": {
+    "recon_mse": 0.05073579381940503,
+    "active_frac": 0.0004879575150860786,
+    "effective_l0": 7.994695927170312,
+    "dead_feature_frac": 0.01251220703125,
+    "top10_row_gap_mean": 0.04188858023669227,
+    "top1_row_gap": 0.0669809203145386
+  },
+  "feature_sets": {
+    "top1": [
+      11574
+    ],
+    "top3": [
+      11574,
+      1625,
+      11739
+    ],
+    "top5": [
+      11574,
+      1625,
+      11739,
+      4450,
+      12863
+    ],
+    "control1": [
+      5255
+    ],
+    "control3": [
+      5255,
+      13633,
+      1982
+    ]
+  },
+  "top5_profile_mass": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ]
+}
