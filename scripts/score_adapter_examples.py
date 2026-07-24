@@ -181,13 +181,18 @@ def main() -> None:
         return nll
 
     done_ids: Set[str] = set()
-    resume_part: Optional[Path] = None
-    if args.resume and parquet_path.exists():
-        prev = pq.read_table(parquet_path).to_pandas()
-        done_ids = set(prev["example_id"].astype(str))
-        resume_part = out_dir / "example_scores_part0.parquet"
-        parquet_path.rename(resume_part)
-        print(f"[resume] {len(done_ids)} examples already scored; appending", flush=True)
+    resume_parts: List[Path] = []
+    if args.resume:
+        resume_parts = sorted(out_dir.glob("example_scores_part*.parquet"))
+        if parquet_path.exists():
+            next_i = len(resume_parts)
+            newest = out_dir / f"example_scores_part{next_i}.parquet"
+            parquet_path.rename(newest)
+            resume_parts.append(newest)
+        for part in resume_parts:
+            done_ids |= set(pq.read_table(part, columns=["example_id"]).to_pandas()["example_id"].astype(str))
+        if done_ids:
+            print(f"[resume] {len(done_ids)} examples already scored across {len(resume_parts)} part(s); appending", flush=True)
 
     def example_iter() -> Iterator[Dict[str, Any]]:
         n_seen = 0
@@ -257,15 +262,16 @@ def main() -> None:
         writer = flush_rows(writer, parquet_path, buffer)
     if writer is not None:
         writer.close()
-    if args.resume and resume_part is not None:
+    if args.resume and resume_parts:
         import pandas as _pd
-        parts = [ _pd.read_parquet(resume_part) ]
+        parts = [_pd.read_parquet(part) for part in resume_parts]
         if parquet_path.exists():
             parts.append(_pd.read_parquet(parquet_path))
         merged = _pd.concat(parts, ignore_index=True).drop_duplicates(subset=["example_id"], keep="first")
         merged.to_parquet(parquet_path, index=False)
-        resume_part.unlink()
-        print(f"[resume] merged {len(merged)} total rows", flush=True)
+        for part in resume_parts:
+            part.unlink()
+        print(f"[resume] merged {len(merged)} total rows from {len(parts)} part(s)", flush=True)
 
     summary = {
         "config": str(args.config),
