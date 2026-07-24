@@ -51,23 +51,26 @@ exploratory search, so this is feature-level, not configuration-level,
 independence). It then reveals what those
 mechanisms are: on \rsix{} (four malicious users), the top causal features
 place $99.8$--$100\%$ of their activation mass on static profile
-tokens---simulated psychometric traits and organizational identifiers---making
-the mechanism a \emph{user-profile novelty detector}; on \rfour{} (sixty
+tokens---simulated psychometric traits and organizational identifiers---showing the selected causal features are overwhelmingly profile-bound,
+consistent with \emph{user-profile novelty}; on \rfour{} (sixty
 malicious users), four of five top features are behavioral, concentrated on
-session-event tokens such as durations. Cross-seed decoder alignment shows
-each mechanism is a stable subspace of its own model ($|\cos|~0.88$--$0.96$
-across seeds, versus chance-level $0.08$--$0.11$ across benchmarks), ruling
-out dictionary non-identifiability as the source of transfer failure. A
+session-event tokens such as durations. Cross-seed decoder alignment shows each mechanism is stable across SAE
+initializations for the same cached adapter representations
+($|\cos|~0.88$--$0.96$ across seeds, versus a $0.08$--$0.11$ empirical null
+across benchmarks), ruling out dictionary non-identifiability as the source
+of transfer failure. A
 score-level sensitivity analysis completes the picture: against never-trained
 benign users, day-level ROC collapses to $0.55$ (\rsix{}) and $0.67$
 (\rfour{}), so the apparent detection strength is largely a
-seen-versus-unseen-user effect. The audit thus surfaces failure modes
-invisible to leaderboards---anomaly evidence resting on identity and novelty
-rather than behavior---and motivates a population-structure hypothesis: that what such mechanisms encode tracks the
-size and structure of the benchmark's malicious population. Confirmatory
-tests of this hypothesis (malicious-population subsampling within one
-benchmark, and score-level profile masking) are reported as work in
-progress.
+seen-versus-unseen-user effect. A malicious-population subsampling study
+on \rfour{} then rejects the natural explanation that positive-population
+size alone drives the dissociation: even four-user positive subsamples select
+predominantly behavioral features, so \rsix{}'s profile capture reflects
+benchmark-specific structure rather than a generic small-population effect.
+The audit thus surfaces failure modes invisible to leaderboards---anomaly
+evidence resting on identity and novelty rather than behavior---shows they
+cannot be predicted from population size alone, and makes ``which benchmark
+properties drive metadata capture'' a precisely posed open question.
 \end{abstract}
 
 \section{Introduction}
@@ -106,16 +109,21 @@ of their activation mass on static psychometric and organizational tokens, not
 on behavioral session events. On CERT \rfour{}, whose population contains
 sixty malicious users, the natively rediscovered mechanism is
 \emph{behavioral}: four of five top features concentrate on session-event
-tokens such as durations. Both mechanisms are causally real---each replicates in
-direction on held-out users---and each is a stable, seed-robust subspace of
-its own model with no counterpart in the other benchmark's dictionary. What
-differs is what they encode. Our working hypothesis is that the malicious
-population's structure drives this: with four positive users, user identity
-is the cheapest separator; with sixty, the identity shortcut dilutes and
-behavioral structure carries the evidence. Because the two benchmarks differ
-in many respects simultaneously, we treat this as a hypothesis under active
-test---by subsampling malicious populations within a single benchmark---rather
-than an established boundary condition.
+tokens such as durations. Both mechanisms are causally relevant under our
+estimands---\rfour{}'s replicates in direction on held-out users
+(feature-level independence; one context individually significant), while
+\rsix{}'s held-out replication concentrates on its dominant user---and each
+feature family is stable across SAE initializations with no counterpart in
+the other benchmark's dictionary. What differs is what the selected features
+encode. Because the model is trained on benign users only, malicious-population
+structure cannot alter training; it can only shape which existing directions
+the \emph{audit selects}. We therefore tested the natural audit-selection
+hypothesis---small positive populations favor profile-bound selection---by
+subsampling \rfour{}'s malicious users, and found it insufficient: even
+four-user subsamples select predominantly behavioral features. \rsix{}'s
+profile capture is a property of that benchmark's label--profile structure
+and its adapter's learned geometry, not of small positive populations in
+general.
 
 \input{figures/pipeline.tex}
 
@@ -374,10 +382,13 @@ Figure~\ref{fig:detector_dissociation} summarizes the pattern. Combined
 with the never-trained-benign sensitivity above, the score-level conclusion
 anticipates the mechanistic one: the model's ranking strength is largely user
 novelty rather than behavioral discrimination---on \rsix{} almost entirely so,
-on \rfour{} with a residual behavioral component ($0.668$ day ROC against
-unseen benigns). This also explains the ranking--precision dissociation: user
-novelty separates users (ROC) but cannot rank a user's malicious days above
-their benign days (PR). We therefore treat detection as background and ask
+on \rfour{} with a residual anomaly signal ($0.668$ day ROC against unseen
+benigns) whose behavioral character is supported by the feature attribution
+rather than by the ROC value itself. A user-novelty account is also
+\emph{consistent with} the ranking--precision dissociation---novelty
+separates users but not a user's malicious days from their benign
+days---though confirming this requires within-user day-ranking metrics we
+leave to the appendix materials. We therefore treat detection as background and ask
 what internal structure the benign-only adaptation induced.
 
 \subsection{\rsix{}: necessity is consistent across users; causal effects concentrate in one user}
@@ -558,9 +569,10 @@ $0.075$--$0.093$) in both directions for all three seeds per side.
 Causal rediscovery is likewise seed-robust: fresh-seed SAEs with their own
 re-selected features reproduce positive \rsix{} contrasts in every finite
 context (e.g., role $0.0071$ and $0.0019$ under seeds 43 and 44, versus
-$0.0068$ originally). The profile-novelty and behavioral subspaces are each
-stable properties of their models; their non-correspondence across benchmarks
-is a property of the benchmarks. (The cross-benchmark comparison is at each
+$0.0068$ originally). The profile-bound and behavioral feature families are each stable across
+SAE initializations for the same cached adapter representations
+(adapter-seed robustness remains untested); their non-correspondence across
+benchmarks is a property of the benchmark--adapter pairs. (The cross-benchmark comparison is at each
 benchmark's native layer, 18 versus 26; the matched-depth case is covered
 causally by the direct transfer experiment above.)
 
@@ -571,16 +583,26 @@ causally by the direct transfer experiment above.)
 
 Taken together (Table~\ref{tab:claim_status}): benign-only adaptation induces
 sparse token-level structure that is causally implicated in anomaly evidence
-on both benchmarks and survives held-out confirmation on both; the structure
+on both benchmarks, with held-out replication that is directional on
+\rfour{} and dominant-user-concentrated on \rsix{}; the structure
 is benchmark-specific not merely in coordinates but in \emph{kind}---identity
 metadata on \rsix{}, behavior on \rfour{}---and this difference tracks the
-malicious-population structure. Two confirmatory experiments are in progress: a score-time ablation that
-masks profile fields and rescores both populations with the frozen model,
-quantifying score-level dependence on profile tokens; and a
-malicious-population subsampling study on \rfour{} (resampled positive
-populations of $4$--$60$ users under a fixed model and benchmark) that
-directly tests whether small malicious populations drive selection toward
-profile-bound features.
+malicious-population structure. We tested the population-size hypothesis directly by malicious-population
+subsampling on \rfour{}: holding the model, benchmark, SAE, and benign
+population fixed, we resampled positive populations of $K=4,10,20,30,60$
+users (ten repetitions each) and re-ranked features for each. The strong form
+of the hypothesis is \emph{rejected}: profile-mass share among top-5 features
+is nearly flat in $K$ ($0.25$ at $K{=}4$ versus $0.16$--$0.20$ at
+$K\geq 10$; typically one profile-bound feature in five at every size),
+nowhere near \rsix{}'s near-total profile dominance. Small malicious
+populations tilt selection toward profile features only mildly. \rsix{}'s
+profile capture therefore reflects benchmark-specific factors---plausibly the
+distinctiveness of its four malicious users' profile fields within its benign
+profile distribution, and properties of its adapter's learned geometry---and
+identifying which benchmark properties drive metadata capture is an open
+question the audit makes precise. A score-time ablation that masks profile
+fields and rescores both populations with the frozen model is in progress.
+% TODO(masking): insert masking numbers when Aquaman scorings complete.
 % TODO(masking): insert masking ablation table + numbers when the Aquaman
 % scorings complete; design already described in the audit protocol.
 
@@ -601,17 +623,21 @@ take this as the central methodological lesson: for anomaly models trained on
 metadata-rich telemetry, causal validation and semantic attribution are
 separate obligations, and only their conjunction says what a detector detects.
 
-\paragraph{A failure mode and its boundary condition.}
-The profile-novelty mechanism is not a bug in the model; it is the optimal
-solution to \rsix{}'s separation problem, where four malicious users make
-identity the cheapest signal. The same pipeline on \rfour{}, with sixty
-malicious users, lands on behavioral features. For benchmark design, the
-implication is concrete: insider-threat benchmarks that expose static per-user
-metadata---especially simulated psychometrics with no operational
-counterpart---and small malicious populations will drive learned detectors
-toward identity proxies, and score-level evaluation will not notice. For
-deployment, the implication is sharper still: an identity-proxy detector
-generalizes to \emph{new users being unusual}, not to insider behavior.
+\paragraph{A failure mode without a simple boundary condition.}
+The profile-novelty mechanism is not a bug in the model; it is a solution to
+\rsix{}'s separation problem. But the obvious explanation---population
+size---fails our direct test: four-user subsamples of \rfour{} still select
+behavioral features. Whatever drives metadata capture on \rsix{} involves
+finer benchmark properties (how distinctive the malicious users' profile
+fields are within the benign profile distribution; what the benign-only
+adapter happened to compress into its deltas). For benchmark design the
+implication is in one way stronger: exposing static per-user metadata,
+especially simulated psychometrics with no operational counterpart, creates a
+capture risk that cannot be predicted from population size and that
+score-level evaluation will not notice---it must be audited for. For
+deployment, the implication is unchanged and sharp: an identity-proxy
+detector generalizes to \emph{new users being unusual}, not to insider
+behavior.
 
 \paragraph{Benchmark-specificity, revisited.}
 Cross-benchmark transfer of literal features fails while native rediscovery

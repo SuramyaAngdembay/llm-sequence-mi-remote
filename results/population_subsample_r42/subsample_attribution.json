@@ -1,0 +1,863 @@
+[
+  {
+    "K": 4,
+    "rep": 0,
+    "top5": [
+      6797,
+      1009,
+      4596,
+      325,
+      428
+    ],
+    "top5_profile_shares": [
+      0.0,
+      0.0,
+      0.0008,
+      0.0,
+      0.0
+    ],
+    "mean_profile_share": 0.0002,
+    "n_profile_features": 0,
+    "n_positive_rows": 24850
+  },
+  {
+    "K": 4,
+    "rep": 1,
+    "top5": [
+      4295,
+      7029,
+      782,
+      2300,
+      6254
+    ],
+    "top5_profile_shares": [
+      0.0114,
+      0.1621,
+      0.999,
+      0.9948,
+      0.0005
+    ],
+    "mean_profile_share": 0.4336,
+    "n_profile_features": 2,
+    "n_positive_rows": 17943
+  },
+  {
+    "K": 4,
+    "rep": 2,
+    "top5": [
+      4125,
+      4596,
+      6467,
+      2538,
+      5563
+    ],
+    "top5_profile_shares": [
+      0.0,
+      0.0008,
+      0.112,
+      0.0,
+      1.0
+    ],
+    "mean_profile_share": 0.2226,
+    "n_profile_features": 1,
+    "n_positive_rows": 26770
+  },
+  {
+    "K": 4,
+    "rep": 3,
+    "top5": [
+      7693,
+      4596,
+      1268,
+      611,
+      4421
+    ],
+    "top5_profile_shares": [
+      0.013,
+      0.0008,
+      0.0,
+      0.0085,
+      0.9948
+    ],
+    "mean_profile_share": 0.2034,
+    "n_profile_features": 1,
+    "n_positive_rows": 32387
+  },
+  {
+    "K": 4,
+    "rep": 4,
+    "top5": [
+      7029,
+      3537,
+      2302,
+      782,
+      3673
+    ],
+    "top5_profile_shares": [
+      0.1621,
+      0.0,
+      0.999,
+      0.999,
+      0.0
+    ],
+    "mean_profile_share": 0.432,
+    "n_profile_features": 2,
+    "n_positive_rows": 26262
+  },
+  {
+    "K": 4,
+    "rep": 5,
+    "top5": [
+      3537,
+      4596,
+      4421,
+      6688,
+      4173
+    ],
+    "top5_profile_shares": [
+      0.0,
+      0.0008,
+      0.9948,
+      0.0,
+      0.9937
+    ],
+    "mean_profile_share": 0.3979,
+    "n_profile_features": 2,
+    "n_positive_rows": 20211
+  },
+  {
+    "K": 4,
+    "rep": 6,
+    "top5": [
+      8148,
+      4596,
+      1268,
+      4421,
+      6688
+    ],
+    "top5_profile_shares": [
+      0.0953,
+      0.0008,
+      0.0,
+      0.9948,
+      0.0
+    ],
+    "mean_profile_share": 0.2182,
+    "n_profile_features": 1,
+    "n_positive_rows": 20249
+  },
+  {
+    "K": 4,
+    "rep": 7,
+    "top5": [
+      6797,
+      1009,
+      7029,
+      428,
+      7178
+    ],
+    "top5_profile_shares": [
+      0.0,
+      0.0,
+      0.1621,
+      0.0,
+      0.9942
+    ],
+    "mean_profile_share": 0.2313,
+    "n_profile_features": 1,
+    "n_positive_rows": 30848
+  },
+  {
+    "K": 4,
+    "rep": 8,
+    "top5": [
+      4295,
+      1725,
+      4596,
+      5948,
+      4986
+    ],
+    "top5_profile_shares": [
+      0.0114,
+      0.0583,
+      0.0008,
+      0.0,
+      0.9578
+    ],
+    "mean_profile_share": 0.2057,
+    "n_profile_features": 1,
+    "n_positive_rows": 12026
+  },
+  {
+    "K": 4,
+    "rep": 9,
+    "top5": [
+      6797,
+      1009,
+      428,
+      5237,
+      6420
+    ],
+    "top5_profile_shares": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.9948
+    ],
+    "mean_profile_share": 0.199,
+    "n_profile_features": 1,
+    "n_positive_rows": 18099
+  },
+  {
+    "K": 10,
+    "rep": 0,
+    "top5": [
+      7029,
+      6254,
+      7825,
+      325,
+      2302
+    ],
+    "top5_profile_shares": [
+      0.1621,
+      0.0005,
+      0.9998,
+      0.0,
+      0.999
+    ],
+    "mean_profile_share": 0.4323,
+    "n_profile_features": 2,
+    "n_positive_rows": 32607
+  },
+  {
+    "K": 10,
+    "rep": 1,
+    "top5": [
+      4596,
+      2687,
+      3673,
+      2538,
+      6823
+    ],
+    "top5_profile_shares": [
+      0.0008,
+      0.0407,
+      0.0,
+      0.0,
+      0.9987
+    ],
+    "mean_profile_share": 0.208,
+    "n_profile_features": 1,
+    "n_positive_rows": 62688
+  },
+  {
+    "K": 10,
+    "rep": 2,
+    "top5": [
+      7693,
+      1481,
+      4596,
+      2302,
+      3537
+    ],
+    "top5_profile_shares": [
+      0.013,
+      0.0356,
+      0.0008,
+      0.999,
+      0.0
+    ],
+    "mean_profile_share": 0.2097,
+    "n_profile_features": 1,
+    "n_positive_rows": 48097
+  },
+  {
+    "K": 10,
+    "rep": 3,
+    "top5": [
+      2687,
+      2302,
+      3537,
+      3673,
+      3455
+    ],
+    "top5_profile_shares": [
+      0.0407,
+      0.999,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "mean_profile_share": 0.2079,
+    "n_profile_features": 1,
+    "n_positive_rows": 40728
+  },
+  {
+    "K": 10,
+    "rep": 4,
+    "top5": [
+      1481,
+      2687,
+      4596,
+      2302,
+      3673
+    ],
+    "top5_profile_shares": [
+      0.0356,
+      0.0407,
+      0.0008,
+      0.999,
+      0.0
+    ],
+    "mean_profile_share": 0.2152,
+    "n_profile_features": 1,
+    "n_positive_rows": 50988
+  },
+  {
+    "K": 10,
+    "rep": 5,
+    "top5": [
+      1481,
+      2687,
+      4596,
+      2302,
+      3673
+    ],
+    "top5_profile_shares": [
+      0.0356,
+      0.0407,
+      0.0008,
+      0.999,
+      0.0
+    ],
+    "mean_profile_share": 0.2152,
+    "n_profile_features": 1,
+    "n_positive_rows": 48156
+  },
+  {
+    "K": 10,
+    "rep": 6,
+    "top5": [
+      4295,
+      4125,
+      4596,
+      5948,
+      7800
+    ],
+    "top5_profile_shares": [
+      0.0114,
+      0.0,
+      0.0008,
+      0.0,
+      0.0
+    ],
+    "mean_profile_share": 0.0024,
+    "n_profile_features": 0,
+    "n_positive_rows": 27850
+  },
+  {
+    "K": 10,
+    "rep": 7,
+    "top5": [
+      4966,
+      4596,
+      2687,
+      3098,
+      3832
+    ],
+    "top5_profile_shares": [
+      0.0,
+      0.0008,
+      0.0407,
+      0.017,
+      0.0277
+    ],
+    "mean_profile_share": 0.0173,
+    "n_profile_features": 0,
+    "n_positive_rows": 75011
+  },
+  {
+    "K": 10,
+    "rep": 8,
+    "top5": [
+      2687,
+      4596,
+      1268,
+      2302,
+      2538
+    ],
+    "top5_profile_shares": [
+      0.0407,
+      0.0008,
+      0.0,
+      0.999,
+      0.0
+    ],
+    "mean_profile_share": 0.2081,
+    "n_profile_features": 1,
+    "n_positive_rows": 53118
+  },
+  {
+    "K": 10,
+    "rep": 9,
+    "top5": [
+      3446,
+      6797,
+      4596,
+      3673,
+      2302
+    ],
+    "top5_profile_shares": [
+      0.0,
+      0.0,
+      0.0008,
+      0.0,
+      0.999
+    ],
+    "mean_profile_share": 0.2,
+    "n_profile_features": 1,
+    "n_positive_rows": 58198
+  },
+  {
+    "K": 20,
+    "rep": 0,
+    "top5": [
+      4596,
+      2687,
+      3673,
+      1268,
+      2302
+    ],
+    "top5_profile_shares": [
+      0.0008,
+      0.0407,
+      0.0,
+      0.0,
+      0.999
+    ],
+    "mean_profile_share": 0.2081,
+    "n_profile_features": 1,
+    "n_positive_rows": 147430
+  },
+  {
+    "K": 20,
+    "rep": 1,
+    "top5": [
+      3446,
+      4596,
+      3673,
+      1268,
+      6797
+    ],
+    "top5_profile_shares": [
+      0.0,
+      0.0008,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "mean_profile_share": 0.0002,
+    "n_profile_features": 0,
+    "n_positive_rows": 113693
+  },
+  {
+    "K": 20,
+    "rep": 2,
+    "top5": [
+      7693,
+      4596,
+      2302,
+      3673,
+      3455
+    ],
+    "top5_profile_shares": [
+      0.013,
+      0.0008,
+      0.999,
+      0.0,
+      0.0
+    ],
+    "mean_profile_share": 0.2026,
+    "n_profile_features": 1,
+    "n_positive_rows": 77873
+  },
+  {
+    "K": 20,
+    "rep": 3,
+    "top5": [
+      4596,
+      3446,
+      2687,
+      3673,
+      1268
+    ],
+    "top5_profile_shares": [
+      0.0008,
+      0.0,
+      0.0407,
+      0.0,
+      0.0
+    ],
+    "mean_profile_share": 0.0083,
+    "n_profile_features": 0,
+    "n_positive_rows": 128821
+  },
+  {
+    "K": 20,
+    "rep": 4,
+    "top5": [
+      4596,
+      2302,
+      3673,
+      4295,
+      3455
+    ],
+    "top5_profile_shares": [
+      0.0008,
+      0.999,
+      0.0,
+      0.0114,
+      0.0
+    ],
+    "mean_profile_share": 0.2022,
+    "n_profile_features": 1,
+    "n_positive_rows": 96415
+  },
+  {
+    "K": 20,
+    "rep": 5,
+    "top5": [
+      4596,
+      1268,
+      6797,
+      2687,
+      2302
+    ],
+    "top5_profile_shares": [
+      0.0008,
+      0.0,
+      0.0,
+      0.0407,
+      0.999
+    ],
+    "mean_profile_share": 0.2081,
+    "n_profile_features": 1,
+    "n_positive_rows": 123900
+  },
+  {
+    "K": 20,
+    "rep": 6,
+    "top5": [
+      4596,
+      6797,
+      2302,
+      3673,
+      2538
+    ],
+    "top5_profile_shares": [
+      0.0008,
+      0.0,
+      0.999,
+      0.0,
+      0.0
+    ],
+    "mean_profile_share": 0.2,
+    "n_profile_features": 1,
+    "n_positive_rows": 117404
+  },
+  {
+    "K": 20,
+    "rep": 7,
+    "top5": [
+      4596,
+      2687,
+      3673,
+      2302,
+      1268
+    ],
+    "top5_profile_shares": [
+      0.0008,
+      0.0407,
+      0.0,
+      0.999,
+      0.0
+    ],
+    "mean_profile_share": 0.2081,
+    "n_profile_features": 1,
+    "n_positive_rows": 123986
+  },
+  {
+    "K": 20,
+    "rep": 8,
+    "top5": [
+      4596,
+      3673,
+      3455,
+      4966,
+      2302
+    ],
+    "top5_profile_shares": [
+      0.0008,
+      0.0,
+      0.0,
+      0.0,
+      0.999
+    ],
+    "mean_profile_share": 0.2,
+    "n_profile_features": 1,
+    "n_positive_rows": 126087
+  },
+  {
+    "K": 20,
+    "rep": 9,
+    "top5": [
+      7693,
+      3673,
+      7825,
+      3455,
+      5734
+    ],
+    "top5_profile_shares": [
+      0.013,
+      0.0,
+      0.9998,
+      0.0,
+      0.0
+    ],
+    "mean_profile_share": 0.2025,
+    "n_profile_features": 1,
+    "n_positive_rows": 89027
+  },
+  {
+    "K": 30,
+    "rep": 0,
+    "top5": [
+      4596,
+      7693,
+      3673,
+      2302,
+      1268
+    ],
+    "top5_profile_shares": [
+      0.0008,
+      0.013,
+      0.0,
+      0.999,
+      0.0
+    ],
+    "mean_profile_share": 0.2026,
+    "n_profile_features": 1,
+    "n_positive_rows": 176460
+  },
+  {
+    "K": 30,
+    "rep": 1,
+    "top5": [
+      4596,
+      7693,
+      3673,
+      2302,
+      3455
+    ],
+    "top5_profile_shares": [
+      0.0008,
+      0.013,
+      0.0,
+      0.999,
+      0.0
+    ],
+    "mean_profile_share": 0.2026,
+    "n_profile_features": 1,
+    "n_positive_rows": 151080
+  },
+  {
+    "K": 30,
+    "rep": 2,
+    "top5": [
+      7693,
+      4596,
+      3673,
+      3455,
+      2302
+    ],
+    "top5_profile_shares": [
+      0.013,
+      0.0008,
+      0.0,
+      0.0,
+      0.999
+    ],
+    "mean_profile_share": 0.2026,
+    "n_profile_features": 1,
+    "n_positive_rows": 148926
+  },
+  {
+    "K": 30,
+    "rep": 3,
+    "top5": [
+      4596,
+      2302,
+      1268,
+      3673,
+      7693
+    ],
+    "top5_profile_shares": [
+      0.0008,
+      0.999,
+      0.0,
+      0.0,
+      0.013
+    ],
+    "mean_profile_share": 0.2026,
+    "n_profile_features": 1,
+    "n_positive_rows": 164015
+  },
+  {
+    "K": 30,
+    "rep": 4,
+    "top5": [
+      4596,
+      7693,
+      3673,
+      2302,
+      3455
+    ],
+    "top5_profile_shares": [
+      0.0008,
+      0.013,
+      0.0,
+      0.999,
+      0.0
+    ],
+    "mean_profile_share": 0.2026,
+    "n_profile_features": 1,
+    "n_positive_rows": 184201
+  },
+  {
+    "K": 30,
+    "rep": 5,
+    "top5": [
+      4596,
+      2302,
+      3673,
+      1268,
+      7152
+    ],
+    "top5_profile_shares": [
+      0.0008,
+      0.999,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "mean_profile_share": 0.2,
+    "n_profile_features": 1,
+    "n_positive_rows": 171327
+  },
+  {
+    "K": 30,
+    "rep": 6,
+    "top5": [
+      4596,
+      3673,
+      7693,
+      2302,
+      1268
+    ],
+    "top5_profile_shares": [
+      0.0008,
+      0.0,
+      0.013,
+      0.999,
+      0.0
+    ],
+    "mean_profile_share": 0.2026,
+    "n_profile_features": 1,
+    "n_positive_rows": 199635
+  },
+  {
+    "K": 30,
+    "rep": 7,
+    "top5": [
+      4596,
+      3673,
+      3455,
+      2302,
+      2538
+    ],
+    "top5_profile_shares": [
+      0.0008,
+      0.0,
+      0.0,
+      0.999,
+      0.0
+    ],
+    "mean_profile_share": 0.2,
+    "n_profile_features": 1,
+    "n_positive_rows": 188371
+  },
+  {
+    "K": 30,
+    "rep": 8,
+    "top5": [
+      4596,
+      2302,
+      3673,
+      1268,
+      3455
+    ],
+    "top5_profile_shares": [
+      0.0008,
+      0.999,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "mean_profile_share": 0.2,
+    "n_profile_features": 1,
+    "n_positive_rows": 153144
+  },
+  {
+    "K": 30,
+    "rep": 9,
+    "top5": [
+      4596,
+      3673,
+      3446,
+      1268,
+      2302
+    ],
+    "top5_profile_shares": [
+      0.0008,
+      0.0,
+      0.0,
+      0.0,
+      0.999
+    ],
+    "mean_profile_share": 0.2,
+    "n_profile_features": 1,
+    "n_positive_rows": 196785
+  },
+  {
+    "K": 60,
+    "rep": 0,
+    "top5": [
+      4596,
+      3673,
+      2302,
+      3455,
+      1268
+    ],
+    "top5_profile_shares": [
+      0.0008,
+      0.0,
+      0.999,
+      0.0,
+      0.0
+    ],
+    "mean_profile_share": 0.2,
+    "n_profile_features": 1,
+    "n_positive_rows": 336335
+  }
+]

@@ -50,16 +50,18 @@ def write_detector_table() -> None:
         ["", "GRU AE", "0.0057", "0.766", "0.081", "24.8"],
         ["", "LSTM AE", "0.0021", "0.768", "0.057", "24.2"],
         ["", "Isolation Forest", "0.0002", "0.713", "0.013", "153.0"],
+        ["", r"\emph{Session LM, user-disjoint benign}", "0.0005", "0.545", "0.013", "--"],
         ["---"],
         ["r4.2", "Session LM (adapted NLL)", "0.0134", r"\textbf{0.964}", "0.101", r"\textbf{26.4}"],
         ["", "Deep SVDD", r"\textbf{0.0337}", "0.743", r"\textbf{0.382}", "53.4"],
         ["", "GRU AE", "0.0254", "0.696", "0.124", "86.6"],
         ["", "LSTM AE", "0.0236", "0.714", "0.120", "92.1"],
         ["", "Isolation Forest", "0.0003", "0.715", "0.008", "186.4"],
+        ["", r"\emph{Session LM, user-disjoint benign}", "0.1023", "0.668", "0.521", "--"],
     ]
     write_table(
         TABLES / "cert_detector_comparison.tex",
-        "Fold-aligned detector comparison on CERT. Bold marks the best value per metric within each dataset (held-out rank: lower is better). The Qwen3-8B session LM shows strong ROC and ranking behavior, but its day-level PR-AUC remains below the stronger feature-based baselines.",
+        "Detector comparison on CERT under two protocols. Fold-aligned rows follow the baselines' protocol, in which the session LM (trained once on ~90 percent of benign users) faces mostly training-seen benign test users while baselines exclude test users from training; bold marks the best fold-aligned value per metric (held-out rank: lower is better). The italicized user-disjoint rows restrict the LM's benign comparison population to never-trained validation users and are the fair comparison for the LM: its ranking advantage largely disappears (day ROC 0.953 to 0.545 on r6.2; 0.964 to 0.668 on r4.2), showing the fold-aligned strength is mostly a seen-versus-unseen-user effect. User-disjoint PR values are on a different benign population size and are not comparable to the fold-aligned column.",
         "tab:cert_detector",
         "llcccc",
         ["Dataset", "Method", "Day PR-AUC", "Day ROC-AUC", "User PR-AUC", "Held-out rank"],
@@ -97,18 +99,19 @@ def write_mech_table() -> None:
 def write_claims_table() -> None:
     rows = [
         ["Benign-only QLoRA training is valid one-class training", "Supported"],
-        ["Both benchmarks admit causally validated sparse mechanisms (held-out confirmed)", "Supported"],
-        ["The r6.2 mechanism encodes behavioral session content", "Rejected (profile tokens)"],
-        ["The r4.2 mechanism encodes behavioral session content", "Supported (4/5 features)"],
+        ["Fold-aligned detector strength reflects behavioral discrimination", "Rejected (seen-vs-unseen-user effect)"],
+        ["r6.2 has a sparse profile-bound causal mechanism", "Supported descriptively; held-out replication concentrates on the dominant user"],
+        ["r4.2 has a sparse behavioral-associated causal mechanism", "Supported; feature-level directional replication on held-out users"],
+        ["Configuration-independent r4.2 confirmation", "Not established"],
         ["Literal feature transfer across benchmarks succeeds", "Rejected"],
         ["Transfer failure is explained by SAE seed non-identifiability", "Rejected (alignment controls)"],
-        ["The session LM detector is strongly superior on CERT", "Not supported"],
+        ["Positive-population size alone explains the profile/behavior dissociation", "Rejected (subsampling)"],
     ]
     write_table(
         TABLES / "claim_status.tex",
         "Audit claim map: what the evidence supports, rejects, and fails to support.",
         "tab:claim_status",
-        "p{9.5cm}l",
+        "p{7.6cm}p{5.6cm}",
         ["Claim", "Status"],
         rows,
     )
@@ -158,7 +161,7 @@ def write_alignment_table() -> None:
         "cross-benchmark alignment is at chance.",
         "tab:alignment",
         "lcc",
-        ["Comparison", "Top-5 best-match $|\\cos|$", "Chance baseline"],
+        ["Comparison", "Top-5 best-match $|\\cos|$", "Empirical null baseline"],
         rows,
     )
 

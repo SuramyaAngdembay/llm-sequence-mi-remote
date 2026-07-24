@@ -3,17 +3,18 @@
 \label{tab:claim_status}
 \centering
 \small
-\begin{tabular}{p{9.5cm}l}
+\begin{tabular}{p{7.6cm}p{5.6cm}}
 \toprule
 Claim & Status \\
 \midrule
 Benign-only QLoRA training is valid one-class training & Supported \\
-Both benchmarks admit causally validated sparse mechanisms (held-out confirmed) & Supported \\
-The r6.2 mechanism encodes behavioral session content & Rejected (profile tokens) \\
-The r4.2 mechanism encodes behavioral session content & Supported (4/5 features) \\
+Fold-aligned detector strength reflects behavioral discrimination & Rejected (seen-vs-unseen-user effect) \\
+r6.2 has a sparse profile-bound causal mechanism & Supported descriptively; held-out replication concentrates on the dominant user \\
+r4.2 has a sparse behavioral-associated causal mechanism & Supported; feature-level directional replication on held-out users \\
+Configuration-independent r4.2 confirmation & Not established \\
 Literal feature transfer across benchmarks succeeds & Rejected \\
 Transfer failure is explained by SAE seed non-identifiability & Rejected (alignment controls) \\
-The session LM detector is strongly superior on CERT & Not supported \\
+Positive-population size alone explains the profile/behavior dissociation & Rejected (subsampling) \\
 \bottomrule
 \end{tabular}
 \end{table}
