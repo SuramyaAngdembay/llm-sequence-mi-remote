@@ -33,7 +33,7 @@ def per_example_nll(
     batch_size = int(logits.shape[0])
     chunk_size = batch_size if int(loss_batch_size) <= 0 else min(batch_size, int(loss_batch_size))
     out: List[torch.Tensor] = []
-    seq_chunk = 512  # bound fp32 CE workspace over the sequence dimension too
+    seq_chunk = 256  # bound fp32 CE workspace over the sequence dimension too
     for start in range(0, batch_size, chunk_size):
         end = min(start + chunk_size, batch_size)
         shift_labels = input_ids[start:end, 1:].contiguous()
