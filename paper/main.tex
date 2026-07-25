@@ -628,6 +628,23 @@ the profile features' necessity was uniformly negative). \rsix{}'s profile
 capture is therefore a property of unconstrained feature \emph{selection},
 not an absence of behavioral causal structure---which is precisely the kind
 of distinction the audit exists to make.
+
+A swap-counterfactual experiment sharpens what the score itself is sensitive
+to. For every positive user-day we constructed two variants---profile fields
+replaced by a random benign (validation-split) user's, and conversely the
+entire behavioral content replaced while keeping the profile---and rescored
+with the frozen models. On \emph{both} benchmarks, the score is more
+disturbed by profile perturbation than by replacing all behavior
+(mean $\Delta$NLL $+0.155$ versus $+0.072$ on \rsix{}, ratio $2.2$;
+$+0.180$ versus $+0.102$ on \rfour{}, ratio $1.8$). Because donors are
+unseen users, this measures perturbation sensitivity rather than profile
+familiarity, and it shows that profile tokens dominate the raw NLL surface of
+both adapters---consistent with masking \emph{improving} \rfour{}
+discrimination by removing profile-driven score variance. The benchmarks thus
+differ not in raw score sensitivity, which is profile-dominated everywhere,
+but in where the anomaly-\emph{discriminative} signal lives: a distinction
+that feature-level attribution and masking expose and that score-level
+perturbation alone cannot.
 % TODO(masking): insert masking ablation table + numbers when the Aquaman
 % scorings complete; design already described in the audit protocol.
 

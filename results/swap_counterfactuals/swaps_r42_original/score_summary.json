@@ -1,0 +1,16 @@
+{
+  "config": "configs/qwen3_8b_qlora_session_targeted.yaml",
+  "jsonl_path": "/home/suramya/cert-data/swaps_r42/positives_original.jsonl",
+  "adapter_dir": "/home/suramya/cert-data/r42_adapter",
+  "output_dir": "/home/suramya/cert-out/swaps_r42_original",
+  "model_name_or_path": "Qwen/Qwen3-8B",
+  "n_examples": 1309,
+  "batch_size": 2,
+  "loss_batch_size": 1,
+  "separate_base_model": false,
+  "flush_rows": 4096,
+  "max_examples": 0,
+  "users_file": "",
+  "n_allowed_users": null,
+  "mean_tokens": 256.9404125286478
+}
