@@ -600,9 +600,34 @@ profile capture therefore reflects benchmark-specific factors---plausibly the
 distinctiveness of its four malicious users' profile fields within its benign
 profile distribution, and properties of its adapter's learned geometry---and
 identifying which benchmark properties drive metadata capture is an open
-question the audit makes precise. A score-time ablation that masks profile
-fields and rescores both populations with the frozen model is in progress.
-% TODO(masking): insert masking numbers when Aquaman scorings complete.
+question the audit makes precise. A score-time ablation completes the picture. We re-serialized the
+evaluation population without the \texttt{PSY} line (\emph{no-psy}) and
+additionally with organizational identifiers masked (\emph{no-profile}), and
+rescored with the frozen models on the unseen-versus-unseen population
+(positives against never-trained benign users). On \rsix{}, masking changes
+essentially nothing (day ROC $0.547$ original, $0.575$ no-psy, $0.471$
+no-profile): with every user unseen, profile novelty separates nothing, and
+no behavioral signal is revealed underneath. On \rfour{}, masking
+psychometrics \emph{improves} discrimination substantially (day ROC
+$0.670\!\to\!0.797$; day PR $0.069\!\to\!0.112$; user ROC
+$0.666\!\to\!0.775$): the simulated psychometric fields were not merely
+uninformative but actively obscured behavioral signal. Static profile
+metadata in the serialization is thus a liability twice over---it invites
+identity capture during selection and degrades behavior-based scoring even
+when the mechanism is behavioral.
+
+Finally, excluding profile-dominated features from selection reveals that
+\rsix{} also contains a \emph{behavioral} feature family: SES-restricted
+ranking under LOUO discipline selects stable behavioral features (two of the
+top five recur across three of four folds, all with near-zero profile mass),
+and these features carry held-out causal effect on the dominant user
+($+0.0027$ to $+0.0029$ across contexts, roughly three-quarters of the
+profile-feature effect), with partial held-out necessity (positive on the
+small multi-day users; role-context positive on the dominant-user fold, where
+the profile features' necessity was uniformly negative). \rsix{}'s profile
+capture is therefore a property of unconstrained feature \emph{selection},
+not an absence of behavioral causal structure---which is precisely the kind
+of distinction the audit exists to make.
 % TODO(masking): insert masking ablation table + numbers when the Aquaman
 % scorings complete; design already described in the audit protocol.
 
