@@ -572,9 +572,18 @@ context (e.g., role $0.0071$ and $0.0019$ under seeds 43 and 44, versus
 $0.0068$ originally). The profile-bound and behavioral feature families are each stable across
 SAE initializations for the same cached adapter representations
 (adapter-seed robustness remains untested); their non-correspondence across
-benchmarks is a property of the benchmark--adapter pairs. (The cross-benchmark comparison is at each
-benchmark's native layer, 18 versus 26; the matched-depth case is covered
-causally by the direct transfer experiment above.)
+benchmarks is a property of the benchmark--adapter pairs. The native-layer
+cross-benchmark comparison (18 versus 26) sits at the empirical null, but that
+partly reflects a depth difference; at matched layer 18 the two benchmarks'
+top features are modestly \emph{above} their null baselines (mean $|\cos|$
+$0.26$ and $0.43$ versus baselines $0.19$ and $0.35$), as expected since both
+SAEs encode the same base model's layer-18 geometry. The decisive contrast is
+scale: matched-layer cross-benchmark alignment ($0.26$--$0.43$) remains far
+below within-benchmark cross-seed alignment ($0.88$--$0.96$), so the
+distinct headline mechanisms are not a relabeling of one shared circuit even
+after controlling for depth. (r4.2's headline mechanism is itself at layer 26;
+its layer-18 features used here are off-mechanism, which further limits the
+correspondence one should expect.)
 
 \input{tables/alignment.tex}
 

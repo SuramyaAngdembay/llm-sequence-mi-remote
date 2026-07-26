@@ -151,7 +151,8 @@ def write_alignment_table() -> None:
     rows = [
         ["within r6.2 (3 seed pairs)", "0.881--0.929", "0.579--0.586"],
         ["within r4.2 (3 seed pairs)", "0.881--0.955", "0.635--0.645"],
-        ["across benchmarks (both directions, 3 seeds/side)", "0.079--0.112", "0.075--0.093"],
+        ["across benchmarks, native layers (18 vs 26)", "0.079--0.112", "0.075--0.093"],
+        ["across benchmarks, matched layer 18", "0.264--0.434", "0.194--0.348"],
     ]
     write_table(
         TABLES / "alignment.tex",

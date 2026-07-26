@@ -1,0 +1,30 @@
+[
+  {
+    "source": "r62_l18",
+    "target": "r42_l18",
+    "top5_best_match_mean": 0.2642274498939514,
+    "top5_best_match_min": 0.1576385647058487,
+    "top5_best_matches": [
+      0.1645,
+      0.1576,
+      0.4426,
+      0.1953,
+      0.361
+    ],
+    "all_features_best_match_median": 0.19404298067092896
+  },
+  {
+    "source": "r42_l18",
+    "target": "r62_l18",
+    "top5_best_match_mean": 0.43436479568481445,
+    "top5_best_match_min": 0.34717410802841187,
+    "top5_best_matches": [
+      0.5405,
+      0.4424,
+      0.3472,
+      0.3664,
+      0.4754
+    ],
+    "all_features_best_match_median": 0.3475678861141205
+  }
+]
