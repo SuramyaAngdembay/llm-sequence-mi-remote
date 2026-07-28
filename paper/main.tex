@@ -790,4 +790,143 @@ publication.
 \bibliography{references}
 \bibliographystyle{tmlr}
 
+\appendix
+
+\section{Methods Appendix}
+\label{app:methods}
+
+\subsection{Serialization schema}
+Each user-day is rendered as: line 1, \texttt{DAY} with
+\texttt{week, project, role, b\_unit, f\_unit, dept, team, itadmin}; line 2,
+\texttt{PSY} with the five simulated trait values \texttt{O,C,E,A,N}; line 3,
+a session-count line; then one \texttt{SES} line per session with
+\texttt{key=value} pairs over the retained LC-DAL session fields:
+\texttt{pc}, work-hour/after-hour/weekend flags, \texttt{duration},
+concurrency, start/end descriptors, activity counts
+(\texttt{n\_allact, n\_logon, n\_usb, usb\_mean\_usb\_dur, n\_file,
+file\_n\_exef, n\_email} with received/sent/attachment statistics,
+\texttt{n\_http} with job/cloud/leak/hack-site counts). The four dropped
+fields are \texttt{file\_n-to\_usb1, file\_n-from\_usb1, file\_n-file\_act3,
+file\_n-disk1} (hyphenated names are renamed by
+\texttt{itertuples(...).\_asdict()} and were consequently omitted; the fast
+serializer reproduces this byte-faithfully).
+
+\subsection{Adaptation and scoring}
+QLoRA adaptation follows Section~\ref{sec:model} exactly (NF4 double
+quantization, bf16 compute; LoRA $r{=}16$, $\alpha{=}32$, dropout $0.05$ on
+q/k/v/o/up/down/gate projections; sequence length $2048$; effective batch
+$8$; one epoch; lr $1.5{\times}10^{-4}$, cosine, $3\%$ warmup). The anomaly
+score of example $x$ is the attention-masked mean token NLL under the adapted
+model. When a batch's full fp32 logits would exceed $28$\,GiB, scoring
+switches to a chunked path that computes cross-entropy from hidden states via
+the output embedding in bounded slices; both paths are exact.
+
+\subsection{Token delta extraction and SAE training}
+Token deltas $\delta_t^{(\ell)} = h^{\mathrm{ada}}_t - h^{\mathrm{base}}_t$
+are extracted at the residual stream after layer $\ell$ for every
+attention-valid token of every example in the evaluation pool
+(\texttt{eval.jsonl} order defines \texttt{example\_idx}). SAEs are trained
+on rows standardized by per-dimension mean and standard deviation
+($\tilde\delta = (\delta-\mu)/\sigma$, statistics stored with the
+checkpoint): encoder $z = \mathrm{TopK}_k(\mathrm{ReLU}(W_e\tilde\delta +
+b_e))$ with untied linear decoder $\hat{\tilde\delta} = W_d z$; Adam,
+lr $10^{-3}$, $20$ epochs, batch $1024$--$4096$, at most $2{\times}10^6$
+training rows per layer (all positive-example rows retained, benign rows
+subsampled). Search grid: layers $\{18,26,34\}$ (\rsix{}) and $\{18,26\}$
+(\rfour{}) $\times\ m \in \{2,4\}$ $\times\ k \in \{4,8\}$. Headline
+configurations---\rsix{}: $\ell{=}18, m{=}4, k{=}8$ (reconstruction MSE
+$0.054$ on standardized rows, effective $L_0$ $7.98$, dead-feature rate
+$1.0\%$); \rfour{}: $\ell{=}26, m{=}2, k{=}4$ (MSE $0.093$, $L_0$ $4.0$,
+dead rate $1.4\%$)---were selected by the exploratory causal contrast on the
+full positive population, which is why held-out evaluation in the main text
+claims feature-level rather than configuration-level independence.
+
+\subsection{Feature ranking and feature sets}
+For each feature $f$, with post-top-$k$ activations $z_{t,f}$ over a labeled
+row sample, the ranking statistic is
+$\mathrm{gap}_f = \overline{z_{\cdot,f}}^{\,\mathrm{pos}} -
+\overline{z_{\cdot,f}}^{\,\mathrm{ben}}$ (mean over positive-example rows
+minus mean over benign rows). \texttt{top}$n$ is the $n$ highest-gap
+features. The active control \texttt{control}$n$\texttt{\_active} comprises
+the $n$ features with smallest $|\mathrm{gap}|$ among those with row
+activation frequency $\geq 0.002$, excluding \texttt{top5}. Behavioral
+(SES-restricted) ranking recomputes $\mathrm{gap}_f$ on SES-class rows only
+and excludes features whose profile-token activation-mass share on positives
+exceeds $0.5$.
+
+\subsection{Causal patching procedure}
+For receiver $r$ with token deltas $\{\delta_t\}$ and codes
+$\{z_t\}$, feature set $F$ (top or control), donor $d$, and strength
+$\alpha \in \{0.25,0.5,0.75,1.0\}$:
+(1) active positions $T_F = \{t : \sum_{f\in F} z_{t,f} > 0\}$;
+(2) donor prototype $p_f$ = mean of $z^{d}_{t,f}$ over donor tokens where the
+donor's $F$-features are active (fallback: mean over all donor tokens);
+(3) counterfactual codes $z'_{t,f} = (1-\alpha)\,z_{t,f} + \alpha\,p_f$ for
+$t \in T_F, f \in F$, all other coordinates unchanged;
+(4) the patched delta is $\delta'_t = \sigma \odot W_d z'_t + \mu$ at
+\emph{every} token, and the additive shift $\delta'_t - \delta_t$ is injected
+into the layer-$\ell$ residual stream by a forward hook during adapted-model
+scoring. Because step (4) substitutes the SAE reconstruction at all tokens in
+\emph{both} arms, reconstruction-substitution error is common to top and
+control interventions and cancels in the top-minus-control contrast; the arms
+differ only in the feature edit at their active positions. The recorded
+per-receiver outcome for each (feature set, donor type) is the best (most
+negative) NLL change over the candidate-donor pool and $\alpha$ grid; best-donor
+selection is applied identically to top and control arms.
+
+\subsection{Necessity ablation}
+Identical machinery with $z'_{t,f} = (1-\alpha)\,z_{t,f}$ for
+$f \in F, t \in T_F$ (scaling toward zero; no donor), applied to each
+positive receiver and its context-matched benign receiver; the estimand
+contrasts (benign minus positive) ablation effects, top versus control, as in
+Section~\ref{sec:mechprotocol}.
+
+\subsection{Donor pools and matching}
+Context modes define donor eligibility by equality on the serialized fields:
+\texttt{role}; \texttt{dept}$\times$\texttt{role};
+\texttt{project}$\times$\texttt{role}; \texttt{team}; \texttt{dept}
+(\rfour{} uses \texttt{team, role, dept, dept\_role}). Donor pools are
+benign-labeled or anomalous-labeled examples matching the receiver's context
+key, with the receiver's own user excluded; at most $16$ candidate donors per
+receiver are drawn uniformly at random (seeded). Complete-case rates for the
+paired estimand are reported per context in the results artifacts (e.g.,
+\rfour{} causal: $1034$--$1157$ complete of $1039$--$1301$ available
+receivers; \rsix{} \texttt{team} has no complete anomalous-donor case and is
+reported as unavailable). Benign donors and necessity matches are drawn from
+the evaluation pool, whose benign members are validation-split users never
+seen in training.
+
+\subsection{Detector protocols}
+Fold-aligned: seed $42$; one held-out malicious user per fold; $800$ benign
+test users per fold sampled from all benign users; day-level metrics over all
+test rows and user-level metrics after per-user max aggregation; the LM is
+trained once (its corpus covers ${\sim}90\%$ of benign users), baselines
+retrain per fold. User-disjoint: the benign comparison population is
+restricted to validation-split users (never trained on); \rsix{}: $405$ of
+$4000$ benign users, \rfour{}: $79$ of $1000$.
+
+\subsection{Uncertainty procedures}
+Primary: user-level cluster bootstrap, $10{,}000$ draws resampling malicious
+users with replacement and recomputing the pooled complete-case contrast;
+supplementary: receiver/pair-level bootstrap ($4{,}000$ draws) and
+mean-of-user-means cluster bootstrap. Point estimates always equal the
+complete-case paired contrast. With four \rsix{} clusters, percentile
+intervals are reported as descriptive.
+
+\subsection{Configuration-selection status}
+Data-dependent choices made on the full positive populations: layer, $m$,
+$k$, context-mode menu, feature-set sizes, and the $\alpha$ grid. Choices
+re-made inside discovery sets for held-out evaluation: feature identities
+(top and control sets). This is the feature-level independence claimed in the
+main text; configuration-level independence would require repeating the
+architecture/layer search within discovery users, which we leave to future
+work.
+
+\subsection{Compute}
+GPU experiments ran on A100-40GB nodes (Slurm) and two RTX~3070 (8\,GB)
+cards; total GPU consumption for all mechanistic, confirmation, control, and
+ablation experiments was approximately $31$ A100-hours plus $\sim$$60$
+consumer-GPU-hours. Every job's batch configuration was validated by
+short debug-queue probes measuring worst-case peak memory before long runs.
+
 \end{document}
