@@ -28,6 +28,7 @@ def load_layer_vectors(
     *,
     max_rows: int = 0,
     seed: int = 42,
+    benign_only: bool = False,
 ) -> tuple[np.ndarray, np.ndarray, pd.DataFrame]:
     scores = pd.read_parquet(extract_dir / "example_scores.parquet")
     score_index = scores.sort_values("example_idx").reset_index(drop=True).set_index("example_idx", drop=False)
@@ -56,9 +57,13 @@ def load_layer_vectors(
         if "position" in obj and obj["position"] is not None:
             has_position = True
             pos = np.asarray(obj["position"], dtype=np.int64)
-        if sample_prob < 1.0:
+        if sample_prob < 1.0 or benign_only:
             labels = score_index.loc[idx, "y"].to_numpy(dtype=np.int64)
-            keep = (labels > 0) | (rng.random(len(idx)) < sample_prob)
+            if benign_only:
+                # exclude ALL positive rows: dictionary sees benign users only
+                keep = (labels == 0) & (rng.random(len(idx)) < sample_prob)
+            else:
+                keep = (labels > 0) | (rng.random(len(idx)) < sample_prob)
             vecs = vecs[keep]
             idx = idx[keep]
             if pos is not None:
@@ -203,6 +208,8 @@ def main() -> None:
     ap.add_argument("--latent-multipliers", default="", help="optional comma-separated latent multipliers")
     ap.add_argument("--topk", default="", help="optional comma-separated top-k values")
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--benign-only", action="store_true",
+                    help="train the dictionary on benign rows only (dictionary-level independence)")
     args = ap.parse_args()
 
     cfg = load_yaml(args.config)
@@ -232,6 +239,7 @@ def main() -> None:
             layer,
             max_rows=args.max_rows,
             seed=args.seed + layer,
+            benign_only=bool(args.benign_only),
         )
         x, y, scores = subsample_rows(x, y, scores, max_rows=args.max_rows, seed=args.seed + layer)
         mean, std = tensor_stats(x)

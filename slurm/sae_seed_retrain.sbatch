@@ -25,7 +25,7 @@ fi
 python scripts/train_delta_sae_frontier.py \
   --config configs/token_delta_sae_frontier.yaml \
   --extract-dir "$EXTRACT" \
-  --out-dir "$PROJ/outputs/token_delta_sae_frontier_${DATASET}_seed${SAE_SEED}" \
+  --out-dir "$PROJ/outputs/token_delta_sae_frontier_${DATASET}_${OUT_TAG:-seed${SAE_SEED}}" \
   --device cuda \
   --batch-size 4096 \
   --epochs 20 \
@@ -33,5 +33,5 @@ python scripts/train_delta_sae_frontier.py \
   --max-rows 2000000 \
   --latent-multipliers "$LM" \
   --topk "$KV" \
-  --seed "$SAE_SEED"
+  --seed "$SAE_SEED" ${BENIGN_ONLY:+--benign-only}
 echo DONE
