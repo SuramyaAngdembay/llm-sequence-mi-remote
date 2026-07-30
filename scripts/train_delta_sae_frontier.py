@@ -269,15 +269,19 @@ def main() -> None:
                     batch_size=args.batch_size,
                 )
                 feature_sets = choose_feature_sets(feature_df)
-                proxy = energy_selectivity_summary(
-                    model,
-                    x_norm,
-                    y,
-                    feature_sets,
-                    device=device,
-                    batch_size=args.batch_size,
-                )
-                proxy_map = {r["intervention"]: float(r["selectivity_proxy"]) for _, r in proxy.iterrows()}
+                if (y > 0).any():
+                    proxy = energy_selectivity_summary(
+                        model,
+                        x_norm,
+                        y,
+                        feature_sets,
+                        device=device,
+                        batch_size=args.batch_size,
+                    )
+                    proxy_map = {r["intervention"]: float(r["selectivity_proxy"]) for _, r in proxy.iterrows()}
+                else:
+                    # benign-only training set: anomaly-vs-benign selectivity is undefined
+                    proxy_map = {}
                 top_ids = [int(x) for x in feature_df.head(10)["feature_id"].tolist()]
                 overlap = decoder_overlap_stats(model, top_ids)
                 support = support_overlap_stats_streaming(
