@@ -102,12 +102,14 @@ estimands---\rfour{}'s replicates in direction on held-out users
 \rsix{}'s held-out replication concentrates on its dominant user---and each
 feature family is stable across SAE initializations with no counterpart in
 the other benchmark's dictionary. What differs is what the selected features
-encode. Because the model is trained on benign users only, malicious-population
-structure cannot alter training; it can only shape which existing directions
-the \emph{audit selects}. We therefore tested the natural audit-selection
-hypothesis---small positive populations favor profile-bound selection---by
-subsampling \rfour{}'s malicious users, and found it insufficient: even
-four-user subsamples select predominantly behavioral features. \rsix{}'s
+encode. Because the session model is adapted on benign users only,
+malicious-population structure cannot alter adapter training; it can,
+however, shape both the SAE dictionary (which is fitted on the evaluation
+pool) and which directions the audit selects. We tested the natural
+selection-stage hypothesis---small positive populations favor profile-bound
+selection---by subsampling \rfour{}'s malicious users within its fixed
+dictionary, and found it insufficient: even four-user subsamples select
+predominantly behavioral features. \rsix{}'s
 profile capture is a property of that benchmark's label--profile structure
 and its adapter's learned geometry, not of small positive populations in
 general.
@@ -119,7 +121,7 @@ general.
 \item We assemble an intervention-based \emph{mechanistic audit} for anomaly
 language models---adapter-delta sparse autoencoders, causal patching and
 necessity ablation under active controls, cluster-level uncertainty,
-held-out-user confirmation, seed-stability controls, and token-level feature
+dictionary-conditional held-out-user confirmation, seed-stability controls, and token-level feature
 attribution---and validate each component on two CERT benchmarks.
 \item Using the audit, we show that the same architecture and pipeline learns
 mechanisms of different \emph{kinds} on related benchmarks: profile-bound
@@ -276,11 +278,17 @@ sequences) during adaptation, whereas the baselines exclude test users from
 training. The bias is not hypothetical: restricting the benign comparison population
 to never-trained validation-split users collapses day-level ROC-AUC from
 $0.954$ to $0.545$ on \rsix{} and from $0.959$ to $0.668$ on \rfour{}
-(user-level: $0.970\!\to\!0.546$ and $0.969\!\to\!0.565$). Since
-malicious users are unseen by construction, the unseen-versus-unseen
-comparison is the fair test of behavior detection, and it shows the
-fold-aligned ROC advantage is largely a \emph{seen-versus-unseen-user}
-effect. The fold-aligned numbers below follow the local baselines' protocol
+(user-level: $0.970\!\to\!0.546$ and $0.969\!\to\!0.565$). These paired
+values are computed on the full evaluation pool; the fold-aligned values in
+Table~\ref{tab:cert_detector} ($0.953$/$0.964$) use the baselines' per-fold
+test populations and therefore differ in the last digits. Since malicious
+users are unseen by construction, the unseen-versus-unseen comparison is the
+fairer test of generalization to unseen users: it removes training-seen
+status as an explanation for discrimination, and it shows the fold-aligned
+ROC advantage is largely a \emph{seen-versus-unseen-user} effect. (Unseen
+malicious users can still differ from unseen benign users in profile as well
+as behavior; the masking analysis in Section~\ref{sec:cross} probes whether
+the residual signal is behavioral.) The fold-aligned numbers below follow the local baselines' protocol
 for comparability, but should be read with this in mind. Scoring uses the full corpus, and fold masks are
 applied only afterward. We adopted this protocol after finding that an earlier
 pipeline, which re-filtered an already-filtered score file, silently dropped
@@ -298,7 +306,7 @@ those with nontrivial activation support (activation frequency at least
 $0.002$). Inert controls make intervention effects look artificially large, so
 control activity is a precondition, not an afterthought \citep{zhang2023best}.
 
-\paragraph{Causal patching (sufficiency).}
+\paragraph{Causal patching (sufficiency-style evidence).}
 For each receiver we select donor user-days matched on an organizational
 context mode (role, department$\times$role, project$\times$role, team, or
 department), drawn either from benign users or---as a same-class control---from
@@ -316,13 +324,17 @@ top/control and benign/anomalous donor values. A positive value means the
 selected features carry anomaly-specific repairable structure beyond what
 matched control features carry.
 
-\paragraph{Necessity (ablation).}
+\paragraph{Ablation (necessity-style evidence).}
 For each positive receiver paired with a context-matched benign receiver, we
 ablate the selected features and measure the NLL change on both. The
 \emph{necessity advantage} is the paired top-versus-control contrast of
 (benign minus positive) ablation effects: positive values mean ablating $S$
 disrupts anomaly evidence on positive examples more than on matched benign
-examples, and more than ablating $C$ does.
+examples, and more than ablating $C$ does. Throughout, patching establishes
+\emph{repairability}---the selected features carry causally useful
+information given the rest of the computation---not literal sufficiency of
+the features in isolation, and ablation establishes dependence rather than
+strict necessity, since redundant pathways may exist.
 
 \paragraph{Same-user exclusion.}
 In both estimands, donors and benign matches from the receiver's own user are
@@ -364,10 +376,14 @@ Forest on both datasets.
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{figures/detector_dissociation.pdf}
-\caption{Ranking--precision dissociation under the fold-aligned protocol. Each
-point is one detector; the adapted session LLM (blue) attains the highest
-day-level ROC-AUC on both benchmarks while remaining mid-pack on day-level
-PR-AUC (log scale) at extreme base rates.}
+\caption{Score-level results. Left two panels: ranking--precision
+dissociation under the fold-aligned protocol; each point is one detector, and
+the adapted session LM (blue) attains the highest day-level ROC-AUC on both
+benchmarks while remaining mid-pack on day-level PR-AUC (log scale) at
+extreme base rates. Right panel: that apparent strength largely disappears
+when the benign comparison population is restricted to never-trained users
+(day ROC $0.954\!\to\!0.545$ on \rsix{}, $0.959\!\to\!0.668$ on \rfour{};
+Section~\ref{sec:detresults})---the paper's central score-level finding.}
 \label{fig:detector_dissociation}
 \end{figure}
 
@@ -445,11 +461,12 @@ user's $46$ held-out days ($+0.0037$ to $+0.0038$ across contexts, e.g.
 project$\times$role $[0.0020, 0.0056]$), while held-out effects on the
 low-activity users are near zero. Held-out necessity is asymmetric: it
 replicates on the two multi-day low-activity users (up to $+0.043$,
-$[0.030, 0.055]$) but is negative on the dominant-user fold. Sufficiency
-therefore transfers across users while necessity is user-specific: the SAE
-space contains multiple causally sufficient repair directions discoverable
-from disjoint user subsets, but which features are \emph{necessary} for a
-given user's anomaly evidence depends on that user.
+$[0.030, 0.055]$) but is negative on the dominant-user fold. Causal
+repairability therefore transfers to the dominant held-out user while
+ablation dependence is user-specific: the SAE space contains multiple
+causally effective repair directions discoverable from disjoint user
+subsets, but which features a given user's anomaly evidence depends on
+varies by user.
 
 \subsection{\rfour{}: direct transfer fails; native rediscovery succeeds}
 \label{sec:r42}
@@ -460,8 +477,9 @@ contrasts across all audited transfer configurations under full uncapped
 evaluation on all $1309$ receivers: the best transferred configuration per
 sparsity setting reaches $-0.00094$ $[-0.00117, -0.00072]$,
 $-0.00105$ $[-0.00149, -0.00064]$, and $-0.00113$ $[-0.00144, -0.00082]$.
-The data reject a universal transferable sparse insider-threat circuit at the
-level of literal feature identity in this training run.
+Direct transfer of the \rsix{} sparse feature set to \rfour{} thus fails
+under every audited configuration: at the level of literal feature identity,
+nothing transfers in this training run.
 
 An exploratory search over layers and SAE hyperparameters on \rfour{},
 however, identifies a candidate mechanism at layer 26 with a smaller
@@ -575,8 +593,9 @@ $0.26$ and $0.43$ versus baselines $0.19$ and $0.35$), as expected since both
 SAEs encode the same base model's layer-18 geometry. The decisive contrast is
 scale: matched-layer cross-benchmark alignment ($0.26$--$0.43$) remains far
 below within-benchmark cross-seed alignment ($0.88$--$0.96$), so the
-distinct headline mechanisms are not a relabeling of one shared circuit even
-after controlling for depth. (r4.2's headline mechanism is itself at layer 26;
+distinct headline mechanisms are not consistent with a simple feature
+relabeling of one shared sparse representation, even after controlling for
+depth. (r4.2's headline mechanism is itself at layer 26;
 its layer-18 features used here are off-mechanism, which further limits the
 correspondence one should expect.)
 
@@ -591,14 +610,19 @@ on both benchmarks, with held-out replication that is directional on
 \rfour{} and dominant-user-concentrated on \rsix{}; the structure
 is benchmark-specific not merely in coordinates but in \emph{kind}---identity
 metadata on \rsix{}, behavior on \rfour{}. We tested the population-size hypothesis directly by malicious-population
-subsampling on \rfour{}: holding the model, benchmark, SAE, and benign
-population fixed, we resampled positive populations of $K=4,10,20,30,60$
-users (ten repetitions each) and re-ranked features for each. The strong form
-of the hypothesis is \emph{rejected}: profile-mass share among top-5 features
+subsampling on \rfour{}: holding the model, benchmark, SAE dictionary, and
+benign population fixed, we resampled positive populations of
+$K=4,10,20,30,60$ users (ten repetitions each) and re-ranked features for
+each. The strong form of the hypothesis is \emph{rejected at the
+feature-selection stage}: profile-mass share among top-5 features
 is nearly flat in $K$ ($0.25$ at $K{=}4$ versus $0.16$--$0.20$ at
 $K\geq 10$; typically one profile-bound feature in five at every size),
 nowhere near \rsix{}'s near-total profile dominance. Small malicious
-populations tilt selection toward profile features only mildly. \rsix{}'s
+populations tilt selection toward profile features only mildly. Because the
+shared dictionary was itself fitted on the full positive population, this
+experiment isolates the selection stage conditional on the fixed \rfour{}
+dictionary; it does not test whether positive-population size could influence
+dictionary formation itself. \rsix{}'s
 profile capture therefore reflects benchmark-specific factors---plausibly the
 distinctiveness of its four malicious users' profile fields within its benign
 profile distribution, and properties of its adapter's learned geometry---and
@@ -606,11 +630,18 @@ identifying which benchmark properties drive metadata capture is an open
 question the audit makes precise. A score-time ablation completes the picture. We re-serialized the
 evaluation population without the \texttt{PSY} line (\emph{no-psy}) and
 additionally with organizational identifiers masked (\emph{no-profile}), and
-rescored with the frozen models on the unseen-versus-unseen population
-(positives against never-trained benign users). On \rsix{}, masking changes
-essentially nothing (day ROC $0.547$ original, $0.575$ no-psy, $0.471$
-no-profile): with every user unseen, profile novelty separates nothing, and
-no behavioral signal is revealed underneath. On \rfour{}, masking
+rescored with the frozen models on a fixed unseen-versus-unseen rescoring
+population: all positive user-days plus every never-trained benign user
+(on \rfour{}: $89$ benign users---the $79$ validation-split users plus $10$
+never-trained others---for $42{,}468$ day rows from $149$ users), which is
+why the original-arm values here differ slightly from the val-only analysis
+of Section~\ref{sec:detresults} (day ROC $0.670$ versus $0.668$; user ROC
+$0.666$ versus $0.565$, the latter sensitive to the ten added users under
+max-aggregation). We report these masking contrasts descriptively, without
+interval estimates. On \rsix{}, all three variants remain near chance at the
+day level (ROC $0.547$ original, $0.575$ no-psy, $0.471$ no-profile): with
+every user unseen, profile novelty separates nothing, and no clear behavioral
+signal is revealed underneath. On \rfour{}, masking
 psychometrics \emph{improves} discrimination substantially (day ROC
 $0.670\!\to\!0.797$; day PR $0.069\!\to\!0.112$; user ROC
 $0.666\!\to\!0.775$): the simulated psychometric fields were not merely
@@ -730,7 +761,7 @@ day counts, so its causal effect is dominated by a single user and one context
 mode (team) is unavailable under strict donor rules; we report cluster
 intervals, per-user effects, and leave-one-user-out results for this reason.
 The \rfour{} native configuration was found by search, so we report a
-held-out-user confirmation alongside the exploratory estimates; the confirmed
+dictionary-conditional held-out-user confirmation alongside the exploratory estimates; the confirmed
 effect sizes are roughly half the exploratory ones, and only the department
 context is individually significant under the strictest user-level resampling.
 For \rsix{}, the analogous leave-one-user-out confirmation recovers a
@@ -865,12 +896,16 @@ $t \in T_F, f \in F$, all other coordinates unchanged;
 \emph{every} token, and the additive shift $\delta'_t - \delta_t$ is injected
 into the layer-$\ell$ residual stream by a forward hook during adapted-model
 scoring. Because step (4) substitutes the SAE reconstruction at all tokens in
-\emph{both} arms, reconstruction-substitution error is common to top and
-control interventions and cancels in the top-minus-control contrast; the arms
-differ only in the feature edit at their active positions. The recorded
-per-receiver outcome for each (feature set, donor type) is the best (most
-negative) NLL change over the candidate-donor pool and $\alpha$ grid; best-donor
-selection is applied identically to top and control arms.
+\emph{both} arms, the two arms share the same SAE-reconstructed baseline:
+reconstruction substitution is controlled across arms
+(common-mode rather than exactly canceling, since the downstream computation
+is nonlinear); the arms differ only in the feature edit at their active
+positions. The recorded per-receiver outcome for each (feature set, donor
+type) is the best (most negative) NLL change over the candidate-donor pool
+and $\alpha$ grid: the estimand is \emph{maximal achievable repair} under
+the permitted donor/strength search, not an average causal effect over
+donors; best-donor selection is applied identically to top and control
+arms.
 
 \subsection{Necessity ablation}
 Identical machinery with $z'_{t,f} = (1-\alpha)\,z_{t,f}$ for

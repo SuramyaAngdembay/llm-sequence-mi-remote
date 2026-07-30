@@ -45,29 +45,29 @@ def fmt(x: float, digits: int = 4) -> str:
 
 def write_detector_table() -> None:
     rows = [
-        ["r6.2", "Session LM (adapted NLL)", "0.0008", r"\textbf{0.953}", "0.054", r"\textbf{24.0}"],
-        ["", "Deep SVDD", r"\textbf{0.0115}", "0.628", r"\textbf{0.211}", "83.2"],
-        ["", "GRU AE", "0.0057", "0.766", "0.081", "24.8"],
-        ["", "LSTM AE", "0.0021", "0.768", "0.057", "24.2"],
-        ["", "Isolation Forest", "0.0002", "0.713", "0.013", "153.0"],
-        ["", r"\emph{Session LM, user-disjoint benign}", "0.0005", "0.545", "0.013", "--"],
+        ["r6.2", "Session LM (adapted NLL)", "0.0008", r"\textbf{0.953}", "0.054", "0.970", r"\textbf{24.0}"],
+        ["", "Deep SVDD", r"\textbf{0.0115}", "0.628", r"\textbf{0.211}", "--", "83.2"],
+        ["", "GRU AE", "0.0057", "0.766", "0.081", "--", "24.8"],
+        ["", "LSTM AE", "0.0021", "0.768", "0.057", "--", "24.2"],
+        ["", "Isolation Forest", "0.0002", "0.713", "0.013", "--", "153.0"],
+        ["", r"\emph{Session LM, user-disjoint benign}", "0.0005", "0.545", "0.013", "0.546", "--"],
         ["---"],
-        ["r4.2", "Session LM (adapted NLL)", "0.0134", r"\textbf{0.964}", "0.101", r"\textbf{26.4}"],
-        ["", "Deep SVDD", r"\textbf{0.0337}", "0.743", r"\textbf{0.382}", "53.4"],
-        ["", "GRU AE", "0.0254", "0.696", "0.124", "86.6"],
-        ["", "LSTM AE", "0.0236", "0.714", "0.120", "92.1"],
-        ["", "Isolation Forest", "0.0003", "0.715", "0.008", "186.4"],
-        ["", r"\emph{Session LM, user-disjoint benign}", "0.1023", "0.668", "0.521", "--"],
+        ["r4.2", "Session LM (adapted NLL)", "0.0134", r"\textbf{0.964}", "0.101", "0.969", r"\textbf{26.4}"],
+        ["", "Deep SVDD", r"\textbf{0.0337}", "0.743", r"\textbf{0.382}", "--", "53.4"],
+        ["", "GRU AE", "0.0254", "0.696", "0.124", "--", "86.6"],
+        ["", "LSTM AE", "0.0236", "0.714", "0.120", "--", "92.1"],
+        ["", "Isolation Forest", "0.0003", "0.715", "0.008", "--", "186.4"],
+        ["", r"\emph{Session LM, user-disjoint benign}", "0.1023", "0.668", "0.521", "0.565", "--"],
     ]
     write_table(
         TABLES / "cert_detector_comparison.tex",
-        "Detector comparison on CERT under two protocols. Fold-aligned rows follow the baselines' protocol, in which the session LM (trained once on ~90 percent of benign users) faces mostly training-seen benign test users while baselines exclude test users from training; bold marks the best fold-aligned value per metric (held-out rank: lower is better). The italicized user-disjoint rows restrict the LM's benign comparison population to never-trained validation users and are the fair comparison for the LM: its ranking advantage largely disappears (day ROC 0.953 to 0.545 on r6.2; 0.964 to 0.668 on r4.2), showing the fold-aligned strength is mostly a seen-versus-unseen-user effect. User-disjoint PR values are on a different benign population size and are not comparable to the fold-aligned column.",
+        "Detector comparison on CERT under two protocols. Fold-aligned rows follow the baselines' protocol, in which the session LM (trained once on ~90 percent of benign users) faces mostly training-seen benign test users while baselines exclude test users from training; bold marks the best fold-aligned value per metric (held-out rank: lower is better). The italicized user-disjoint rows restrict the LM's benign comparison population to never-trained validation users and are the fairer generalization test for the LM: its ranking advantage largely disappears (day ROC 0.954 to 0.545 on r6.2 and 0.959 to 0.668 on r4.2 computed on the full evaluation pool; the fold-aligned column uses the baselines' per-fold test populations, hence its slightly different 0.953/0.964), showing the fold-aligned strength is mostly a seen-versus-unseen-user effect. User-disjoint PR values are computed at a very different prevalence (60 malicious versus 79 benign users on r4.2) and are not comparable to the fold-aligned column; the informative cross-protocol comparison is the ROC collapse. Baseline user-level ROC is not reported by the fold-aligned benchmark harness.",
         "tab:cert_detector",
-        "llcccc",
-        ["Dataset", "Method", "Day PR-AUC", "Day ROC-AUC", "User PR-AUC", "Held-out rank"],
+        "llccccc",
+        ["Dataset", "Method", "Day PR-AUC", "Day ROC-AUC", "User PR-AUC", "User ROC-AUC", "Held-out rank"],
         rows,
         size=r"\footnotesize",
-        colsep="4.5pt",
+        colsep="3pt",
     )
 
 
@@ -93,6 +93,7 @@ def write_mech_table() -> None:
         "lllccl",
         ["Dataset", "Estimand", "Context", "Effect", "95\\% CI", "Note"],
         rows,
+        colsep="5pt",
     )
 
 
@@ -105,7 +106,7 @@ def write_claims_table() -> None:
         ["Configuration-independent r4.2 confirmation", "Not established"],
         ["Literal feature transfer across benchmarks succeeds", "Rejected"],
         ["Transfer failure is explained by SAE seed non-identifiability", "Rejected (alignment controls)"],
-        ["Positive-population size alone explains the profile/behavior dissociation", "Rejected (subsampling)"],
+        ["Positive-population size alone explains the feature-selection dissociation (conditional on the fixed r4.2 dictionary)", "Rejected at the selection stage (subsampling); dictionary formation untested"],
     ]
     write_table(
         TABLES / "claim_status.tex",
@@ -143,7 +144,7 @@ def write_attribution_table() -> None:
         ["Bench", "Feature", "PSY mass", "DAY mass", "SES mass", "PSY enrich", "Top tokens"],
         rows,
         size=r"\footnotesize",
-        colsep="4.5pt",
+        colsep="3pt",
     )
 
 

@@ -145,8 +145,19 @@ def mech_effects() -> None:
     plt.close(fig)
 
 
+COLLAPSE = {  # day-level ROC on the full evaluation pool: all-benign -> val-only benign
+    "r6.2": (0.954, 0.545),
+    "r4.2": (0.959, 0.668),
+}
+
+
 def detector_dissociation() -> None:
-    fig, axes = plt.subplots(1, 2, figsize=(6.0, 2.5), sharey=True)
+    fig, axes = plt.subplots(
+        1, 3, figsize=(6.0, 2.5),
+        gridspec_kw={"width_ratios": [1.0, 1.0, 0.62]},
+    )
+    axes[1].sharey(axes[0])
+    plt.setp(axes[1].get_yticklabels(), visible=False)
     # Per-panel label nudges (points): keep short labels clear of the marks.
     offsets = {
         ("r6.2", "Qwen3-8B session LM"): (0, 7),
@@ -160,7 +171,7 @@ def detector_dissociation() -> None:
         ("r4.2", "LSTM AE"): (14, -10),
         ("r4.2", "Isolation Forest"): (6, 7),
     }
-    for ax, dataset in zip(axes, ["r6.2", "r4.2"]):
+    for ax, dataset in zip(axes[:2], ["r6.2", "r4.2"]):
         for name, pr, roc in DETECTOR[dataset]:
             remote = name.startswith("Qwen")
             ax.plot(
@@ -184,7 +195,37 @@ def detector_dissociation() -> None:
         style_axis(ax)
         ax.grid(axis="y", color=GRID, linewidth=0.5)
     axes[0].set_ylabel("day-level ROC-AUC")
-    fig.subplots_adjust(left=0.09, right=0.985, top=0.90, bottom=0.19, wspace=0.14)
+
+    # Third panel: the collapse when benign comparisons are restricted to
+    # never-trained users (same statistic, full evaluation pool).
+    ax = axes[2]
+    for dataset in ["r6.2", "r4.2"]:
+        seen, unseen = COLLAPSE[dataset]
+        ax.annotate(
+            "", xy=(1, unseen), xytext=(0, seen),
+            arrowprops=dict(arrowstyle="-|>", color=ACCENT, linewidth=1.3,
+                            shrinkA=4, shrinkB=4),
+        )
+        ax.plot(0, seen, marker="o", markersize=5, markerfacecolor=ACCENT,
+                markeredgecolor="white", markeredgewidth=0.8, zorder=3)
+        ax.plot(1, unseen, marker="o", markersize=5, markerfacecolor="white",
+                markeredgecolor=ACCENT, markeredgewidth=1.1, zorder=3)
+        ax.annotate(f"{dataset}: {unseen:.2f}", (1, unseen),
+                    textcoords="offset points", xytext=(-3, -12),
+                    ha="right", fontsize=6.8, color=INK, fontweight="bold")
+    ax.annotate("0.95\u20130.96", (0, 0.957), textcoords="offset points",
+                xytext=(6, 6), fontsize=6.8, color=INK, fontweight="bold")
+    ax.axhline(0.5, color=INK_2, linewidth=0.6, linestyle=(0, (3, 2)))
+    ax.annotate("chance", (-0.26, 0.508), ha="left", fontsize=6.2, color=INK_2)
+    ax.set_xlim(-0.3, 1.3)
+    ax.set_ylim(0.40, 1.03)
+    ax.set_xticks([0, 1])
+    ax.set_xticklabels(["seen\nbenign", "unseen\nbenign"], fontsize=7)
+    ax.set_title("ROC collapse", loc="left", fontweight="bold",
+                 color=INK, fontsize=7.6)
+    style_axis(ax)
+    ax.grid(axis="y", color=GRID, linewidth=0.5)
+    fig.subplots_adjust(left=0.09, right=0.99, top=0.90, bottom=0.22, wspace=0.24)
     fig.savefig(FIGS / "detector_dissociation.pdf")
     fig.savefig(FIGS / "detector_dissociation_preview.png", dpi=200)
     plt.close(fig)
