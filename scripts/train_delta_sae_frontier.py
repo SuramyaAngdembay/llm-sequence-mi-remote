@@ -281,6 +281,7 @@ def main() -> None:
                     proxy_map = {r["intervention"]: float(r["selectivity_proxy"]) for _, r in proxy.iterrows()}
                 else:
                     # benign-only training set: anomaly-vs-benign selectivity is undefined
+                    proxy = None
                     proxy_map = {}
                 top_ids = [int(x) for x in feature_df.head(10)["feature_id"].tolist()]
                 overlap = decoder_overlap_stats(model, top_ids)
@@ -307,7 +308,8 @@ def main() -> None:
                     cfg_dir / "delta_sae_model.pt",
                 )
                 feature_df.to_csv(cfg_dir / "delta_sae_top_features.csv", index=False)
-                proxy.to_csv(cfg_dir / "delta_sae_proxy_selectivity.csv", index=False)
+                if proxy is not None:
+                    proxy.to_csv(cfg_dir / "delta_sae_proxy_selectivity.csv", index=False)
                 row = {
                     "unit": unit,
                     "layer": layer,

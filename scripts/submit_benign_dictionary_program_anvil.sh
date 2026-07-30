@@ -6,17 +6,23 @@ REPO_DIR="${REPO_DIR:-$HOME/cert-qlora-MI/llm-sequence-mi-remote}"
 cd "$REPO_DIR"
 P=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI
 
-# A: benign-only SAE trainings
-A1=$(DATASET=r42 SAE_SEED=42 BENIGN_ONLY=1 OUT_TAG=benign sbatch --parsable -p gpu-debug -t 00:30:00 -J bsae_r42 --export=ALL slurm/sae_seed_retrain.sbatch)
-A2=$(DATASET=r62 SAE_SEED=42 BENIGN_ONLY=1 OUT_TAG=benign sbatch --parsable -p gpu -t 01:00:00 -J bsae_r62 --export=ALL slurm/sae_seed_retrain.sbatch)
-echo "A: $A1 $A2"
+# A: benign-only SAE trainings (SKIP_A=1 reuses checkpoints already on disk)
+if [ "${SKIP_A:-0}" = "1" ]; then
+  DEP_B1=""; DEP_B2=""
+  echo "A: skipped (reusing existing benign-dictionary checkpoints)"
+else
+  A1=$(DATASET=r42 SAE_SEED=42 BENIGN_ONLY=1 OUT_TAG=benign sbatch --parsable -p gpu-debug -t 00:30:00 -J bsae_r42 --export=ALL slurm/sae_seed_retrain.sbatch)
+  A2=$(DATASET=r62 SAE_SEED=42 BENIGN_ONLY=1 OUT_TAG=benign sbatch --parsable -p gpu -t 01:00:00 -J bsae_r62 --export=ALL slurm/sae_seed_retrain.sbatch)
+  DEP_B1="--dependency=afterok:$A1"; DEP_B2="--dependency=afterok:$A2"
+  echo "A: $A1 $A2"
+fi
 
 # B: reselection under new dictionaries (held-out discipline)
-B1=$(sbatch --parsable -p gpu-debug -t 00:30:00 -J bresel_r42 --dependency=afterok:$A1 \
+B1=$(sbatch --parsable -p gpu-debug -t 00:30:00 -J bresel_r42 $DEP_B1 \
   -A cis230270-gpu --gres=gpu:1 --cpus-per-task=16 --mem=180G \
   -o $P/logs/%x_%j.out -e $P/logs/%x_%j.err \
   --wrap "module load conda/2026.03 && conda activate /anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert-qlora-qwen3 && cd $REPO_DIR && python scripts/reselect_token_sae_features.py --extract-dir $P/token_delta_cache/qwen3_8b_session_token_deltas_r42_mb22_gc_on --data-dir $P/outputs/session_jsonl_r42 --frontier-dir $P/outputs/token_delta_sae_frontier_r42_benign --out-frontier-dir $P/outputs/token_delta_sae_frontier_r42_benign_discovery --layer 26 --latent-mult 2 --k 4 --discovery-user-file $P/outputs/user_splits_r42/discovery_users.txt --benign-sample-prob 0.25 --device cuda --seed 42")
-B2=$(sbatch --parsable -p gpu -t 01:00:00 -J bresel_r62 --dependency=afterok:$A2 \
+B2=$(sbatch --parsable -p gpu -t 01:00:00 -J bresel_r62 $DEP_B2 \
   -A cis230270-gpu --gres=gpu:1 --cpus-per-task=16 --mem=240G \
   -o $P/logs/%x_%j.out -e $P/logs/%x_%j.err \
   --wrap "module load conda/2026.03 && conda activate /anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert-qlora-qwen3 && cd $REPO_DIR && python scripts/reselect_token_sae_features.py --extract-dir $P/token_delta_cache/qwen3_8b_session_token_deltas_targeted_mb12_gc_on_fresh_v2 --data-dir $P/outputs/session_jsonl --frontier-dir $P/outputs/token_delta_sae_frontier_r62_benign --out-frontier-dir $P/outputs/token_delta_sae_frontier_r62_benign_louo --layer 18 --latent-mult 4 --k 8 --louo-splits-dir $P/outputs/user_splits_r62 --benign-sample-prob 0.05 --device cuda --seed 42")
