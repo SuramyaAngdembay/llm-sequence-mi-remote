@@ -122,8 +122,8 @@ necessity ablation under active controls, cluster-level uncertainty,
 held-out-user confirmation, seed-stability controls, and token-level feature
 attribution---and validate each component on two CERT benchmarks.
 \item Using the audit, we show that the same architecture and pipeline learns
-mechanisms of different \emph{kinds} on related benchmarks: a user-profile
-novelty detector on \rsix{} ($99.8$--$100\%$ of top-feature activation mass on
+mechanisms of different \emph{kinds} on related benchmarks: profile-bound
+features consistent with user-profile novelty on \rsix{} ($99.8$--$100\%$ of top-feature activation mass on
 psychometric and organizational tokens) versus behavioral session features on
 \rfour{}---a failure mode invisible to score-level evaluation, together
 with a population-structure hypothesis for when it arises.
@@ -538,10 +538,11 @@ On \rfour{}, four of the five top features are \emph{behavioral}: they place
 $99.9$--$100\%$ of their mass on \texttt{SES} tokens (enrichment $1.33\times$
 over the $75\%$ token share) with essentially zero psychometric mass, and one
 fires specifically on session-duration fields; the fifth is
-\texttt{DAY}-bound. The natural explanation for the contrast is the malicious
-population's structure: with four positive users, user identity is the
-cheapest separator of positives from benigns; with sixty, the identity
-shortcut dilutes and behavioral regularities carry the anomaly evidence.
+\texttt{DAY}-bound. A natural first hypothesis for the contrast is the malicious population's
+structure---with four positive users, identity is the cheapest separator;
+with sixty, behavioral regularities carry the evidence---but
+Section~\ref{sec:cross} tests this directly and rejects its strong form,
+pointing instead to finer benchmark properties.
 
 \input{tables/attribution.tex}
 
@@ -589,8 +590,7 @@ sparse token-level structure that is causally implicated in anomaly evidence
 on both benchmarks, with held-out replication that is directional on
 \rfour{} and dominant-user-concentrated on \rsix{}; the structure
 is benchmark-specific not merely in coordinates but in \emph{kind}---identity
-metadata on \rsix{}, behavior on \rfour{}---and this difference tracks the
-malicious-population structure. We tested the population-size hypothesis directly by malicious-population
+metadata on \rsix{}, behavior on \rfour{}. We tested the population-size hypothesis directly by malicious-population
 subsampling on \rfour{}: holding the model, benchmark, SAE, and benign
 population fixed, we resampled positive populations of $K=4,10,20,30,60$
 users (ten repetitions each) and re-ranked features for each. The strong form
@@ -659,9 +659,9 @@ perturbation alone cannot.
 \paragraph{Audits, not leaderboards.}
 Every component of this audit was necessary to reach the finding. Score-level
 evaluation showed strong ROC on both benchmarks; the intervention estimands
-showed causally real mechanisms on both; the confirmation splits showed those
-mechanisms survive on held-out users; the seed controls showed they are stable
-subspaces. Only token-level attribution revealed that one of them detects
+showed causally real mechanisms on both; the confirmation splits showed
+directional held-out replication; the seed controls showed stability across
+SAE initializations. Only token-level attribution revealed that one of them detects
 \emph{who a user is} rather than \emph{what they did}. Any prefix of the audit
 would have licensed a stronger---and wrong---behavioral interpretation. We
 take this as the central methodological lesson: for anomaly models trained on
