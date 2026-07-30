@@ -86,9 +86,9 @@ def write_mech_table() -> None:
         "same-user-excluded protocol with active-control feature sets; the "
         "transferred row applies the r6.2 layer-18 configuration to r4.2 without "
         "re-fitting. Effects are paired complete-case top-versus-control "
-        "contrasts with 95\\% bootstrap confidence intervals. Comparator ratios "
-        "are relative to the best matched session-autoencoder contrast on the "
-        "same receivers (r6.2: 0.001133; r4.2: 0.000909).",
+        "contrasts; intervals are the prespecified user-level cluster bootstrap "
+        "(10,000 draws, malicious user as resampling unit; descriptive for "
+        "r6.2's four clusters).",
         "tab:cert_mechanistic",
         "lllccl",
         ["Dataset", "Estimand", "Context", "Effect", "95\\% CI", "Note"],
@@ -158,8 +158,9 @@ def write_alignment_table() -> None:
         TABLES / "alignment.tex",
         "Decoder-space feature alignment. Best-match $|\\cos|$ of each source SAE's "
         "top-5 features into a target dictionary, versus the whole-dictionary median "
-        "(chance). Within-benchmark cross-seed alignment is far above chance; "
-        "cross-benchmark alignment is at chance.",
+        "(empirical null). Within-benchmark cross-seed alignment is far above "
+        "the null; native-layer cross-benchmark alignment is indistinguishable "
+        "from it, and matched-layer alignment remains far below cross-seed levels.",
         "tab:alignment",
         "lcc",
         ["Comparison", "Top-5 best-match $|\\cos|$", "Empirical null baseline"],
