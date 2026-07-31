@@ -37,21 +37,48 @@ import torch
 from sae_core import TopKSAE
 
 
-def load_needed_tokens(extract_dir: Path, layer: int, needed_idx: set[int]):
-    vec_parts: List[np.ndarray] = []
+def encode_needed_tokens(
+    extract_dir: Path,
+    layer: int,
+    needed_idx: set[int],
+    model: TopKSAE,
+    all_feats: List[int],
+    x_mean: np.ndarray,
+    x_std: np.ndarray,
+    device: torch.device,
+    batch_size: int,
+):
+    """Stream chunks: encode needed rows immediately, keep only the involved
+    feature columns and per-token reconstruction norms (never the raw deltas)."""
+    z_parts: List[np.ndarray] = []
+    recon_parts: List[np.ndarray] = []
     idx_parts: List[np.ndarray] = []
+    needed_arr = np.fromiter(needed_idx, dtype=np.int64)
     layer_dir = extract_dir / f"layer_{layer}"
-    for path in sorted(layer_dir.glob("chunk_*.pt")):
-        obj = torch.load(path, map_location="cpu", weights_only=False)
-        idx = np.asarray(obj["example_idx"], dtype=np.int64)
-        keep = np.isin(idx, list(needed_idx))
-        if not keep.any():
-            continue
-        vec_parts.append(np.asarray(obj["delta"], dtype=np.float32)[keep])
-        idx_parts.append(idx[keep])
-    if not vec_parts:
+    with torch.no_grad():
+        for path in sorted(layer_dir.glob("chunk_*.pt")):
+            obj = torch.load(path, map_location="cpu", weights_only=False)
+            idx = np.asarray(obj["example_idx"], dtype=np.int64)
+            keep = np.isin(idx, needed_arr)
+            if not keep.any():
+                continue
+            vecs = np.asarray(obj["delta"], dtype=np.float32)[keep]
+            idx = idx[keep]
+            z_cols = np.zeros((len(idx), len(all_feats)), dtype=np.float32)
+            recon_norm = np.zeros(len(idx), dtype=np.float32)
+            for start in range(0, len(idx), batch_size):
+                sl = slice(start, start + batch_size)
+                xb = torch.from_numpy((vecs[sl] - x_mean) / x_std).to(device)
+                recon, z = model(xb)
+                z_cols[sl] = z[:, all_feats].cpu().numpy()
+                err = (recon - xb).cpu().numpy() * x_std
+                recon_norm[sl] = np.linalg.norm(err, axis=1)
+            z_parts.append(z_cols)
+            recon_parts.append(recon_norm)
+            idx_parts.append(idx)
+    if not z_parts:
         raise SystemExit("no token rows found for requested examples")
-    return np.concatenate(vec_parts), np.concatenate(idx_parts)
+    return np.concatenate(z_parts), np.concatenate(recon_parts), np.concatenate(idx_parts)
 
 
 def main() -> None:
@@ -92,26 +119,15 @@ def main() -> None:
     if missing:
         raise SystemExit(f"{len(missing)} example ids missing from scores parquet, e.g. {missing[:3]}")
 
-    vecs, idx = load_needed_tokens(args.extract_dir, args.layer, needed_idx)
-    print(f"[load] token rows={len(idx)} examples={len(needed_idx)}", flush=True)
-
     all_feats = sorted({f for feats in cand["features"] for f in feats})
     col_of = {f: j for j, f in enumerate(all_feats)}
     W_sub = model.decoder.weight.detach().cpu().numpy()[:, all_feats].astype(np.float32)  # d_in x n_feats
 
-    # Encode all needed tokens once; keep only the involved feature columns
-    # plus the per-token reconstruction-substitution norm (arm-common term).
-    z_cols = np.zeros((len(idx), len(all_feats)), dtype=np.float32)
-    recon_norm = np.zeros(len(idx), dtype=np.float32)
-    with torch.no_grad():
-        for start in range(0, len(idx), args.sae_batch_size):
-            sl = slice(start, start + args.sae_batch_size)
-            xb = torch.from_numpy((vecs[sl] - x_mean) / x_std).to(device)
-            recon, z = model(xb)
-            z_cols[sl] = z[:, all_feats].cpu().numpy()
-            err = ((recon - xb).cpu().numpy() * x_std)
-            recon_norm[sl] = np.linalg.norm(err, axis=1)
-    del vecs
+    z_cols, recon_norm, idx = encode_needed_tokens(
+        args.extract_dir, args.layer, needed_idx, model, all_feats,
+        x_mean, x_std, device, args.sae_batch_size,
+    )
+    print(f"[encode] token rows={len(idx)} examples={len(needed_idx)}", flush=True)
 
     tok_slices: Dict[int, np.ndarray] = {e: np.flatnonzero(idx == e) for e in needed_idx}
 
