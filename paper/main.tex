@@ -637,14 +637,20 @@ never-trained others---for $42{,}468$ day rows from $149$ users), which is
 why the original-arm values here differ slightly from the val-only analysis
 of Section~\ref{sec:detresults} (day ROC $0.670$ versus $0.668$; user ROC
 $0.666$ versus $0.565$, the latter sensitive to the ten added users under
-max-aggregation). We report these masking contrasts descriptively, without
-interval estimates. On \rsix{}, all three variants remain near chance at the
-day level (ROC $0.547$ original, $0.575$ no-psy, $0.471$ no-profile): with
-every user unseen, profile novelty separates nothing, and no clear behavioral
-signal is revealed underneath. On \rfour{}, masking
+max-aggregation). Uncertainty for the masking contrasts uses the same
+user-level cluster bootstrap as the mechanistic estimands ($10{,}000$ draws,
+users as resampling units stratified by label, paired within draws). On
+\rsix{}, all three variants remain near chance at the day level (ROC $0.547$
+original, $0.575$ no-psy, $0.471$ no-profile) and no masking change is
+significant (all $\Delta$ROC intervals span zero; descriptive with four
+malicious clusters): with every user unseen, profile novelty separates
+nothing, and no clear behavioral signal is revealed underneath. On \rfour{}, masking
 psychometrics \emph{improves} discrimination substantially (day ROC
-$0.670\!\to\!0.797$; day PR $0.069\!\to\!0.112$; user ROC
-$0.666\!\to\!0.775$): the simulated psychometric fields were not merely
+$0.670\!\to\!0.797$, $\Delta$ROC $+0.127$ $[0.061, 0.193]$; day PR
+$0.069\!\to\!0.112$; user ROC $0.666\!\to\!0.775$, $\Delta$ROC
+$+0.108$ $[0.038, 0.179]$; masking all organizational identifiers as well
+yields a smaller, nonsignificant day-level gain of $+0.063$
+$[-0.003, 0.130]$): the simulated psychometric fields were not merely
 uninformative but actively obscured behavioral signal. Static profile
 metadata in the serialization is thus a liability twice over---it invites
 identity capture during selection and degrades behavior-based scoring even
