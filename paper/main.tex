@@ -45,9 +45,10 @@ different anomaly evidence. On \rsix{}, the causally implicated sparse
 features are almost entirely profile-bound, placing $99.8$--$100\%$ of their
 activation mass on simulated psychometric and organizational tokens,
 consistent with user-profile novelty; on \rfour{}, four of five selected
-features concentrate on behavioral session events such as durations. Each
-feature family is stable across SAE initializations, while literal feature
-transfer between benchmarks fails. Critically, when malicious users are
+features concentrate on behavioral session events such as durations. Both
+attributions reproduce under dictionaries retrained on benign rows alone.
+Each feature family is stable across SAE initializations, while literal
+feature transfer between benchmarks fails. Critically, when malicious users are
 compared only against benign users never seen during adaptation, day-level
 ROC-AUC falls from $0.95$ to $0.55$ (\rsix{}) and from $0.96$ to $0.67$
 (\rfour{}): apparent detection strength is largely a seen-versus-unseen-user
@@ -109,7 +110,9 @@ pool) and which directions the audit selects. We tested the natural
 selection-stage hypothesis---small positive populations favor profile-bound
 selection---by subsampling \rfour{}'s malicious users within its fixed
 dictionary, and found it insufficient: even four-user subsamples select
-predominantly behavioral features. \rsix{}'s
+predominantly behavioral features. Retraining both dictionaries on benign
+rows alone reproduces the attribution dissociation, so profile capture does
+not require positive-shaped dictionaries either. \rsix{}'s
 profile capture is a property of that benchmark's label--profile structure
 and its adapter's learned geometry, not of small positive populations in
 general.
@@ -253,7 +256,13 @@ untied linear decoder, with latent dimension a multiplier $m$ of the model
 width. Because the dictionary is fitted on the full evaluation pool, all
 held-out analyses below provide feature-selection and evaluation independence
 \emph{conditional on this shared dictionary}, not dictionary-level
-independence; we flag this wherever held-out results are claimed. The headline \rsix{} configuration uses layer $18$,
+independence; we flag this wherever held-out results are claimed. As a
+dictionary-independence check, we additionally retrained both SAEs from
+scratch on benign rows only---no positive example enters dictionary
+formation---and reran selection, attribution, and held-out evaluation
+(Section~\ref{sec:cross}): the attribution dissociation reproduces exactly,
+while replication of the intervention estimands is partly
+dictionary-sensitive. The headline \rsix{} configuration uses layer $18$,
 $m=4$, $k=8$; the headline \rfour{} configuration, found by native search
 (Section~\ref{sec:r42}), uses layer $26$, $m=2$, $k=4$. Candidate feature sets
 are the top-$5$ features ranked by association between feature activity and
@@ -622,7 +631,25 @@ populations tilt selection toward profile features only mildly. Because the
 shared dictionary was itself fitted on the full positive population, this
 experiment isolates the selection stage conditional on the fixed \rfour{}
 dictionary; it does not test whether positive-population size could influence
-dictionary formation itself. \rsix{}'s
+dictionary formation itself. A stronger check removes positives from
+dictionary formation altogether: we retrained both SAEs from scratch on
+benign token deltas only and reran the full downstream pipeline---feature
+reselection under held-out discipline (discovery users on \rfour{}; LOUO on
+\rsix{}), token attribution, and confirmation evaluation. The dissociation
+reproduces at the dictionary level. On \rfour{}, the benign-dictionary top-5
+places $\geq 94\%$ of activation mass on behavioral \texttt{SES} tokens
+(four of five features at $100\%$, profile mass $\approx 0$); on \rsix{},
+every LOUO fold's top-5 is $\geq 99\%$ profile-bound, three of four folds
+select an identical feature set, and the fold excluding the dominant user
+diverges wholesale---mirroring the original dictionary's
+dominant-user-defined feature identity. Held-out intervention effects are
+estimand-dependent under the new dictionaries: \rfour{} necessity replicates
+across all four contexts ($+0.004$ to $+0.013$; $528$--$638$ complete pairs),
+while its patch-repair contrast does not ($-0.0002$ to $-0.0004$); on
+\rsix{}, causal repair is positive on one held-out fold and necessity on the
+dominant-user fold. What the selected features \emph{encode} is therefore
+dictionary-independent; which intervention estimand replicates on which
+held-out users is not. \rsix{}'s
 profile capture therefore reflects benchmark-specific factors---plausibly the
 distinctiveness of its four malicious users' profile fields within its benign
 profile distribution, and properties of its adapter's learned geometry---and
@@ -781,8 +808,12 @@ where features fire rather than fully specifying their computation, and the
 masking and swap experiments of Section~\ref{sec:cross} provide score-level
 profile-sensitivity evidence without identifying individual feature
 semantics. The SAE dictionaries were fitted on the full evaluation pool
-(including positive rows), so held-out analyses are dictionary-conditional;
-benign-only dictionary retraining is the corresponding robustness check. SAE-seed robustness is established
+(including positive rows), so most held-out analyses are
+dictionary-conditional; the benign-only retraining check
+(Section~\ref{sec:cross}) establishes that the attribution dissociation and
+\rfour{}'s necessity-style replication are dictionary-independent, while
+patch-repair replication on held-out users is dictionary-sensitive and
+should be read as configuration-specific. SAE-seed robustness is established
 (Section~\ref{sec:seeds}), but adapter-seed and architecture-level robustness
 are not: our evidence covers one model family at one scale with one adapter
 training run per benchmark. Finally, the population-structure explanation for
@@ -911,7 +942,17 @@ type) is the best (most negative) NLL change over the candidate-donor pool
 and $\alpha$ grid: the estimand is \emph{maximal achievable repair} under
 the permitted donor/strength search, not an average causal effect over
 donors; best-donor selection is applied identically to top and control
-arms.
+arms. A perturbation-norm audit of the headline candidate pools shows
+top-set edits are larger than active-control edits (mean best-row Frobenius
+norms $\approx 71$ versus $20$ on \rsix{}; $112$--$124$ versus $11$--$13$
+on \rfour{}), an expected property of gap-ranked features. The reported
+estimand, however, is a donor-type contrast \emph{within} feature set, and
+within-set edit norms are matched across benign and anomalous donor arms
+(differences of $0.2\%$ on \rsix{} and $\leq 6\%$ on \rfour{}), so the
+top-minus-control contrast of donor-type contrasts is not attributable to
+perturbation magnitude alone. The reconstruction-substitution component
+common to both arms has mean per-token norm $\approx 7$ (\rsix{}) and
+$\approx 37$ (\rfour{}).
 
 \subsection{Necessity ablation}
 Identical machinery with $z'_{t,f} = (1-\alpha)\,z_{t,f}$ for

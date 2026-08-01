@@ -10,11 +10,12 @@ Claim & Status \\
 Benign-only QLoRA training is valid one-class training & Supported \\
 Fold-aligned detector strength reflects behavioral discrimination & Rejected (seen-vs-unseen-user effect) \\
 r6.2 has a sparse profile-bound causal mechanism & Supported descriptively; held-out replication concentrates on the dominant user \\
-r4.2 has a sparse behavioral-associated causal mechanism & Supported; feature-level directional replication on held-out users \\
+r4.2 has a sparse behavioral-associated causal mechanism & Supported; feature-level directional replication on held-out users; necessity-style replication persists under a benign-only dictionary, patch-repair replication does not \\
 Configuration-independent r4.2 confirmation & Not established \\
 Literal feature transfer across benchmarks succeeds & Rejected \\
 Transfer failure is explained by SAE seed non-identifiability & Rejected (alignment controls) \\
-Positive-population size alone explains the feature-selection dissociation (conditional on the fixed r4.2 dictionary) & Rejected at the selection stage (subsampling); dictionary formation untested \\
+Positive-population size alone explains the feature-selection dissociation (conditional on the fixed r4.2 dictionary) & Rejected at the selection stage (subsampling) \\
+The profile/behavior attribution dissociation requires positive-shaped dictionaries & Rejected: benign-only SAE retrain reproduces it (r4.2 top-5 $\geq$94\% behavioral; r6.2 $\geq$99\% profile-bound in all LOUO folds) \\
 \bottomrule
 \end{tabular}
 \end{table}
