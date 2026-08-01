@@ -1,0 +1,17 @@
+\begin{table}[t]
+\caption{Dictionary-independence summary. Attribution (what the selected features encode) reproduces exactly under SAE dictionaries retrained on benign rows only, while held-out replication of the intervention estimands is estimand- and dictionary-dependent.}
+\label{tab:dict_robustness}
+\centering
+\footnotesize
+\begin{tabular}{llp{3.4cm}p{3.6cm}p{3.6cm}}
+\toprule
+Dataset & Dictionary & Attribution & Held-out patching & Held-out ablation \\
+\midrule
+r6.2 & Full-pool & Profile-bound (99.8--100\%) & Dominant-user concentrated & User-specific (negative on dominant fold) \\
+r6.2 & Benign-only & $\geq$99\% profile-bound, all folds & Positive on one held-out fold & Positive on dominant-user fold \\
+\midrule
+r4.2 & Full-pool & 4/5 behavioral & Directional; one context significant & Partial \\
+r4.2 & Benign-only & $\geq$94\% behavioral & Does not replicate & Replicates in all four contexts \\
+\bottomrule
+\end{tabular}
+\end{table}

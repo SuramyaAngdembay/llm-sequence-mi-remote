@@ -52,8 +52,10 @@ feature transfer between benchmarks fails. Critically, when malicious users are
 compared only against benign users never seen during adaptation, day-level
 ROC-AUC falls from $0.95$ to $0.55$ (\rsix{}) and from $0.96$ to $0.67$
 (\rfour{}): apparent detection strength is largely a seen-versus-unseen-user
-effect. Malicious-population subsampling on \rfour{} rejects positive-population
-size as the explanation for profile capture, and score-time profile masking
+effect. Malicious-population subsampling on \rfour{} shows positive-population size
+alone does not explain the feature-selection dissociation, benign-only SAE
+retraining shows the attribution result does not require positive-shaped
+dictionaries, and score-time profile masking
 \emph{improves} \rfour{}'s unseen-user discrimination, showing profile
 metadata can actively obscure behavioral signal. High anomaly-ranking
 performance can thus conceal qualitatively different---and sometimes
@@ -125,7 +127,7 @@ general.
 language models---adapter-delta sparse autoencoders, causal patching and
 necessity ablation under active controls, cluster-level uncertainty,
 dictionary-conditional held-out-user confirmation, seed-stability controls, and token-level feature
-attribution---and validate each component on two CERT benchmarks.
+attribution---and apply and stress-test the combined audit on two CERT benchmarks.
 \item Using the audit, we show that the same architecture and pipeline learns
 mechanisms of different \emph{kinds} on related benchmarks: profile-bound
 features consistent with user-profile novelty on \rsix{} ($99.8$--$100\%$ of top-feature activation mass on
@@ -186,6 +188,21 @@ of universality of learned structure \citep{olah2020zoom,chughtai2023toy}. A
 distinctive aspect of our setting is that the sparse decomposition targets
 \emph{adapter-induced deltas} rather than raw activations, isolating what
 benign-only fine-tuning adds to the base model.
+
+\paragraph{Shortcut learning and evaluation pitfalls.}
+Our central finding is an instance of shortcut learning: models satisfying a
+training objective through features that do not generalize as intended
+\citep{geirhos2020shortcut}, a risk amplified when pipelines are
+underspecified by their evaluations \citep{damour2020underspecification}.
+In security applications specifically, sampling bias, label artifacts, and
+inappropriate train/test separation are documented recurrent pitfalls
+\citep{arp2022dos}; our user-disjoint detector analysis and profile-masking
+counterfactuals are instances of the evaluation hygiene that work
+prescribes. On the interpretability side, SAE feature identity is itself an
+unstable object---features can split or absorb one another across dictionary
+configurations \citep{chanin2024absorption}---which motivates our seed
+controls, matched-layer alignment baselines, and the benign-only dictionary
+retraining check.
 
 \section{Benchmarks and Session Modeling}
 \label{sec:data}
@@ -296,7 +313,7 @@ fairer test of generalization to unseen users: it removes training-seen
 status as an explanation for discrimination, and it shows the fold-aligned
 ROC advantage is largely a \emph{seen-versus-unseen-user} effect. (Unseen
 malicious users can still differ from unseen benign users in profile as well
-as behavior; the masking analysis in Section~\ref{sec:cross} probes whether
+as behavior; the masking analysis in Section~\ref{sec:counterfactuals} probes whether
 the residual signal is behavioral.) The fold-aligned numbers below follow the local baselines' protocol
 for comparability, but should be read with this in mind. Scoring uses the full corpus, and fold masks are
 applied only afterward. We adopted this protocol after finding that an earlier
@@ -610,7 +627,7 @@ correspondence one should expect.)
 
 \input{tables/alignment.tex}
 
-\subsection{Cross-benchmark reading}
+\subsection{Dictionary and population robustness}
 \label{sec:cross}
 
 Taken together (Table~\ref{tab:claim_status}): benign-only adaptation induces
@@ -642,19 +659,40 @@ places $\geq 94\%$ of activation mass on behavioral \texttt{SES} tokens
 every LOUO fold's top-5 is $\geq 99\%$ profile-bound, three of four folds
 select an identical feature set, and the fold excluding the dominant user
 diverges wholesale---mirroring the original dictionary's
-dominant-user-defined feature identity. Held-out intervention effects are
+dominant-user-defined feature identity
+(Table~\ref{tab:dict_robustness}). Held-out intervention effects are
 estimand-dependent under the new dictionaries: \rfour{} necessity replicates
 across all four contexts ($+0.004$ to $+0.013$; $528$--$638$ complete pairs),
 while its patch-repair contrast does not ($-0.0002$ to $-0.0004$); on
 \rsix{}, causal repair is positive on one held-out fold and necessity on the
 dominant-user fold. What the selected features \emph{encode} is therefore
 dictionary-independent; which intervention estimand replicates on which
-held-out users is not. \rsix{}'s
+held-out users is not (Table~\ref{tab:dict_robustness}). \rsix{}'s
 profile capture therefore reflects benchmark-specific factors---plausibly the
 distinctiveness of its four malicious users' profile fields within its benign
 profile distribution, and properties of its adapter's learned geometry---and
 identifying which benchmark properties drive metadata capture is an open
-question the audit makes precise. A score-time ablation completes the picture. We re-serialized the
+question the audit makes precise.
+
+\input{tables/dictionary_robustness.tex}
+
+Excluding profile-dominated features from selection likewise reveals that
+\rsix{} also contains a \emph{behavioral} feature family: SES-restricted
+ranking under LOUO discipline selects stable behavioral features (two of the
+top five recur across three of four folds, all with near-zero profile mass),
+and these features carry held-out causal effect on the dominant user
+($+0.0027$ to $+0.0029$ across contexts, roughly three-quarters of the
+profile-feature effect), with partial held-out necessity (positive on the
+small multi-day users; role-context positive on the dominant-user fold, where
+the profile features' necessity was uniformly negative). \rsix{}'s profile
+capture is therefore a property of unconstrained feature \emph{selection},
+not an absence of behavioral causal structure---which is precisely the kind
+of distinction the audit exists to make.
+
+\subsection{Score-level profile counterfactuals}
+\label{sec:counterfactuals}
+
+A score-time ablation asks what the \emph{score} is sensitive to. We re-serialized the
 evaluation population without the \texttt{PSY} line (\emph{no-psy}) and
 additionally with organizational identifiers masked (\emph{no-profile}), and
 rescored with the frozen models on a fixed unseen-versus-unseen rescoring
@@ -683,18 +721,6 @@ metadata in the serialization is thus a liability twice over---it invites
 identity capture during selection and degrades behavior-based scoring even
 when the mechanism is behavioral.
 
-Finally, excluding profile-dominated features from selection reveals that
-\rsix{} also contains a \emph{behavioral} feature family: SES-restricted
-ranking under LOUO discipline selects stable behavioral features (two of the
-top five recur across three of four folds, all with near-zero profile mass),
-and these features carry held-out causal effect on the dominant user
-($+0.0027$ to $+0.0029$ across contexts, roughly three-quarters of the
-profile-feature effect), with partial held-out necessity (positive on the
-small multi-day users; role-context positive on the dominant-user fold, where
-the profile features' necessity was uniformly negative). \rsix{}'s profile
-capture is therefore a property of unconstrained feature \emph{selection},
-not an absence of behavioral causal structure---which is precisely the kind
-of distinction the audit exists to make.
 
 A swap-counterfactual experiment sharpens what the score itself is sensitive
 to. For every positive user-day we constructed two variants---profile fields
@@ -723,7 +749,8 @@ perturbation alone cannot.
 \paragraph{Audits, not leaderboards.}
 Every component of this audit was necessary to reach the finding. Score-level
 evaluation showed strong ROC on both benchmarks; the intervention estimands
-showed causally real mechanisms on both; the confirmation splits showed
+established causal relevance under at least one audited estimand on both;
+the confirmation splits showed
 directional held-out replication; the seed controls showed stability across
 SAE initializations. Only token-level attribution revealed that one of them detects
 \emph{who a user is} rather than \emph{what they did}. Any prefix of the audit
@@ -735,7 +762,8 @@ separate obligations, and only their conjunction says what a detector detects.
 \paragraph{A failure mode without a simple boundary condition.}
 The profile-novelty mechanism is not a bug in the model; it is a solution to
 \rsix{}'s separation problem. But the obvious explanation---population
-size---fails our direct test: four-user subsamples of \rfour{} still select
+size---fails our direct test at the feature-selection stage: four-user
+subsamples of \rfour{} still select
 behavioral features. Whatever drives metadata capture on \rsix{} involves
 finer benchmark properties (how distinctive the malicious users' profile
 fields are within the benign profile distribution; what the benign-only
@@ -847,7 +875,8 @@ $800$ benign test users per fold), and causal/necessity evaluation with
 bootstrap reports whose estimands match the reported tables. Dataset rebuilds
 were verified byte-identical from checksummed transfer shards, and final
 mechanistic artifacts were audited for zero same-user donor rows and non-inert
-controls. An anonymized code and artifact package will be released upon
+controls. An anonymized code and artifact package accompanies the
+submission as supplementary material and will be released publicly upon
 publication.
 
 % Camera-ready only: add an Acknowledgments section (funding, disclosures)
@@ -952,7 +981,18 @@ within-set edit norms are matched across benign and anomalous donor arms
 top-minus-control contrast of donor-type contrasts is not attributable to
 perturbation magnitude alone. The reconstruction-substitution component
 common to both arms has mean per-token norm $\approx 7$ (\rsix{}) and
-$\approx 37$ (\rfour{}).
+$\approx 37$ (\rfour{}). As a size-calibration sensitivity, we recomputed
+the estimand on per-unit-norm effects (each best-row NLL change divided by
+its edit norm before forming the donor-type contrast)---a conservative
+rescaling that assumes linear response and therefore favors the smaller
+control edits. On \rfour{}, the point contrast remains positive in three of
+four contexts including the headline (team $+0.0008$ per unit norm), though
+individual-context cluster intervals include zero; on \rsix{}, the contrast
+does not survive the rescaling ($3$ clusters, descriptive). \rsix{}'s
+patch-repair advantage should therefore be read as size-uncalibrated: its
+causal-relevance evidence rests on the donor-type contrast and the necessity
+estimand, while the profile-bound content claim rests on token attribution,
+which involves no intervention.
 
 \subsection{Necessity ablation}
 Identical machinery with $z'_{t,f} = (1-\alpha)\,z_{t,f}$ for

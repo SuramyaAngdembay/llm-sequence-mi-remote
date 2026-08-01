@@ -101,8 +101,8 @@ def write_claims_table() -> None:
     rows = [
         ["Benign-only QLoRA training is valid one-class training", "Supported"],
         ["Fold-aligned detector strength reflects behavioral discrimination", "Rejected (seen-vs-unseen-user effect)"],
-        ["r6.2 has a sparse profile-bound causal mechanism", "Supported descriptively; held-out replication concentrates on the dominant user"],
-        ["r4.2 has a sparse behavioral-associated causal mechanism", "Supported; feature-level directional replication on held-out users; necessity-style replication persists under a benign-only dictionary, patch-repair replication does not"],
+        ["r6.2 contains a profile-bound sparse feature family with causal relevance under the audited estimands", "Supported descriptively; held-out replication concentrates on the dominant user; patching size-uncalibrated (App.~A.5)"],
+        ["r4.2 contains a behavior-associated sparse feature family supported by patching and ablation", "Supported; directional replication on held-out users; ablation replication persists under a benign-only dictionary, patch-repair replication does not"],
         ["Configuration-independent r4.2 confirmation", "Not established"],
         ["Literal feature transfer across benchmarks succeeds", "Rejected"],
         ["Transfer failure is explained by SAE seed non-identifiability", "Rejected (alignment controls)"],
@@ -116,6 +116,25 @@ def write_claims_table() -> None:
         "p{7.6cm}p{5.6cm}",
         ["Claim", "Status"],
         rows,
+    )
+
+
+def write_dictionary_robustness_table() -> None:
+    rows = [
+        ["r6.2", "Full-pool", "Profile-bound (99.8--100\\%)", "Dominant-user concentrated", "User-specific (negative on dominant fold)"],
+        ["r6.2", "Benign-only", "$\\geq$99\\% profile-bound, all folds", "Positive on one held-out fold", "Positive on dominant-user fold"],
+        ["---"],
+        ["r4.2", "Full-pool", "4/5 behavioral", "Directional; one context significant", "Partial"],
+        ["r4.2", "Benign-only", "$\\geq$94\\% behavioral", "Does not replicate", "Replicates in all four contexts"],
+    ]
+    write_table(
+        TABLES / "dictionary_robustness.tex",
+        "Dictionary-independence summary. Attribution (what the selected features encode) reproduces exactly under SAE dictionaries retrained on benign rows only, while held-out replication of the intervention estimands is estimand- and dictionary-dependent.",
+        "tab:dict_robustness",
+        "llp{3.4cm}p{3.6cm}p{3.6cm}",
+        ["Dataset", "Dictionary", "Attribution", "Held-out patching", "Held-out ablation"],
+        rows,
+        size=r"\footnotesize",
     )
 
 
@@ -175,6 +194,7 @@ def main() -> None:
     write_detector_table()
     write_mech_table()
     write_claims_table()
+    write_dictionary_robustness_table()
     write_attribution_table()
     write_alignment_table()
 

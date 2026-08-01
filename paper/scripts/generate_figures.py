@@ -75,9 +75,6 @@ MECH = {
     ],
 }
 
-# Best local session-AE comparator day-level contrast on the same receivers.
-LOCAL_REF = {"r6.2": 0.001133, "r4.2": 0.000909}
-
 DETECTOR = {
     "r6.2": [
         ("Qwen3-8B session LM", 0.000754631, 0.953157),
@@ -127,9 +124,6 @@ def mech_effects() -> None:
                 markeredgecolor=ACCENT, markeredgewidth=1.1, zorder=3,
             )
         ax.axvline(0.0, color=INK_2, linewidth=0.7, zorder=1)
-        if estimand == "Causal patching":
-            ax.axvline(LOCAL_REF[dataset] * 1e3, color=INK_2, linewidth=0.8,
-                       linestyle=(0, (4, 2.5)), zorder=1)
         ax.set_yticks(list(ys))
         ax.set_yticklabels([r[0] for r in rows])
         ax.set_ylim(0.4, len(rows) + 0.6)
