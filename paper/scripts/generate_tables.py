@@ -61,7 +61,7 @@ def write_detector_table() -> None:
     ]
     write_table(
         TABLES / "cert_detector_comparison.tex",
-        "Detector comparison on CERT under two protocols. Fold-aligned rows follow the baselines' protocol, in which the session LM (trained once on ~90 percent of benign users) faces mostly training-seen benign test users while baselines exclude test users from training; bold marks the best fold-aligned value per metric (held-out rank: lower is better). The italicized user-disjoint rows restrict the LM's benign comparison population to never-trained validation users and are the fairer generalization test for the LM: its ranking advantage largely disappears (day ROC 0.954 to 0.545 on r6.2 and 0.959 to 0.668 on r4.2 computed on the full evaluation pool; the fold-aligned column uses the baselines' per-fold test populations, hence its slightly different 0.953/0.964), showing the fold-aligned strength is mostly a seen-versus-unseen-user effect. User-disjoint PR values are computed at a very different prevalence (60 malicious versus 79 benign users on r4.2) and are not comparable to the fold-aligned column; the informative cross-protocol comparison is the ROC collapse. Baseline user-level ROC is not reported by the fold-aligned benchmark harness.",
+        "Detector comparison on CERT under two protocols. Fold-aligned rows follow the baselines' protocol, in which the session LM (trained once on ~90 percent of benign users) faces mostly training-seen benign test users while baselines exclude test users from training; bold marks the best fold-aligned value per metric (held-out rank: lower is better). The italicized user-disjoint rows restrict the LM's benign comparison population to never-trained validation users and are the fairer generalization test for the LM: its ranking advantage largely disappears (day ROC 0.954 to 0.545 on r6.2 and 0.959 to 0.668 on r4.2 computed on the full evaluation pool; the fold-aligned column uses the baselines' per-fold test populations, hence its slightly different 0.953/0.964), showing the fold-aligned strength is mostly a seen-versus-unseen-user effect; under the user-disjoint protocol the LM's day ROC falls at or below every baseline's fold-aligned value. User-disjoint PR values are computed at a very different prevalence (60 malicious versus 79 benign users on r4.2) and are not comparable to the fold-aligned column; the informative cross-protocol comparison is the ROC collapse. Baseline user-level ROC is not reported by the fold-aligned benchmark harness.",
         "tab:cert_detector",
         "llccccc",
         ["Dataset", "Method", "Day PR-AUC", "Day ROC-AUC", "User PR-AUC", "User ROC-AUC", "Held-out rank"],
@@ -73,7 +73,7 @@ def write_detector_table() -> None:
 
 def write_mech_table() -> None:
     rows = [
-        ["r6.2", "Token-SAE causal", "role", "0.006848", "[0.000092, 0.010000]", "4/4 users positive"],
+        ["r6.2", "Token-SAE causal", "role", "0.006848", "[0.000092, 0.009996]", "4/4 users positive"],
         ["r6.2", "Token-SAE necessity", "project$\\times$role", "0.065188", "[0.026059, 0.082920]", "4/4 users positive"],
         ["---"],
         ["r4.2", "Transferred causal", "multiple", "$<0$", "all audited configs $<0$", "direct transfer fails"],

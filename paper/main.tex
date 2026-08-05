@@ -41,7 +41,8 @@ cluster-level uncertainty, held-out-user evaluation, seed-stability controls,
 and token-level attribution---and apply it to a Qwen3-8B model adapted with
 QLoRA on benign users only, across two CERT insider-threat benchmarks.
 Despite similar score-level behavior, the benchmarks induce qualitatively
-different anomaly evidence. On \rsix{}, the causally implicated sparse
+different anomaly evidence in the audited adaptation runs (one per
+benchmark). On \rsix{}, the causally implicated sparse
 features are almost entirely profile-bound, placing $99.8$--$100\%$ of their
 activation mass on simulated psychometric and organizational tokens,
 consistent with user-profile novelty; on \rfour{}, four of five selected
@@ -132,8 +133,11 @@ attribution---and apply and stress-test the combined audit on two CERT benchmark
 mechanisms of different \emph{kinds} on related benchmarks: profile-bound
 features consistent with user-profile novelty on \rsix{} ($99.8$--$100\%$ of top-feature activation mass on
 psychometric and organizational tokens) versus behavioral session features on
-\rfour{}---a failure mode invisible to score-level evaluation, together
-with a population-structure hypothesis for when it arises.
+\rfour{}---a failure mode invisible to score-level evaluation. The
+dissociation is established for these benchmark--adapter instances (one
+adaptation run per benchmark); population-level tests reject positive-count
+explanations at the selection stage, and benign-only dictionary retraining
+rejects dictionary-formation explanations.
 \item We show the two mechanisms are stable subspaces of their own models
 (cross-seed decoder alignment $0.88$--$0.96$, far above the empirical
 dictionary-wide best-match baseline of $\sim$$0.6$) while cross-benchmark
@@ -192,8 +196,14 @@ benign-only fine-tuning adds to the base model.
 \paragraph{Shortcut learning and evaluation pitfalls.}
 Our central finding is an instance of shortcut learning: models satisfying a
 training objective through features that do not generalize as intended
-\citep{geirhos2020shortcut}, a risk amplified when pipelines are
-underspecified by their evaluations \citep{damour2020underspecification}.
+\citep{geirhos2020shortcut,lapuschkin2019unmasking}, a risk amplified when
+pipelines are underspecified by their evaluations
+\citep{damour2020underspecification}. Closest to our setting, the Clever
+Hans effect has been demonstrated in anomaly detection specifically, with
+explanation methods revealing detectors that rely on spurious input
+components \citep{kauffmann2020clever}; our audit extends that program from
+attribution over inputs to causally validated sparse features inside an
+adapted language model.
 In security applications specifically, sampling bias, label artifacts, and
 inappropriate train/test separation are documented recurrent pitfalls
 \citep{arp2022dos}; our user-disjoint detector analysis and profile-masking
@@ -378,6 +388,11 @@ intervals use a \emph{user-level cluster bootstrap} ($10{,}000$ draws with the
 malicious user as the resampling unit); we additionally report per-user
 estimates and leave-one-user-out effects. Receiver-level (day-level) bootstrap
 intervals are narrower and are reported only as supplementary material.
+Context modes constitute a small multiplicity surface: we report all audited
+context modes rather than selecting a winner, quote per-context intervals
+without multiplicity adjustment, and treat cross-context consistency of
+sign---not any single best context---as the replication criterion; headline
+text names the best context only as an exemplar.
 
 \section{Results}
 \label{sec:results}
@@ -419,12 +434,24 @@ anticipates the mechanistic one: the model's ranking strength is largely user
 novelty rather than behavioral discrimination---on \rsix{} almost entirely so,
 on \rfour{} with a residual anomaly signal ($0.668$ day ROC against unseen
 benigns) whose behavioral character is supported by the feature attribution
-rather than by the ROC value itself. A user-novelty account is also
-\emph{consistent with} the ranking--precision dissociation---novelty
-separates users but not a user's malicious days from their benign
-days---though confirming this requires within-user day-ranking metrics we
-leave to the appendix materials. We therefore treat detection as background and ask
-what internal structure the benign-only adaptation induced.
+rather than by the ROC value itself. Stated plainly: under the
+user-disjoint comparison the session LM does \emph{not} outperform the
+feature-based baselines---its day ROC ($0.545$/$0.668$) falls at or below
+every baseline's fold-aligned value ($0.628$--$0.768$), and the baselines
+already exclude test users from training. Within-user day ranking sharpens
+the picture. For each malicious user we computed the ROC-AUC of the adapted
+NLL over that user's own days (positive versus own-benign; identity held
+fixed by construction). The score does carry within-user signal on both
+benchmarks: mean within-user AUC $0.669$ ($95\%$ user bootstrap
+$[0.619, 0.717]$; $52/60$ users above chance) on \rfour{} and $0.725$
+($[0.654, 0.795]$; $4/4$ users, e.g.\ the dominant user at $0.768$) on
+\rsix{}. User novelty therefore explains the collapse of \emph{cross-user}
+ranking---between-user profile novelty swamps the within-user signal when
+users are compared---rather than an absence of within-user behavioral
+signal; on \rsix{} the latter is consistent with the secondary behavioral
+feature family recovered in Section~\ref{sec:cross}. We therefore treat
+detection as background and ask what internal structure the benign-only
+adaptation induced.
 
 \subsection{\rsix{}: necessity is consistent across users; causal effects concentrate in one user}
 \label{sec:r62}
@@ -630,12 +657,14 @@ correspondence one should expect.)
 \subsection{Dictionary and population robustness}
 \label{sec:cross}
 
-Taken together (Table~\ref{tab:claim_status}): benign-only adaptation induces
-sparse token-level structure that is causally implicated in anomaly evidence
-on both benchmarks, with held-out replication that is directional on
-\rfour{} and dominant-user-concentrated on \rsix{}; the structure
-is benchmark-specific not merely in coordinates but in \emph{kind}---identity
-metadata on \rsix{}, behavior on \rfour{}. We tested the population-size hypothesis directly by malicious-population
+The picture so far (Table~\ref{tab:claim_status}): benign-only adaptation
+induces sparse token-level structure that is causally implicated in anomaly
+evidence on both benchmarks, with held-out replication that is directional
+on \rfour{} and dominant-user-concentrated on \rsix{}; the structure is
+benchmark-specific not merely in coordinates but in \emph{kind}---identity
+metadata on \rsix{}, behavior on \rfour{}. This subsection stress-tests
+that picture against the two remaining artifact explanations: the positive
+population and the dictionary. We tested the population-size hypothesis directly by malicious-population
 subsampling on \rfour{}: holding the model, benchmark, SAE dictionary, and
 benign population fixed, we resampled positive populations of
 $K=4,10,20,30,60$ users (ten repetitions each) and re-ranked features for
@@ -752,8 +781,9 @@ evaluation showed strong ROC on both benchmarks; the intervention estimands
 established causal relevance under at least one audited estimand on both;
 the confirmation splits showed
 directional held-out replication; the seed controls showed stability across
-SAE initializations. Only token-level attribution revealed that one of them detects
-\emph{who a user is} rather than \emph{what they did}. Any prefix of the audit
+SAE initializations. Only token-level attribution revealed that one of
+them scores evidence consistent with \emph{who a user is} rather than
+\emph{what they did}. Any prefix of the audit
 would have licensed a stronger---and wrong---behavioral interpretation. We
 take this as the central methodological lesson: for anomaly models trained on
 metadata-rich telemetry, causal validation and semantic attribution are
@@ -833,7 +863,7 @@ concern feature-level interventions at a single layer under a specific SAE
 family; they localize causal structure but do not constitute a complete
 circuit-level account \citep{chan2022causal}. Attribution is based on activation mass over line classes; it identifies
 where features fire rather than fully specifying their computation, and the
-masking and swap experiments of Section~\ref{sec:cross} provide score-level
+masking and swap experiments of Section~\ref{sec:counterfactuals} provide score-level
 profile-sensitivity evidence without identifying individual feature
 semantics. The SAE dictionaries were fitted on the full evaluation pool
 (including positive rows), so most held-out analyses are
@@ -842,9 +872,15 @@ dictionary-conditional; the benign-only retraining check
 \rfour{}'s necessity-style replication are dictionary-independent, while
 patch-repair replication on held-out users is dictionary-sensitive and
 should be read as configuration-specific. SAE-seed robustness is established
-(Section~\ref{sec:seeds}), but adapter-seed and architecture-level robustness
-are not: our evidence covers one model family at one scale with one adapter
-training run per benchmark. Finally, the population-structure explanation for
+(Section~\ref{sec:seeds}), but adapter-seed and architecture-level
+robustness are not: our evidence covers one model family at one scale with
+one adapter training run per benchmark, and all dissociation claims should
+be read as scoped to these runs. The planned smaller-scale serializer-repaired
+rerun will double as an adapter-seed replication. Relatedly, the
+discovery/confirmation splits reselect feature identities but inherit
+configuration choices (layer, dictionary size, sparsity, context menu,
+intervention grid) made on the full population; confirmation is
+feature-level, not configuration-level. Finally, the population-structure explanation for
 the profile/behavior dissociation is supported by two benchmarks; testing it
 requires benchmarks with varied malicious-population sizes and, ultimately,
 real telemetry without simulated psychometrics.

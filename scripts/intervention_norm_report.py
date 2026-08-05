@@ -92,6 +92,8 @@ def main() -> None:
     ap.add_argument("--out-dir", type=Path, required=True)
     ap.add_argument("--context-modes", default=None,
                     help="comma list; default: all in the CSV")
+    ap.add_argument("--mode", choices=["causal", "necessity"], default="causal",
+                    help="necessity: ablation edits (no donor; dz = -alpha*z_F)")
     ap.add_argument("--sae-batch-size", type=int, default=8192)
     ap.add_argument("--device", default="cuda")
     args = ap.parse_args()
@@ -113,7 +115,10 @@ def main() -> None:
 
     scores = pd.read_parquet(args.extract_dir / "example_scores.parquet")
     idx_by_id = dict(zip(scores["example_id"].astype(str), scores["example_idx"].astype(int)))
-    needed_ids = set(cand["receiver_example_id"]) | set(cand["donor_example_id"])
+    if args.mode == "necessity":
+        needed_ids = set(cand["receiver_example_id"])
+    else:
+        needed_ids = set(cand["receiver_example_id"]) | set(cand["donor_example_id"])
     needed_idx = {idx_by_id[e] for e in needed_ids if e in idx_by_id}
     missing = [e for e in needed_ids if e not in idx_by_id]
     if missing:
@@ -134,29 +139,33 @@ def main() -> None:
     rows_out: List[dict] = []
     for r in cand.itertuples(index=False):
         e_recv = idx_by_id[r.receiver_example_id]
-        e_don = idx_by_id[r.donor_example_id]
         fcols = np.array([col_of[f] for f in r.features], dtype=np.int64)
         z_recv = z_cols[tok_slices[e_recv]][:, fcols]
-        z_don = z_cols[tok_slices[e_don]][:, fcols]
         active = z_recv.sum(axis=1) > 0.0
         n_active = int(active.sum())
         if n_active == 0:
             edit_fro = 0.0
             edit_mean = 0.0
         else:
-            don_active = z_don.sum(axis=1) > 0.0
-            proto = z_don[don_active].mean(axis=0) if don_active.any() else z_don.mean(axis=0)
-            dz = float(r.alpha) * (proto[None, :] - z_recv[active])  # n_active x n_feats
+            if args.mode == "necessity":
+                dz = -float(r.alpha) * z_recv[active]                # scale toward zero
+            else:
+                e_don = idx_by_id[r.donor_example_id]
+                z_don = z_cols[tok_slices[e_don]][:, fcols]
+                don_active = z_don.sum(axis=1) > 0.0
+                proto = z_don[don_active].mean(axis=0) if don_active.any() else z_don.mean(axis=0)
+                dz = float(r.alpha) * (proto[None, :] - z_recv[active])
             edit = dz @ W_sub[:, fcols].T                            # n_active x d_in
             edit *= x_std
             norms = np.linalg.norm(edit, axis=1)
             edit_fro = float(np.sqrt((norms ** 2).sum()))
             edit_mean = float(norms.mean())
+        arm = r.receiver_type if args.mode == "necessity" else r.donor_type
         rows_out.append({
             "context_mode": r.context_mode, "feature_set": r.feature_set,
-            "donor_type": r.donor_type, "alpha": float(r.alpha),
+            "donor_type": arm, "alpha": float(r.alpha),
             "receiver_example_id": r.receiver_example_id,
-            "donor_example_id": r.donor_example_id, "delta": float(r.delta),
+            "delta": float(r.delta),
             "n_active_tokens": n_active, "edit_norm_fro": edit_fro,
             "edit_norm_mean_token": edit_mean,
             "recon_norm_mean_token": float(recon_norm[tok_slices[e_recv]].mean()),
