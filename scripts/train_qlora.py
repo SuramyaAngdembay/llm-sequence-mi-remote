@@ -167,14 +167,20 @@ def main() -> None:
 
         trainer_cls = RngSkipTrainer
 
-    trainer = trainer_cls(
+    trainer_kwargs = dict(
         model=model,
         args=training_args,
         train_dataset=tokenized["train"],
         eval_dataset=tokenized["validation"],
-        tokenizer=tokenizer,
         data_collator=collator,
     )
+    # transformers v5 renamed Trainer's `tokenizer` kwarg to `processing_class`.
+    import inspect
+    if "processing_class" in inspect.signature(trainer_cls.__init__).parameters:
+        trainer_kwargs["processing_class"] = tokenizer
+    else:
+        trainer_kwargs["tokenizer"] = tokenizer
+    trainer = trainer_cls(**trainer_kwargs)
     resume_from_checkpoint = str(args.resume_from_checkpoint) if args.resume_from_checkpoint else None
     trainer.train(resume_from_checkpoint=resume_from_checkpoint)
     if trainer.is_world_process_zero():
