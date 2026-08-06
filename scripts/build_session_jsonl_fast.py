@@ -42,7 +42,7 @@ def _effective_session_cols(present_cols: list[str]) -> list[str]:
     return [c for c, f in zip(present_cols, nt._fields) if c == f]
 
 
-def build_examples_fast(df: pd.DataFrame, labels: pd.DataFrame, val_frac: float, max_sessions: int):
+def build_examples_fast(df: pd.DataFrame, labels: pd.DataFrame, val_frac: float, max_sessions: int, repair_hyphenated_cols: bool = False):
     labels = labels[["user_id", "day_index", "y"]].drop_duplicates()
     label_map = {(str(r.user_id), int(r.day_index)): int(r.y) for r in labels.itertuples(index=False)}
     positive_users = set(labels.loc[labels["y"] > 0, "user_id"].astype(str))
@@ -54,7 +54,16 @@ def build_examples_fast(df: pd.DataFrame, labels: pd.DataFrame, val_frac: float,
 
     present_context = [c for c in DAY_CONTEXT_COLS if c in df.columns]
     present_session = [c for c in SESSION_COLS if c in df.columns]
-    eff_session = _effective_session_cols(present_session)
+    if repair_hyphenated_cols:
+        # Repaired serializer: keep ALL SESSION_COLS, including the four
+        # hyphenated file-routing sub-counts (file_n-to_usb1, file_n-from_usb1,
+        # file_n-file_act3, file_n-disk1) that the original itertuples path
+        # silently dropped via namedtuple renaming.
+        eff_session = present_session
+        dropped = [c for c in present_session if c not in _effective_session_cols(present_session)]
+        print(f"[repair] restoring {len(dropped)} dropped columns: {dropped}", flush=True)
+    else:
+        eff_session = _effective_session_cols(present_session)
 
     uid = df["user_id"].to_numpy()
     day = df["day_index"].to_numpy()
@@ -111,6 +120,8 @@ def main() -> None:
     ap.add_argument("--out-dir", type=Path, required=True)
     ap.add_argument("--val-frac", type=float, default=0.10)
     ap.add_argument("--max-sessions", type=int, default=24)
+    ap.add_argument("--repair-hyphenated-cols", action="store_true",
+                    help="serialize the four hyphenated file-routing columns the original dropped")
     args = ap.parse_args()
 
     out_dir = ensure_dir(args.out_dir)
@@ -126,7 +137,7 @@ def main() -> None:
     labels = pd.read_parquet(labels_path)
     print(f"[build_fast] loaded labels: {len(labels)} rows", flush=True)
 
-    examples, meta_df = build_examples_fast(raw_df, labels, val_frac=args.val_frac, max_sessions=args.max_sessions)
+    examples, meta_df = build_examples_fast(raw_df, labels, val_frac=args.val_frac, max_sessions=args.max_sessions, repair_hyphenated_cols=args.repair_hyphenated_cols)
     print(f"[build_fast] built examples: {len(meta_df)}", flush=True)
 
     train_rows = [r for r in examples if r["split"] == "train"]
