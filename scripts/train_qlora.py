@@ -175,7 +175,6 @@ def main() -> None:
         data_collator=collator,
     )
     # transformers v5 renamed Trainer's `tokenizer` kwarg to `processing_class`.
-    import inspect
     if "processing_class" in inspect.signature(trainer_cls.__init__).parameters:
         trainer_kwargs["processing_class"] = tokenizer
     else:
