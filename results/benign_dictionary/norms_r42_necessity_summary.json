@@ -1,0 +1,358 @@
+{
+  "all_rows": [
+    {
+      "context_mode": "dept",
+      "feature_set": "control5_active",
+      "donor_type": "benign",
+      "n": 4796,
+      "edit_fro_mean": 13.631950488020422,
+      "edit_fro_median": 9.058993339538574,
+      "edit_tok_mean": 4.033012745838249,
+      "active_tokens_mean": 6.325271059216013,
+      "recon_tok_mean": 36.96677030256333
+    },
+    {
+      "context_mode": "dept",
+      "feature_set": "control5_active",
+      "donor_type": "positive",
+      "n": 4796,
+      "edit_fro_mean": 12.881987072931318,
+      "edit_fro_median": 8.861259937286377,
+      "edit_tok_mean": 4.163026352044042,
+      "active_tokens_mean": 5.916597164303586,
+      "recon_tok_mean": 37.5338210900492
+    },
+    {
+      "context_mode": "dept",
+      "feature_set": "top5",
+      "donor_type": "benign",
+      "n": 4796,
+      "edit_fro_mean": 91.36586859215787,
+      "edit_fro_median": 75.79464721679688,
+      "edit_tok_mean": 56.22085730847068,
+      "active_tokens_mean": 2.226021684737281,
+      "recon_tok_mean": 36.96677030256333
+    },
+    {
+      "context_mode": "dept",
+      "feature_set": "top5",
+      "donor_type": "positive",
+      "n": 4796,
+      "edit_fro_mean": 168.43964385389785,
+      "edit_fro_median": 161.5712890625,
+      "edit_tok_mean": 76.10968437485143,
+      "active_tokens_mean": 4.4804003336113425,
+      "recon_tok_mean": 37.5338210900492
+    },
+    {
+      "context_mode": "dept_role",
+      "feature_set": "control5_active",
+      "donor_type": "benign",
+      "n": 4156,
+      "edit_fro_mean": 14.868053280304727,
+      "edit_fro_median": 8.948370933532715,
+      "edit_tok_mean": 4.315671436230476,
+      "active_tokens_mean": 6.2136669874879695,
+      "recon_tok_mean": 37.59541503091175
+    },
+    {
+      "context_mode": "dept_role",
+      "feature_set": "control5_active",
+      "donor_type": "positive",
+      "n": 4156,
+      "edit_fro_mean": 13.48986519722553,
+      "edit_fro_median": 9.05379867553711,
+      "edit_tok_mean": 4.274969256733104,
+      "active_tokens_mean": 5.995187680461982,
+      "recon_tok_mean": 37.33963074376654
+    },
+    {
+      "context_mode": "dept_role",
+      "feature_set": "top5",
+      "donor_type": "benign",
+      "n": 4156,
+      "edit_fro_mean": 88.21122847501766,
+      "edit_fro_median": 75.1665153503418,
+      "edit_tok_mean": 53.88279087639291,
+      "active_tokens_mean": 2.1645813282001924,
+      "recon_tok_mean": 37.59541503091175
+    },
+    {
+      "context_mode": "dept_role",
+      "feature_set": "top5",
+      "donor_type": "positive",
+      "n": 4156,
+      "edit_fro_mean": 164.99224397238913,
+      "edit_fro_median": 159.04388427734375,
+      "edit_tok_mean": 76.26465873699904,
+      "active_tokens_mean": 4.3253128007699715,
+      "recon_tok_mean": 37.33963074376654
+    },
+    {
+      "context_mode": "role",
+      "feature_set": "control5_active",
+      "donor_type": "benign",
+      "n": 4476,
+      "edit_fro_mean": 14.292529798198535,
+      "edit_fro_median": 9.015273094177246,
+      "edit_tok_mean": 4.2381709725516945,
+      "active_tokens_mean": 6.178731009830206,
+      "recon_tok_mean": 37.99539688935335
+    },
+    {
+      "context_mode": "role",
+      "feature_set": "control5_active",
+      "donor_type": "positive",
+      "n": 4476,
+      "edit_fro_mean": 13.356328851908739,
+      "edit_fro_median": 9.11039400100708,
+      "edit_tok_mean": 4.2644748975247335,
+      "active_tokens_mean": 5.943699731903485,
+      "recon_tok_mean": 37.592652983064625
+    },
+    {
+      "context_mode": "role",
+      "feature_set": "top5",
+      "donor_type": "benign",
+      "n": 4476,
+      "edit_fro_mean": 85.0491758894052,
+      "edit_fro_median": 73.4448471069336,
+      "edit_tok_mean": 52.67670997246181,
+      "active_tokens_mean": 2.1134941912421805,
+      "recon_tok_mean": 37.99539688935335
+    },
+    {
+      "context_mode": "role",
+      "feature_set": "top5",
+      "donor_type": "positive",
+      "n": 4476,
+      "edit_fro_mean": 166.66757491744983,
+      "edit_fro_median": 160.63408660888672,
+      "edit_tok_mean": 76.21690032075195,
+      "active_tokens_mean": 4.410187667560321,
+      "recon_tok_mean": 37.592652983064625
+    },
+    {
+      "context_mode": "team",
+      "feature_set": "control5_active",
+      "donor_type": "benign",
+      "n": 5204,
+      "edit_fro_mean": 13.036423224305803,
+      "edit_fro_median": 8.944450378417969,
+      "edit_tok_mean": 3.980416458578269,
+      "active_tokens_mean": 6.325903151421983,
+      "recon_tok_mean": 37.56987802767919
+    },
+    {
+      "context_mode": "team",
+      "feature_set": "control5_active",
+      "donor_type": "positive",
+      "n": 5204,
+      "edit_fro_mean": 13.22456663876749,
+      "edit_fro_median": 9.123576164245605,
+      "edit_tok_mean": 4.238051632257446,
+      "active_tokens_mean": 5.993850883935434,
+      "recon_tok_mean": 37.87122115091944
+    },
+    {
+      "context_mode": "team",
+      "feature_set": "top5",
+      "donor_type": "benign",
+      "n": 5204,
+      "edit_fro_mean": 86.75759334248318,
+      "edit_fro_median": 74.48838806152344,
+      "edit_tok_mean": 55.90446721844312,
+      "active_tokens_mean": 2.0284396617986165,
+      "recon_tok_mean": 37.56987802767919
+    },
+    {
+      "context_mode": "team",
+      "feature_set": "top5",
+      "donor_type": "positive",
+      "n": 5204,
+      "edit_fro_mean": 169.40689475897364,
+      "edit_fro_median": 162.26487731933594,
+      "edit_tok_mean": 76.08782075736084,
+      "active_tokens_mean": 4.534204458109147,
+      "recon_tok_mean": 37.87122115091944
+    }
+  ],
+  "best_rows": [
+    {
+      "context_mode": "dept",
+      "feature_set": "control5_active",
+      "donor_type": "benign",
+      "n": 1176,
+      "edit_fro_mean": 13.844801044332332,
+      "edit_fro_median": 9.247022151947021,
+      "edit_tok_mean": 4.064258505343174,
+      "active_tokens_mean": 6.325680272108843,
+      "recon_tok_mean": 36.96744148747451
+    },
+    {
+      "context_mode": "dept",
+      "feature_set": "control5_active",
+      "donor_type": "positive",
+      "n": 1199,
+      "edit_fro_mean": 12.852894480671855,
+      "edit_fro_median": 9.121804237365723,
+      "edit_tok_mean": 4.163668224272676,
+      "active_tokens_mean": 5.916597164303586,
+      "recon_tok_mean": 37.5338210900492
+    },
+    {
+      "context_mode": "dept",
+      "feature_set": "top5",
+      "donor_type": "benign",
+      "n": 1176,
+      "edit_fro_mean": 76.34120475657943,
+      "edit_fro_median": 70.72134017944336,
+      "edit_tok_mean": 49.4148857607728,
+      "active_tokens_mean": 2.2270408163265305,
+      "recon_tok_mean": 36.96744148747451
+    },
+    {
+      "context_mode": "dept",
+      "feature_set": "top5",
+      "donor_type": "positive",
+      "n": 1199,
+      "edit_fro_mean": 118.54589660969052,
+      "edit_fro_median": 108.50096893310547,
+      "edit_tok_mean": 55.440279503282255,
+      "active_tokens_mean": 4.4804003336113425,
+      "recon_tok_mean": 37.5338210900492
+    },
+    {
+      "context_mode": "dept_role",
+      "feature_set": "control5_active",
+      "donor_type": "benign",
+      "n": 1016,
+      "edit_fro_mean": 15.755393291082909,
+      "edit_fro_median": 9.370859146118164,
+      "edit_tok_mean": 4.5013512160599705,
+      "active_tokens_mean": 6.232283464566929,
+      "recon_tok_mean": 37.67211724078562
+    },
+    {
+      "context_mode": "dept_role",
+      "feature_set": "control5_active",
+      "donor_type": "positive",
+      "n": 1039,
+      "edit_fro_mean": 13.2416600776017,
+      "edit_fro_median": 9.148468971252441,
+      "edit_tok_mean": 4.218970379769745,
+      "active_tokens_mean": 5.995187680461982,
+      "recon_tok_mean": 37.33963074376654
+    },
+    {
+      "context_mode": "dept_role",
+      "feature_set": "top5",
+      "donor_type": "benign",
+      "n": 1016,
+      "edit_fro_mean": 73.84341876554912,
+      "edit_fro_median": 67.87837982177734,
+      "edit_tok_mean": 46.711122236207245,
+      "active_tokens_mean": 2.170275590551181,
+      "recon_tok_mean": 37.67211724078562
+    },
+    {
+      "context_mode": "dept_role",
+      "feature_set": "top5",
+      "donor_type": "positive",
+      "n": 1039,
+      "edit_fro_mean": 116.17542045453744,
+      "edit_fro_median": 109.41912841796875,
+      "edit_tok_mean": 55.98227451809102,
+      "active_tokens_mean": 4.3253128007699715,
+      "recon_tok_mean": 37.33963074376654
+    },
+    {
+      "context_mode": "role",
+      "feature_set": "control5_active",
+      "donor_type": "benign",
+      "n": 1099,
+      "edit_fro_mean": 14.749016402904504,
+      "edit_fro_median": 9.109768867492676,
+      "edit_tok_mean": 4.36705936368104,
+      "active_tokens_mean": 6.185623293903548,
+      "recon_tok_mean": 38.037905721690464
+    },
+    {
+      "context_mode": "role",
+      "feature_set": "control5_active",
+      "donor_type": "positive",
+      "n": 1119,
+      "edit_fro_mean": 13.030701212844644,
+      "edit_fro_median": 9.121722221374512,
+      "edit_tok_mean": 4.176402203146106,
+      "active_tokens_mean": 5.943699731903485,
+      "recon_tok_mean": 37.592652983064625
+    },
+    {
+      "context_mode": "role",
+      "feature_set": "top5",
+      "donor_type": "benign",
+      "n": 1099,
+      "edit_fro_mean": 73.11116841096461,
+      "edit_fro_median": 61.89392852783203,
+      "edit_tok_mean": 46.69602448496632,
+      "active_tokens_mean": 2.1091901728844404,
+      "recon_tok_mean": 38.037905721690464
+    },
+    {
+      "context_mode": "role",
+      "feature_set": "top5",
+      "donor_type": "positive",
+      "n": 1119,
+      "edit_fro_mean": 120.82063969807288,
+      "edit_fro_median": 113.5738296508789,
+      "edit_tok_mean": 57.169903087019385,
+      "active_tokens_mean": 4.410187667560321,
+      "recon_tok_mean": 37.592652983064625
+    },
+    {
+      "context_mode": "team",
+      "feature_set": "control5_active",
+      "donor_type": "benign",
+      "n": 1254,
+      "edit_fro_mean": 13.634508638148102,
+      "edit_fro_median": 9.142558574676514,
+      "edit_tok_mean": 4.097776734087455,
+      "active_tokens_mean": 6.31658692185008,
+      "recon_tok_mean": 37.5549231153546
+    },
+    {
+      "context_mode": "team",
+      "feature_set": "control5_active",
+      "donor_type": "positive",
+      "n": 1301,
+      "edit_fro_mean": 13.21296579777324,
+      "edit_fro_median": 9.2306489944458,
+      "edit_tok_mean": 4.256285380620758,
+      "active_tokens_mean": 5.993850883935434,
+      "recon_tok_mean": 37.87122115091944
+    },
+    {
+      "context_mode": "team",
+      "feature_set": "top5",
+      "donor_type": "benign",
+      "n": 1254,
+      "edit_fro_mean": 73.41144639838255,
+      "edit_fro_median": 67.30804824829102,
+      "edit_tok_mean": 49.42610508179741,
+      "active_tokens_mean": 2.0135566188197767,
+      "recon_tok_mean": 37.5549231153546
+    },
+    {
+      "context_mode": "team",
+      "feature_set": "top5",
+      "donor_type": "positive",
+      "n": 1301,
+      "edit_fro_mean": 121.6407478781135,
+      "edit_fro_median": 113.5738296508789,
+      "edit_tok_mean": 56.266377688004,
+      "active_tokens_mean": 4.534204458109147,
+      "recon_tok_mean": 37.87122115091944
+    }
+  ]
+}

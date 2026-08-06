@@ -1028,7 +1028,21 @@ does not survive the rescaling ($3$ clusters, descriptive). \rsix{}'s
 patch-repair advantage should therefore be read as size-uncalibrated: its
 causal-relevance evidence rests on the donor-type contrast and the necessity
 estimand, while the profile-bound content claim rests on token attribution,
-which involves no intervention.
+which involves no intervention. The same norm audit applied to the ablation
+estimand shows the analogous pattern: top-set ablations on positive
+receivers are larger than active-control ablations (mean Frobenius norm
+$\approx 45$ versus $\approx 21$ on \rsix{}; $165$--$169$ versus
+$13$--$15$ on \rfour{}) and are additionally asymmetric across receiver
+classes, because top features barely activate on the matched benign
+receivers (\rsix{}: $0.2$--$0.8$ mean active tokens versus $3.0$ on
+positives; \rfour{}: $\approx 2$ versus $\approx 4.4$), so the
+(benign\,$-$\,positive) contrast for the top set is dominated by the
+positive-side edit. The near-null benign-side activation is itself
+consistent with the attribution result---the selected features are
+positive-specific---but it means ablation, like patching, is
+size-uncalibrated across feature sets; its protections are the
+receiver-class contrast within feature set and cross-context,
+cross-dictionary replication, not norm matching.
 
 \subsection{Necessity ablation}
 Identical machinery with $z'_{t,f} = (1-\alpha)\,z_{t,f}$ for
