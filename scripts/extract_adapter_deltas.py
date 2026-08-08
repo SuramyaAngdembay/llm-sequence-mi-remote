@@ -15,16 +15,28 @@ from remote_common import dump_json, ensure_dir, load_yaml, read_jsonl
 
 
 def per_example_nll(logits: torch.Tensor, input_ids: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
-    shift_logits = logits[:, :-1, :].contiguous()
+    """Sequence-chunked CE: bounds the fp32 logits workspace on small GPUs
+    (same approach as score_adapter_examples.per_example_nll)."""
     shift_labels = input_ids[:, 1:].contiguous()
     shift_mask = attention_mask[:, 1:].contiguous().float()
-    token_loss = F.cross_entropy(
-        shift_logits.view(-1, shift_logits.size(-1)),
-        shift_labels.view(-1),
-        reduction="none",
-    ).view(shift_labels.size())
+    seq_len = shift_labels.shape[1]
+    seq_chunk = 256
+    loss_sum = torch.zeros(shift_labels.shape[0], device=logits.device, dtype=torch.float32)
+    for s0 in range(0, seq_len, seq_chunk):
+        s1 = min(s0 + seq_chunk, seq_len)
+        chunk_logits = logits[:, s0:s1, :].float().contiguous()
+        chunk_labels = shift_labels[:, s0:s1]
+        token_loss = F.cross_entropy(
+            chunk_logits.view(-1, chunk_logits.size(-1)),
+            chunk_labels.reshape(-1),
+            reduction="none",
+        ).view(chunk_labels.size())
+        loss_sum += (token_loss * shift_mask[:, s0:s1]).sum(dim=1)
+        del chunk_logits, chunk_labels, token_loss
+        if logits.device.type == "cuda":
+            torch.cuda.empty_cache()
     denom = shift_mask.sum(dim=1).clamp_min(1.0)
-    return (token_loss * shift_mask).sum(dim=1) / denom
+    return loss_sum / denom
 
 
 def mean_pool(hidden: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
@@ -149,8 +161,8 @@ def main() -> None:
         with torch.no_grad():
             base_out = base_model(**tok, output_hidden_states=True, return_dict=True)
             adapted_out = adapted_model(**tok, output_hidden_states=True, return_dict=True)
-        base_nll = per_example_nll(base_out.logits.float(), tok["input_ids"], tok["attention_mask"]).cpu().numpy()
-        adapted_nll = per_example_nll(adapted_out.logits.float(), tok["input_ids"], tok["attention_mask"]).cpu().numpy()
+        base_nll = per_example_nll(base_out.logits, tok["input_ids"], tok["attention_mask"]).cpu().numpy()
+        adapted_nll = per_example_nll(adapted_out.logits, tok["input_ids"], tok["attention_mask"]).cpu().numpy()
         attn = tok["attention_mask"]
 
         for bi, ex in enumerate(batch):
