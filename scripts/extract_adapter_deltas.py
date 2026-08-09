@@ -158,11 +158,21 @@ def main() -> None:
             max_length=max_seq_len,
         )
         tok = {k: v.to(base_model.device) for k, v in tok.items()}
+        # Sequential forwards: never hold two full logits/hidden-state sets at
+        # once (8GB-GPU constraint). Harvest NLL + needed layers, then free.
         with torch.no_grad():
             base_out = base_model(**tok, output_hidden_states=True, return_dict=True)
+            base_nll = per_example_nll(base_out.logits, tok["input_ids"], tok["attention_mask"]).cpu().numpy()
+            base_hidden = {layer: base_out.hidden_states[layer].detach().clone() for layer in layers}
+            del base_out
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
             adapted_out = adapted_model(**tok, output_hidden_states=True, return_dict=True)
-        base_nll = per_example_nll(base_out.logits, tok["input_ids"], tok["attention_mask"]).cpu().numpy()
-        adapted_nll = per_example_nll(adapted_out.logits, tok["input_ids"], tok["attention_mask"]).cpu().numpy()
+            adapted_nll = per_example_nll(adapted_out.logits, tok["input_ids"], tok["attention_mask"]).cpu().numpy()
+            adapted_hidden = {layer: adapted_out.hidden_states[layer].detach().clone() for layer in layers}
+            del adapted_out
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
         attn = tok["attention_mask"]
 
         for bi, ex in enumerate(batch):
@@ -185,8 +195,8 @@ def main() -> None:
             )
 
         for layer in layers:
-            base_h = base_out.hidden_states[layer]
-            adapted_h = adapted_out.hidden_states[layer]
+            base_h = base_hidden[layer]
+            adapted_h = adapted_hidden[layer]
             delta = (adapted_h - base_h).float()
             if pool_unit == "mean":
                 pooled = mean_pool(delta, attn).cpu().numpy()
@@ -201,6 +211,7 @@ def main() -> None:
                     current[layer]["example_idx"].append(np.full((vecs.shape[0],), start + bi, dtype=np.int64))
                     current[layer]["position"].append(pos)
 
+        del base_hidden, adapted_hidden
         current_example_count += len(batch)
         if current_example_count >= args.chunk_examples:
             maybe_flush()
