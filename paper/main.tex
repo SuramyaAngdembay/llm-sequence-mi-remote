@@ -47,7 +47,9 @@ features are almost entirely profile-bound, placing $99.8$--$100\%$ of their
 activation mass on simulated psychometric and organizational tokens,
 consistent with user-profile novelty; on \rfour{}, four of five selected
 features concentrate on behavioral session events such as durations. Both
-attributions reproduce under dictionaries retrained on benign rows alone.
+attributions reproduce under dictionaries retrained on benign rows alone,
+and in a smaller-scale rerun with the serialization defect repaired and
+fresh adapter seeds.
 Each feature family is stable across SAE initializations, while literal
 feature transfer between benchmarks fails. Critically, when malicious users are
 compared only against benign users never seen during adaptation, day-level
@@ -245,8 +247,11 @@ per session listing its numeric LC-DAL features as \texttt{key=value} pairs.
 The serialization is deliberately non-prose: the model must learn behavioral
 regularities from structured key-value sequences, not natural-language cues.
 Four hyphenated file-transfer columns are dropped by the serializer due to a
-column-naming constraint; we treat the serialized field set, not the full
-LC-DAL schema, as the model's observation space.
+column-naming constraint (all four exist in \rsix{}'s raw schema;
+\rfour{}'s release contains only one of them); we treat the serialized
+field set, not the full LC-DAL schema, as the model's observation space.
+A smaller-scale rerun with the defect repaired reproduces the paper's
+central attribution result (Section~\ref{sec:cross}).
 
 \paragraph{Splits.}
 Users with any positive day are assigned entirely to an evaluation split;
@@ -705,6 +710,27 @@ question the audit makes precise.
 
 \input{tables/dictionary_robustness.tex}
 
+Finally, a smaller-scale rerun tests scale-, serializer-, and
+adapter-seed-dependence jointly. We repaired the serializer defect
+(restoring the four omitted file-routing fields on \rsix{}; \rfour{}'s
+release contains one of the four), retrained Qwen2.5-3B QLoRA adapters from
+scratch with two adapter seeds per benchmark (one epoch; full $287{,}827$-day
+corpus on \rfour{}, $300$k of $1.25$M days on \rsix{}), extracted fresh
+token deltas at layers $12/18/24$, retrained benign-only dictionaries, and
+reran selection and attribution. The dissociation reproduces under both
+adapter seeds. On \rfour{}, the selected features are behavioral in every
+audited configuration (five of five features $\geq 0.94$ SES mass at the
+best layer under both seeds), and the adapters retain unseen-user
+discrimination (day ROC $0.678$/$0.718$ against never-trained benigns,
+versus $0.668$ at 8B). On \rsix{}, profile-bound features dominate at the
+deepest extracted layer under both seeds (three of five and four of five
+features at $\approx 100\%$ profile mass), while shallower layers lean
+behavioral: at this scale, profile capture concentrates at depth. The two
+\rsix{} adapters differ in quality (day ROC $0.414$ versus $0.738$), and
+profile dominance is strongest in the better-trained seed---consistent with
+profile capture being acquired through adaptation rather than induced by
+the serialization defect or particular to the 8B run.
+
 Excluding profile-dominated features from selection likewise reveals that
 \rsix{} also contains a \emph{behavioral} feature family: SES-restricted
 ranking under LOUO discipline selects stable behavioral features (two of the
@@ -844,8 +870,8 @@ total USB events and mean USB session duration, total and executable file
 counts, e-mail volumes and attachment statistics, off-hours and weekend
 flags, session durations, and HTTP category counts including leak- and
 hacking-site visits. Claims about the mechanism concern this serialized field
-set; a serializer-repaired rerun at smaller scale is the planned robustness
-check. Day-level PR-AUC of the adapted session LM
+set; the repaired-serializer rerun (Section~\ref{sec:cross}) shows the
+attribution dissociation does not depend on the omission. Day-level PR-AUC of the adapted session LM
 is weak in absolute terms at realistic base rates. \rsix{} mechanistic
 estimates rest on $70$ receivers from $4$ malicious users with highly unequal
 day counts, so its causal effect is dominated by a single user and one context
@@ -872,11 +898,12 @@ dictionary-conditional; the benign-only retraining check
 \rfour{}'s necessity-style replication are dictionary-independent, while
 patch-repair replication on held-out users is dictionary-sensitive and
 should be read as configuration-specific. SAE-seed robustness is established
-(Section~\ref{sec:seeds}), but adapter-seed and architecture-level
-robustness are not: our evidence covers one model family at one scale with
-one adapter training run per benchmark, and all dissociation claims should
-be read as scoped to these runs. The planned smaller-scale serializer-repaired
-rerun will double as an adapter-seed replication. Relatedly, the
+(Section~\ref{sec:seeds}); the smaller-scale rerun adds attribution-level
+replication across two adapter seeds per benchmark and a repaired
+serializer, but the 8B intervention estimands themselves rest on one
+adaptation run per benchmark, the rerun's \rsix{} arms train on a capped
+corpus, and no intervention estimands were rerun at 3B---the 8B causal
+claims remain scoped to their runs. Relatedly, the
 discovery/confirmation splits reselect feature identities but inherit
 configuration choices (layer, dictionary size, sparsity, context menu,
 intervention grid) made on the full population; confirmation is

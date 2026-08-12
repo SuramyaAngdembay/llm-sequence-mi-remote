@@ -108,6 +108,7 @@ def write_claims_table() -> None:
         ["Transfer failure is explained by SAE seed non-identifiability", "Rejected (alignment controls)"],
         ["Positive-population size alone explains the feature-selection dissociation (conditional on the fixed r4.2 dictionary)", "Rejected at the selection stage (subsampling)"],
         ["The profile/behavior attribution dissociation requires positive-shaped dictionaries", "Rejected: benign-only SAE retrain reproduces it (r4.2 top-5 $\\geq$94\\% behavioral; r6.2 $\\geq$99\\% profile-bound in all LOUO folds)"],
+        ["The dissociation is particular to the 8B run, the serializer defect, or one adapter seed", "Rejected at attribution level: 3B repaired-serializer rerun reproduces it across two adapter seeds per benchmark"],
     ]
     write_table(
         TABLES / "claim_status.tex",
