@@ -1,0 +1,33 @@
+[driver] 60 positive users
+[base] rows=645591 positives=348578
+[fold all_positive_users.txt] top5=[1220, 3233, 2198, 863, 2439]
+[driver] layer=12 top5_gap=0.054630 ids=[1220, 3233, 2198, 863, 2439]
+[base] rows=645591 positives=348578
+[fold all_positive_users.txt] top5=[2372, 3398, 2961, 1037, 598]
+[driver] layer=18 top5_gap=0.035862 ids=[2372, 3398, 2961, 1037, 598]
+[base] rows=645591 positives=348578
+[fold all_positive_users.txt] top5=[819, 2668, 3412, 3286, 3659]
+[driver] layer=24 top5_gap=0.043946 ids=[819, 2668, 3412, 3286, 3659]
+[driver] BEST layer=12 gap=0.054630
+[token_load] layer=12 keep_examples=1309 selected_chunks=2/2
+{
+ "top5": [
+  1220,
+  3233,
+  2198,
+  863,
+  2439
+ ],
+ "n_benign_contrast": 500
+}
+feature 1220: SES mass 0.0033, DAY 0.9666, PSY 0.0301
+feature 3233: SES mass 0.938, DAY 0.0419, PSY 0.0155
+feature 2198: SES mass 0.5414, DAY 0.0878, PSY 0.2574
+feature 863: SES mass 1.0, DAY 0.0, PSY 0.0
+feature 2439: SES mass 0.9097, DAY 0.0062, PSY 0.0
+[verdict] best_layer=12 top5=[1220, 3233, 2198, 863, 2439]
+[verdict] feat 1220: DAY=0.967 PSY=0.030 SES=0.003 -> profile_mass=0.997
+[verdict] feat 3233: DAY=0.042 PSY=0.015 SES=0.938 -> profile_mass=0.057
+[verdict] feat 2198: DAY=0.088 PSY=0.257 SES=0.541 -> profile_mass=0.345
+[verdict] feat 863: DAY=0.000 PSY=0.000 SES=1.000 -> profile_mass=0.000
+[verdict] feat 2439: DAY=0.006 PSY=0.000 SES=0.910 -> profile_mass=0.006

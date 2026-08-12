@@ -1,0 +1,1035 @@
+{
+  "layer": 24,
+  "latent_mult": 4,
+  "k": 8,
+  "top5": [
+    1900,
+    2642,
+    2146,
+    4976,
+    5627
+  ],
+  "n_benign_contrast": 500,
+  "features": [
+    {
+      "feature_id": 1900,
+      "positive_DAY_mass_frac": 0.0247,
+      "positive_DAY_token_share": 0.0986,
+      "positive_DAY_enrichment": 0.25,
+      "positive_PSY_mass_frac": 0.0703,
+      "positive_PSY_token_share": 0.0661,
+      "positive_PSY_enrichment": 1.064,
+      "positive_SESCOUNT_mass_frac": 0.0726,
+      "positive_SESCOUNT_token_share": 0.0259,
+      "positive_SESCOUNT_enrichment": 2.81,
+      "positive_SES_mass_frac": 0.8324,
+      "positive_SES_token_share": 0.8095,
+      "positive_SES_enrichment": 1.028,
+      "benign_DAY_mass_frac": 0.0302,
+      "benign_DAY_token_share": 0.1061,
+      "benign_DAY_enrichment": 0.284,
+      "benign_PSY_mass_frac": 0.0817,
+      "benign_PSY_token_share": 0.0715,
+      "benign_PSY_enrichment": 1.142,
+      "benign_SESCOUNT_mass_frac": 0.0688,
+      "benign_SESCOUNT_token_share": 0.028,
+      "benign_SESCOUNT_enrichment": 2.459,
+      "benign_SES_mass_frac": 0.8193,
+      "benign_SES_token_share": 0.7943,
+      "benign_SES_enrichment": 1.031,
+      "top_tokens": [
+        {
+          "act": 4.565,
+          "example": 1282,
+          "pos": 57,
+          "class": "SESCOUNT",
+          "token": "SESSION"
+        },
+        {
+          "act": 4.565,
+          "example": 1281,
+          "pos": 57,
+          "class": "SESCOUNT",
+          "token": "SESSION"
+        },
+        {
+          "act": 4.565,
+          "example": 1280,
+          "pos": 57,
+          "class": "SESCOUNT",
+          "token": "SESSION"
+        },
+        {
+          "act": 4.565,
+          "example": 1278,
+          "pos": 57,
+          "class": "SESCOUNT",
+          "token": "SESSION"
+        },
+        {
+          "act": 4.511,
+          "example": 1279,
+          "pos": 57,
+          "class": "SESCOUNT",
+          "token": "SESSION"
+        },
+        {
+          "act": 4.057,
+          "example": 1300,
+          "pos": 57,
+          "class": "SESCOUNT",
+          "token": "SESSION"
+        },
+        {
+          "act": 4.057,
+          "example": 1299,
+          "pos": 57,
+          "class": "SESCOUNT",
+          "token": "SESSION"
+        },
+        {
+          "act": 4.057,
+          "example": 1298,
+          "pos": 57,
+          "class": "SESCOUNT",
+          "token": "SESSION"
+        },
+        {
+          "act": 4.042,
+          "example": 1282,
+          "pos": 66,
+          "class": "SES",
+          "token": "SES"
+        },
+        {
+          "act": 4.042,
+          "example": 1281,
+          "pos": 66,
+          "class": "SES",
+          "token": "SES"
+        },
+        {
+          "act": 4.042,
+          "example": 1280,
+          "pos": 66,
+          "class": "SES",
+          "token": "SES"
+        },
+        {
+          "act": 4.042,
+          "example": 1278,
+          "pos": 66,
+          "class": "SES",
+          "token": "SES"
+        },
+        {
+          "act": 4.04,
+          "example": 1279,
+          "pos": 59,
+          "class": "SESCOUNT",
+          "token": " total"
+        },
+        {
+          "act": 4.023,
+          "example": 1282,
+          "pos": 35,
+          "class": "PSY",
+          "token": "Y"
+        },
+        {
+          "act": 4.023,
+          "example": 1281,
+          "pos": 35,
+          "class": "PSY",
+          "token": "Y"
+        },
+        {
+          "act": 4.023,
+          "example": 1280,
+          "pos": 35,
+          "class": "PSY",
+          "token": "Y"
+        },
+        {
+          "act": 4.023,
+          "example": 1278,
+          "pos": 35,
+          "class": "PSY",
+          "token": "Y"
+        },
+        {
+          "act": 3.979,
+          "example": 1282,
+          "pos": 59,
+          "class": "SESCOUNT",
+          "token": " total"
+        },
+        {
+          "act": 3.979,
+          "example": 1281,
+          "pos": 59,
+          "class": "SESCOUNT",
+          "token": " total"
+        },
+        {
+          "act": 3.979,
+          "example": 1280,
+          "pos": 59,
+          "class": "SESCOUNT",
+          "token": " total"
+        },
+        {
+          "act": 3.979,
+          "example": 1278,
+          "pos": 59,
+          "class": "SESCOUNT",
+          "token": " total"
+        },
+        {
+          "act": 3.964,
+          "example": 1282,
+          "pos": 73,
+          "class": "SES",
+          "token": " is"
+        },
+        {
+          "act": 3.964,
+          "example": 1281,
+          "pos": 73,
+          "class": "SES",
+          "token": " is"
+        },
+        {
+          "act": 3.964,
+          "example": 1280,
+          "pos": 73,
+          "class": "SES",
+          "token": " is"
+        },
+        {
+          "act": 3.964,
+          "example": 1278,
+          "pos": 73,
+          "class": "SES",
+          "token": " is"
+        }
+      ]
+    },
+    {
+      "feature_id": 2642,
+      "positive_DAY_mass_frac": 0.0803,
+      "positive_DAY_token_share": 0.0986,
+      "positive_DAY_enrichment": 0.814,
+      "positive_PSY_mass_frac": 0.2418,
+      "positive_PSY_token_share": 0.0661,
+      "positive_PSY_enrichment": 3.66,
+      "positive_SESCOUNT_mass_frac": 0.0074,
+      "positive_SESCOUNT_token_share": 0.0259,
+      "positive_SESCOUNT_enrichment": 0.286,
+      "positive_SES_mass_frac": 0.6705,
+      "positive_SES_token_share": 0.8095,
+      "positive_SES_enrichment": 0.828,
+      "benign_DAY_mass_frac": 0.0513,
+      "benign_DAY_token_share": 0.1061,
+      "benign_DAY_enrichment": 0.483,
+      "benign_PSY_mass_frac": 0.2346,
+      "benign_PSY_token_share": 0.0715,
+      "benign_PSY_enrichment": 3.28,
+      "benign_SESCOUNT_mass_frac": 0.0054,
+      "benign_SESCOUNT_token_share": 0.028,
+      "benign_SESCOUNT_enrichment": 0.192,
+      "benign_SES_mass_frac": 0.7087,
+      "benign_SES_token_share": 0.7943,
+      "benign_SES_enrichment": 0.892,
+      "top_tokens": [
+        {
+          "act": 6.912,
+          "example": 1532,
+          "pos": 43,
+          "class": "PSY",
+          "token": "4"
+        },
+        {
+          "act": 6.912,
+          "example": 1531,
+          "pos": 43,
+          "class": "PSY",
+          "token": "4"
+        },
+        {
+          "act": 6.912,
+          "example": 1530,
+          "pos": 43,
+          "class": "PSY",
+          "token": "4"
+        },
+        {
+          "act": 6.912,
+          "example": 1529,
+          "pos": 43,
+          "class": "PSY",
+          "token": "4"
+        },
+        {
+          "act": 6.9,
+          "example": 1533,
+          "pos": 43,
+          "class": "PSY",
+          "token": "4"
+        },
+        {
+          "act": 6.898,
+          "example": 1278,
+          "pos": 250,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 6.84,
+          "example": 1280,
+          "pos": 245,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 6.714,
+          "example": 1282,
+          "pos": 251,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 6.701,
+          "example": 1278,
+          "pos": 236,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 6.693,
+          "example": 1282,
+          "pos": 237,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 6.633,
+          "example": 1281,
+          "pos": 239,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 6.553,
+          "example": 1279,
+          "pos": 249,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 6.371,
+          "example": 1279,
+          "pos": 235,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 6.192,
+          "example": 1280,
+          "pos": 260,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 5.964,
+          "example": 1281,
+          "pos": 253,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 5.829,
+          "example": 1297,
+          "pos": 241,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 5.774,
+          "example": 1267,
+          "pos": 241,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 5.726,
+          "example": 1269,
+          "pos": 238,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 5.721,
+          "example": 1263,
+          "pos": 237,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 5.71,
+          "example": 1296,
+          "pos": 242,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 5.674,
+          "example": 1293,
+          "pos": 239,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 5.648,
+          "example": 1272,
+          "pos": 240,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 5.566,
+          "example": 1268,
+          "pos": 239,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 5.499,
+          "example": 1270,
+          "pos": 245,
+          "class": "SES",
+          "token": "="
+        },
+        {
+          "act": 5.49,
+          "example": 1279,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        }
+      ]
+    },
+    {
+      "feature_id": 2146,
+      "positive_DAY_mass_frac": 0.0,
+      "positive_DAY_token_share": 0.0986,
+      "positive_DAY_enrichment": 0.0,
+      "positive_PSY_mass_frac": 0.9964,
+      "positive_PSY_token_share": 0.0661,
+      "positive_PSY_enrichment": 15.082,
+      "positive_SESCOUNT_mass_frac": 0.0023,
+      "positive_SESCOUNT_token_share": 0.0259,
+      "positive_SESCOUNT_enrichment": 0.09,
+      "positive_SES_mass_frac": 0.0013,
+      "positive_SES_token_share": 0.8095,
+      "positive_SES_enrichment": 0.002,
+      "benign_DAY_mass_frac": 0.0,
+      "benign_DAY_token_share": 0.1061,
+      "benign_DAY_enrichment": 0.0,
+      "benign_PSY_mass_frac": 0.9882,
+      "benign_PSY_token_share": 0.0715,
+      "benign_PSY_enrichment": 13.816,
+      "benign_SESCOUNT_mass_frac": 0.0118,
+      "benign_SESCOUNT_token_share": 0.028,
+      "benign_SESCOUNT_enrichment": 0.423,
+      "benign_SES_mass_frac": 0.0,
+      "benign_SES_token_share": 0.7943,
+      "benign_SES_enrichment": 0.0,
+      "top_tokens": [
+        {
+          "act": 18.839,
+          "example": 1297,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.839,
+          "example": 1293,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.757,
+          "example": 1296,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.757,
+          "example": 1295,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.757,
+          "example": 1294,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.543,
+          "example": 1267,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.543,
+          "example": 1266,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.543,
+          "example": 1265,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.543,
+          "example": 1264,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.543,
+          "example": 1263,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.445,
+          "example": 1279,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.423,
+          "example": 1276,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.283,
+          "example": 1300,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.283,
+          "example": 1299,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.283,
+          "example": 1298,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.263,
+          "example": 1272,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.263,
+          "example": 1271,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.263,
+          "example": 1270,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.263,
+          "example": 1269,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.263,
+          "example": 1268,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.234,
+          "example": 1282,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.234,
+          "example": 1281,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.234,
+          "example": 1280,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.234,
+          "example": 1278,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        },
+        {
+          "act": 18.177,
+          "example": 1292,
+          "pos": 41,
+          "class": "PSY",
+          "token": "="
+        }
+      ]
+    },
+    {
+      "feature_id": 4976,
+      "positive_DAY_mass_frac": 0.0,
+      "positive_DAY_token_share": 0.0986,
+      "positive_DAY_enrichment": 0.0,
+      "positive_PSY_mass_frac": 1.0,
+      "positive_PSY_token_share": 0.0661,
+      "positive_PSY_enrichment": 15.136,
+      "positive_SESCOUNT_mass_frac": 0.0,
+      "positive_SESCOUNT_token_share": 0.0259,
+      "positive_SESCOUNT_enrichment": 0.0,
+      "positive_SES_mass_frac": 0.0,
+      "positive_SES_token_share": 0.8095,
+      "positive_SES_enrichment": 0.0,
+      "benign_DAY_mass_frac": 0.0,
+      "benign_DAY_token_share": 0.1061,
+      "benign_DAY_enrichment": 0.0,
+      "benign_PSY_mass_frac": 0.0,
+      "benign_PSY_token_share": 0.0715,
+      "benign_PSY_enrichment": 0.0,
+      "benign_SESCOUNT_mass_frac": 0.8241,
+      "benign_SESCOUNT_token_share": 0.028,
+      "benign_SESCOUNT_enrichment": 29.446,
+      "benign_SES_mass_frac": 0.1759,
+      "benign_SES_token_share": 0.7943,
+      "benign_SES_enrichment": 0.221,
+      "top_tokens": [
+        {
+          "act": 38.892,
+          "example": 1292,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.892,
+          "example": 1289,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.892,
+          "example": 1288,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.885,
+          "example": 1291,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.885,
+          "example": 1290,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.494,
+          "example": 1300,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.494,
+          "example": 1299,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.494,
+          "example": 1298,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.391,
+          "example": 1267,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.391,
+          "example": 1266,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.391,
+          "example": 1265,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.391,
+          "example": 1264,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.391,
+          "example": 1263,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.184,
+          "example": 1257,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.184,
+          "example": 1256,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.184,
+          "example": 1255,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.108,
+          "example": 1277,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.108,
+          "example": 1275,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.108,
+          "example": 1274,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.108,
+          "example": 1273,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.08,
+          "example": 1258,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.071,
+          "example": 1262,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.071,
+          "example": 1261,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.071,
+          "example": 1259,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        },
+        {
+          "act": 38.025,
+          "example": 1287,
+          "pos": 51,
+          "class": "PSY",
+          "token": "3"
+        }
+      ]
+    },
+    {
+      "feature_id": 5627,
+      "positive_DAY_mass_frac": 1.0,
+      "positive_DAY_token_share": 0.0986,
+      "positive_DAY_enrichment": 10.141,
+      "positive_PSY_mass_frac": 0.0,
+      "positive_PSY_token_share": 0.0661,
+      "positive_PSY_enrichment": 0.0,
+      "positive_SESCOUNT_mass_frac": 0.0,
+      "positive_SESCOUNT_token_share": 0.0259,
+      "positive_SESCOUNT_enrichment": 0.0,
+      "positive_SES_mass_frac": 0.0,
+      "positive_SES_token_share": 0.8095,
+      "positive_SES_enrichment": 0.0,
+      "benign_DAY_mass_frac": 0.0,
+      "benign_DAY_token_share": 0.1061,
+      "benign_DAY_enrichment": 0.0,
+      "benign_PSY_mass_frac": 0.0,
+      "benign_PSY_token_share": 0.0715,
+      "benign_PSY_enrichment": 0.0,
+      "benign_SESCOUNT_mass_frac": 0.0,
+      "benign_SESCOUNT_token_share": 0.028,
+      "benign_SESCOUNT_enrichment": 0.0,
+      "benign_SES_mass_frac": 1.0,
+      "benign_SES_token_share": 0.7943,
+      "benign_SES_enrichment": 1.259,
+      "top_tokens": [
+        {
+          "act": 38.753,
+          "example": 1260,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.648,
+          "example": 1262,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.648,
+          "example": 1261,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.648,
+          "example": 1259,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.621,
+          "example": 1284,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.608,
+          "example": 1258,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.45,
+          "example": 1257,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.45,
+          "example": 1256,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.45,
+          "example": 1255,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.259,
+          "example": 1287,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.259,
+          "example": 1286,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.259,
+          "example": 1285,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.259,
+          "example": 1283,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.143,
+          "example": 1282,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.143,
+          "example": 1281,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.143,
+          "example": 1280,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.143,
+          "example": 1278,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.098,
+          "example": 1277,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.098,
+          "example": 1275,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.098,
+          "example": 1274,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.098,
+          "example": 1273,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.055,
+          "example": 1272,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.055,
+          "example": 1271,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.055,
+          "example": 1270,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 38.055,
+          "example": 1269,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        }
+      ]
+    }
+  ]
+}

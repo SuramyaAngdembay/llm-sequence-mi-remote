@@ -1,0 +1,45 @@
+{
+  "source_frontier": "/home/suramya/cert-out/qwen3b_repaired/sae_r42_seed42_benign/layer_18/m02_k04",
+  "discovery_user_file": "/home/suramya/cert-out/qwen3b_repaired/audit_r42_seed42/all_positive_users.txt",
+  "n_discovery_users": 60,
+  "benign_sample_prob": 0.25,
+  "row_stats": {
+    "n_rows": 645591,
+    "n_positive_rows_kept": 348578,
+    "n_positive_rows_dropped_confirmation": 0,
+    "n_benign_rows": 297013
+  },
+  "eval_stats": {
+    "recon_mse": 0.06435078176891951,
+    "active_frac": 0.0009692192708405941,
+    "effective_l0": 3.9699221333630734,
+    "dead_feature_frac": 0.10888671875,
+    "top10_row_gap_mean": 0.028589223265063173,
+    "top1_row_gap": 0.0432372734655519
+  },
+  "feature_sets": {
+    "top1": [
+      2372
+    ],
+    "top3": [
+      2372,
+      3398,
+      2961
+    ],
+    "top5": [
+      2372,
+      3398,
+      2961,
+      1037,
+      598
+    ],
+    "control1": [
+      2137
+    ],
+    "control3": [
+      2137,
+      2945,
+      2116
+    ]
+  }
+}

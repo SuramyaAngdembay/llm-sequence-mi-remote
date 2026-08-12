@@ -1,0 +1,26 @@
+{
+  "config": "configs/qwen3b_qlora_session.yaml",
+  "data_dir": "/home/suramya/cert-data/session_jsonl_r62_repaired",
+  "output_dir": "/home/suramya/cert-out/qwen3b_repaired/r62_seed43",
+  "model_name_or_path": "Qwen/Qwen2.5-3B",
+  "n_train": 300000,
+  "n_validation": 2000,
+  "max_seq_len": 2048,
+  "seed": 43,
+  "world_size": 1,
+  "micro_batch_size": 1,
+  "grad_accum": 16,
+  "effective_batch": 16,
+  "gradient_checkpointing": true,
+  "save_steps": 500,
+  "eval_strategy": "steps",
+  "eval_steps": 500,
+  "resume_from_checkpoint": null,
+  "ignore_data_skip": false,
+  "skip_rng_state_resume": false,
+  "env": {
+    "HF_HOME": "/home/suramya/hf_cache",
+    "HF_HUB_OFFLINE": "",
+    "TRANSFORMERS_OFFLINE": ""
+  }
+}

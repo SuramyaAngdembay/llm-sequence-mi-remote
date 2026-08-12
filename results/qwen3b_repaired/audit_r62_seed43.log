@@ -1,0 +1,66 @@
+[driver] 4 positive users
+[base] rows=600220 positives=24369
+[fold all_positive_users.txt] top5=[3233, 1780, 2232, 37, 4927]
+[driver] layer=12 top5_gap=0.065997 ids=[3233, 1780, 2232, 37, 4927]
+[base] rows=600220 positives=24369
+[fold all_positive_users.txt] top5=[2939, 1979, 6923, 4833, 1087]
+[driver] layer=18 top5_gap=0.053171 ids=[2939, 1979, 6923, 4833, 1087]
+[base] rows=600220 positives=24369
+[fold all_positive_users.txt] top5=[668, 1657, 4773, 2894, 6026]
+[driver] layer=24 top5_gap=0.073916 ids=[668, 1657, 4773, 2894, 6026]
+[driver] BEST layer=24 gap=0.073916
+[token_load] layer=24 keep_examples=70 selected_chunks=2/2
+{
+ "top5": [
+  668,
+  1657,
+  4773,
+  2894,
+  6026
+ ],
+ "n_benign_contrast": 500
+}
+feature 668: SES mass 0.9995, DAY 0.0005, PSY 0.0
+feature 1657: SES mass 0.0002, DAY 0.0, PSY 0.9998
+feature 4773: SES mass 0.0004, DAY 0.9996, PSY 0.0
+feature 2894: SES mass 0.0004, DAY 0.9995, PSY 0.0002
+feature 6026: SES mass 0.0, DAY 1.0, PSY 0.0
+[verdict] best_layer=24 top5=[668, 1657, 4773, 2894, 6026]
+[verdict] feat 668: DAY=0.001 PSY=0.000 SES=1.000 -> profile_mass=0.001
+[verdict] feat 1657: DAY=0.000 PSY=1.000 SES=0.000 -> profile_mass=1.000
+[verdict] feat 4773: DAY=1.000 PSY=0.000 SES=0.000 -> profile_mass=1.000
+[verdict] feat 2894: DAY=1.000 PSY=0.000 SES=0.000 -> profile_mass=1.000
+[verdict] feat 6026: DAY=1.000 PSY=0.000 SES=0.000 -> profile_mass=1.000
+[token_load] layer=18 keep_examples=70 selected_chunks=2/2
+{
+ "top5": [
+  2939,
+  1979,
+  6923,
+  4833,
+  1087
+ ],
+ "n_benign_contrast": 500
+}
+feature 2939: SES mass 0.9415, DAY 0.014, PSY 0.0402
+feature 1979: SES mass 0.0, DAY 1.0, PSY 0.0
+feature 6923: SES mass 0.9972, DAY 0.0019, PSY 0.0
+feature 4833: SES mass 1.0, DAY 0.0, PSY 0.0
+feature 1087: SES mass 0.0, DAY 0.0, PSY 1.0
+[token_load] layer=24 keep_examples=70 selected_chunks=2/2
+{
+ "top5": [
+  668,
+  1657,
+  4773,
+  2894,
+  6026
+ ],
+ "n_benign_contrast": 500
+}
+feature 668: SES mass 0.9995, DAY 0.0005, PSY 0.0
+feature 1657: SES mass 0.0002, DAY 0.0, PSY 0.9998
+feature 4773: SES mass 0.0004, DAY 0.9996, PSY 0.0
+feature 2894: SES mass 0.0004, DAY 0.9995, PSY 0.0002
+feature 6026: SES mass 0.0, DAY 1.0, PSY 0.0
+R62_S43_AUDIT_DONE

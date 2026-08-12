@@ -1,0 +1,1035 @@
+{
+  "layer": 18,
+  "latent_mult": 4,
+  "k": 8,
+  "top5": [
+    2939,
+    1979,
+    6923,
+    4833,
+    1087
+  ],
+  "n_benign_contrast": 500,
+  "features": [
+    {
+      "feature_id": 2939,
+      "positive_DAY_mass_frac": 0.014,
+      "positive_DAY_token_share": 0.0986,
+      "positive_DAY_enrichment": 0.142,
+      "positive_PSY_mass_frac": 0.0402,
+      "positive_PSY_token_share": 0.0661,
+      "positive_PSY_enrichment": 0.608,
+      "positive_SESCOUNT_mass_frac": 0.0043,
+      "positive_SESCOUNT_token_share": 0.0259,
+      "positive_SESCOUNT_enrichment": 0.166,
+      "positive_SES_mass_frac": 0.9415,
+      "positive_SES_token_share": 0.8095,
+      "positive_SES_enrichment": 1.163,
+      "benign_DAY_mass_frac": 0.0043,
+      "benign_DAY_token_share": 0.1061,
+      "benign_DAY_enrichment": 0.041,
+      "benign_PSY_mass_frac": 0.109,
+      "benign_PSY_token_share": 0.0715,
+      "benign_PSY_enrichment": 1.523,
+      "benign_SESCOUNT_mass_frac": 0.0096,
+      "benign_SESCOUNT_token_share": 0.028,
+      "benign_SESCOUNT_enrichment": 0.344,
+      "benign_SES_mass_frac": 0.8771,
+      "benign_SES_token_share": 0.7943,
+      "benign_SES_enrichment": 1.104,
+      "top_tokens": [
+        {
+          "act": 14.154,
+          "example": 71,
+          "pos": 586,
+          "class": "SES",
+          "token": "4"
+        },
+        {
+          "act": 13.955,
+          "example": 1525,
+          "pos": 376,
+          "class": "SES",
+          "token": "1"
+        },
+        {
+          "act": 13.853,
+          "example": 1521,
+          "pos": 329,
+          "class": "SES",
+          "token": "."
+        },
+        {
+          "act": 13.69,
+          "example": 1284,
+          "pos": 330,
+          "class": "SES",
+          "token": "8"
+        },
+        {
+          "act": 13.392,
+          "example": 1293,
+          "pos": 328,
+          "class": "SES",
+          "token": "."
+        },
+        {
+          "act": 12.923,
+          "example": 1276,
+          "pos": 334,
+          "class": "SES",
+          "token": "."
+        },
+        {
+          "act": 12.456,
+          "example": 1293,
+          "pos": 327,
+          "class": "SES",
+          "token": "8"
+        },
+        {
+          "act": 11.939,
+          "example": 1284,
+          "pos": 329,
+          "class": "SES",
+          "token": "."
+        },
+        {
+          "act": 11.542,
+          "example": 1279,
+          "pos": 323,
+          "class": "SES",
+          "token": "."
+        },
+        {
+          "act": 10.869,
+          "example": 1533,
+          "pos": 325,
+          "class": "SES",
+          "token": "."
+        },
+        {
+          "act": 10.695,
+          "example": 72,
+          "pos": 400,
+          "class": "SES",
+          "token": "2"
+        },
+        {
+          "act": 10.65,
+          "example": 1279,
+          "pos": 322,
+          "class": "SES",
+          "token": "8"
+        },
+        {
+          "act": 10.534,
+          "example": 1276,
+          "pos": 335,
+          "class": "SES",
+          "token": "7"
+        },
+        {
+          "act": 10.19,
+          "example": 1291,
+          "pos": 330,
+          "class": "SES",
+          "token": "9"
+        },
+        {
+          "act": 9.869,
+          "example": 1522,
+          "pos": 328,
+          "class": "SES",
+          "token": "."
+        },
+        {
+          "act": 9.862,
+          "example": 1521,
+          "pos": 401,
+          "class": "SES",
+          "token": "4"
+        },
+        {
+          "act": 9.729,
+          "example": 1520,
+          "pos": 328,
+          "class": "SES",
+          "token": "."
+        },
+        {
+          "act": 9.671,
+          "example": 71,
+          "pos": 306,
+          "class": "SES",
+          "token": "2"
+        },
+        {
+          "act": 9.303,
+          "example": 1530,
+          "pos": 323,
+          "class": "SES",
+          "token": "1"
+        },
+        {
+          "act": 9.164,
+          "example": 72,
+          "pos": 331,
+          "class": "SES",
+          "token": "3"
+        },
+        {
+          "act": 9.099,
+          "example": 73,
+          "pos": 131,
+          "class": "SES",
+          "token": "1"
+        },
+        {
+          "act": 8.963,
+          "example": 1525,
+          "pos": 383,
+          "class": "SES",
+          "token": "2"
+        },
+        {
+          "act": 8.915,
+          "example": 1526,
+          "pos": 422,
+          "class": "SES",
+          "token": "."
+        },
+        {
+          "act": 8.841,
+          "example": 1518,
+          "pos": 331,
+          "class": "SES",
+          "token": "."
+        },
+        {
+          "act": 8.767,
+          "example": 1290,
+          "pos": 332,
+          "class": "SES",
+          "token": "."
+        }
+      ]
+    },
+    {
+      "feature_id": 1979,
+      "positive_DAY_mass_frac": 1.0,
+      "positive_DAY_token_share": 0.0986,
+      "positive_DAY_enrichment": 10.141,
+      "positive_PSY_mass_frac": 0.0,
+      "positive_PSY_token_share": 0.0661,
+      "positive_PSY_enrichment": 0.0,
+      "positive_SESCOUNT_mass_frac": 0.0,
+      "positive_SESCOUNT_token_share": 0.0259,
+      "positive_SESCOUNT_enrichment": 0.0,
+      "positive_SES_mass_frac": 0.0,
+      "positive_SES_token_share": 0.8095,
+      "positive_SES_enrichment": 0.0,
+      "benign_DAY_mass_frac": 0.0,
+      "benign_DAY_token_share": 0.1061,
+      "benign_DAY_enrichment": 0.0,
+      "benign_PSY_mass_frac": 0.0,
+      "benign_PSY_token_share": 0.0715,
+      "benign_PSY_enrichment": 0.0,
+      "benign_SESCOUNT_mass_frac": 0.0,
+      "benign_SESCOUNT_token_share": 0.028,
+      "benign_SESCOUNT_enrichment": 0.0,
+      "benign_SES_mass_frac": 1.0,
+      "benign_SES_token_share": 0.7943,
+      "benign_SES_enrichment": 1.259,
+      "top_tokens": [
+        {
+          "act": 34.395,
+          "example": 1260,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 34.328,
+          "example": 1258,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 34.131,
+          "example": 1262,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 34.131,
+          "example": 1261,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 34.131,
+          "example": 1259,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 34.109,
+          "example": 1296,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 34.109,
+          "example": 1295,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 34.109,
+          "example": 1294,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 34.047,
+          "example": 1272,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 34.047,
+          "example": 1271,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 34.047,
+          "example": 1270,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 34.047,
+          "example": 1269,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 34.047,
+          "example": 1268,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 33.971,
+          "example": 1277,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 33.971,
+          "example": 1275,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 33.971,
+          "example": 1274,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 33.971,
+          "example": 1273,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 33.942,
+          "example": 1297,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 33.942,
+          "example": 1293,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 33.838,
+          "example": 1300,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 33.838,
+          "example": 1299,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 33.838,
+          "example": 1298,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 33.825,
+          "example": 1282,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 33.825,
+          "example": 1281,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        },
+        {
+          "act": 33.825,
+          "example": 1280,
+          "pos": 28,
+          "class": "DAY",
+          "token": "8"
+        }
+      ]
+    },
+    {
+      "feature_id": 6923,
+      "positive_DAY_mass_frac": 0.0019,
+      "positive_DAY_token_share": 0.0986,
+      "positive_DAY_enrichment": 0.019,
+      "positive_PSY_mass_frac": 0.0,
+      "positive_PSY_token_share": 0.0661,
+      "positive_PSY_enrichment": 0.0,
+      "positive_SESCOUNT_mass_frac": 0.001,
+      "positive_SESCOUNT_token_share": 0.0259,
+      "positive_SESCOUNT_enrichment": 0.038,
+      "positive_SES_mass_frac": 0.9972,
+      "positive_SES_token_share": 0.8095,
+      "positive_SES_enrichment": 1.232,
+      "benign_DAY_mass_frac": 0.0006,
+      "benign_DAY_token_share": 0.1061,
+      "benign_DAY_enrichment": 0.005,
+      "benign_PSY_mass_frac": 0.0075,
+      "benign_PSY_token_share": 0.0715,
+      "benign_PSY_enrichment": 0.104,
+      "benign_SESCOUNT_mass_frac": 0.0004,
+      "benign_SESCOUNT_token_share": 0.028,
+      "benign_SESCOUNT_enrichment": 0.015,
+      "benign_SES_mass_frac": 0.9915,
+      "benign_SES_token_share": 0.7943,
+      "benign_SES_enrichment": 1.248,
+      "top_tokens": [
+        {
+          "act": 9.218,
+          "example": 1293,
+          "pos": 416,
+          "class": "SES",
+          "token": "2"
+        },
+        {
+          "act": 8.669,
+          "example": 1522,
+          "pos": 425,
+          "class": "SES",
+          "token": "6"
+        },
+        {
+          "act": 8.611,
+          "example": 74,
+          "pos": 454,
+          "class": "SES",
+          "token": "_h"
+        },
+        {
+          "act": 8.53,
+          "example": 1276,
+          "pos": 419,
+          "class": "SES",
+          "token": "3"
+        },
+        {
+          "act": 8.43,
+          "example": 1525,
+          "pos": 381,
+          "class": "SES",
+          "token": "3"
+        },
+        {
+          "act": 8.294,
+          "example": 1297,
+          "pos": 403,
+          "class": "SES",
+          "token": "_mail"
+        },
+        {
+          "act": 8.068,
+          "example": 1517,
+          "pos": 402,
+          "class": "SES",
+          "token": "_recv"
+        },
+        {
+          "act": 7.853,
+          "example": 1533,
+          "pos": 393,
+          "class": "SES",
+          "token": "_recv"
+        },
+        {
+          "act": 7.74,
+          "example": 1279,
+          "pos": 400,
+          "class": "SES",
+          "token": "_mail"
+        },
+        {
+          "act": 7.705,
+          "example": 74,
+          "pos": 404,
+          "class": "SES",
+          "token": "_recv"
+        },
+        {
+          "act": 7.692,
+          "example": 1533,
+          "pos": 400,
+          "class": "SES",
+          "token": "_mail"
+        },
+        {
+          "act": 7.564,
+          "example": 71,
+          "pos": 628,
+          "class": "SES",
+          "token": "ak"
+        },
+        {
+          "act": 7.538,
+          "example": 1524,
+          "pos": 405,
+          "class": "SES",
+          "token": "_recv"
+        },
+        {
+          "act": 7.487,
+          "example": 1526,
+          "pos": 389,
+          "class": "SES",
+          "token": "-d"
+        },
+        {
+          "act": 7.486,
+          "example": 1524,
+          "pos": 383,
+          "class": "SES",
+          "token": "3"
+        },
+        {
+          "act": 7.414,
+          "example": 74,
+          "pos": 448,
+          "class": "SES",
+          "token": "ak"
+        },
+        {
+          "act": 7.339,
+          "example": 1527,
+          "pos": 421,
+          "class": "SES",
+          "token": "ak"
+        },
+        {
+          "act": 7.328,
+          "example": 1527,
+          "pos": 378,
+          "class": "SES",
+          "token": "_recv"
+        },
+        {
+          "act": 7.327,
+          "example": 1291,
+          "pos": 443,
+          "class": "SES",
+          "token": "ak"
+        },
+        {
+          "act": 7.306,
+          "example": 1290,
+          "pos": 445,
+          "class": "SES",
+          "token": "ak"
+        },
+        {
+          "act": 7.276,
+          "example": 71,
+          "pos": 394,
+          "class": "SES",
+          "token": "_mail"
+        },
+        {
+          "act": 7.242,
+          "example": 1526,
+          "pos": 384,
+          "class": "SES",
+          "token": "3"
+        },
+        {
+          "act": 7.154,
+          "example": 1528,
+          "pos": 396,
+          "class": "SES",
+          "token": "_recv"
+        },
+        {
+          "act": 7.099,
+          "example": 1533,
+          "pos": 436,
+          "class": "SES",
+          "token": "ak"
+        },
+        {
+          "act": 7.09,
+          "example": 1518,
+          "pos": 441,
+          "class": "SES",
+          "token": "_cl"
+        }
+      ]
+    },
+    {
+      "feature_id": 4833,
+      "positive_DAY_mass_frac": 0.0,
+      "positive_DAY_token_share": 0.0986,
+      "positive_DAY_enrichment": 0.0,
+      "positive_PSY_mass_frac": 0.0,
+      "positive_PSY_token_share": 0.0661,
+      "positive_PSY_enrichment": 0.0,
+      "positive_SESCOUNT_mass_frac": 0.0,
+      "positive_SESCOUNT_token_share": 0.0259,
+      "positive_SESCOUNT_enrichment": 0.0,
+      "positive_SES_mass_frac": 1.0,
+      "positive_SES_token_share": 0.8095,
+      "positive_SES_enrichment": 1.235,
+      "benign_DAY_mass_frac": 0.0,
+      "benign_DAY_token_share": 0.1061,
+      "benign_DAY_enrichment": 0.0,
+      "benign_PSY_mass_frac": 0.0004,
+      "benign_PSY_token_share": 0.0715,
+      "benign_PSY_enrichment": 0.006,
+      "benign_SESCOUNT_mass_frac": 0.0,
+      "benign_SESCOUNT_token_share": 0.028,
+      "benign_SESCOUNT_enrichment": 0.0,
+      "benign_SES_mass_frac": 0.9996,
+      "benign_SES_token_share": 0.7943,
+      "benign_SES_enrichment": 1.258,
+      "top_tokens": [
+        {
+          "act": 13.287,
+          "example": 1276,
+          "pos": 421,
+          "class": "SES",
+          "token": "3"
+        },
+        {
+          "act": 11.813,
+          "example": 1531,
+          "pos": 353,
+          "class": "SES",
+          "token": "1"
+        },
+        {
+          "act": 11.738,
+          "example": 1530,
+          "pos": 350,
+          "class": "SES",
+          "token": "1"
+        },
+        {
+          "act": 11.509,
+          "example": 1521,
+          "pos": 353,
+          "class": "SES",
+          "token": "1"
+        },
+        {
+          "act": 11.347,
+          "example": 1518,
+          "pos": 354,
+          "class": "SES",
+          "token": "1"
+        },
+        {
+          "act": 11.338,
+          "example": 1526,
+          "pos": 361,
+          "class": "SES",
+          "token": "1"
+        },
+        {
+          "act": 11.308,
+          "example": 1531,
+          "pos": 352,
+          "class": "SES",
+          "token": "=-"
+        },
+        {
+          "act": 11.255,
+          "example": 1528,
+          "pos": 350,
+          "class": "SES",
+          "token": "1"
+        },
+        {
+          "act": 11.221,
+          "example": 1518,
+          "pos": 353,
+          "class": "SES",
+          "token": "=-"
+        },
+        {
+          "act": 11.122,
+          "example": 1525,
+          "pos": 358,
+          "class": "SES",
+          "token": "1"
+        },
+        {
+          "act": 11.096,
+          "example": 1516,
+          "pos": 354,
+          "class": "SES",
+          "token": "=-"
+        },
+        {
+          "act": 11.079,
+          "example": 1521,
+          "pos": 352,
+          "class": "SES",
+          "token": "=-"
+        },
+        {
+          "act": 11.064,
+          "example": 1525,
+          "pos": 357,
+          "class": "SES",
+          "token": "=-"
+        },
+        {
+          "act": 11.044,
+          "example": 1520,
+          "pos": 353,
+          "class": "SES",
+          "token": "1"
+        },
+        {
+          "act": 11.032,
+          "example": 1526,
+          "pos": 360,
+          "class": "SES",
+          "token": "=-"
+        },
+        {
+          "act": 10.986,
+          "example": 1516,
+          "pos": 355,
+          "class": "SES",
+          "token": "1"
+        },
+        {
+          "act": 10.974,
+          "example": 1523,
+          "pos": 354,
+          "class": "SES",
+          "token": "1"
+        },
+        {
+          "act": 10.924,
+          "example": 1520,
+          "pos": 352,
+          "class": "SES",
+          "token": "=-"
+        },
+        {
+          "act": 10.909,
+          "example": 1530,
+          "pos": 349,
+          "class": "SES",
+          "token": "=-"
+        },
+        {
+          "act": 10.721,
+          "example": 1522,
+          "pos": 351,
+          "class": "SES",
+          "token": "=-"
+        },
+        {
+          "act": 10.511,
+          "example": 1528,
+          "pos": 349,
+          "class": "SES",
+          "token": "=-"
+        },
+        {
+          "act": 10.468,
+          "example": 1529,
+          "pos": 349,
+          "class": "SES",
+          "token": "=-"
+        },
+        {
+          "act": 10.378,
+          "example": 1529,
+          "pos": 350,
+          "class": "SES",
+          "token": "1"
+        },
+        {
+          "act": 10.355,
+          "example": 1523,
+          "pos": 353,
+          "class": "SES",
+          "token": "=-"
+        },
+        {
+          "act": 10.168,
+          "example": 73,
+          "pos": 344,
+          "class": "SES",
+          "token": " usb"
+        }
+      ]
+    },
+    {
+      "feature_id": 1087,
+      "positive_DAY_mass_frac": 0.0,
+      "positive_DAY_token_share": 0.0986,
+      "positive_DAY_enrichment": 0.0,
+      "positive_PSY_mass_frac": 1.0,
+      "positive_PSY_token_share": 0.0661,
+      "positive_PSY_enrichment": 15.136,
+      "positive_SESCOUNT_mass_frac": 0.0,
+      "positive_SESCOUNT_token_share": 0.0259,
+      "positive_SESCOUNT_enrichment": 0.0,
+      "positive_SES_mass_frac": 0.0,
+      "positive_SES_token_share": 0.8095,
+      "positive_SES_enrichment": 0.0,
+      "benign_DAY_mass_frac": 0.0,
+      "benign_DAY_token_share": 0.1061,
+      "benign_DAY_enrichment": 0.0,
+      "benign_PSY_mass_frac": 0.9981,
+      "benign_PSY_token_share": 0.0715,
+      "benign_PSY_enrichment": 13.955,
+      "benign_SESCOUNT_mass_frac": 0.0,
+      "benign_SESCOUNT_token_share": 0.028,
+      "benign_SESCOUNT_enrichment": 0.0,
+      "benign_SES_mass_frac": 0.0019,
+      "benign_SES_token_share": 0.7943,
+      "benign_SES_enrichment": 0.002,
+      "top_tokens": [
+        {
+          "act": 14.065,
+          "example": 1300,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 14.065,
+          "example": 1299,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 14.065,
+          "example": 1298,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.797,
+          "example": 1276,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.574,
+          "example": 1277,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.574,
+          "example": 1275,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.574,
+          "example": 1274,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.574,
+          "example": 1273,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.442,
+          "example": 1292,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.442,
+          "example": 1289,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.442,
+          "example": 1288,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.341,
+          "example": 1291,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.341,
+          "example": 1290,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.287,
+          "example": 1296,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.287,
+          "example": 1295,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.287,
+          "example": 1294,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.236,
+          "example": 1297,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.236,
+          "example": 1293,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.183,
+          "example": 1284,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.17,
+          "example": 1287,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.17,
+          "example": 1286,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.17,
+          "example": 1285,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.17,
+          "example": 1283,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.037,
+          "example": 1282,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        },
+        {
+          "act": 13.037,
+          "example": 1281,
+          "pos": 43,
+          "class": "PSY",
+          "token": "8"
+        }
+      ]
+    }
+  ]
+}
