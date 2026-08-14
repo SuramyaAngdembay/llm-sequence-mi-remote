@@ -859,6 +859,8 @@ def main() -> None:
     ap.add_argument("--layer", type=int, required=True)
     ap.add_argument("--latent-mult", type=int, required=True)
     ap.add_argument("--k", type=int, required=True)
+    ap.add_argument("--control-feature-file", type=Path, default=None,
+                    help="JSON {set_name: [feature_ids]} merged into feature_sets (e.g. norm-matched controls)")
     ap.add_argument("--batch-size", type=int, default=8)
     ap.add_argument("--loss-batch-size", type=int, default=0)
     ap.add_argument("--sae-batch-size", type=int, default=2048)
@@ -934,6 +936,11 @@ def main() -> None:
         min_active_frac=float(args.active_control_min_frac),
         sizes=active_control_sizes,
     )
+    if args.control_feature_file is not None:
+        import json as _json
+        custom = {k: [int(x) for x in v] for k, v in _json.loads(args.control_feature_file.read_text()).items()}
+        feature_sets.update(custom)
+        print(f"[custom-controls] merged sets: {sorted(custom)}", flush=True)
     if control_set not in feature_sets:
         available = ", ".join(sorted(feature_sets))
         raise ValueError(f"Requested control set {control_set} missing from token SAE feature sets. Available: {available}")
