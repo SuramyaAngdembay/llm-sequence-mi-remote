@@ -190,10 +190,13 @@ in our protocol follow explicit recommendations from this literature: effects
 are always measured against matched active controls rather than in isolation
 \citep{zhang2023best}, and we treat cross-dataset transfer of a mechanism as an
 empirical claim to be tested rather than assumed---connecting to the question
-of universality of learned structure \citep{olah2020zoom,chughtai2023toy}. A
-distinctive aspect of our setting is that the sparse decomposition targets
-\emph{adapter-induced deltas} rather than raw activations, isolating what
-benign-only fine-tuning adds to the base model.
+of universality of learned structure \citep{olah2020zoom,chughtai2023toy}.
+Like recent work analyzing LoRA-induced \emph{delta activations} with sparse
+autoencoders \citep{prasanth2026lora}, our decomposition targets what
+fine-tuning adds to the residual stream rather than raw activations; our
+contribution is not the delta-SAE construction itself but its combination
+with intervention-based validation under matched controls, user-disjoint
+security evaluation, and semantic attribution into an end-to-end audit.
 
 \paragraph{Shortcut learning and evaluation pitfalls.}
 Our central finding is an instance of shortcut learning: models satisfying a
