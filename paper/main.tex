@@ -732,7 +732,16 @@ behavioral: at this scale, profile capture concentrates at depth. The two
 \rsix{} adapters differ in quality (day ROC $0.414$ versus $0.738$), and
 profile dominance is strongest in the better-trained seed---consistent with
 profile capture being acquired through adaptation rather than induced by
-the serialization defect or particular to the 8B run.
+the serialization defect or particular to the 8B run. Rerunning the
+headline intervention estimands on all four 3B adapters replicates the
+estimand asymmetry observed under the 8B benign dictionaries: \rfour{}
+necessity-style dependence replicates across both adapter seeds with nearly
+identical effects ($+0.00218$ and $+0.00215$; $1301$ complete pairs each)
+while its patch-repair contrast does not ($-0.0004$ under both seeds), and
+\rsix{}'s intervention effects remain seed- and estimand-idiosyncratic
+(causal $+0.0175$ under one seed, near zero under the other). Ablation
+dependence is thus the seed-robust causal signature of the behavioral
+family.
 
 Excluding profile-dominated features from selection likewise reveals that
 \rsix{} also contains a \emph{behavioral} feature family: SES-restricted
@@ -903,10 +912,11 @@ patch-repair replication on held-out users is dictionary-sensitive and
 should be read as configuration-specific. SAE-seed robustness is established
 (Section~\ref{sec:seeds}); the smaller-scale rerun adds attribution-level
 replication across two adapter seeds per benchmark and a repaired
-serializer, but the 8B intervention estimands themselves rest on one
-adaptation run per benchmark, the rerun's \rsix{} arms train on a capped
-corpus, and no intervention estimands were rerun at 3B---the 8B causal
-claims remain scoped to their runs. Relatedly, the
+serializer, and the headline intervention estimands rerun on the four 3B
+adapters replicate \rfour{}'s ablation dependence across seeds; still, the
+8B intervention estimands rest on one adaptation run per benchmark and the
+rerun's \rsix{} arms train on a capped corpus, so the 8B causal claims
+remain scoped to their runs. Relatedly, the
 discovery/confirmation splits reselect feature identities but inherit
 configuration choices (layer, dictionary size, sparsity, context menu,
 intervention grid) made on the full population; confirmation is
@@ -1037,7 +1047,18 @@ type) is the best (most negative) NLL change over the candidate-donor pool
 and $\alpha$ grid: the estimand is \emph{maximal achievable repair} under
 the permitted donor/strength search, not an average causal effect over
 donors; best-donor selection is applied identically to top and control
-arms. A perturbation-norm audit of the headline candidate pools shows
+arms. As the primary answer to dose-matching, we additionally constructed
+\emph{norm-matched} active controls---features matched to the top-5 on
+activation frequency, mean active magnitude, and decoder norm while
+remaining gap-neutral---which closes the edit-size gap to $1.33\times$
+(\rsix{}) and $1.79\times$ (\rfour{}), and reran the headline contexts.
+All four top-versus-matched-control contrasts remain positive: \rfour{}
+causal $+0.00168$ (cluster $95\%$ CI $[0.00105, 0.00228]$; individually
+significant) and necessity $+0.0012$ $[-0.0016, 0.0038]$; \rsix{} necessity
+$+0.0609$ $[0.0074, 0.0843]$ (significant) and causal $+0.0059$
+$[-0.0018, 0.0096]$ (descriptive; four clusters). Each benchmark therefore
+retains at least one individually significant estimand at matched dose.
+A perturbation-norm audit of the headline candidate pools shows
 top-set edits are larger than active-control edits (mean best-row Frobenius
 norms $\approx 71$ versus $20$ on \rsix{}; $112$--$124$ versus $11$--$13$
 on \rfour{}), an expected property of gap-ranked features. The reported

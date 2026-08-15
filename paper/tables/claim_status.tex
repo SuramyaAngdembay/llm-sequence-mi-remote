@@ -9,14 +9,14 @@ Claim & Status \\
 \midrule
 Benign-only QLoRA training is valid one-class training & Supported \\
 Fold-aligned detector strength reflects behavioral discrimination & Rejected (seen-vs-unseen-user effect) \\
-r6.2 contains a profile-bound sparse feature family with causal relevance under the audited estimands & Supported descriptively; held-out replication concentrates on the dominant user; patching size-uncalibrated (App.~A.5) \\
-r4.2 contains a behavior-associated sparse feature family supported by patching and ablation & Supported; directional replication on held-out users; ablation replication persists under a benign-only dictionary, patch-repair replication does not \\
+r6.2 contains a profile-bound sparse feature family with causal relevance under the audited estimands & Supported descriptively; held-out replication concentrates on the dominant user; necessity significant under dose-matched controls (App.~A.5) \\
+r4.2 contains a behavior-associated sparse feature family supported by patching and ablation & Supported; causal contrast significant under dose-matched controls; ablation replication persists under a benign-only dictionary and across 3B adapter seeds, patch-repair replication does not \\
 Configuration-independent r4.2 confirmation & Not established \\
 Literal feature transfer across benchmarks succeeds & Rejected \\
 Transfer failure is explained by SAE seed non-identifiability & Rejected (alignment controls) \\
 Positive-population size alone explains the feature-selection dissociation (conditional on the fixed r4.2 dictionary) & Rejected at the selection stage (subsampling) \\
 The profile/behavior attribution dissociation requires positive-shaped dictionaries & Rejected: benign-only SAE retrain reproduces it (r4.2 top-5 $\geq$94\% behavioral; r6.2 $\geq$99\% profile-bound in all LOUO folds) \\
-The dissociation is particular to the 8B run, the serializer defect, or one adapter seed & Rejected at attribution level: 3B repaired-serializer rerun reproduces it across two adapter seeds per benchmark \\
+The dissociation is particular to the 8B run, the serializer defect, or one adapter seed & Rejected: 3B repaired-serializer rerun reproduces attribution across two adapter seeds per benchmark, and r4.2 ablation dependence replicates across 3B seeds \\
 \bottomrule
 \end{tabular}
 \end{table}
