@@ -20,9 +20,17 @@ import pandas as pd
 import torch
 
 
-def load_sae(cfg_dir: Path) -> tuple[np.ndarray, list[int]]:
+def load_sae(cfg_dir: Path, destandardize: bool = True) -> tuple[np.ndarray, list[int]]:
     bundle = torch.load(cfg_dir / "delta_sae_model.pt", map_location="cpu", weights_only=False)
     dec = bundle["state_dict"]["decoder.weight"].numpy()  # (d_in, d_latent)
+    if destandardize:
+        # Map decoder columns back into original residual-stream coordinates:
+        # the SAE reconstructs standardized deltas, so the residual-space
+        # direction of feature f is sigma * W_dec[:, f]. Without this, SAEs
+        # trained with different per-coordinate sigma live in different
+        # coordinate systems and cross-benchmark cosines are not comparable.
+        x_std = np.asarray(bundle["x_std"], dtype=np.float32).reshape(-1)
+        dec = dec * x_std[:, None]
     dec = dec / (np.linalg.norm(dec, axis=0, keepdims=True) + 1e-8)
     feats = pd.read_csv(cfg_dir / "delta_sae_top_features.csv")
     top5 = [int(x) for x in feats.sort_values("row_gap", ascending=False).head(5)["feature_id"]]
@@ -46,6 +54,8 @@ def main() -> None:
     ap.add_argument("--pairs", required=True,
                     help="semicolon-separated label_a=path_a,label_b=path_b pairs")
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--no-destandardize", action="store_true",
+                    help="compare raw standardized-space decoder columns (legacy behavior)")
     args = ap.parse_args()
 
     cache: dict[str, tuple[np.ndarray, list[int]]] = {}
@@ -53,7 +63,7 @@ def main() -> None:
     def get(label_path: str):
         label, path = label_path.split("=", 1)
         if label not in cache:
-            cache[label] = load_sae(Path(path))
+            cache[label] = load_sae(Path(path), destandardize=not args.no_destandardize)
         return label, cache[label]
 
     rows = []

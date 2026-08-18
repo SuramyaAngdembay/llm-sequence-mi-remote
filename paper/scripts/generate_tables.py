@@ -171,18 +171,21 @@ def write_attribution_table() -> None:
 
 def write_alignment_table() -> None:
     rows = [
-        ["within r6.2 (3 seed pairs)", "0.881--0.929", "0.579--0.586"],
-        ["within r4.2 (3 seed pairs)", "0.881--0.955", "0.635--0.645"],
-        ["across benchmarks, native layers (18 vs 26)", "0.079--0.112", "0.075--0.093"],
-        ["across benchmarks, matched layer 18", "0.264--0.434", "0.194--0.348"],
+        ["within r6.2 (3 seed pairs)", "0.807--0.856", "0.720--0.750"],
+        ["within r4.2 (3 seed pairs)", "0.837--0.946", "0.814--0.818"],
+        ["across benchmarks, native layers (18 vs 26)", "0.218--0.236", "0.224--0.405"],
+        ["across benchmarks, matched layer 18", "0.295--0.652", "0.370--0.963"],
     ]
     write_table(
         TABLES / "alignment.tex",
-        "Decoder-space feature alignment. Best-match $|\\cos|$ of each source SAE's "
-        "top-5 features into a target dictionary, versus the whole-dictionary median "
-        "(empirical null). Within-benchmark cross-seed alignment is far above "
-        "the null; native-layer cross-benchmark alignment is indistinguishable "
-        "from it, and matched-layer alignment remains far below cross-seed levels.",
+        "Feature alignment in residual-stream coordinates (decoder columns mapped "
+        "back through each SAE's per-coordinate standardization before "
+        "normalization). Best-match $|\\cos|$ of each source SAE's top-5 features "
+        "into a target dictionary, versus the whole-dictionary median (empirical "
+        "null). Within-benchmark cross-seed alignment exceeds the null; "
+        "cross-benchmark top-5 alignment sits at or below its null---at matched "
+        "layer the top features align worse than typical dictionary features "
+        "despite substantially shared overall geometry.",
         "tab:alignment",
         "lcc",
         ["Comparison", "Top-5 best-match $|\\cos|$", "Empirical null baseline"],

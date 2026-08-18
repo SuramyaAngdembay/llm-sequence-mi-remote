@@ -141,11 +141,12 @@ adaptation run per benchmark); population-level tests reject positive-count
 explanations at the selection stage, and benign-only dictionary retraining
 rejects dictionary-formation explanations.
 \item We show the two mechanisms are stable subspaces of their own models
-(cross-seed decoder alignment $0.88$--$0.96$, far above the empirical
-dictionary-wide best-match baseline of $\sim$$0.6$) while cross-benchmark
-alignment is indistinguishable from that null baseline, showing that SAE
-initialization instability is unlikely to explain the observed transfer
-failure.
+(cross-seed decoder alignment $0.81$--$0.95$ in residual-stream
+coordinates, above dictionary-median null baselines of $0.72$--$0.82$)
+while cross-benchmark top-feature alignment sits at or below its null---at
+matched depth, the top features align \emph{worse} than typical dictionary
+features---showing that SAE initialization instability is unlikely to
+explain the observed transfer failure.
 \item We document the audit's validity program---why receiver-level
 uncertainty, permissive donor matching, and search-then-evaluate selection
 each overstate mechanistic evidence, and how cluster bootstraps, same-user
@@ -302,6 +303,128 @@ $m=4$, $k=8$; the headline \rfour{} configuration, found by native search
 (Section~\ref{sec:r42}), uses layer $26$, $m=2$, $k=4$. Candidate feature sets
 are the top-$5$ features ranked by association between feature activity and
 positive examples.
+
+\subsection{Formal pipeline}
+\label{sec:formal}
+
+We collect the full pipeline---adaptation, scoring, delta extraction, sparse
+decomposition, intervention estimands, and attribution---in one place.
+
+\textbf{Benign-only QLoRA.}
+Let $p_{\theta_0}$ denote the frozen base model with NF4-quantized weights.
+For each adapted linear map $W \in \mathbb{R}^{d_{\mathrm{out}} \times
+d_{\mathrm{in}}}$, QLoRA parameterizes
+$W' = W + \tfrac{\alpha_{\mathrm{L}}}{r}\,BA$ with
+$B \in \mathbb{R}^{d_{\mathrm{out}} \times r}$,
+$A \in \mathbb{R}^{r \times d_{\mathrm{in}}}$ ($r{=}16$,
+$\alpha_{\mathrm{L}}{=}32$), and only $(A,B)$ are trained on the benign
+corpus $\mathcal{D}_{\mathrm{ben}}$ of serialized user-days:
+\begin{equation}
+\mathcal{L}(\theta) \;=\; -\!\!\sum_{x \in \mathcal{D}_{\mathrm{ben}}}
+\sum_{t=1}^{|x|} \log p_{\theta}\!\left(x_t \mid x_{<t}\right).
+\end{equation}
+No positive example influences $\theta$.
+
+\textbf{Anomaly score.}
+For a serialized day $x$, the detector score is the length-normalized
+adapted negative log-likelihood
+\begin{equation}
+s(x) \;=\; -\tfrac{1}{|x|}\textstyle\sum_{t} \log
+p_{\theta_{\mathrm{ada}}}\!\left(x_t \mid x_{<t}\right),
+\end{equation}
+with $s_{\mathrm{base}}$ defined analogously under $\theta_0$; days are
+ranked by $s$.
+
+\textbf{Adapter deltas.}
+Let $h^{(\ell)}_t(x;\theta) \in \mathbb{R}^{d}$ be the layer-$\ell$
+residual-stream state at position $t$. The token-level adapter delta
+\begin{equation}
+\delta_t(x) \;=\; h^{(\ell)}_t(x;\theta_{\mathrm{ada}}) -
+h^{(\ell)}_t(x;\theta_0)
+\end{equation}
+isolates what adaptation adds to the computation at $(\ell, t)$; it is the
+object we decompose.
+
+\textbf{Top-$k$ sparse autoencoder.}
+Deltas are standardized per coordinate,
+$\tilde{\delta} = (\delta - \mu) \oslash \sigma$, and encoded by
+\begin{equation}
+z(\tilde{\delta}) \;=\; \mathrm{TopK}_{k}\!\bigl(\mathrm{ReLU}(W_e
+\tilde{\delta} + b_e)\bigr) \in \mathbb{R}_{\geq 0}^{m d}, \qquad
+\hat{\delta} \;=\; W_d\, z,
+\end{equation}
+where $\mathrm{TopK}_k$ zeroes all but the $k$ largest pre-activations and
+$W_d \in \mathbb{R}^{d \times md}$ is an untied linear decoder trained to
+minimize $\mathbb{E}\,\|\tilde{\delta} - \hat{\delta}\|_2^2$. The
+residual-stream direction of feature $f$ is $u_f = \sigma \odot
+W_d[:,f]$ (all cross-dictionary geometry is computed on normalized $u_f$,
+not on raw decoder columns, which live in dictionary-specific standardized
+coordinates).
+
+\textbf{Feature selection.}
+With row labels $y$ inherited from examples, the selection statistic is the
+activation gap $g_f = \mathbb{E}[z_f \mid y{=}1] - \mathbb{E}[z_f \mid
+y{=}0]$; the audited set $S$ is the top-5 by $g_f$ and $C$ is a matched
+active control set ($|C|=|S|$, activation frequency $\geq 0.002$, low
+$|g_f|$; dose-matched variants additionally match activation magnitude and
+decoder norm).
+
+\textbf{Causal patching (sufficiency-style).}
+For receiver $x$ with codes $\{z_t\}$, feature set $F$, donor day $d$ with
+prototype $p_f$ (mean donor code over the donor's $F$-active positions), and
+strength $\alpha \in \{0.25, 0.5, 0.75, 1\}$, the counterfactual codes are
+\begin{equation}
+z'_{t,f} \;=\; (1-\alpha)\, z_{t,f} + \alpha\, p_f
+\quad \text{for } f \in F,\; t \in T_F, \qquad
+T_F = \{t : \textstyle\sum_{f \in F} z_{t,f} > 0\},
+\end{equation}
+and the injected residual shift at every token is
+$\Delta_t = \bigl(\sigma \odot W_d z'_t + \mu\bigr) - \delta_t$, applied by
+forward hook at layer $\ell$ during scoring. Writing $s_F(x; d, \alpha)$ for
+the patched score, the recorded per-receiver outcome under donor class
+$c \in \{\mathrm{ben}, \mathrm{anom}\}$ is the maximal achievable repair
+$\Delta^{F}_{c}(x) = \min_{d \in \mathcal{D}_c(x),\, \alpha}
+\bigl[s_F(x; d, \alpha) - s(x)\bigr]$, and the estimand is the paired
+difference-in-differences
+\begin{equation}
+\tau \;=\; \underbrace{\bigl(\overline{\Delta^{S}_{\mathrm{anom}}} -
+\overline{\Delta^{S}_{\mathrm{ben}}}\bigr)}_{\mathrm{RA}(S)} \;-\;
+\underbrace{\bigl(\overline{\Delta^{C}_{\mathrm{anom}}} -
+\overline{\Delta^{C}_{\mathrm{ben}}}\bigr)}_{\mathrm{RA}(C)},
+\end{equation}
+computed over complete-case receivers with same-user donors excluded;
+uncertainty is a user-level cluster bootstrap over malicious users.
+
+\textbf{Necessity ablation.}
+Identical machinery with $z'_{t,f} = (1-\alpha) z_{t,f}$ (no donor); with
+$e_F(x)$ the resulting score change, the estimand contrasts ablation
+dependence across receiver classes and feature sets,
+$\nu = \bigl[\overline{e_S(x_{\mathrm{ben}})} -
+\overline{e_S(x_{\mathrm{pos}})}\bigr] -
+\bigl[\overline{e_C(x_{\mathrm{ben}})} -
+\overline{e_C(x_{\mathrm{pos}})}\bigr]$ over context-matched pairs.
+
+\textbf{Token attribution.}
+Each position carries a line class $c(t) \in \{\texttt{DAY}, \texttt{PSY},
+\texttt{SESCOUNT}, \texttt{SES}\}$ from the serialization schema. The
+attribution mass of feature $f$ on class $c$ over positive rows is
+\begin{equation}
+m_f(c) \;=\;
+\frac{\sum_{(x,t)\,:\,c(t)=c} z_{t,f}(x)}{\sum_{(x,t)} z_{t,f}(x)},
+\qquad \text{profile mass} \;=\; m_f(\texttt{DAY}) + m_f(\texttt{PSY}).
+\end{equation}
+
+\textbf{From interventions to mechanism.}
+The audit's inferential contract is the conjunction: $\tau > 0$ and
+$\nu > 0$ against matched controls establish that $S$ is \emph{causally
+implicated} in the score's anomaly evidence (with the estimand-specific
+caveats of Appendix~\ref{app:methods}); the attribution profile
+$\{m_f\}_{f \in S}$ establishes \emph{what} $S$ encodes; and only together
+do they license mechanistic statements of the form ``the detector's anomaly
+evidence rides on profile (or behavioral) content.'' Either component alone
+underdetermines the mechanism: interventions certify causal relevance of an
+unlabeled subspace, and attribution labels a subspace without certifying
+relevance.
 
 \section{Evaluation Protocol}
 \label{sec:protocol}
@@ -480,6 +603,16 @@ operates on a different score scale).}
 \end{figure}
 
 Figure~\ref{fig:mech_effects} shows all headline mechanistic effects.
+Because gap-ranked features carry more activation energy than active
+controls, the headline contrasts were re-verified against
+\emph{dose-matched} controls (features matched on activation frequency,
+magnitude, and decoder norm; edit-size gap closed to $1.3$--$1.8\times$;
+Appendix~\ref{app:methods}): all four contrasts remain positive, with the
+\rfour{} causal contrast ($+0.0017$ $[0.0011, 0.0023]$) and the \rsix{}
+necessity contrast ($+0.061$ $[0.007, 0.084]$) individually significant.
+\rsix{} patching is the weakest link (positive but descriptive with four
+clusters); its causal evidence rests on necessity and the donor-type
+contrast.
 The $70$ positive receiver-days on \rsix{} come from only four malicious
 users, with highly unequal day counts ($46/18/5/1$), so we treat per-user
 structure as part of the result rather than pooling days as independent units.
@@ -636,10 +769,15 @@ cached deltas. Because every SAE decodes into the same $d_{\mathrm{model}}$
 residual space, feature correspondence is measurable as decoder cosine
 similarity (Table~\ref{tab:alignment}): within a benchmark, each seed's top-5
 features have close counterparts in every other seed's dictionary
-($|\cos|$ $0.88$--$0.96$ against empirical dictionary-wide best-match
-baselines of $\sim$$0.58$--$0.65$); across benchmarks, best matches are
-indistinguishable from that null baseline ($0.08$--$0.11$ against
-$0.075$--$0.093$) in both directions for all three seeds per side.
+($|\cos|$ $0.81$--$0.95$ against empirical dictionary-wide best-match
+dictionary-median null baselines of $0.72$--$0.82$); across benchmarks,
+top-5 best matches sit at or below their nulls ($0.22$--$0.24$ against
+nulls of $0.22$--$0.40$ at native layers) in both directions. All geometry
+is computed in original residual-stream coordinates: decoder columns are
+mapped back through each SAE's per-coordinate standardization scale before
+normalization, since raw standardized columns from dictionaries with
+different scales are not mutually comparable (the raw-coordinate
+comparison, our earlier convention, gives the same qualitative pattern).
 Causal rediscovery is likewise seed-robust: fresh-seed SAEs with their own
 re-selected features reproduce positive \rsix{} contrasts in every finite
 context (e.g., role $0.0071$ and $0.0019$ under seeds 43 and 44, versus
@@ -647,16 +785,18 @@ $0.0068$ originally). The profile-bound and behavioral feature families are each
 SAE initializations for the same cached adapter representations
 (adapter-seed robustness remains untested); their non-correspondence across
 benchmarks is a property of the benchmark--adapter pairs. The native-layer
-cross-benchmark comparison (18 versus 26) sits at the empirical null, but that
-partly reflects a depth difference; at matched layer 18 the two benchmarks'
-top features are modestly \emph{above} their null baselines (mean $|\cos|$
-$0.26$ and $0.43$ versus baselines $0.19$ and $0.35$), as expected since both
-SAEs encode the same base model's layer-18 geometry. The decisive contrast is
-scale: matched-layer cross-benchmark alignment ($0.26$--$0.43$) remains far
-below within-benchmark cross-seed alignment ($0.88$--$0.96$), so the
-distinct headline mechanisms are not consistent with a simple feature
-relabeling of one shared sparse representation, even after controlling for
-depth. (r4.2's headline mechanism is itself at layer 26;
+cross-benchmark comparison (18 versus 26) sits at or below the empirical
+null, but that partly reflects a depth difference. The matched-layer
+comparison at layer 18 is sharper: overall dictionary geometry is
+substantially shared there (whole-dictionary median best-match up to
+$0.96$, as expected since both SAEs encode the same base model's layer-18
+residual stream), yet the \emph{top-5} features align at or below those
+medians ($0.30$ and $0.65$)---the anomaly-relevant directions are more
+benchmark-specific than typical dictionary directions. Matched-layer top-5
+alignment also remains below within-benchmark cross-seed alignment
+($0.81$--$0.95$), so the distinct headline mechanisms are not consistent
+with a simple feature relabeling of one shared sparse representation, even
+after controlling for depth. (r4.2's headline mechanism is itself at layer 26;
 its layer-18 features used here are off-mechanism, which further limits the
 correspondence one should expect.)
 
@@ -1058,6 +1198,14 @@ significant) and necessity $+0.0012$ $[-0.0016, 0.0038]$; \rsix{} necessity
 $+0.0609$ $[0.0074, 0.0843]$ (significant) and causal $+0.0059$
 $[-0.0018, 0.0096]$ (descriptive; four clusters). Each benchmark therefore
 retains at least one individually significant estimand at matched dose.
+Best-donor selection is also examined for extreme-value artifacts: donor
+pools are asymmetric (benign donors capped at $16$ per receiver, anomalous
+donors scarcer---median $1$ on \rsix{}, mean $13$ on \rfour{}), which
+gives the benign arm more selection opportunities; the asymmetry is common
+to top and control arms, and a complementary median-over-donors estimand
+(per-donor best-$\alpha$, median across donors, no extreme-value
+selection) remains positive on both headline contexts ($+0.0005$ on
+\rsix{}, $+0.0006$ on \rfour{}).
 A perturbation-norm audit of the headline candidate pools shows
 top-set edits are larger than active-control edits (mean best-row Frobenius
 norms $\approx 71$ versus $20$ on \rsix{}; $112$--$124$ versus $11$--$13$
