@@ -1,30 +1,54 @@
 \begin{figure}[t]
 \centering
+\resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
-  box/.style={draw=black!60, rounded corners=2pt, align=center, minimum height=0.9cm, inner sep=5pt, font=\small},
+  box/.style={draw=black!60, rounded corners=2pt, align=center, minimum height=0.95cm, inner sep=4pt, font=\footnotesize},
   stage/.style={box, fill=black!4},
   evalbox/.style={box, fill=blue!6},
-  arrow/.style={->, thick, black!65}
+  claimbox/.style={box, fill=green!8},
+  arrow/.style={->, thick, black!65},
+  lab/.style={font=\scriptsize\itshape, black!55}
 ]
+% Row 1: model + score
 \node[stage] (data) {CERT \rsix{} / \rfour{}\\session logs};
-\node[stage, right=0.9cm of data] (serial) {serialized\\user-days};
-\node[stage, right=0.9cm of serial] (train) {benign-only QLoRA\\(Qwen3-8B)};
-\node[stage, right=0.9cm of train] (delta) {token adapter deltas\\$\delta_t = h^{\mathrm{ada}}_t - h^{\mathrm{base}}_t$};
+\node[stage, right=0.7cm of data] (serial) {serialized user-day $x$\\(\texttt{DAY/PSY/SES} lines)};
+\node[stage, right=0.7cm of serial] (train) {benign-only QLoRA\\$W' = W + \tfrac{\alpha_{\mathrm{L}}}{r}BA$};
+\node[evalbox, right=0.7cm of train] (score) {anomaly score $s(x)$\\(adapted NLL)};
+\node[evalbox, right=0.7cm of score] (det) {detector eval:\\fold-aligned \&\\user-disjoint};
 
-\node[stage, below=0.9cm of delta] (sae) {top-$k$ delta-SAE\\top-5 vs.\ active control};
-\node[evalbox, below=0.9cm of train] (mech) {causal patching \&\\necessity ablation};
-\node[evalbox, below=0.9cm of serial] (det) {fold-aligned\\detector eval};
-\node[box, below=0.9cm of data] (local) {feature-based baselines\\\& session-AE comparator};
+% Row 2: mechanism
+\node[stage, below=0.75cm of train] (delta) {token adapter deltas\\$\delta_t = h^{\mathrm{ada}}_t - h^{\mathrm{base}}_t$};
+\node[stage, left=0.7cm of delta] (sae) {top-$k$ delta-SAE\\$z = \mathrm{TopK}_k(\mathrm{ReLU}(W_e\tilde{\delta}+b_e))$};
+\node[stage, left=0.7cm of sae] (select) {gap selection\\$S$ (top-5) vs.\ matched $C$};
+
+% Row 3: audit
+\node[evalbox, below=0.75cm of select] (mech) {interventions\\patching $\tau$, ablation $\nu$};
+\node[evalbox, right=0.7cm of mech] (attr) {token attribution\\$m_f(c)$, profile mass};
+\node[claimbox, right=0.7cm of attr] (claim) {mechanistic claim\\= causal relevance ($\tau,\nu$)\\$\wedge$ content ($m_f$)};
+\node[evalbox, right=0.7cm of claim] (robust) {robustness: held-out users,\\SAE seeds, benign dictionaries,\\3B + adapter seeds, masking};
 
 \draw[arrow] (data) -- (serial);
 \draw[arrow] (serial) -- (train);
+\draw[arrow] (train) -- (score);
+\draw[arrow] (score) -- (det);
 \draw[arrow] (train) -- (delta);
 \draw[arrow] (delta) -- (sae);
-\draw[arrow] (sae) -- (mech);
-\draw[arrow] (train) -- (det);
-\draw[arrow] (local) -- (det);
-\draw[arrow] (local) -- (mech);
-\end{tikzpicture}
-\caption{Overview. Session logs are serialized into structured user-day text and used to adapt Qwen3-8B on benign users only. Token-level adapter deltas feed sparse top-$k$ autoencoders whose feature sets are evaluated by causal patching and necessity ablation against active controls with same-user donors excluded. Detector comparisons against the feature-based one-class baselines use a shared fold-aligned protocol.}
+\draw[arrow] (sae) -- (select);
+\draw[arrow] (select) -- (mech);
+\draw[arrow] (mech) -- (attr);
+\draw[arrow] (attr) -- (claim);
+\draw[arrow] (robust) -- (claim);
+\end{tikzpicture}}%
+\caption{The audit pipeline, annotated with the notation of
+Section~\ref{sec:formal}. Top row (model and score): session logs are
+serialized into structured user-day text $x$ and adapt Qwen3-8B on benign
+users only; the adapted NLL $s(x)$ is evaluated under both the fold-aligned
+and the user-disjoint detector protocols. Middle row (representation):
+token-level adapter deltas $\delta_t$ feed a top-$k$ sparse autoencoder,
+and features are selected by activation gap against matched active
+controls. Bottom row (audit): intervention estimands ($\tau$: patching;
+$\nu$: ablation) certify causal relevance, token attribution $m_f(c)$
+identifies content, and only their conjunction---stress-tested by the
+robustness battery---licenses a mechanistic claim.}
 \label{fig:pipeline}
 \end{figure}
