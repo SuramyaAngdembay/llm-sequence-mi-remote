@@ -99,7 +99,7 @@ The audit's findings are a dissociation. On CERT \rsix{}, whose evaluation
 population contains four malicious users, the causally implicated features are
 almost entirely \emph{profile-bound}, placing essentially all of their
 activation mass on static psychometric and organizational tokens rather than
-behavioral session events---consistent with user-profile novelty. On CERT \rfour{}, whose population contains
+behavioral session events, consistent with user-profile novelty. On CERT \rfour{}, whose population contains
 sixty malicious users, the natively rediscovered mechanism is
 \emph{behavioral}: four of five top features concentrate on session-event
 tokens such as durations. Both mechanisms are causally relevant under our
@@ -147,7 +147,7 @@ while cross-benchmark top-feature alignment sits at or below its null---at
 matched depth, the top features align \emph{worse} than typical dictionary
 features---showing that SAE initialization instability is unlikely to
 explain the observed transfer failure.
-\item We document the audit's validity program---why receiver-level
+\item We document the audit's validity program: why receiver-level
 uncertainty, permissive donor matching, and search-then-evaluate selection
 each overstate mechanistic evidence, and how cluster bootstraps, same-user
 exclusion, and feature-level discovery/confirmation splits repair them.
@@ -190,7 +190,7 @@ natural-language behaviors \citep{wang2023interpretability}. Two design choices
 in our protocol follow explicit recommendations from this literature: effects
 are always measured against matched active controls rather than in isolation
 \citep{zhang2023best}, and we treat cross-dataset transfer of a mechanism as an
-empirical claim to be tested rather than assumed---connecting to the question
+empirical claim to be tested rather than assumed, connecting to the question
 of universality of learned structure \citep{olah2020zoom,chughtai2023toy}.
 Like recent work analyzing LoRA-induced \emph{delta activations} with sparse
 autoencoders \citep{prasanth2026lora}, our decomposition targets what
@@ -562,12 +562,12 @@ Section~\ref{sec:detresults})---the paper's central score-level finding.}
 Figure~\ref{fig:detector_dissociation} summarizes the pattern. Combined
 with the never-trained-benign sensitivity above, the score-level conclusion
 anticipates the mechanistic one: the model's ranking strength is largely user
-novelty rather than behavioral discrimination---on \rsix{} almost entirely so,
+novelty rather than behavioral discrimination: on \rsix{} almost entirely so,
 on \rfour{} with a residual anomaly signal ($0.668$ day ROC against unseen
 benigns) whose behavioral character is supported by the feature attribution
 rather than by the ROC value itself. Stated plainly: under the
 user-disjoint comparison the session LM does \emph{not} outperform the
-feature-based baselines---its day ROC ($0.545$/$0.668$) falls at or below
+feature-based baselines: its day ROC ($0.545$/$0.668$) falls at or below
 every baseline's fold-aligned value ($0.628$--$0.768$), and the baselines
 already exclude test users from training. Within-user day ranking sharpens
 the picture. For each malicious user we computed the ROC-AUC of the adapted
@@ -635,7 +635,7 @@ stratum; we report it as unavailable rather than imputing it.
 Two comparisons calibrate these magnitudes. First, the strengthened protocol
 matters: same-user exclusion reduced the causal point estimates relative to
 earlier permissive-donor runs, so part of the earlier effect was inflated
-exactly as the audit hypothesized---but the effect does not vanish. Second, a matched session-autoencoder comparator evaluated on the same
+exactly as the audit hypothesized, but the effect does not vanish. Second, a matched session-autoencoder comparator evaluated on the same
 receivers at the same day-level unit yields a best contrast of $0.0011$;
 because the comparator's score is on a different scale (autoencoder
 reconstruction error rather than NLL), we report this as context rather than
@@ -647,7 +647,7 @@ re-selected using only the other three users' positives and effects are
 estimated on the held-out user with the configuration frozen. Feature
 selection itself proved user-sensitive: the three folds that retain the
 dominant user select nearly identical top-5 sets, while the fold that holds
-out the dominant user selects a fully disjoint set---\rsix{}'s feature
+out the dominant user selects a fully disjoint set: \rsix{}'s feature
 identity is largely defined by that user's data. The causal effect
 nevertheless passes its hardest test: the disjoint features, chosen from the
 other users' $24$ days, produce a significant repair effect on the dominant
@@ -791,7 +791,7 @@ comparison at layer 18 is sharper: overall dictionary geometry is
 substantially shared there (whole-dictionary median best-match up to
 $0.96$, as expected since both SAEs encode the same base model's layer-18
 residual stream), yet the \emph{top-5} features align at or below those
-medians ($0.30$ and $0.65$)---the anomaly-relevant directions are more
+medians ($0.30$ and $0.65$): the anomaly-relevant directions are more
 benchmark-specific than typical dictionary directions. Matched-layer top-5
 alignment also remains below within-benchmark cross-seed alignment
 ($0.81$--$0.95$), so the distinct headline mechanisms are not consistent
@@ -809,7 +809,7 @@ The picture so far (Table~\ref{tab:claim_status}): benign-only adaptation
 induces sparse token-level structure that is causally implicated in anomaly
 evidence on both benchmarks, with held-out replication that is directional
 on \rfour{} and dominant-user-concentrated on \rsix{}; the structure is
-benchmark-specific not merely in coordinates but in \emph{kind}---identity
+benchmark-specific not merely in coordinates but in \emph{kind}: identity
 metadata on \rsix{}, behavior on \rfour{}. This subsection stress-tests
 that picture against the two remaining artifact explanations: the positive
 population and the dictionary. We tested the population-size hypothesis directly by malicious-population
@@ -827,7 +827,7 @@ experiment isolates the selection stage conditional on the fixed \rfour{}
 dictionary; it does not test whether positive-population size could influence
 dictionary formation itself. A stronger check removes positives from
 dictionary formation altogether: we retrained both SAEs from scratch on
-benign token deltas only and reran the full downstream pipeline---feature
+benign token deltas only and reran the full downstream pipeline: feature
 reselection under held-out discipline (discovery users on \rfour{}; LOUO on
 \rsix{}), token attribution, and confirmation evaluation. The dissociation
 reproduces at the dictionary level. On \rfour{}, the benign-dictionary top-5
@@ -835,7 +835,7 @@ places $\geq 94\%$ of activation mass on behavioral \texttt{SES} tokens
 (four of five features at $100\%$, profile mass $\approx 0$); on \rsix{},
 every LOUO fold's top-5 is $\geq 99\%$ profile-bound, three of four folds
 select an identical feature set, and the fold excluding the dominant user
-diverges wholesale---mirroring the original dictionary's
+diverges wholesale, mirroring the original dictionary's
 dominant-user-defined feature identity
 (Table~\ref{tab:dict_robustness}). Held-out intervention effects are
 estimand-dependent under the new dictionaries: \rfour{} necessity replicates
@@ -870,7 +870,7 @@ deepest extracted layer under both seeds (three of five and four of five
 features at $\approx 100\%$ profile mass), while shallower layers lean
 behavioral: at this scale, profile capture concentrates at depth. The two
 \rsix{} adapters differ in quality (day ROC $0.414$ versus $0.738$), and
-profile dominance is strongest in the better-trained seed---consistent with
+profile dominance is strongest in the better-trained seed, consistent with
 profile capture being acquired through adaptation rather than induced by
 the serialization defect or particular to the 8B run. Rerunning the
 headline intervention estimands on all four 3B adapters replicates the
@@ -893,7 +893,7 @@ profile-feature effect), with partial held-out necessity (positive on the
 small multi-day users; role-context positive on the dominant-user fold, where
 the profile features' necessity was uniformly negative). \rsix{}'s profile
 capture is therefore a property of unconstrained feature \emph{selection},
-not an absence of behavioral causal structure---which is precisely the kind
+not an absence of behavioral causal structure, which is precisely the kind
 of distinction the audit exists to make.
 
 \subsection{Score-level profile counterfactuals}
@@ -924,7 +924,7 @@ $+0.108$ $[0.038, 0.179]$; masking all organizational identifiers as well
 yields a smaller, nonsignificant day-level gain of $+0.063$
 $[-0.003, 0.130]$): the simulated psychometric fields were not merely
 uninformative but actively obscured behavioral signal. Static profile
-metadata in the serialization is thus a liability twice over---it invites
+metadata in the serialization is thus a liability twice over: it invites
 identity capture during selection and degrades behavior-based scoring even
 when the mechanism is behavioral.
 
@@ -939,7 +939,7 @@ disturbed by profile perturbation than by replacing all behavior
 $+0.180$ versus $+0.102$ on \rfour{}, ratio $1.8$). Because donors are
 unseen users, this measures perturbation sensitivity rather than profile
 familiarity, and it shows that profile tokens dominate the raw NLL surface of
-both adapters---consistent with masking \emph{improving} \rfour{}
+both adapters, consistent with masking \emph{improving} \rfour{}
 discrimination by removing profile-driven score variance. The benchmarks thus
 differ not in raw score sensitivity, which is profile-dominated everywhere,
 but in where the anomaly-\emph{discriminative} signal lives: a distinction
@@ -991,7 +991,7 @@ benchmarks rather than in dictionary randomness. The universality question
 familiar from interpretability \citep{olah2020zoom,chughtai2023toy} thus
 reappears here with a mechanistic finding: we find no evidence that the two
 benchmark-specific adapters implement their anomaly signals through directly
-corresponding sparse feature families---indeed the selected evidence differs
+corresponding sparse feature families; indeed, the selected evidence differs
 in \emph{kind}. What transfers is the audit itself---the pipeline that
 finds, validates, and identifies mechanisms---not the mechanisms.
 
@@ -1078,7 +1078,7 @@ falsifiable (active controls, exclusion rules, prespecified primary
 estimands) rather than persuasive. Nothing here justifies autonomous action against
 individuals. Deployments would require human review, documented appeal
 processes, and governance appropriate to workplace monitoring, and our results
-are on simulated data---they establish methodology, not operational readiness.
+are on simulated data: they establish methodology, not operational readiness.
 
 \section*{Reproducibility Statement}
 
@@ -1200,7 +1200,7 @@ $[-0.0018, 0.0096]$ (descriptive; four clusters). Each benchmark therefore
 retains at least one individually significant estimand at matched dose.
 Best-donor selection is also examined for extreme-value artifacts: donor
 pools are asymmetric (benign donors capped at $16$ per receiver, anomalous
-donors scarcer---median $1$ on \rsix{}, mean $13$ on \rfour{}), which
+donors scarcer: median $1$ on \rsix{}, mean $13$ on \rfour{}), which
 gives the benign arm more selection opportunities; the asymmetry is common
 to top and control arms, and a complementary median-over-donors estimand
 (per-donor best-$\alpha$, median across donors, no extreme-value
@@ -1218,7 +1218,7 @@ perturbation magnitude alone. The reconstruction-substitution component
 common to both arms has mean per-token norm $\approx 7$ (\rsix{}) and
 $\approx 37$ (\rfour{}). As a size-calibration sensitivity, we recomputed
 the estimand on per-unit-norm effects (each best-row NLL change divided by
-its edit norm before forming the donor-type contrast)---a conservative
+its edit norm before forming the donor-type contrast), a conservative
 rescaling that assumes linear response and therefore favors the smaller
 control edits. On \rfour{}, the point contrast remains positive in three of
 four contexts including the headline (team $+0.0008$ per unit norm), though
