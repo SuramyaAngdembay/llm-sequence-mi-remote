@@ -49,7 +49,9 @@ consistent with user-profile novelty; on \rfour{}, four of five selected
 features concentrate on behavioral session events such as durations. Both
 attributions reproduce under dictionaries retrained on benign rows alone,
 and in a smaller-scale rerun with the serialization defect repaired and
-fresh adapter seeds.
+fresh adapter seeds; on a real-user benchmark with real psychometrics
+(TWOS) and non-distinctive malicious users, the audit certifies a cleanly
+behavioral detector, as the population-structure account predicts.
 Each feature family is stable across SAE initializations, while literal
 feature transfer between benchmarks fails. Critically, when malicious users are
 compared only against benign users never seen during adaptation, day-level
@@ -945,8 +947,37 @@ differ not in raw score sensitivity, which is profile-dominated everywhere,
 but in where the anomaly-\emph{discriminative} signal lives: a distinction
 that feature-level attribution and masking expose and that score-level
 perturbation alone cannot.
-% TODO(masking): insert masking ablation table + numbers when the Aquaman
-% scorings complete; design already described in the audit protocol.
+\subsection{Real-data replication with real psychometrics (TWOS)}
+\label{sec:twos}
+
+All results above are on simulated CERT data, and the population-structure
+account makes a falsifiable prediction about real data: when malicious users
+are \emph{not} a small distinctive minority, identity is a poor separator
+and selection should be behavioral. TWOS \citep{harilal2017twos} provides
+exactly this test: $24$ real users over five days, staged masquerade
+sessions on $12$ of them ($50\%$ prevalence), and---critically---each
+user's \emph{real} IPIP-50 Big-Five inventory, giving a genuine
+psychometric \texttt{PSY} line where CERT's is simulated. We serialized
+mouse, keystroke, and login telemetry into CERT-analogous ten-minute
+windows ($18{,}048$ windows; $138$ positive; $12$-user benign train pool),
+ran the identical pipeline at smaller scale (Qwen2.5-3B benign-only QLoRA,
+two adapter seeds; benign-only dictionaries; full-pool selection;
+attribution), and reran the headline intervention estimands.
+
+The audit certifies a clean detector on this benchmark: top-5 attribution
+is essentially $100\%$ behavioral under both adapter seeds at both audited
+layers (worst single feature: $0.983$ SES mass), despite real personality
+scores being present in every window; the score carries real signal
+(mean within-user ROC $0.783$ across the $16$ malicious users, identity
+held fixed by construction); and the intervention estimands reproduce the
+estimand asymmetry a fourth time (ablation dependence $+0.0019$,
+patch-repair $-0.0018$; $138$ receivers, team-matched donors, same-user
+excluded). This is the predicted outcome for the high-prevalence corner,
+and it complements the \rsix{} corner (four highly distinctive users among
+thousands) where profile capture wins: the dissociation's behavioral pole
+is not an artifact of synthetic data or simulated psychometrics. Deeper
+analyses of this benchmark (insider-type boundaries, detector baselines,
+per-user failure cases) are developed in companion work.
 
 \input{tables/claim_status.tex}
 
@@ -975,7 +1006,12 @@ subsamples of \rfour{} still select
 behavioral features. Whatever drives metadata capture on \rsix{} involves
 finer benchmark properties (how distinctive the malicious users' profile
 fields are within the benign profile distribution; what the benign-only
-adapter happened to compress into its deltas). For benchmark design the
+adapter happened to compress into its deltas). The account's two corners
+are now both instantiated: profile capture where a tiny distinctive
+malicious minority makes identity cheap (\rsix{}), and cleanly behavioral
+selection where half the population is malicious and identity separates
+nothing (TWOS, on real users with real psychometrics;
+Section~\ref{sec:twos}). For benchmark design the
 implication is in one way stronger: exposing static per-user metadata,
 especially simulated psychometrics with no operational counterpart, creates a
 capture risk that cannot be predicted from population size and that
@@ -1061,9 +1097,12 @@ discovery/confirmation splits reselect feature identities but inherit
 configuration choices (layer, dictionary size, sparsity, context menu,
 intervention grid) made on the full population; confirmation is
 feature-level, not configuration-level. Finally, the population-structure explanation for
-the profile/behavior dissociation is supported by two benchmarks; testing it
-requires benchmarks with varied malicious-population sizes and, ultimately,
-real telemetry without simulated psychometrics.
+the profile/behavior dissociation is supported by two synthetic benchmarks
+plus the TWOS replication (Section~\ref{sec:twos}), which supplies the
+high-prevalence, real-psychometrics corner; what remains untested is the
+profile-capture corner on real data---an organization-scale population with
+a small, profile-distinctive malicious minority---which no public real
+dataset currently provides.
 
 \section{Broader Impact Statement}
 
