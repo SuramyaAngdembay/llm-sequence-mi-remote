@@ -40,27 +40,33 @@ representation changes, validated by causal interventions against matched
 controls and labeled by token-level attribution---and apply it to
 Qwen3-8B adapted with QLoRA on benign users only, across two CERT
 insider-threat benchmarks. Despite similar scores, the audited detectors
-rest on qualitatively different internal evidence: on \rsix{}, with four
-malicious users among thousands, the causally implicated features are
-almost entirely profile-bound ($99.8$--$100\%$ of activation mass on
-simulated psychometric and organizational tokens), consistent with
-user-profile novelty; on \rfour{}, with sixty malicious users, four of
-five are behavioral. What reproduces is the pattern, not the features:
-literal feature transfer between benchmarks fails, yet each benchmark's
-evidence \emph{type} recurs across SAE initializations, benign-only
-dictionaries, a repaired serializer, and fresh adapter seeds at smaller
-scale. This yields an out-of-setting prediction: identity is cheap
-anomaly evidence when malicious users are a small, distinctive minority
-and useless when they are not, so on TWOS---real users with real
-psychometrics, half of them attacked---the audit should certify
-behavioral evidence, and it does. The score-level consequence is stark:
-compared only against benign users unseen during adaptation, day-level
-ROC-AUC falls from $0.95$ to $0.55$ (\rsix{}) and from $0.96$ to $0.67$
-(\rfour{})---apparent strength is largely a seen-versus-unseen-user
-effect---and score-time profile masking \emph{improves} \rfour{}'s
-unseen-user discrimination. High anomaly-ranking performance can thus
-conceal qualitatively different---and sometimes identity-proxy---internal
-evidence; mechanistic auditing makes the difference visible.
+rest on qualitatively different internal evidence. On \rsix{}, whose few
+malicious users are profile-distinctive within the benign population, the
+causally implicated features are almost entirely profile-bound
+($99.8$--$100\%$ of activation mass on simulated psychometric and
+organizational tokens), consistent with user-profile novelty; on
+\rfour{}, four of five causally selected features instead concentrate on
+behavioral session events; and subsampling shows that raw positive count
+alone does not explain the difference. What reproduces is the pattern,
+not the individual features: literal feature transfer across benchmarks
+fails, but each benchmark's profile-versus-behavior evidence type recurs
+across SAE initializations and benign-only dictionaries, and in smaller
+reruns with a repaired serializer and fresh adapter seeds. The resulting
+account---when malicious users are systematically distinguishable from
+the benign adaptation population through profile attributes, profile
+novelty offers a cheap anomaly shortcut; when that shortcut is
+unavailable, behavioral evidence dominates---was specified on CERT and
+makes an out-of-setting prediction: on TWOS, with real users, real
+psychometrics, and no profile-distinctive malicious minority, the audit
+should certify behavioral evidence, and it does. The score-level
+consequence is stark: compared only against benign users unseen during
+adaptation, day-level ROC-AUC falls from $0.95$ to $0.55$ (\rsix{}) and
+from $0.96$ to $0.67$ (\rfour{})---apparent strength is largely a
+seen-versus-unseen-user effect---and score-time profile masking
+\emph{improves} \rfour{}'s unseen-user discrimination. High
+anomaly-ranking performance can thus conceal qualitatively
+different---and sometimes identity-proxy---internal evidence; mechanistic
+auditing makes the difference visible.
 \end{abstract}
 
 \section{Introduction}
