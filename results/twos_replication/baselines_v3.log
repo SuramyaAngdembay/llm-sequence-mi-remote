@@ -1,0 +1,4 @@
+baseline | window ROC (all) | masq-only | traitor-only | mean within-user
+IsolationForest | 0.714 | 0.839 | 0.374 | 0.715
+OneClassSVM | 0.607 | 0.763 | 0.183 | 0.626
+PCA-recon | 0.790 | 0.867 | 0.582 | 0.795
