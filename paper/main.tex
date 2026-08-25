@@ -178,7 +178,13 @@ transformer's sequence modeling capacity \citep{vaswani2017attention} but are
 typically evaluated only as detectors. We instead use parameter-efficient
 adaptation \citep{hu2022lora,dettmers2023qlora} of a general-purpose LLM
 \citep{qwen3} and center the evaluation on the internal structure induced by
-adaptation rather than on detection leaderboards.
+adaptation rather than on detection leaderboards. This detector class is no
+longer hypothetical: LoRA-tuned and LLM-based insider-threat log analysis
+systems are actively being developed \citep{song2025dmfi,sun2025redchronos},
+which makes auditing what such detectors learn a timely obligation rather
+than a retrospective one; to our knowledge, ours is the first end-to-end
+causal audit of what an adaptation-based anomaly detector's score rests
+on.
 
 \paragraph{Mechanistic interpretability.}
 Sparse autoencoders and dictionary learning decompose model activations into
@@ -997,7 +1003,18 @@ them scores evidence consistent with \emph{who a user is} rather than
 would have licensed a stronger---and wrong---behavioral interpretation. We
 take this as the central methodological lesson: for anomaly models trained on
 metadata-rich telemetry, causal validation and semantic attribution are
-separate obligations, and only their conjunction says what a detector detects.
+separate obligations, and only their conjunction says what a detector
+detects. In this sense the audit's mechanistic layer is demonstrably
+necessary---every cheaper prefix misleads, and on \rsix{} the black-box
+probes were silent where attribution was decisive---while never sufficient
+alone: only conjoined with causal validation and score-level evaluation
+does it identify what a detector detects. One might object that we audit a
+detector of our own construction; but benign-only adaptation is the natural
+one-class recipe for the LoRA-tuned insider-detection systems now appearing
+\citep{song2025dmfi}, and the failure modes exposed here are properties of
+metadata-rich serialization and of evaluation protocol---both inherited
+from existing practice---rather than of any particular adapter
+architecture. Auditing the class before it is deployed is the point.
 
 \paragraph{A failure mode without a simple boundary condition.}
 The profile-novelty mechanism is not a bug in the model; it is a solution to
