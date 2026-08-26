@@ -1,0 +1,65 @@
+{
+  "tag": "r42",
+  "n_train_days": 284322,
+  "n_eval": 33789,
+  "n_pos": 1309,
+  "n_holdout_users": 94,
+  "profile_cols": [
+    "role",
+    "b_unit",
+    "f_unit",
+    "dept",
+    "team",
+    "ITAdmin",
+    "O",
+    "C",
+    "E",
+    "A",
+    "N"
+  ],
+  "n_behav_cols": 110,
+  "models": {
+    "IsolationForest": {
+      "roc_with_profile": 0.8294,
+      "profile_importance_mass": 0.017,
+      "top5_features": [
+        "usb_mean_usb_dur",
+        "n_usb",
+        "file_mean_file_len",
+        "file_mean_file_nwords",
+        "http_jobf_mean_http_c_len"
+      ],
+      "top5_profile_count": 0,
+      "roc_no_profile": 0.821,
+      "delta_roc_no_profile": -0.0084
+    },
+    "OneClassSVM": {
+      "roc_with_profile": 0.6595,
+      "profile_importance_mass": 0.124,
+      "top5_features": [
+        "http_jobf_mean_http_c_len",
+        "http_jobf_mean_http_c_nwords",
+        "file_n_phof",
+        "O",
+        "file_phof_n-disk0"
+      ],
+      "top5_profile_count": 1,
+      "roc_no_profile": 0.6372,
+      "delta_roc_no_profile": -0.0223
+    },
+    "PCA": {
+      "roc_with_profile": 0.8382,
+      "profile_importance_mass": 0.024,
+      "top5_features": [
+        "usb_mean_usb_dur",
+        "n_usb",
+        "file_mean_file_len",
+        "file_docf_n-disk0",
+        "http_mean_url_depth"
+      ],
+      "top5_profile_count": 0,
+      "roc_no_profile": 0.8471,
+      "delta_roc_no_profile": 0.0089
+    }
+  }
+}

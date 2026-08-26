@@ -1,0 +1,66 @@
+{
+  "tag": "r62",
+  "n_train_days": 1254025,
+  "n_eval": 138138,
+  "n_pos": 70,
+  "n_holdout_users": 399,
+  "profile_cols": [
+    "project",
+    "role",
+    "b_unit",
+    "f_unit",
+    "dept",
+    "team",
+    "ITAdmin",
+    "O",
+    "C",
+    "E",
+    "A",
+    "N"
+  ],
+  "n_behav_cols": 230,
+  "models": {
+    "IsolationForest": {
+      "roc_with_profile": 0.6408,
+      "profile_importance_mass": 0.04,
+      "top5_features": [
+        "http_jobf_n-http_act1",
+        "email_recvmail_mean_e_att_scomp",
+        "email_recvmail_mean_e_att_comp",
+        "http_jobf_mean_url_depth",
+        "email_send_mail_mean_e_att_doc"
+      ],
+      "top5_profile_count": 0,
+      "roc_no_profile": 0.6438,
+      "delta_roc_no_profile": 0.003
+    },
+    "OneClassSVM": {
+      "roc_with_profile": 0.4914,
+      "profile_importance_mass": 0.065,
+      "top5_features": [
+        "http_socnetf_n-http_act1",
+        "http_n_socnetf",
+        "http_jobf_n-http_act1",
+        "email_recvmail_mean_e_att_comp",
+        "http_mean_url_depth"
+      ],
+      "top5_profile_count": 0,
+      "roc_no_profile": 0.5139,
+      "delta_roc_no_profile": 0.0225
+    },
+    "PCA": {
+      "roc_with_profile": 0.6164,
+      "profile_importance_mass": 0.041,
+      "top5_features": [
+        "http_jobf_n-http_act1",
+        "email_recvmail_mean_e_att_scomp",
+        "email_recvmail_mean_e_att_comp",
+        "http_n_jobf",
+        "http_mean_http_c_len"
+      ],
+      "top5_profile_count": 0,
+      "roc_no_profile": 0.6384,
+      "delta_roc_no_profile": 0.022
+    }
+  }
+}

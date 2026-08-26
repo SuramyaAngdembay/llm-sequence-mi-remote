@@ -1014,7 +1014,18 @@ one-class recipe for the LoRA-tuned insider-detection systems now appearing
 \citep{song2025dmfi}, and the failure modes exposed here are properties of
 metadata-rich serialization and of evaluation protocol---both inherited
 from existing practice---rather than of any particular adapter
-architecture. Auditing the class before it is deployed is the point.
+architecture. A cross-architecture probe sharpens this: classical
+one-class detectors (Isolation Forest, one-class SVM, PCA reconstruction)
+trained on the same \rsix{} day-level features \emph{with profile columns
+included} place only $4$--$7\%$ of permutation-importance mass on profile
+fields, select no profile feature in any top-5, and lose nothing when
+profile columns are removed. The profile shortcut is therefore not a
+generic dataset property inherited by any detector: it emerges in the
+sequence-likelihood pathway, where per-user-constant profile tokens are
+exactly what a next-token objective is incentivized to compress. The
+detector class the field is now adopting carries a shortcut risk its
+classical predecessors demonstrably did not---which is why auditing it
+matters. Auditing the class before it is deployed is the point.
 
 \paragraph{A failure mode without a simple boundary condition.}
 The profile-novelty mechanism is not a bug in the model; it is a solution to
@@ -1024,7 +1035,10 @@ subsamples of \rfour{} still select
 behavioral features. Whatever drives metadata capture on \rsix{} involves
 finer benchmark properties (how distinctive the malicious users' profile
 fields are within the benign profile distribution; what the benign-only
-adapter happened to compress into its deltas). The account's two corners
+adapter happened to compress into its deltas)---and, per the
+cross-architecture probe, properties of the sequence-likelihood pathway
+specifically, since classical detectors on the same features do not take
+the shortcut. The account's two corners
 are now both instantiated: profile capture where a tiny distinctive
 malicious minority makes identity cheap (\rsix{}), and cleanly behavioral
 selection where half the population is malicious and identity separates
