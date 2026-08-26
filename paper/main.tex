@@ -54,7 +54,9 @@ across SAE initializations and benign-only dictionaries, and in smaller
 reruns with a repaired serializer and fresh adapter seeds. The resulting
 account---when malicious users are systematically distinguishable from
 the benign adaptation population through profile attributes, profile
-novelty offers a cheap anomaly shortcut; when that shortcut is
+novelty offers a cheap shortcut to sequence-likelihood detectors
+(classical detectors on the same features do not take it); when that
+shortcut is
 unavailable, behavioral evidence dominates---was specified on CERT and
 makes an out-of-setting prediction: on TWOS, with real users, real
 psychometrics, and no profile-distinctive malicious minority, the audit
@@ -1025,7 +1027,12 @@ sequence-likelihood pathway, where per-user-constant profile tokens are
 exactly what a next-token objective is incentivized to compress. The
 detector class the field is now adopting carries a shortcut risk its
 classical predecessors demonstrably did not---which is why auditing it
-matters. Auditing the class before it is deployed is the point.
+matters. The refined account also makes a testable prediction we leave to
+future work: sequence autoencoders, which share the sequence-prediction
+objective but not the pretrained representation, should fall between the
+tabular detectors and the LM in profile reliance; auditing their latent
+spaces with this framework would locate the shortcut's origin more finely.
+Auditing the class before it is deployed is the point.
 
 \paragraph{A failure mode without a simple boundary condition.}
 The profile-novelty mechanism is not a bug in the model; it is a solution to
@@ -1043,11 +1050,24 @@ are now both instantiated: profile capture where a tiny distinctive
 malicious minority makes identity cheap (\rsix{}), and cleanly behavioral
 selection where half the population is malicious and identity separates
 nothing (TWOS, on real users with real psychometrics;
-Section~\ref{sec:twos}). For benchmark design the
-implication is in one way stronger: exposing static per-user metadata,
-especially simulated psychometrics with no operational counterpart, creates a
-capture risk that cannot be predicted from population size and that
-score-level evaluation will not notice---it must be audited for. For
+Section~\ref{sec:twos}). The cross-architecture probe adds the second
+factor: classical one-class detectors on the same \rsix{} features do not
+take the shortcut, so ``cheap'' is relative to the learner. The account in
+its refined form is two-factor---\emph{population structure determines
+when the shortcut is available; the objective and representation determine
+which detectors take it}. Twelve profile columns among $242$ are not
+especially cheap for a density model, but per-user-constant profile tokens
+are maximally cheap for a sequence-likelihood objective. This also
+explains a number reported earlier: under user-disjoint evaluation the
+session LM \emph{underperforms} the classical baselines on \rsix{}
+($0.545$ against $0.63$--$0.77$), exactly as expected if adaptation spent
+capacity on a shortcut that does not generalize while the baselines
+learned behavior. For benchmark design the
+implication is accordingly conditional but sharp: exposing static per-user
+metadata, especially simulated psychometrics with no operational
+counterpart, creates a capture risk for sequence-likelihood detectors that
+cannot be predicted from population size and that score-level evaluation
+will not notice---it must be audited for. For
 deployment, the implication is unchanged and sharp: an identity-proxy
 detector generalizes to \emph{new users being unusual}, not to insider
 behavior.
