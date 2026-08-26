@@ -1,19 +1,47 @@
-\documentclass[11pt]{article}
-\usepackage[margin=1.15in]{geometry}
+\documentclass[10pt]{article}
+\usepackage[accepted,preprint]{tmlr}
 \usepackage{amsmath,amssymb}
-\usepackage{microtype}
-\usepackage{parskip}
-\usepackage[colorlinks=true,linkcolor=black,urlcolor=blue]{hyperref}
 \usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{url}
+\hypersetup{hidelinks}
+
+\def\month{08}
+\def\year{2026}
 
 \title{What Does a Benign-Trained Anomaly Detector Actually Detect?\\
-\large A plain-language account of the core method and findings}
-\author{Suramya Angdembay \and Haiyan Tian\\
-\normalsize University of Southern Mississippi}
-\date{}
+A Plain-Language Account of the Core Method and Findings}
+
+\author{\name Suramya Angdembay \email suramya.angdembay@usm.edu \\
+\addr University of Southern Mississippi
+\AND
+\name Haiyan Tian \email haiyan.tian@usm.edu \\
+\addr University of Southern Mississippi}
 
 \begin{document}
 \maketitle
+
+\begin{abstract}
+Anomaly detectors for insider threats are usually judged by how well
+their scores rank malicious activity above normal activity. We show that
+this number can be misleading, because it does not reveal what
+information the detector uses. We build a detector by adapting a large
+language model to normal employee activity only, so that unusual
+activity receives a high surprisal score, and we then open the model to
+determine what its score is based on. On one standard benchmark the
+score turns out to rest almost entirely on who each user is (their
+recorded personality and organizational profile) rather than on what
+they did; on a second benchmark the score rests mostly on behavior. When
+malicious users are compared only against normal users that the model
+has never seen, apparent ranking quality falls from about $0.95$ to near
+chance on the first benchmark. The same analysis on a third dataset,
+collected from real people with real personality questionnaires,
+confirms the behavioral case, and classical statistical detectors
+trained on the same information do not take the profile shortcut. The
+conclusion is that high ranking performance alone does not show that a
+detector has learned to detect behavior, and we provide a way to check.
+\end{abstract}
 
 \section{The problem}
 
@@ -208,7 +236,21 @@ the score changes, and it changes more than when the same edit is
 applied to matched control features. We omit the details of those
 experiments here and take away only their conclusion: the selected
 features are causally connected to the score, not merely correlated
-with it.
+with it. Figure~\ref{fig:effects} summarizes those measurements.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/mech_effects.pdf}
+\caption{Effect of editing the selected features, compared with editing
+matched control features, on the anomaly score (one panel per benchmark
+and per type of edit; units are thousandths of the score). Each point is
+the average effect for one organizational matching context, and each
+horizontal bar is a $95$ percent confidence interval computed with the
+malicious users as the resampling unit. Positive values mean that the
+selected features influence the score more strongly than the control
+features do. Open circles mark intervals that include zero.}
+\label{fig:effects}
+\end{figure}
 
 \subsection{Reading off what the features respond to}
 
@@ -263,7 +305,23 @@ first approximation, an unfamiliar-user detector. Consistently with
 this, deleting the personality lines from the inputs at scoring time
 \emph{improves} the r4.2 detector's performance on unseen users from
 $0.67$ to about $0.80$: the profile text was not merely unhelpful, it
-was actively obscuring the behavioral signal.
+was actively obscuring the behavioral signal. Figure~\ref{fig:collapse}
+shows the comparison with standard detectors and the collapse.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/detector_dissociation.pdf}
+\caption{Score-level results. Left and center panels: ranking quality
+(vertical axis) and precision (horizontal axis, logarithmic scale) for
+the language-model detector (blue) and four standard anomaly-detection
+methods on the two benchmarks; the language model attains the highest
+ranking quality under the standard protocol. Right panel: the same
+language-model ranking quality when malicious users are compared only
+against benign users never seen during training. The apparent advantage
+largely disappears (from $0.95$ to $0.55$ on r6.2 and from $0.96$ to
+$0.67$ on r4.2), and the dashed line marks chance level.}
+\label{fig:collapse}
+\end{figure}
 
 \subsection{A real-data test with real personality scores}
 
