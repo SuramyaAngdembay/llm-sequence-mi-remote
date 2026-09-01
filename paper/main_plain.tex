@@ -191,10 +191,11 @@ states. Define, at a chosen layer $\ell$ and each token position $t$,
 \delta_t \;=\; h^{(\ell), \mathrm{ada}}_t - h^{(\ell),
 \mathrm{base}}_t \;\in\; \mathbb{R}^{d}.
 \end{equation}
-The vector $\delta_t$ is precisely the contribution of the fine-tuning
-to the model's internal computation at that point. Everything the
-detector learned about our corpus, beyond what the general-purpose model
-already knew, must be expressed through these vectors.
+The vector $\delta_t$ isolates the representational change induced by
+the fine-tuning at the audited layer and position. It is the natural
+object to study if one wants to know what the adaptation, as opposed to
+the general-purpose model, contributes at that point in the
+computation.
 
 \subsection{A sparse dictionary for the changes}
 
@@ -284,13 +285,29 @@ lines. The detector's causally relevant evidence is almost entirely a
 description of \emph{who the user is}. On r4.2, four of the five
 selected features concentrate on the behavioral session lines. There,
 the evidence is mostly \emph{what the user did}.
+Figure~\ref{fig:attribution} summarizes this contrast, together with
+the real-data result of Section~\ref{sec:findings}.3.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/attribution_summary.pdf}
+\caption{Where the selected features place their activation, averaged
+over each detector's five selected features. Each bar decomposes the
+activation mass into the organizational lines, the personality lines,
+and the behavioral session lines of the input text. The r6.2 detector's
+evidence is almost entirely a description of who the user is; the r4.2
+and TWOS detectors' evidence is almost entirely a description of what
+the user did.}
+\label{fig:attribution}
+\end{figure}
 
 \subsection{The consequence for the headline numbers}
 
 Why would reading a user's static profile produce a high AUC at all? The
 adapted model was trained on roughly ninety percent of the benign users.
-For those users, the model has memorized the constant profile lines, so
-their days look unsurprising. The malicious users, however, were never
+For those users, the model has been repeatedly exposed to the constant
+profile lines, so their profile text is comparatively familiar and their
+days look unsurprising. The malicious users, however, were never
 seen in training, so their profile lines alone make their days look
 surprising. The score is then partly measuring \emph{familiarity} rather
 than behavior.
@@ -331,13 +348,14 @@ design of the underlying study, temporarily took over other users'
 sessions. Each real user completed a standard fifty-item Big Five
 personality questionnaire, so the serialized days contain genuine
 psychometric information. In this dataset half of the users experience
-an attack, so ``being an unusual person'' cannot separate the classes,
-and our account predicts that the detector must rely on behavior. That
-is what the analysis finds: the selected features place essentially all
-of their mass on the behavioral lines, under two independent training
-runs, and the score meaningfully separates each user's attacked windows
-from that same user's normal windows (average within-user AUC about
-$0.7$, with identity held fixed by construction).
+an attack, so profile information is a far weaker separator than in
+CERT r6.2, and our account predicts that the detector should rely on
+behavior. That is what the analysis finds: the selected features place
+essentially all of their mass on the behavioral lines, under two
+independent training runs. Decisively, the evaluation compares each
+user's attacked windows with that same user's normal windows, so static
+identity and personality information is held fixed and cannot explain
+the observed separation (average within-user AUC about $0.7$).
 
 \subsection{Where the shortcut comes from}
 
@@ -352,11 +370,13 @@ four to seven percent of the total importance, no profile variable
 appears among any method's top five, and deleting the profile variables
 does not hurt their performance.
 
-The shortcut is therefore specific to the language-model pathway, and
-the reason is visible in the training objective. For a
+The shortcut is therefore not an inevitable consequence of the
+available profile information: we do not observe comparable profile
+reliance in the three classical detectors. An explanation consistent
+with this evidence lies in the training objective. For a
 likelihood-based sequence model, the per-user-constant profile tokens
-are the most predictable part of every training sequence, so memorizing
-them yields the largest and cheapest reduction of the training loss. In
+are the most predictable part of every training sequence, so learning
+them yields a large and cheap reduction of the training loss. In
 a plain feature-vector representation, the same information is twelve
 columns among two hundred forty-two, with no comparable incentive
 attached. Our summary of the whole phenomenon is a two-factor statement:
