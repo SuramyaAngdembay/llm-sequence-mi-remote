@@ -212,7 +212,7 @@ comparison days belong to users the model saw during training. Under
 this protocol the adapted model looks excellent: AUC about $0.953$ on
 r6.2 and $0.964$ on r4.2, higher than four standard anomaly-detection
 baselines evaluated on the same benchmarks (an isolation forest, a
-one-class support vector machine variant called Deep SVDD, and two
+deep one-class method called Deep SVDD, and two
 recurrent autoencoders), whose AUC values range from about $0.63$ to
 $0.77$.
 \item \emph{The user-disjoint protocol.} Malicious days are compared
@@ -565,7 +565,9 @@ simulation. We therefore repeated the pipeline on TWOS, a public
 dataset collected at the Singapore University of Technology and Design
 from twenty-four real users over one week, during which, by design of
 the underlying study, twelve users had their sessions temporarily taken
-over by other participants (a ``masquerade'' attack). Each real user
+over by other participants (a ``masquerade'' attack), and five users,
+after a staged dismissal, briefly acted as insiders on their own accounts
+(a ``traitor'' scenario). Each real user
 completed the standard fifty-item Big Five questionnaire, so the
 serialized inputs contain genuine psychometric information.
 
@@ -573,9 +575,12 @@ The details mirror the CERT setup at smaller scale. Mouse, keyboard,
 and logon telemetry are aggregated into ten-minute windows and
 serialized in the same three-line-class format, with the real Big Five
 scores forming the personality line ($18{,}048$ windows in total, of
-which $138$ overlap a staged attack). The model is the smaller
-Qwen2.5-3B, adapted on benign users' windows only (about seven thousand
-windows from the twelve never-attacked users), trained twice with
+which $138$ overlap a staged attack: $101$ masquerade and $37$ traitor
+windows). The model is the smaller
+Qwen2.5-3B, adapted on benign windows only (about seven thousand windows
+from the twelve users who were never masqueraded; for the five later
+dismissed users, only days before the dismissal enter training), trained
+twice with
 different random seeds; dictionaries are trained on benign rows only;
 selection and attribution proceed exactly as before.
 
@@ -589,7 +594,8 @@ $0.983$). Decisively, the evaluation compares each attacked user's
 attack windows with that same user's normal windows, so static identity
 and personality information is held fixed and cannot explain the
 observed separation; the average within-user AUC is $0.78$ across the
-sixteen attacked users. The intervention experiments reproduce the
+sixteen attacked users (the twelve masqueraded users plus the four
+dismissed users with logged activity in their staged window). The intervention experiments reproduce the
 pattern seen on CERT: the ablation contrast is positive
 ($+0.0019$) while the repair contrast is not, the fourth independent
 occurrence of that asymmetry. The behavioral pole of the dissociation

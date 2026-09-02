@@ -964,11 +964,13 @@ account makes a falsifiable prediction about real data: when malicious users
 are \emph{not} a small distinctive minority, identity is a poor separator
 and selection should be behavioral. TWOS \citep{harilal2017twos} provides
 exactly this test: $24$ real users over five days, staged masquerade
-sessions on $12$ of them ($50\%$ prevalence), and---critically---each
+sessions on $12$ of them ($50\%$ prevalence) plus five staged insider
+(``traitor'') sessions, and---critically---each
 user's \emph{real} IPIP-50 Big-Five inventory, giving a genuine
 psychometric \texttt{PSY} line where CERT's is simulated. We serialized
 mouse, keystroke, and login telemetry into CERT-analogous ten-minute
-windows ($18{,}048$ windows; $138$ positive; $12$-user benign train pool),
+windows ($18{,}048$ windows; $138$ positive, of which $101$ are masquerade
+and $37$ traitor windows; $12$-user benign train pool),
 ran the identical pipeline at smaller scale (Qwen2.5-3B benign-only QLoRA,
 two adapter seeds; benign-only dictionaries; full-pool selection;
 attribution), and reran the headline intervention estimands.
@@ -977,8 +979,9 @@ The audit certifies a clean detector on this benchmark: top-5 attribution
 is essentially $100\%$ behavioral under both adapter seeds at both audited
 layers (worst single feature: $0.983$ SES mass), despite real personality
 scores being present in every window; the score carries real signal
-(mean within-user ROC $0.783$ across the $16$ malicious users, identity
-held fixed by construction); and the intervention estimands reproduce the
+(mean within-user ROC $0.783$ across the $16$ attacked users---$12$
+masqueraded plus $4$ traitors with logged activity---identity held fixed
+by construction); and the intervention estimands reproduce the
 estimand asymmetry a fourth time (ablation dependence $+0.0019$,
 patch-repair $-0.0018$; $138$ receivers, team-matched donors, same-user
 excluded). This is the predicted outcome for the high-prevalence corner,
@@ -1045,7 +1048,14 @@ fields are within the benign profile distribution; what the benign-only
 adapter happened to compress into its deltas)---and, per the
 cross-architecture probe, properties of the sequence-likelihood pathway
 specifically, since classical detectors on the same features do not take
-the shortcut. The account's two corners
+the shortcut. Neither factor of the two-factor account has yet been
+manipulated in isolation: the classical detectors differ from the language
+model in objective, representation, architecture, and capacity
+simultaneously, and profile distinctiveness has not been varied
+independently of malicious-user count; factorial designs (matched adapters
+trained with profile fields removed, shuffled, or loss-downweighted;
+distinctiveness varied at fixed count) remain the decisive tests of the
+account. The account's two corners
 are now both instantiated: profile capture where a tiny distinctive
 malicious minority makes identity cheap (\rsix{}), and cleanly behavioral
 selection where half the population is malicious and identity separates
