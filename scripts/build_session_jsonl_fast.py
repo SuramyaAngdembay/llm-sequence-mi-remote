@@ -42,7 +42,7 @@ def _effective_session_cols(present_cols: list[str]) -> list[str]:
     return [c for c, f in zip(present_cols, nt._fields) if c == f]
 
 
-def build_examples_fast(df: pd.DataFrame, labels: pd.DataFrame, val_frac: float, max_sessions: int, repair_hyphenated_cols: bool = False):
+def build_examples_fast(df: pd.DataFrame, labels: pd.DataFrame, val_frac: float, max_sessions: int, repair_hyphenated_cols: bool = False, profile_mode: str = 'full'):
     labels = labels[["user_id", "day_index", "y"]].drop_duplicates()
     label_map = {(str(r.user_id), int(r.day_index)): int(r.y) for r in labels.itertuples(index=False)}
     positive_users = set(labels.loc[labels["y"] > 0, "user_id"].astype(str))
@@ -68,6 +68,26 @@ def build_examples_fast(df: pd.DataFrame, labels: pd.DataFrame, val_frac: float,
     uid = df["user_id"].to_numpy()
     day = df["day_index"].to_numpy()
     ctx_arrays = {c: df[c].to_numpy() for c in present_context}
+    # P1 profile-manipulation modes. 'shuffle_profile' replaces each user's
+    # profile block with a fixed random OTHER user's block (breaks per-user
+    # constancy while preserving the marginal token distribution).
+    uid_arr = df["user_id"].to_numpy()
+    donor_ctx = None
+    if profile_mode == "shuffle_profile":
+        import numpy as _np
+        first = {}
+        for i in range(len(uid_arr)):
+            u = uid_arr[i]
+            if u not in first:
+                first[u] = {c: ctx_arrays[c][i] for c in present_context}
+        users_sorted = sorted(first)
+        rng = _np.random.default_rng(1234)
+        perm = list(users_sorted); rng.shuffle(perm)
+        # derange: ensure no user keeps its own profile
+        for j in range(len(perm)):
+            if perm[j] == users_sorted[j]:
+                perm[j], perm[(j+1) % len(perm)] = perm[(j+1) % len(perm)], perm[j]
+        donor_ctx = {users_sorted[j]: first[perm[j]] for j in range(len(users_sorted))}
     sess_arrays = {c: df[c].to_numpy() for c in eff_session}
 
     # contiguous-group boundaries on the sorted frame (same grouping as groupby(sort=False))
@@ -84,8 +104,14 @@ def build_examples_fast(df: pd.DataFrame, labels: pd.DataFrame, val_frac: float,
         y = int(label_map.get((user_id, day_index), 0))
         split = assign_split(user_id, positive_users, val_frac=val_frac)
         context = {c: ctx_arrays[c][s] for c in present_context}
+        if profile_mode == "shuffle_profile" and donor_ctx is not None:
+            context = dict(donor_ctx.get(user_id, context))
         sessions = [{c: sess_arrays[c][i] for c in eff_session} for i in range(s, s + kept)]
         text = serialize_text(context, sessions, total_sessions=int(n_total))
+        if profile_mode == "no_psy":
+            text = "\n".join(l for l in text.split("\n") if not l.startswith("PSY "))
+        elif profile_mode == "no_profile":
+            text = "\n".join(l for l in text.split("\n") if not (l.startswith("PSY ") or l.startswith("DAY ")))
         example_id = f"{user_id}:{day_index}"
         rows.append({
             "example_id": example_id,
@@ -122,6 +148,8 @@ def main() -> None:
     ap.add_argument("--max-sessions", type=int, default=24)
     ap.add_argument("--repair-hyphenated-cols", action="store_true",
                     help="serialize the four hyphenated file-routing columns the original dropped")
+    ap.add_argument("--profile-mode", choices=["full", "no_psy", "no_profile", "shuffle_profile"],
+                    default="full", help="P1 profile-manipulation condition")
     args = ap.parse_args()
 
     out_dir = ensure_dir(args.out_dir)
@@ -137,7 +165,7 @@ def main() -> None:
     labels = pd.read_parquet(labels_path)
     print(f"[build_fast] loaded labels: {len(labels)} rows", flush=True)
 
-    examples, meta_df = build_examples_fast(raw_df, labels, val_frac=args.val_frac, max_sessions=args.max_sessions, repair_hyphenated_cols=args.repair_hyphenated_cols)
+    examples, meta_df = build_examples_fast(raw_df, labels, val_frac=args.val_frac, max_sessions=args.max_sessions, repair_hyphenated_cols=args.repair_hyphenated_cols, profile_mode=args.profile_mode)
     print(f"[build_fast] built examples: {len(meta_df)}", flush=True)
 
     train_rows = [r for r in examples if r["split"] == "train"]
