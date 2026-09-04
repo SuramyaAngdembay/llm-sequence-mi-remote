@@ -17,7 +17,7 @@
 \newcommand{\rsix}{r6.2}
 \newcommand{\rfour}{r4.2}
 
-\def\month{07}
+\def\month{09}
 \def\year{2026}
 \def\openreview{\url{https://openreview.net/forum?id=XXXX}}
 
@@ -125,7 +125,11 @@ rows alone reproduces the attribution dissociation, so profile capture does
 not require positive-shaped dictionaries either. \rsix{}'s
 profile capture is a property of that benchmark's label--profile structure
 and its adapter's learned geometry, not of small positive populations in
-general.
+general. These conclusions extend beyond the two synthetic benchmarks: the
+behavioral pole reproduces on a real-user dataset with genuine psychometrics
+(Section~\ref{sec:twos}), and classical detectors given the same profile
+fields do not take the shortcut, locating it in the sequence-likelihood
+pathway (Section~\ref{sec:discussion}).
 
 \input{figures/pipeline.tex}
 
@@ -152,6 +156,15 @@ while cross-benchmark top-feature alignment sits at or below its null---at
 matched depth, the top features align \emph{worse} than typical dictionary
 features---showing that SAE initialization instability is unlikely to
 explain the observed transfer failure.
+\item We test the account's generality on real data and across detector
+classes: on TWOS (real users, real Big-Five psychometrics) the audit
+certifies behavioral evidence exactly where the account predicts it, while
+classical one-class detectors given the same CERT profile fields do not
+take the profile shortcut, locating it in the sequence-likelihood pathway.
+The resulting two-factor account---population structure governs when an
+identity shortcut is available; objective and representation govern which
+detectors take it---is stated with its isolating factorial tests named as
+future work.
 \item We document the audit's validity program: why receiver-level
 uncertainty, permissive donor matching, and search-then-evaluate selection
 each overstate mechanistic evidence, and how cluster bootstraps, same-user
@@ -606,10 +619,7 @@ estimand (note the panel-specific scales, all in units of $10^{-3}$
 adapted-NLL). Points are paired complete-case top-versus-control contrasts;
 horizontal lines are $95\%$ user-level cluster bootstrap intervals
 ($10{,}000$ draws with the malicious user as resampling unit; the prespecified
-primary analysis); open markers denote intervals that cross zero. In the
-causal panels, the dashed line marks the best matched session-autoencoder
-comparator contrast on the same receivers (indicative only; the comparator
-operates on a different score scale).}
+primary analysis); open markers denote intervals that cross zero.}
 \label{fig:mech_effects}
 \end{figure}
 
