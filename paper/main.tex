@@ -161,10 +161,15 @@ classes: on TWOS (real users, real Big-Five psychometrics) the audit
 certifies behavioral evidence exactly where the account predicts it, while
 classical one-class detectors given the same CERT profile fields do not
 take the profile shortcut, locating it in the sequence-likelihood pathway.
-The resulting two-factor account---population structure governs when an
-identity shortcut is available; objective and representation govern which
-detectors take it---is stated with its isolating factorial tests named as
-future work.
+We then ground the account causally at training time with a train-matched
+factorial (Section~\ref{sec:trainfactorial}): four adapters identical except
+for the profile block, where shuffling profiles across users---presence
+preserved, identity link destroyed---collapses cross-user ranking to chance
+while removal yields the best unseen-user generalization. The resulting
+two-factor account: population structure governs when an identity shortcut
+is available; objective and representation govern which detectors take it,
+and profile availability at training time is causally responsible for the
+binding.
 \item We document the audit's validity program: why receiver-level
 uncertainty, permissive donor matching, and search-then-evaluate selection
 each overstate mechanistic evidence, and how cluster bootstraps, same-user
@@ -188,7 +193,11 @@ admits a causal, feature-level account of its anomaly evidence.
 
 \paragraph{Language models over logs.}
 Treating system and behavior logs as sequences for anomaly detection predates
-modern LLMs \citep{du2017deeplog,guo2021logbert}. These approaches inherit the
+modern LLMs \citep{du2017deeplog,guo2021logbert}, including benign-trained
+event-level language models over enterprise authentication logs whose
+strongest variants condition on user identity by construction---per-user
+tiered models and per-user score normalization treated as features, not
+audited as risks \citep{tuor2018recurrent}. These approaches inherit the
 transformer's sequence modeling capacity \citep{vaswani2017attention} but are
 typically evaluated only as detectors. We instead use parameter-efficient
 adaptation \citep{hu2022lora,dettmers2023qlora} of a general-purpose LLM
@@ -238,7 +247,20 @@ In security applications specifically, sampling bias, label artifacts, and
 inappropriate train/test separation are documented recurrent pitfalls
 \citep{arp2022dos}; our user-disjoint detector analysis and profile-masking
 counterfactuals are instances of the evaluation hygiene that work
-prescribes. On the interpretability side, SAE feature identity is itself an
+prescribes. Benchmark-level critiques have shown that reported gains of
+sequence models on standard log-anomaly datasets are partly evaluation
+artifacts \citep{landauer2024critical}; our seen-versus-unseen collapse is
+the identity-leakage analogue of that critique for insider-threat
+benchmarks. Closest to our finding, \citet{xu2024facade} explicitly identify
+the pathology in which a detector ``achieves separation by featurizing
+actions through the token of their principal'' and engineer around it with
+identity-obfuscated contrastive training on proprietary data. We are
+complementary: rather than preventing the shortcut by construction, we open
+a benign-trained detector and characterize the shortcut
+mechanistically---sparse features, causal interventions, attribution
+masses, and train-matched counterfactuals
+(Section~\ref{sec:trainfactorial})---on public benchmarks where the result
+can be reproduced. On the interpretability side, SAE feature identity is itself an
 unstable object---features can split or absorb one another across dictionary
 configurations \citep{chanin2024absorption}---which motivates our seed
 controls, matched-layer alignment baselines, and the benign-only dictionary
@@ -1000,6 +1022,65 @@ thousands) where profile capture wins: the dissociation's behavioral pole
 is not an artifact of synthetic data or simulated psychometrics. Deeper
 analyses of this benchmark (insider-type boundaries, detector baselines,
 per-user failure cases) are developed in companion work.
+
+\subsection{Train-matched counterfactuals: profile availability is causal at training time}
+\label{sec:trainfactorial}
+
+Every causal result above intervenes at \emph{inference} time on an adapter
+that was trained with the profile present; a fair objection is that profile
+capture might be a correlate of training rather than a consequence of the
+profile itself. To close this gap we trained four adapters from scratch under
+an identical recipe (Qwen2.5-3B, benign-only QLoRA, $300$k training examples,
+shared seed) on \rsix{} serializations that differ \emph{only} in the profile
+block: (i) the full serialization; (ii) \textsc{no-psy}, dropping the
+\texttt{PSY} line; (iii) \textsc{no-profile}, dropping both \texttt{DAY} and
+\texttt{PSY}; and (iv) \textsc{shuffle}, a seeded derangement that gives every
+user another user's profile block---token presence, line format, and surface
+statistics are preserved exactly, but the profile--identity link is destroyed.
+We score each adapter by adapted NLL under a lightweight protocol (positives
+against held-out benign users for a user-disjoint ROC; per-user day ranking
+for a within-user ROC; $70$ positive user-days; one seed). Absolute values
+under this protocol are not comparable to the fold-aligned benchmark of
+Section~\ref{sec:detprotocol}; the object of interest is the contrast across
+arms, which shares protocol, data volume, and seed.
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Training serialization & User-disjoint ROC & Within-user ROC \\
+\midrule
+full                & $0.736$ & $0.739$ \\
+\textsc{no-psy}     & $0.683$ & $0.702$ \\
+\textsc{no-profile} & $\mathbf{0.774}$ & $0.570$ \\
+\textsc{shuffle}    & $\mathbf{0.452}$ & $0.666$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Three observations. First, the \textsc{shuffle} arm isolates
+\emph{informativeness} from \emph{presence}: with profile tokens intact but
+decoupled from identity, cross-user ranking collapses to chance or below
+($0.452$, $-0.284$ versus full) while within-user ranking survives
+($0.666$)---the model learns to bind score structure to profile content
+during training, and when profiles are uninformative that binding actively
+misleads ranking across users. No inference-time intervention can produce
+this contrast. Second, removing the profile entirely yields the best
+cross-user generalization ($0.774$), and removing \texttt{PSY} alone does not
+($0.683$): the \texttt{DAY} line suffices to carry the shortcut, so the
+effect is not specific to the simulated psychometric inventory. Third, the
+profile block is not purely parasitic: \textsc{no-profile} \emph{degrades}
+within-user ranking ($0.739\!\to\!0.570$) even though the profile is constant
+within a user, indicating that profile context also conditions the behavioral
+representation. Serializing identity-linked profile therefore buys
+within-user sensitivity at the cost of cross-user generalization---a
+trade-off, not a free defect---which is the training-time face of the
+two-factor account developed in Section~\ref{sec:discussion}. These are
+pilot-scale results (one seed, $3$B, $70$ positives) and we scope them as
+directional; they causally ground, but do not numerically transfer to, the
+$8$B findings above.
+% TODO(sae-readout): feature-level audit of full vs shuffle adapters
+% (does profile capture vanish when the identity link is destroyed?) --
+% jobs 20502738/20502739; add one paragraph when attribution masses land.
 
 \input{tables/claim_status.tex}
 
