@@ -1,0 +1,285 @@
+\documentclass[10pt]{article}
+\usepackage[preprint]{tmlr}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{url}
+\hypersetup{hidelinks}
+
+\def\month{09}
+\def\year{2026}
+\def\openreview{\url{https://openreview.net/forum?id=XXXX}}
+
+\title{What a Benign-Trained Anomaly Detector Can and Cannot See:\\
+A Real-Data Study of the Masquerade--Traitor Boundary on TWOS}
+
+\author{\name Suramya Angdembay \email suramya.angdembay@usm.edu \\
+\addr University of Southern Mississippi
+\AND
+\name Haiyan Tian \email haiyan.tian@usm.edu \\
+\addr University of Southern Mississippi}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Benign-trained anomaly detectors are evaluated by how well their scores rank
+attacks, but a score says nothing about \emph{which} attacks a detector can
+see at all. We study this directly on TWOS, a dataset of $24$ real users with
+genuine self-reported personality inventories and two distinct kinds of staged
+insider activity---\emph{masquerades}, in which an attacker operates a
+victim's live session, and \emph{traitors}, in which a legitimate user turns
+malicious. Adapting a general-purpose language model to the benign population
+and auditing it with sparse features and causal interventions, we find a clean
+behavioral detector (top causal features carry essentially no profile mass
+despite real psychometrics being present in every input), replicating on real
+data the behavioral pole of a profile-versus-behavior dissociation established
+on synthetic benchmarks. The detector reaches a mean within-user ROC-AUC of
+$0.783$ over $16$ attacked users from mouse, keystroke, and host-event
+telemetry alone. But its central finding is a \emph{boundary}: masquerade
+windows are detected far better than traitor windows
+($0.780$ vs.\ $0.256$ pool ROC-AUC), and---crucially---this gap reproduces
+across four unrelated detector families (Isolation Forest, one-class SVM,
+PCA reconstruction, and the language model), so it is a property of the
+\emph{observation space}, not of any one model: traitors are behaviorally
+\emph{calmer} than their own baselines, exfiltrating out of the telemetry
+channel. A case study on a near-zero-activity user shows the converse---that
+detectability is a property of the serialized field set: enriching the
+serialization with a host-event channel flips that user's within-user ROC-AUC
+from $0.005$ (inverted) to $0.929$. We argue that reporting what a detector
+\emph{structurally cannot} see belongs alongside its detection numbers.
+\end{abstract}
+
+\section{Introduction}
+
+An insider-threat detector trained only on benign activity is usually reported
+by a single kind of number: an ROC-AUC or a precision at some alert budget,
+summarizing how well its anomaly score separates known attacks from normal
+behavior. Such numbers answer ``how well does it rank the attacks we gave
+it?'' They are silent on two prior questions that matter at least as much in
+deployment: \emph{what evidence} is the score actually built on, and \emph{which
+kinds of attack are even visible} in the data the detector consumes.
+
+In companion work we developed a mechanistic audit that answers the first
+question for adaptation-based sequence detectors, and used it to expose a
+dissociation: on one synthetic benchmark a benign-trained language model scores
+anomalies through user-identity and profile tokens rather than behavior, while
+on another it uses genuine behavioral evidence. That study reserved a real-data
+benchmark, TWOS \citep{harilal2017twos}, for a compact confirmation that the
+behavioral pole is not a synthetic-data artifact. Here we return to TWOS as the
+primary object of study, because it uniquely supports the \emph{second}
+question. TWOS contains two operationally different insider scenarios under one
+schema---masquerades and traitors---and it pairs high-frequency behavioral
+telemetry with each user's real IPIP-50 Big-Five inventory. This lets us ask
+not just how well a benign-trained detector scores, but where its blind spots
+are and why.
+
+Our contributions are:
+\begin{enumerate}[leftmargin=1.3em]
+\item \textbf{A real-data audit with real psychometrics.} Adapting Qwen2.5-3B
+to the benign TWOS population and running the full sparse-feature-plus-causal
+audit, we find the top causally implicated features are essentially $100\%$
+behavioral at both audited layers and both adapter seeds---despite a real
+personality \texttt{PSY} line in every window. On real data the detector does
+not take the identity shortcut, exactly in the population regime
+($50\%$ attack prevalence) where identity is a useless separator.
+\item \textbf{A model-class-independent masquerade--traitor boundary.} The
+language model detects masquerades far better than traitors
+($0.780$ vs.\ $0.256$), and this dichotomy holds across Isolation Forest,
+one-class SVM, and PCA reconstruction on the same features. Because four
+unrelated detector families agree, the boundary is a statement about the
+telemetry, not the model: traitor activity is behaviorally quiet.
+\item \textbf{A case study localizing detectability to the field set.} A
+near-zero-baseline user whose masquerader was the most hyperactive attacker in
+the dataset is scored \emph{inverted} (ROC-AUC $0.005$) by a two-source
+serialization, and correctly ($0.929$) once a host-event channel is added---a
+concrete demonstration that what a detector can see is a property of what the
+serialization exposes.
+\item \textbf{A causal signature that transfers.} The estimand asymmetry
+observed on synthetic data---ablation-dependence is a robust causal signature
+of behavioral feature families while patch-repair is configuration-sensitive
+---reproduces a fourth time here, on real data.
+\end{enumerate}
+
+We take from this that a detector's report should include not only its scores
+but an explicit account of what its observation space renders invisible; on
+TWOS, that is precisely the traitor.
+
+\section{The TWOS benchmark and serialization}
+
+TWOS \citep{harilal2017twos} records $24$ real users over five working days
+across six telemetry sources (keystroke, mouse, host/event-viewer, network,
+email, and logon), together with each user's real self-administered IPIP-50
+Big-Five personality inventory. Ground truth comprises $12$ staged
+\emph{masquerade} sessions ($90$ minutes each, in which an attacker uses a
+victim's unlocked machine) and $5$ staged \emph{traitor} sessions ($120$
+minutes each, in which a legitimate user acts maliciously). This is the
+combination we need: a genuine psychometric axis, two attack modalities, and a
+prevalence ($12$ of $24$ users involved in masquerades) that is the opposite
+extreme from the small distinctive minority found in the synthetic benchmark
+where profile capture occurred.
+
+We serialize the telemetry into the same \texttt{DAY}/\texttt{PSY}/\texttt{SES}
+text schema used in the companion audit, at a $10$-minute window grain: a
+\texttt{DAY} line with team and machine context, a \texttt{PSY} line carrying
+the real scored OCEAN values, and \texttt{SES} lines summarizing per-window
+mouse, keystroke, and host-event activity. This yields $18{,}048$ windows,
+$138$ positive windows ($101$ masquerade, $37$ traitor), and a $12$-user benign
+training pool. We adapt Qwen2.5-3B on the benign windows only (QLoRA, three
+epochs, two adapter seeds), score windows by adapted negative log-likelihood,
+and run the identical downstream stack (token-delta extraction at layers
+$12/18/24$; benign-only top-$k$ sparse autoencoder; full-pool feature
+selection; token attribution; causal patching and necessity ablation). No
+component of the pipeline is TWOS-specific; the serialization is the only new
+code.
+
+\section{The detector is clean and behavioral}
+
+\paragraph{Attribution.} On real data with real personality scores present in
+every window, the audit certifies a behavioral detector. The top-five causally
+selected features carry essentially all of their attribution mass on
+\texttt{SES} (behavioral) tokens and none on \texttt{PSY}/\texttt{DAY}
+(profile) tokens: at layer $24$, seed $42$, the five features have profile mass
+$[0,0,0,0,0]$ and behavioral mass $\ge 0.987$; the worst single value across
+both audited layers and both adapter seeds is $0.983$ behavioral. This is the
+fifth clean replication counting the smaller two-source corpus, and it holds
+whether or not the enriched host-event channel is included.
+
+This is the outcome the population-structure account predicts. With $12$ of
+$24$ users malicious, user identity carries almost no information about which
+windows are attacks; a next-token detector therefore has no cheap
+identity-shortcut to take, and the behavioral session evidence is what
+survives selection. The synthetic benchmark that exhibited profile capture sat
+at the opposite corner (four highly distinctive malicious users among
+thousands); TWOS confirms the behavioral corner with genuine, rather than
+simulated, psychometrics.
+
+\paragraph{Causal support.} Team-matched, same-user-excluded interventions on
+the seed-$42$ layer-$24$ top features ($138$ receivers) give a positive
+necessity effect ($+0.0019$) and an absent patch-repair effect ($-0.0018$).
+The direction reproduces the estimand asymmetry documented three times on CERT:
+ablation-dependence is the robust causal signature of behavioral families,
+while patch-repair is configuration-sensitive---here plausibly because a
+masquerade anomaly is another \emph{human's} behavior, so repairing toward a
+benign teammate need not reduce anomaly the way a synthetic profile swap does.
+The signature is weak in absolute terms (small pool, thin per-team donor sets)
+and we report it as directional corroboration, not as a headline effect.
+
+\section{The masquerade--traitor boundary is a property of the data}
+
+The detector's most consequential result is not a level but a \emph{gap}. Table
+\ref{tab:boundary} scores every detector on the same $10$-minute windows, split
+by attack modality.
+
+\begin{table}[t]
+\centering
+\caption{Window ROC-AUC by attack modality on TWOS, across four detector
+families trained benign-only on the same serialized features. Every family
+detects masquerades far better than traitors; the language model is not an
+outlier. ``Within-user'' averages per-user ROC with identity held fixed
+(victim's own benign vs.\ attack windows).}
+\label{tab:boundary}
+\begin{tabular}{lcccc}
+\toprule
+Detector & All & Masquerade-only & Traitor-only & Mean within-user \\
+\midrule
+Language model (ours) & $0.639$ & $0.780$ & $0.256$ & $\mathbf{0.783}$ \\
+Isolation Forest      & $0.714$ & $0.839$ & $0.374$ & $0.715$ \\
+One-class SVM         & $0.607$ & $0.763$ & $0.183$ & $0.626$ \\
+PCA reconstruction    & $0.790$ & $0.867$ & $0.582$ & $0.795$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two things are visible. First, masquerade detection is strong and traitor
+detection is at or below chance for \emph{every} detector: the language model
+($0.780$ vs.\ $0.256$), Isolation Forest ($0.839$ vs.\ $0.374$), one-class SVM
+($0.763$ vs.\ $0.183$), and PCA reconstruction ($0.867$ vs.\ $0.582$) all show
+the same ordering with a large margin. Because these four families make
+completely different modeling assumptions (density, tree-isolation, margin,
+linear reconstruction, and sequence likelihood), their agreement cannot be a
+modeling artifact. The boundary is a property of the \emph{observation space}.
+
+Second, the reason is interpretable. A masquerade is a \emph{foreign} operator
+on a victim's machine, so the victim's window suddenly looks unlike the
+victim---high, out-of-distribution mouse and keystroke activity that every
+anomaly model flags. A traitor is the \emph{legitimate} user, and their
+malicious phase tends to be behaviorally \emph{calmer} than their own baseline
+(disengagement from normal work) while the malicious act itself---data
+staged for exfiltration, sent over email---occurs largely \emph{outside} the
+mouse/keystroke/host-event channels we serialize. The telemetry that makes
+masquerades loud makes traitors quiet. This is not a failure that a better
+model fixes; it is a limit of what the field set can express, and any detector
+restricted to this observation space inherits it.
+
+The practical consequence is a reporting norm. A benign-trained detector on
+this telemetry should not be summarized by its pooled ROC-AUC, which averages a
+detectable modality with an undetectable one; it should be reported per
+modality, with the traitor result labeled as an observation-space blind spot
+rather than a tuning target. The remedy is a channel, not a loss function:
+detecting traitors requires serializing the exfiltration surface (email/network
+content), not a better anomaly score over mouse and keyboard.
+
+\section{Case study: detectability follows the field set}
+
+If the traitor boundary shows what the observation space \emph{hides}, one user
+shows the converse---that enriching the field set changes what a detector can
+see. User~21 has a near-empty benign baseline: a median of one mouse event per
+$10$-minute window (all quartiles at $1.0$; mean $91$) and roughly $25$
+keystrokes---this user barely touched the monitored machine. Their masquerader,
+by contrast, was the single most active attacker in TWOS ($23{,}552$ mouse
+events per window, against $1$--$2{,}216$ for every other user).
+
+Under a two-source serialization (mouse and keystroke only), this user is
+scored \emph{inverted}: within-user ROC-AUC $0.005$, i.e.\ the hyperactive
+attack windows are ranked \emph{less} anomalous than the near-empty benign
+ones. The mechanism is degeneracy: near-empty benign windows produce
+pathological likelihoods that out-rank genuine attack windows, so the raw score
+inverts. Adding a host-event channel to the serialization---which gives the
+benign windows non-degenerate content and the attack windows a second axis of
+evidence---eliminates the inversion entirely: User~21's within-user ROC-AUC
+becomes $0.929$.
+
+The lesson generalizes the paper's thesis: the pathological case was not a
+model deficiency but a serialization deficiency, and it was fixed by exposing a
+field, not by retraining a better scorer. Detectability is a property of what
+the serialization renders observable. Reporting a detector therefore means
+reporting its field set, because two serializations of the same underlying
+telemetry can place the same attack on opposite sides of chance.
+
+\section{Discussion}
+
+Read together, the three results make a single argument about how
+benign-trained anomaly detectors should be evaluated and reported. The clean
+behavioral audit shows that \emph{what} a detector scores on is not settled by
+its score and must be checked. The masquerade--traitor boundary shows that
+\emph{which} attacks a detector can see is often not a property of the detector
+at all, but of the telemetry it is given---so a good pooled number can hide a
+structurally invisible attack class. The User~21 case shows the same coin's
+other face: the field set can be changed, and doing so, not tuning the model,
+is what moves an attack across the detectability boundary.
+
+None of these are visible at the level of a leaderboard. A detector that scores
+$0.78$ pooled on TWOS looks respectable; the audit and the per-modality split
+reveal that it is an excellent masquerade detector, a non-detector of traitors,
+and a scorer whose behavior on sparse users depends entirely on which channels
+were serialized. We suggest that reports of benign-trained insider-threat
+detectors carry three artifacts alongside their scores: an attribution of what
+evidence the score rests on, a per-modality breakdown that names any
+observation-space blind spot, and the field set under which the numbers hold.
+
+\paragraph{Limitations.} TWOS is small ($24$ users, five days, $37$ traitor
+windows), so all numbers here are pilot-scale and single-corpus; the causal
+interventions in particular rest on thin donor pools and are reported as
+directional. The traitor account is a structural hypothesis supported by the
+cross-model agreement and by the calmer-than-baseline activity profile, not by
+instrumented exfiltration ground truth; confirming it would require serializing
+the email and network channels and re-running the split. We regard the boundary
+statement---not the individual ROC values---as the transferable claim.
+
+\bibliographystyle{tmlr}
+\bibliography{references}
+
+\end{document}
