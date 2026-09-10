@@ -60,7 +60,12 @@ shortcut is
 unavailable, behavioral evidence dominates---was specified on CERT and
 makes an out-of-setting prediction: on TWOS, with real users, real
 psychometrics, and no profile-distinctive malicious minority, the audit
-should certify behavioral evidence, and it does. The score-level
+should certify behavioral evidence, and it does. Train-matched adapters
+differing only in the profile block localize the effect to training time:
+shuffling profiles across users---tokens present, identity destroyed---
+collapses cross-user ranking, indicating that profile availability during
+adaptation is causally responsible for the shortcut rather than a correlate
+of it. The score-level
 consequence is stark: compared only against benign users unseen during
 adaptation, day-level ROC-AUC falls from $0.95$ to $0.55$ (\rsix{}) and
 from $0.96$ to $0.67$ (\rfour{})---apparent strength is largely a
@@ -1139,14 +1144,21 @@ fields are within the benign profile distribution; what the benign-only
 adapter happened to compress into its deltas)---and, per the
 cross-architecture probe, properties of the sequence-likelihood pathway
 specifically, since classical detectors on the same features do not take
-the shortcut. Neither factor of the two-factor account has yet been
-manipulated in isolation: the classical detectors differ from the language
-model in objective, representation, architecture, and capacity
-simultaneously, and profile distinctiveness has not been varied
-independently of malicious-user count; factorial designs (matched adapters
-trained with profile fields removed, shuffled, or loss-downweighted;
-distinctiveness varied at fixed count) remain the decisive tests of the
-account. The account's two corners
+the shortcut. The two factors have been manipulated to differing degrees. The
+availability factor is now tested directly: the train-matched factorial of
+Section~\ref{sec:trainfactorial}---matched adapters differing only in whether
+the profile block is present, dropped, or shuffled---shows that removing the
+profile improves unseen-user generalization and that shuffling it (tokens
+present, identity link destroyed) collapses cross-user ranking, establishing
+that profile \emph{availability at training time} is causally responsible for
+the binding rather than being a correlate. The second factor is less cleanly
+isolated: the classical detectors differ from the language model in objective,
+representation, architecture, and capacity simultaneously, and profile
+distinctiveness has not been varied independently of malicious-user count.
+The remaining decisive tests are therefore those that isolate the
+representation--objective factor (e.g.\ loss-downweighting of profile tokens,
+or distinctiveness varied at fixed count), and confirmation of the training-time
+result at the $8$B scale of our headline detector. The account's two corners
 are now both instantiated: profile capture where a tiny distinctive
 malicious minority makes identity cheap (\rsix{}), and cleanly behavioral
 selection where half the population is malicious and identity separates
