@@ -1,0 +1,96 @@
+\begin{figure*}[t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\footnotesize, >=latex,
+  strip/.style={draw=black!40, rounded corners=2pt, fill=black!3, align=center,
+                inner sep=3pt, font=\scriptsize, minimum height=8mm},
+  tower/.style={draw=black!55, rounded corners=3pt, fill=black!5,
+                minimum width=16mm, minimum height=14mm, align=center, font=\scriptsize},
+  op/.style={circle, draw=black!70, fill=black!8, inner sep=1.6pt, font=\normalsize},
+  saebox/.style={draw=blue!45, rounded corners=3pt, fill=blue!5, align=center,
+                 font=\scriptsize, minimum height=15mm, minimum width=26mm},
+  acc/.style={draw=orange!80!black, fill=orange!20, rounded corners=2pt, align=center,
+              font=\scriptsize},
+  readout/.style={draw=black!55, rounded corners=2pt, fill=green!8, align=center,
+                  inner sep=3pt, font=\scriptsize},
+  a/.style={->, semithick, black!60},
+  aa/.style={->, semithick, orange!85!black},
+  st/.style={circle, fill=black!80, text=white, font=\scriptsize\bfseries, inner sep=1.3pt},
+  lbl/.style={font=\scriptsize\itshape, black!55}
+]
+
+% ---- Stage 1: serialize ----
+\node[strip] (logs) {insider-threat\\logs};
+\node[strip, right=4mm of logs] (ser) {serialized user-day\\\texttt{DAY}/\texttt{PSY}/\texttt{SES}};
+\draw[a] (logs) -- (ser);
+\node[st, above=0.4mm of logs] {1};
+
+% ---- Stage 2: base vs adapted towers + delta ----
+\node[tower, above right=2mm and 11mm of ser] (base) {frozen\\base LM};
+\node[tower, below right=2mm and 11mm of ser] (ada)  {adapted LM\\{\tiny(base\,+\,QLoRA)}};
+\draw[a] (ser.east) -- (base.west);
+\draw[a] (ser.east) -- (ada.west);
+\node[op, right=17mm of ser] (sub) {$-$};
+\draw[a] (base.east) -| (sub);
+\draw[a] (ada.east)  -| (sub);
+\node[acc, right=5mm of sub] (delta) {token delta\\$\delta_{\ell,t}$};
+\draw[aa] (sub) -- (delta);
+\node[st, above=1mm of base] {2};
+
+% ---- Stage 3: top-k delta-SAE ----
+\node[saebox, right=6mm of delta, minimum width=30mm, minimum height=17mm] (sae) {};
+\draw[a] (delta) -- (sae);
+\node[font=\scriptsize] at ([yshift=5mm]sae.center) {top-$k$ delta-SAE};
+\node[font=\tiny, black!70] at ([xshift=-11mm]sae.center) {enc};
+\node[font=\tiny, black!70] at ([xshift=11mm]sae.center)  {dec};
+\draw[a] ([xshift=-8.5mm]sae.center) -- ([xshift=-2.5mm]sae.center);
+\draw[a] ([xshift=2.5mm]sae.center)  -- ([xshift=8.5mm]sae.center);
+% sparse-code glyph centered (few cells lit = top-k)
+\begin{scope}[shift={(sae.center)}]
+  \draw[draw=black!45, fill=black!10]  (-1mm, 3.2mm) rectangle ++(2mm,-1.3mm);
+  \draw[draw=black!45, fill=black!10]  (-1mm, 1.7mm) rectangle ++(2mm,-1.3mm);
+  \draw[draw=black!45, fill=orange!75] (-1mm, 0.2mm) rectangle ++(2mm,-1.3mm);
+  \draw[draw=black!45, fill=black!10]  (-1mm,-1.3mm) rectangle ++(2mm,-1.3mm);
+  \draw[draw=black!45, fill=orange!75] (-1mm,-2.8mm) rectangle ++(2mm,-1.3mm);
+  \draw[draw=black!45, fill=black!10]  (-1mm,-4.3mm) rectangle ++(2mm,-1.3mm);
+\end{scope}
+\node[font=\tiny, black!55] at ([yshift=-6.7mm]sae.center) {code $z$ ($k$ active) $+\,\varepsilon$};
+\node[st, above=1mm of sae] {3};
+
+% ---- Stage 4: pick feature -> patch/ablate -> score effect ----
+\node[acc, below=10mm of sae.south, xshift=-10mm] (feat) {gap-selected\\feature $f_j$};
+\draw[aa] (sae.south) -- (feat.north);
+\node[readout, right=6mm of feat, fill=orange!8, draw=orange!70!black] (inter)
+  {patch $\tau$ / ablate $\nu$\\vs.\ matched control};
+\draw[aa] (feat) -- (inter);
+\node[readout, right=6mm of inter] (score) {$\Delta$ anomaly score\\$s \to s'$};
+\draw[a] (inter) -- (score);
+\node[st, above=0.4mm of feat] {4};
+
+% ---- Stage 5: attribution ----
+\node[readout, right=6mm of score] (attr) {attribution $m_f(c)$:\\profile vs.\ behavior};
+\draw[a] (score) -- (attr);
+\node[st, above=0.4mm of attr] {5};
+
+\end{tikzpicture}}%
+\caption{The delta-SAE audit, drawn as architecture.
+\textbf{(1)}~A user-day is serialized into structured
+\texttt{DAY}/\texttt{PSY}/\texttt{SES} text.
+\textbf{(2)}~The same input runs through the frozen base model and its
+benign-only QLoRA-adapted copy; at layer $\ell$ we take the per-token
+residual-stream difference
+$\delta_{\ell,t}=h^{\mathrm{ada}}_{\ell,t}-h^{\mathrm{base}}_{\ell,t}$
+(the adapter is left abstract---the delta is the object of study).
+\textbf{(3)}~$\delta$ feeds a top-$k$ sparse autoencoder (encoder $\to$ sparse
+code $z$ with only $k$ units active, shown as the lit cells $\to$ decoder,
+plus reconstruction error), whose decoder columns form the feature dictionary.
+\textbf{(4)}~A gap-selected feature $f_j$ is causally patched ($\tau$) or
+ablated ($\nu$) against a matched active control, and the effect on the adapted
+anomaly score $s\!\to\!s'$ is measured.
+\textbf{(5)}~Token attribution $m_f(c)$ labels the feature's content as
+profile- or behavior-bound. A mechanistic claim requires both causal relevance
+(Step~4) \emph{and} content (Step~5); formal definitions are in
+Section~\ref{sec:formal}.}
+\label{fig:architecture}
+\end{figure*}
