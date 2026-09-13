@@ -1085,9 +1085,28 @@ two-factor account developed in Section~\ref{sec:discussion}. These are
 pilot-scale results (one seed, $3$B, $70$ positives) and we scope them as
 directional; they causally ground, but do not numerically transfer to, the
 $8$B findings above.
-% TODO(sae-readout): feature-level audit of full vs shuffle adapters
-% (does profile capture vanish when the identity link is destroyed?) --
-% jobs 20502738/20502739; add one paragraph when attribution masses land.
+
+\paragraph{Capture survives shuffling; utility does not.}
+Running the delta-SAE audit on the \textsc{full} and \textsc{shuffle} adapters
+separately dissociates \emph{what the model represents} from \emph{what helps
+detection}. Profile capture does not disappear when profiles are deranged: at
+the audited layer the top-five features are profile-bound for both adapters---four
+of five under \textsc{full} (profile mass $\{1.00, 0.85, 1.00, 0.03, 0.99\}$)
+and, if anything, more so under \textsc{shuffle} (five of five, mass
+$\{1.00, 0.92, 1.00, 1.00, 0.99\}$). The reason is that the derangement assigns
+each user a \emph{different} profile but keeps it constant across that user's own
+days, so the per-user constancy that makes profile tokens maximally compressible
+for a next-token model is preserved; what the shuffle destroys is only the
+correlation between profile and true identity. Capture therefore tracks
+compressibility, which shuffling leaves intact, while the cross-user ranking
+collapse above ($0.452$) tracks identity-informativeness, which shuffling
+removes. The two come apart cleanly: under \textsc{shuffle} the audit reports
+$\sim\!100\%$ profile capture alongside \emph{below-chance} cross-user detection.
+This is a controlled, ground-truth instance of the paper's central
+methodological point---attribution mass alone overstates a shortcut, and only a
+behavioral or causal probe distinguishes an informative binding from a merely
+salient one. (This readout is $3$B, single-seed; the $8$B confirmation is
+in progress.)
 
 \input{tables/claim_status.tex}
 
