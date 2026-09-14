@@ -7,7 +7,7 @@
 \usepackage{url}
 \hypersetup{hidelinks}
 
-\def\month{08}
+\def\month{09}
 \def\year{2026}
 
 \title{What Does a Benign-Trained Anomaly Detector Actually Detect?}
@@ -37,9 +37,14 @@ has never seen, apparent ranking quality falls from about $0.95$ to near
 chance on the first benchmark. The same analysis on a third dataset,
 collected from real people with real personality questionnaires,
 confirms the behavioral case, and classical statistical detectors
-trained on the same information do not take the profile shortcut. The
-conclusion is that high ranking performance alone does not show that a
-detector has learned to detect behavior, and we provide a way to check.
+trained on the same information do not take the profile shortcut. Retraining the detector with the profile removed shows that the profile
+is the cause and not a bystander: at the large model, removal restores
+ranking of unseen users from chance to about $0.90$, while at a smaller
+model it makes no difference, so the harm requires capacity. On a
+corporate login log with no profile of any kind, the same failure appears
+and the shortcut moves to the computer name. The conclusion is that high
+ranking performance alone does not show that a detector has learned to
+detect behavior, and we provide a way to check.
 \end{abstract}
 
 \section{The problem}
@@ -89,9 +94,9 @@ activity logs, produced by Carnegie Mellon University. Each version
 contains several thousand simulated employees observed over about
 eighteen months, with a small set of employees scripted to carry out
 malicious scenarios on particular days. Version r4.2 has sixty malicious
-users; version r6.2 has four. We later add a third dataset, TWOS,
-collected from real people; it is described in
-Section~\ref{sec:findings}.
+users; version r6.2 has four. We later add two real datasets: TWOS, collected from real people with
+real personality questionnaires, and a corporate login log with no profile
+of any kind; both are described in Section~\ref{sec:findings}.
 
 Each user-day is converted into a short structured text with three kinds
 of lines:
@@ -181,6 +186,7 @@ detector. The rest of this document asks what that number is actually
 made of.
 
 \section{Looking inside the model}
+\label{sec:plain-inside}
 
 \subsection{What did fine-tuning change?}
 
@@ -286,7 +292,7 @@ description of \emph{who the user is}. On r4.2, four of the five
 selected features concentrate on the behavioral session lines. There,
 the evidence is mostly \emph{what the user did}.
 Figure~\ref{fig:attribution} summarizes this contrast, together with
-the real-data result of Section~\ref{sec:findings}.3.
+the real-data result of Section~\ref{sec:plain-twos}.
 
 \begin{figure}[t]
 \centering
@@ -340,6 +346,7 @@ $0.67$ on r4.2), and the dashed line marks chance level.}
 \end{figure}
 
 \subsection{A real-data test with real personality scores}
+\label{sec:plain-twos}
 
 The CERT data are simulated, including the personality scores, so we
 repeated the entire pipeline on TWOS, a dataset collected from
@@ -356,6 +363,137 @@ independent training runs. Decisively, the evaluation compares each
 user's attacked windows with that same user's normal windows, so static
 identity and personality information is held fixed and cannot explain
 the observed separation (average within-user AUC about $0.7$).
+
+\subsection{A second real-data test, with no profile at all}
+\label{sec:plain-lanl}
+
+TWOS still contains a profile line, albeit a real one. To remove profile
+information entirely we turned to a corporate login log released by Los
+Alamos National Laboratory in 2015: fifty-eight days of authentication
+events from a real enterprise ($12{,}425$ users, about a billion events),
+during which a security ``red team'' carried out $749$ documented
+intrusions using stolen credentials. Each event records only who logged
+on, from which computer, to which computer, by what mechanism, and whether
+it succeeded; there is no personality line and no organizational header.
+We grouped each user's events into windows of thirty-two consecutive
+events, called a window malicious if it contained a red-team event,
+adapted the smaller three-billion-parameter sibling of our model to
+benign windows only, and scored held-out windows exactly as before. Users
+were divided into five groups; the model was adapted on four and the
+fifth was held out, so ranking quality can be reported separately for
+\emph{seen} users (in the adaptation groups) and \emph{unseen} users (the
+held-out group). Because identity now sits in two fields, we trained four
+versions of the detector on four versions of the text: the full line; the
+user name hidden; the computer names hidden; and the user names scrambled,
+each user being given another user's name throughout.
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Identity fields in the text & Seen-user AUC & Unseen-user AUC \\
+\midrule
+full                  & $0.949$ & $0.497$ \\
+user name hidden      & $0.944$ & $0.518$ \\
+computer names hidden & $0.877$ & $\mathbf{0.627}$ \\
+user names scrambled  & $0.947$ & $0.488$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The pattern of the CERT experiments returns in a dataset that has no
+profile text at all. Every version ranks seen users well and unseen users
+at chance. Hiding or scrambling the user name changes nothing, so the
+shortcut is not the user name. Hiding the computer names costs some
+seen-user quality and buys unseen-user quality, which is exactly the
+trade-off produced by CERT's profile lines. The reason is simple: people
+log on from their own machines, so on a login log the computer name is
+the field that is constant for each user and reveals who they are, and it
+plays the role that the personality line plays in CERT. A gap remains
+after the computer names are hidden ($0.63$ rather than $0.95$), which we
+read as genuine differences between people's behavior rather than as a
+shortcut. Two cautions apply: each of these four detectors was trained
+once, and the intrusions are staged credential theft rather than the
+insider scenarios of CERT, so the numbers replicate the mechanism rather
+than benchmark a product.
+
+\subsection{Retraining without the profile: is the profile the cause?}
+\label{sec:plain-factorial}
+
+Everything so far shows that a detector trained \emph{with} the profile
+present relies on it. A skeptic can still ask whether the profile is the
+cause of the failure on unseen users or merely something the detector
+happens to notice. The direct test is a controlled experiment: train
+several detectors that are identical in every respect except the profile
+block, and compare them on the same unseen users. We trained four such
+detectors on CERT r6.2, at both the eight-billion-parameter model of the
+main paper and its three-billion-parameter sibling: (i) the full text;
+(ii) the personality line removed; (iii) both profile lines removed;
+(iv) the profiles scrambled, meaning that every user is given another
+user's profile throughout, so the text keeps the same form and the same
+statistics but the profile no longer tells the truth about its owner.
+
+For each detector we used the strictest evaluation available. Each of the
+four malicious users in r6.2 is held out in turn and ranked against $800$
+benign users who were never used in training; a user's score is the
+largest of its daily scores; the AUC is averaged over the four held-out
+users. Uncertainty comes from resampling the malicious users ten thousand
+times and recomputing everything, which yields an interval for each
+number and, because the same users are resampled for every detector, a
+paired test of the difference between two detectors.
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Text the detector was trained on & 3B model & 8B model \\
+\midrule
+full                       & $0.926$ & $0.532$ \\
+personality line removed   & $0.903$ & $\mathbf{0.906}$ \\
+both profile lines removed & $0.956$ & $\mathbf{0.903}$ \\
+profiles scrambled         & $0.656$ & $0.485$ \\
+\midrule
+removal effect (both removed $-$ full) & $+0.03$ ($p = 0.32$) & $\mathbf{+0.37}$ ($p = 0.005$) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Read the 8B column first, since that is the model of the main paper. With
+the profile present, the detector ranks unseen users at chance ($0.532$).
+With the profile removed it ranks them at $0.903$. The difference,
+$+0.37$, has a resampling interval that excludes zero ($p = 0.005$): the
+profile is not merely noticed by the detector; its presence during
+training \emph{causes} the failure on unseen users, and removing it
+repairs the detector. Removing the personality line alone repairs it just
+as well ($0.906$), so that line is the carrier.
+
+Now read the 3B column. The smaller model does not fail in the first
+place: with the profile present it already ranks unseen users at $0.926$,
+and removing the profile changes nothing measurable ($+0.03$). Yet when we
+open the small model by the method of Section~\ref{sec:plain-inside}, its
+selected features are just as profile-bound as the large model's. The
+small model has \emph{noticed} the profile without being harmed by it;
+the harm appears only when the model is large enough to memorize each
+user's profile so thoroughly that familiarity swamps behavior. The harm,
+in other words, is a property of capacity, which is one reason the size
+of the headline model matters.
+
+Looking user by user makes the mechanism concrete. The large model's
+failure is not spread evenly: one of the four malicious users is still
+caught, two are ranked at chance, and one is ranked among the \emph{least}
+suspicious of the $407$ users compared, worse than a coin flip. That last
+user is precisely the one whose five personality scores most closely
+resemble those of many benign training users; the user whose scores are
+most unusual is the one the model still catches. A large model trained on
+normal users learns that familiar personality scores mean ``normal,'' and
+a malicious user who happens to have ordinary scores is waved through.
+Removing the profile catches all four users, at both model sizes.
+Scrambling the profiles never helps, as one would expect: a description
+that lies is at best useless and at worst misleading. One further
+observation deserves recording. When we open the scrambled-profile model,
+its selected features are still profile-bound, exactly as in the
+honest-profile model, even though its ranking of unseen users has
+collapsed. Where a model \emph{looks} and what \emph{helps} it are
+different things, which is why this paper tests features by intervening
+on them rather than by attribution alone.
 
 \subsection{Where the shortcut comes from}
 
@@ -382,7 +520,11 @@ columns among two hundred forty-two, with no comparable incentive
 attached. Our summary of the whole phenomenon is a two-factor statement:
 the population structure of a dataset determines \emph{when} an
 identity shortcut is available, and the training objective together with
-the data representation determines \emph{which} detectors take it.
+the data representation determines \emph{which} detectors take it. The retraining experiment adds
+that availability is causal rather than merely correlated with the
+failure, and the login-log experiment adds that the shortcut lands on
+whichever field is constant per user and reveals identity: the computer
+name there, the personality line here.
 
 \section{Why this matters}
 
@@ -398,7 +540,9 @@ users, and, where possible, by within-user comparisons.
 Second, including static descriptors of people (role, department,
 personality measures) in a detector's input is not harmless. In the
 likelihood-based detector it created the shortcut, and even where the
-detector was behavioral it degraded performance.
+detector was behavioral it degraded performance. Retraining the large
+model with the profile removed repairs its ranking of unseen users from
+chance to about $0.90$.
 
 Third, the question ``what does this detector actually detect?'' can be
 answered, not merely asked. The chain presented here, namely
