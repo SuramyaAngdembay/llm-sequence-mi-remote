@@ -1216,13 +1216,16 @@ of, the mechanism.
 \paragraph{Shuffling.} Deranging profiles never helps. At $8$B the
 \textsc{shuffle} adapter sits with \textsc{full} at chance ($0.485$); at $3$B
 it falls well below the honest-profile adapter ($0.656$ versus $0.926$).
-Because the derangement preserves per-user constancy, what is lost is not a
-stable per-user token but the correspondence between the profile's content
-and its owner; and because the permutation runs over the whole population, an
-unseen user can carry a training user's profile, so profile familiarity no
-longer tracks whether a user was seen. A fixed profile that belongs to someone
-else is worse than none, even for a model for which the honest profile is
-harmless.
+The derangement preserves per-user constancy, and because it is a bijection
+each profile text is carried by exactly one user, so an unseen user's
+borrowed profile is as unseen during adaptation as its own would have been:
+exposure is unchanged, and what is lost is only the correspondence between
+the profile's content and the user's recorded attributes and behavior. The
+result shows that profile content matters to unseen-user ranking in both
+audited runs; it does not identify whether broken attribute--behavior
+associations or particular profile similarities explain the loss. A fixed
+profile that belongs to someone else is worse than none, even for a model
+for which the honest profile is harmless.
 
 \paragraph{Capture survives shuffling; utility does not.}
 Running the delta-SAE audit on the \textsc{full} and \textsc{shuffle} adapters
