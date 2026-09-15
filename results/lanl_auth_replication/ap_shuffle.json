@@ -1,0 +1,11 @@
+{
+  "mode": "shuffle",
+  "seen_ap": 0.173,
+  "seen_auc": 0.9468,
+  "seen_pos": 234,
+  "seen_n": 22563,
+  "unseen_ap": 0.0123,
+  "unseen_auc": 0.4875,
+  "unseen_pos": 198,
+  "unseen_n": 30410
+}

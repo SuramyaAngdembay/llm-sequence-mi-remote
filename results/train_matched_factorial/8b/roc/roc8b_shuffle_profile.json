@@ -1,0 +1,7 @@
+{
+  "mode": "shuffle_profile",
+  "model": "qwen3-8b",
+  "user_disjoint_roc": 0.3795,
+  "within_user_roc": 0.6395,
+  "n_pos": 70
+}

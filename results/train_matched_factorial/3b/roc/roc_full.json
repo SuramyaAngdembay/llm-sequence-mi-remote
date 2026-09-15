@@ -1,0 +1,6 @@
+{
+  "mode": "full",
+  "user_disjoint_roc": 0.736,
+  "within_user_roc": 0.7389,
+  "n_pos": 70
+}

@@ -1,0 +1,82 @@
+===NOVELTY===
+benign train users: 3590   malicious eval users: ['ACM2278', 'CDE1846', 'CMP2946', 'MBG3183']
+user      org_exact psy_minL1 psy_within10  8B_full  3B_full  org_tuple / OCEAN
+ACM2278          29       9.0            3    0.919    0.995  (31, 0, 8, 11, 47, 0) / (18, 37, 32, 36, 28)
+CDE1846          13       7.0           12    0.155    0.803  (9, 0, 2, 18, 18, 0) / (36, 38, 26, 43, 27)
+CMP2946          22       6.0           11    0.527    0.966  (31, 0, 9, 11, 55, 0) / (36, 46, 15, 37, 30)
+MBG3183           4      12.0            0    0.527    0.941  (9, 0, 3, 18, 39, 0) / (50, 42, 43, 29, 29)
+DONE_NOVELTY
+===FOLDBOOT_8B===
+=== per-condition fold-aligned user-ROC (mean [95% cluster-boot CI]) ===
+  full             0.532  [0.248, 0.821]
+  no_psy           0.906  [0.882, 0.926]
+  no_profile       0.903  [0.842, 0.964]
+  shuffle_profile  0.485  [0.293, 0.676]
+
+=== removal effect (no_profile - full), paired cluster bootstrap ===
+  delta user-ROC = +0.371  [+0.067, +0.690]   one-sided p(no help) = 0.0051
+
+DONE_FOLD_BOOT
+===FOLDBOOT_3B===
+=== per-condition fold-aligned user-ROC (mean [95% cluster-boot CI]) ===
+  full             0.926  [0.844, 0.982]
+  no_psy           0.903  [0.865, 0.925]
+  no_profile       0.956  [0.882, 0.993]
+  shuffle_profile  0.656  [0.504, 0.808]
+
+=== removal effect (no_profile - full), paired cluster bootstrap ===
+  delta user-ROC = +0.030  [-0.065, +0.142]   one-sided p(no help) = 0.3188
+
+DONE_FOLD_BOOT
+===SAE /anvil/scratch/x-bbhusal1/p1_8b/slurm_full_20595298.out===
+[driver] layer=12 top5_gap=0.116628 ids=[15449, 3294, 4552, 10718, 9086]
+[fold all_positive_users.txt] top5=[9262, 11152, 2180, 7343, 8100]
+[driver] layer=18 top5_gap=0.090828 ids=[9262, 11152, 2180, 7343, 8100]
+[fold all_positive_users.txt] top5=[8704, 10777, 15679, 5596, 3291]
+[driver] layer=24 top5_gap=0.347938 ids=[8704, 10777, 15679, 5596, 3291]
+ "top5": [
+[verdict] best_layer=24 top5=[8704, 10777, 15679, 5596, 3291]
+[verdict] feat 8704: DAY=0.020 PSY=0.033 SES=0.938 -> profile_mass=0.053
+[verdict] feat 10777: DAY=0.020 PSY=0.021 SES=0.824 -> profile_mass=0.041
+[verdict] feat 15679: DAY=0.029 PSY=0.066 SES=0.859 -> profile_mass=0.095
+[verdict] feat 5596: DAY=0.000 PSY=1.000 SES=0.000 -> profile_mass=1.000
+[verdict] feat 3291: DAY=1.000 PSY=0.000 SES=0.000 -> profile_mass=1.000
+===SAE /anvil/scratch/x-bbhusal1/p1_8b/slurm_shuffle_profile_20595301.out===
+[driver] layer=12 top5_gap=0.196445 ids=[1969, 13513, 7171, 4021, 1569]
+[fold all_positive_users.txt] top5=[544, 14189, 158, 600, 13863]
+[driver] layer=18 top5_gap=0.108129 ids=[544, 14189, 158, 600, 13863]
+[fold all_positive_users.txt] top5=[3743, 8616, 15083, 4843, 6489]
+[driver] layer=24 top5_gap=0.197485 ids=[3743, 8616, 15083, 4843, 6489]
+ "top5": [
+[verdict] best_layer=24 top5=[3743, 8616, 15083, 4843, 6489]
+[verdict] feat 3743: DAY=0.035 PSY=0.050 SES=0.818 -> profile_mass=0.085
+[verdict] feat 8616: DAY=0.029 PSY=0.066 SES=0.798 -> profile_mass=0.095
+[verdict] feat 15083: DAY=0.054 PSY=0.203 SES=0.647 -> profile_mass=0.257
+[verdict] feat 4843: DAY=0.998 PSY=0.000 SES=0.002 -> profile_mass=0.998
+[verdict] feat 6489: DAY=1.000 PSY=0.000 SES=0.000 -> profile_mass=1.000
+===SAE /anvil/scratch/x-bbhusal1/p1/sae_full_20564928.out===
+[driver] layer=12 top5_gap=0.067881 ids=[4893, 745, 6053, 7448, 717]
+[fold all_positive_users.txt] top5=[2267, 5650, 1312, 6531, 3645]
+[driver] layer=18 top5_gap=0.056318 ids=[2267, 5650, 1312, 6531, 3645]
+[fold all_positive_users.txt] top5=[7627, 7351, 6861, 7970, 6423]
+[driver] layer=24 top5_gap=0.066991 ids=[7627, 7351, 6861, 7970, 6423]
+ "top5": [
+[verdict] best_layer=12 top5=[4893, 745, 6053, 7448, 717]
+[verdict] feat 4893: DAY=1.000 PSY=0.000 SES=0.000 -> profile_mass=1.000
+[verdict] feat 745: DAY=0.000 PSY=0.853 SES=0.082 -> profile_mass=0.853
+[verdict] feat 6053: DAY=0.000 PSY=0.997 SES=0.003 -> profile_mass=0.997
+[verdict] feat 7448: DAY=0.000 PSY=0.026 SES=0.973 -> profile_mass=0.026
+[verdict] feat 717: DAY=0.000 PSY=0.992 SES=0.001 -> profile_mass=0.992
+===SAE /anvil/scratch/x-bbhusal1/p1/sae_shuf_20564929.out===
+[driver] layer=12 top5_gap=0.099831 ids=[4828, 2378, 7465, 4687, 7029]
+[fold all_positive_users.txt] top5=[3788, 6087, 1664, 140, 409]
+[driver] layer=18 top5_gap=0.070646 ids=[3788, 6087, 1664, 140, 409]
+[fold all_positive_users.txt] top5=[7940, 6655, 6721, 3356, 602]
+[driver] layer=24 top5_gap=0.098844 ids=[7940, 6655, 6721, 3356, 602]
+ "top5": [
+[verdict] best_layer=12 top5=[4828, 2378, 7465, 4687, 7029]
+[verdict] feat 4828: DAY=1.000 PSY=0.000 SES=0.000 -> profile_mass=1.000
+[verdict] feat 2378: DAY=0.920 PSY=0.000 SES=0.080 -> profile_mass=0.920
+[verdict] feat 7465: DAY=1.000 PSY=0.000 SES=0.000 -> profile_mass=1.000
+[verdict] feat 4687: DAY=0.000 PSY=1.000 SES=0.000 -> profile_mass=1.000
+[verdict] feat 7029: DAY=0.918 PSY=0.067 SES=0.004 -> profile_mass=0.985

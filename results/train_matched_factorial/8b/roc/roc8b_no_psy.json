@@ -1,0 +1,7 @@
+{
+  "mode": "no_psy",
+  "model": "qwen3-8b",
+  "user_disjoint_roc": 0.655,
+  "within_user_roc": 0.7045,
+  "n_pos": 70
+}

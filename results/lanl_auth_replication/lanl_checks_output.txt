@@ -1,0 +1,8 @@
+# output of scripts/lanl/lanl_checks.py on Anvil (2026-09-14), training windows of the LANL cyber1 build
+events=9414753 users(>=20 ev)=1180
+per-user share of events from the user's MODAL source host: median=0.54  q25=0.40  q75=0.61  mean=0.51
+per-user share of events to the user's MODAL dest host:     median=0.16  q25=0.13  q75=0.28  mean=0.25
+fraction of users with >=80% of events from one source host: 0.07
+[full] windows=52973 n_tokens max=1503 p99=1408 mean=1256  positives max_tokens=1417
+[host_anon] windows=52973 n_tokens max=1311 p99=1263 mean=1087  positives max_tokens=1212
+[full] seen AP=0.1769 (prev 234/22563=0.0104)  unseen AP=0.0133 (prev 198/30410=0.0065)

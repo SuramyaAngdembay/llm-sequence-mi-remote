@@ -1,0 +1,6 @@
+{
+  "mode": "no_psy",
+  "user_disjoint_roc": 0.6832,
+  "within_user_roc": 0.7017,
+  "n_pos": 70
+}

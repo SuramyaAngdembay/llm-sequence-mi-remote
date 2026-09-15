@@ -136,7 +136,6 @@ def main() -> None:
         "num_train_epochs": float(cfg["training"]["num_train_epochs"]),
         "learning_rate": float(cfg["training"]["learning_rate"]),
         "lr_scheduler_type": str(cfg["training"]["lr_scheduler_type"]),
-        "warmup_ratio": float(cfg["training"]["warmup_ratio"]),
         "weight_decay": float(cfg["training"]["weight_decay"]),
         "logging_steps": int(cfg["training"]["logging_steps"]),
         "save_steps": save_steps,
@@ -152,6 +151,18 @@ def main() -> None:
         "logging_first_step": True,
     }
     training_args_params = inspect.signature(TrainingArguments.__init__).parameters
+    _wr = float(cfg["training"]["warmup_ratio"])
+    if "warmup_ratio" in training_args_params:
+        training_arg_kwargs["warmup_ratio"] = _wr
+    else:
+        import math as _math
+        _n = getattr(args, "max_train_examples", None)
+        _epochs = float(cfg["training"]["num_train_epochs"])
+        if _n:
+            _total = _math.ceil(int(_n) / (micro_bs * grad_accum)) * _epochs
+            training_arg_kwargs["warmup_steps"] = max(1, round(_wr * _total))
+        else:
+            training_arg_kwargs["warmup_steps"] = 500
     eval_strategy_key = "eval_strategy" if "eval_strategy" in training_args_params else "evaluation_strategy"
     training_arg_kwargs[eval_strategy_key] = args.eval_strategy
     if "ignore_data_skip" in training_args_params:

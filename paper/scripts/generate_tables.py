@@ -10,7 +10,7 @@ TABLES = ROOT / "tables"
 
 def write_table(path: Path, caption: str, label: str, colspec: str, header: list[str], rows: list[list[str]], size: str = r"\small", colsep: str | None = None) -> None:
     lines = [
-        r"\begin{table}[t]",
+        r"\begin{table}[htbp]",
         rf"\caption{{{caption}}}",
         rf"\label{{{label}}}",
         r"\centering",
@@ -111,6 +111,8 @@ def write_claims_table() -> None:
         ["The dissociation is particular to the 8B run, the serializer defect, or one adapter seed", "Rejected: 3B repaired-serializer rerun reproduces attribution across two adapter seeds per benchmark, and r4.2 ablation dependence replicates across 3B seeds"],
         ["The behavioral pole is an artifact of synthetic data or simulated psychometrics", "Rejected: TWOS (real users, real Big-Five) yields ~100\\% behavioral attribution across two adapter seeds at 50\\% malicious prevalence, as the population account predicts"],
         ["Profile capture is a generic dataset property that any detector class inherits", "Rejected at attribution level: classical one-class detectors on the same r6.2 features place 4--7\\% importance on profile, select no profile feature in any top-5, and lose nothing when profile is removed"],
+        ["The shortcut is an artifact of CERT's injected profile", "Rejected: on raw LANL authentication logs with no profile the unseen-user collapse recurs (AUC $0.95\\to0.50$); anonymizing the user-associated host field trades seen-user ranking for unseen-user ranking ($0.95\\to0.88$; $0.50\\to0.63$) while unseen average precision stays at the base rate; user-token ablation moves unseen AUC by $\\leq0.02$"],
+        ["Profile content is merely correlated with the unseen-user collapse", "Rejected in the audited 8B run: removing profile content from adaptation and scoring restores fold-aligned unseen-user ROC $0.53\\to0.90$ (descriptive paired bootstrap interval excluding zero); small and non-significant in the audited 3B run (one adapter seed per arm)"],
     ]
     write_table(
         TABLES / "claim_status.tex",

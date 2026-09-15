@@ -69,8 +69,9 @@ def build_examples_fast(df: pd.DataFrame, labels: pd.DataFrame, val_frac: float,
     day = df["day_index"].to_numpy()
     ctx_arrays = {c: df[c].to_numpy() for c in present_context}
     # P1 profile-manipulation modes. 'shuffle_profile' replaces each user's
-    # profile block with a fixed random OTHER user's block (breaks per-user
-    # constancy while preserving the marginal token distribution).
+    # profile block with a fixed random OTHER user's block (seeded derangement
+    # over all users). Per-user constancy and the marginal token distribution
+    # are preserved; only the profile<->user correspondence is broken.
     uid_arr = df["user_id"].to_numpy()
     donor_ctx = None
     if profile_mode == "shuffle_profile":

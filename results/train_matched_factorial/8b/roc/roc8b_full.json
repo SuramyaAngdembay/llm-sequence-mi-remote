@@ -1,0 +1,7 @@
+{
+  "mode": "full",
+  "model": "qwen3-8b",
+  "user_disjoint_roc": 0.2638,
+  "within_user_roc": 0.7508,
+  "n_pos": 70
+}

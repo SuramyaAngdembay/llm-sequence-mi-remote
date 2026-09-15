@@ -1,0 +1,6 @@
+{
+  "mode": "shuffle_profile",
+  "user_disjoint_roc": 0.4519,
+  "within_user_roc": 0.6663,
+  "n_pos": 70
+}

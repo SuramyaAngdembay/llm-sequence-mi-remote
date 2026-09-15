@@ -33,11 +33,10 @@ activity receives a high surprisal score, and we then open the model to
 determine what its score is based on: we isolate the internal changes
 that adaptation caused, approximate them with a sparse dictionary, test
 which dictionary directions causally influence the score, and measure
-what part of the input those directions respond to. On one standard
-benchmark the score turns out to rest almost entirely on who each user
-is (their recorded personality and organizational profile) rather than
-on what they did; on a second benchmark the score rests mostly on
-behavior. When malicious users are compared only against normal users
+what part of the input those directions respond to. On one standard benchmark the evidence the audit selects turns out to be
+almost entirely a description of who each user is (their recorded
+personality and organizational profile) rather than of what they did; on a
+second benchmark it is mostly behavior. When malicious users are compared only against normal users
 that the model has never seen, apparent ranking quality falls from about
 $0.95$ to near chance on the first benchmark. The finding survives an
 extensive robustness program: held-out users, repeated dictionary
@@ -50,14 +49,18 @@ case, and classical statistical detectors trained on the same
 information do not take the profile shortcut. The conclusion is that
 high ranking performance alone does not show that a detector has learned
 to detect behavior, and this paper provides a way to check.
-A train-matched retraining experiment then shows the profile is the
-cause and not a correlate: at the headline eight-billion-parameter scale,
-removing the profile block restores unseen-user ranking from chance to
-about $0.90$ (paired resampling of the malicious users, $p = 0.005$),
-while the same removal is inert at three billion parameters, so the harm
-emerges with capacity and is carried by the personality line. On a
-corporate login log with no profile of any kind, the collapse on unseen
-users recurs and the shortcut relocates to the host field.
+A train-matched retraining experiment then shows that, in the audited
+eight-billion-parameter run, profile content in the serialization causes the
+collapse: removing the profile block from the text used for adaptation and
+scoring restores unseen-user ranking from chance to about $0.90$ (a
+descriptive paired resampling interval over the four malicious users
+excludes zero), while the same removal has a small, non-significant effect
+in the audited three-billion-parameter run; the two runs differ in model
+family as well as size and were trained once each, so the design does not
+attribute the difference to capacity alone. The personality line carries the
+effect. On a corporate login log with no profile of any kind, the collapse
+on unseen users recurs and host identity, a user-associated field, carries
+the shortcut.
 \end{abstract}
 
 \section{The problem}
@@ -269,11 +272,11 @@ individually interpretable. We therefore approximate them by sparse
 nonnegative combinations of learned dictionary elements. After
 standardizing each coordinate (subtracting its mean $\mu$ and dividing
 by its standard deviation $\sigma$), we seek a dictionary matrix
-$D \in \mathbb{R}^{d \times m}$ (with $m = 4d$ columns, called
-\emph{features}) and, for each standardized vector
+$D \in \mathbb{R}^{d \times m}$ (with $m$ columns, called \emph{features};
+$m = 4d$ for the headline r6.2 audit and $m = 2d$ for the native r4.2 audit) and, for each standardized vector
 $\tilde\delta_t$, a coefficient vector
-$z_t \in \mathbb{R}^{m}_{\geq 0}$ with at most $k = 8$ nonzero
-entries, such that
+$z_t \in \mathbb{R}^{m}_{\geq 0}$ with at most $k$ nonzero entries ($k = 8$
+and $k = 4$ respectively), such that
 \begin{equation}
 \tilde\delta_t \;\approx\; D z_t ,
 \end{equation}
@@ -333,10 +336,12 @@ estimand is the doubly differenced quantity
 \bigl(\overline{\Delta^{C}_{\mathrm{anom}}} -
 \overline{\Delta^{C}_{\mathrm{ben}}}\bigr).
 \end{equation}
-The double difference protects the comparison: any effect that comes
-merely from making a large edit, rather than from the specific content
-of the selected features, appears in both arms and cancels at the level
-of the contrast.
+The double difference protects the comparison: an effect that comes merely
+from making an edit of that size, rather than from the specific content of
+the selected features, appears in both arms and is removed to the extent
+that the control edit matches the treatment edit in strength, which the
+paper enforces by matching the size of the control edit to the treatment
+edit.
 
 \emph{Ablation (a necessity-style test).} We scale the selected
 coefficients toward zero, on malicious days and on matched benign days,
@@ -420,9 +425,8 @@ percent of their attribution mass on the personality and organizational
 lines, with activation on the personality line enriched about thirteen
 times over its share of tokens. The intervention contrasts are positive
 (repair $\tau = 0.0068$ with descriptive interval $[0.0001, 0.0100]$;
-ablation $\nu = 0.065$ with interval $[0.026, 0.083]$). The detector's
-causally relevant evidence is almost entirely a description of \emph{who
-the user is}.
+ablation $\nu = 0.065$ with interval $[0.026, 0.083]$). The evidence the audit selects, the five features that most raise the
+score, is almost entirely a description of \emph{who the user is}.
 
 On r4.2, four of the five selected features concentrate on the
 behavioral session lines (the fifth responds to the organizational
@@ -438,10 +442,9 @@ the real-data result of Section~\ref{sec:twos}.
 \caption{Where the selected features place their activation, averaged
 over each detector's five selected features. Each bar decomposes the
 activation mass into the organizational lines, the personality lines,
-and the behavioral session lines of the input text. The r6.2 detector's
-evidence is almost entirely a description of who the user is; the r4.2
-and TWOS detectors' evidence is almost entirely a description of what
-the user did.}
+and the behavioral session lines of the input text. The r6.2 detector's selected features respond almost entirely to who the
+user is; the r4.2 and TWOS detectors' selected features respond almost
+entirely to what the user did.}
 \label{fig:attribution}
 \end{figure}
 
@@ -565,10 +568,13 @@ matching the pattern above.
 \emph{Could the score's profile sensitivity be an illusion of the
 analysis rather than a property of the score?} Two input-level
 experiments require no interpretability machinery at all and agree with
-the internal analysis. Replacing a malicious day's profile lines with a
-random benign user's profile changes the r6.2 score substantially,
-while replacing its entire behavioral content changes it much less; on
-r4.2 the sensitivities are reversed. And the masking result of
+the internal analysis. Replacing a malicious day's profile lines with a random benign user's
+profile changes the score more than replacing its entire behavioral content
+on both benchmarks (mean score change $+0.155$ against $+0.072$ on r6.2, a
+ratio of $2.2$; $+0.180$ against $+0.102$ on r4.2, a ratio of $1.8$). The
+profile swap dominates on both; the behavioral swap is a larger share of the
+total on r4.2, in line with the more behavioral audit there, but the two
+benchmarks are not reversed. And the masking result of
 Section~\ref{sec:collapse} shows the score-level consequence directly.
 
 \section{Real data with real personality scores}
@@ -628,16 +634,17 @@ shortcut on \emph{that} field, whatever it is called. We tested this on
 the ``Comprehensive, Multi-Source Cyber-Security Events'' dataset released
 by Los Alamos National Laboratory in 2015: fifty-eight days of raw Windows
 authentication events from a real enterprise ($12{,}425$ users, $1.05$
-billion events), with $749$ red-team lateral-movement events over $104$
+billion events), with $749$
+red-team compromise events (credential-based lateral movement) over $104$
 users as ground truth and no profile of any kind. Each event records only
 identity fields (source and destination user, source and destination
 host) and behavioral fields (authentication type, logon type,
 orientation, outcome, hour).
 
 We serialized each user-day into windows of thirty-two consecutive
-events, one text line per event, and called a window positive if it
-contained a red-team event, so that truncation can never silently drop a
-positive. We kept every red-team user and a one-in-ten sample of benign
+events, one text line per event, and called a window positive if it contained a red-team event; the longest
+window is $1{,}503$ tokens against a $2{,}048$-token context, so no window
+was truncated. We kept every red-team user and a one-in-ten sample of benign
 users ($1.62$ million windows, $432$ of them positive), adapted Qwen2.5-3B
 on benign windows only under the same recipe as the CERT experiments, and
 scored held-out windows by adapted negative log-likelihood. Users were
@@ -646,44 +653,49 @@ folds ($300{,}729$ windows) and were evaluated separately on seen-fold
 users ($22{,}563$ windows, $234$ positive) and on the held-out fold
 ($30{,}410$ windows, $198$ positive). Four serializations differ only in
 the identity fields: the full line, user identity anonymized, host
-identity anonymized, and user identity deranged across users. Positive
-windows are rare enough that average precision is dominated by the base
-rate, so we report AUC.
+identity anonymized, and user identity deranged across users. Positive windows are rare (prevalence $1.0$ percent among seen-fold windows
+and $0.65$ percent among unseen-fold windows), so we report both AUC and
+average precision.
 
 \begin{center}
-\begin{tabular}{lcc}
+\begin{tabular}{lcccc}
 \toprule
-Identity fields in the serialization & Seen-user AUC & Unseen-user AUC \\
+Identity fields in the serialization & Seen AUC & Seen AP & Unseen AUC & Unseen AP \\
 \midrule
-full (user $+$ host)     & $0.949$ & $0.497$ \\
-user anonymized          & $0.944$ & $0.518$ \\
-host anonymized          & $0.877$ & $\mathbf{0.627}$ \\
-user deranged (shuffle)  & $0.947$ & $0.488$ \\
+full (user $+$ host)     & $0.949$ & $0.177$ & $0.497$ & $0.013$ \\
+user anonymized          & $0.944$ & $0.176$ & $0.518$ & $0.019$ \\
+host anonymized          & $0.877$ & $0.069$ & $\mathbf{0.627}$ & $0.013$ \\
+user deranged (shuffle)  & $0.947$ & $0.173$ & $0.488$ & $0.012$ \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-Three observations. First, the seen-versus-unseen collapse reproduces on
-real data with no injected profile: every serialization ranks seen users
-near $0.95$ and unseen users near chance. Second, the user field is
-inert: anonymizing or deranging it changes neither number, so the shortcut
-is not carried by the user identifier. Third, the host field carries it,
-with exactly the trade-off produced by CERT's profile lines: anonymizing
-hosts costs seen-user ranking ($0.949\!\to\!0.877$) and buys unseen-user
-ranking ($0.497\!\to\!0.627$). This is localization rather than failure.
-People log on from their own machines, so on an authentication log the
-host is the per-user-constant, identity-revealing field, and it plays the
-role that CERT's personality line plays. A residual unseen-user gap
-survives host removal ($0.63$ rather than $0.95$), which we read as
-genuine behavioral heterogeneity across users rather than as shortcut.
-Two caveats: each condition is a single 3B adapter, and the ground truth
-is red-team credential theft rather than CERT's insider scenarios, so
-these numbers replicate the mechanism rather than benchmark a detector.
-One cross-dataset contrast is worth recording now and returns in
-Section~\ref{sec:factorial}: the unseen-user collapse is already severe
-at 3B here, whereas on CERT r6.2 it appears only at 8B; raw host identity
-is a stronger shortcut than an injected profile at small scale, which is
-what one expects if availability is a property of the data.
+Three observations. First, the seen-versus-unseen collapse reproduces on real
+data with no injected profile: every serialization ranks seen users near
+$0.95$ and unseen users far lower, at chance except when hosts are
+anonymized. Second, the user field contributes little: anonymizing or
+deranging it moves unseen-user AUC by at most $0.02$ (a fixed permutation
+relabels a user rather than removing the label), so the shortcut is not
+carried mainly by the user identifier. Third, the host field carries
+it, with the trade-off seen for CERT's profile block: anonymizing hosts costs
+seen-user ranking ($0.949\!\to\!0.877$) and improves unseen-user ranking
+($0.497\!\to\!0.627$), although unseen-user average precision stays at the
+base rate ($0.013$ at prevalence $0.65\%$) in every condition, so the gain is
+in ranking, not in alert precision. Hosts are user-associated rather than
+per-user-constant: a user's most frequent source host accounts for a median
+$54\%$ of that user's events, and only $7\%$ of users issue $80\%$ or more of
+their events from one host. The host field is therefore a partial identity
+proxy that may also encode resource access and attack-path structure, and
+its analogy to CERT's constant personality line is qualitative. A
+seen-versus-unseen gap remains within the host-anonymized condition ($0.877$
+versus $0.627$), which may reflect behavioral heterogeneity across users,
+residual identity cues, or both. Two caveats: this is a single $3$B adapter
+per condition, and the ground truth is red-team credential misuse rather than
+CERT's insider scenarios, so these numbers replicate the \emph{mechanism}, not
+a detection benchmark. Notably the host shortcut is severe even in this $3$B
+adapter, whereas on CERT r6.2 the profile-removal effect appears only in the
+audited $8$B run (Section~\ref{sec:factorial}), consistent with the
+availability factor being a property of the data.
 
 \section{Which detectors take the shortcut?}
 \label{sec:classical}
@@ -731,27 +743,30 @@ generalize while the baselines learned behavior.
 Every causal result so far intervenes at scoring time on a detector that
 was trained with the profile present, so profile capture could in
 principle be a correlate of adaptation rather than a consequence of the
-profile. The direct test is a controlled experiment at training time. We
+profile. The direct test is a controlled experiment that changes the text used for adaptation and scoring. We
 trained four adapters from scratch under an identical recipe on r6.2
 texts that differ \emph{only} in the profile block: (i) \textsc{full};
 (ii) \textsc{no-psy}, with the personality line removed; (iii)
 \textsc{no-profile}, with both profile lines removed; and (iv)
 \textsc{shuffle}, a seeded derangement that gives every user another
 user's profile, so that token presence, format, and surface statistics
-are preserved but the link between profile and identity is destroyed. We
+and per-user constancy are preserved; only the original correspondence
+between a user and the recorded attributes is broken, and the reassigned
+profile still acts as a stable pseudonym. We
 ran this factorial at both scales used in the paper, Qwen2.5-3B and the
 headline Qwen3-8B ($300{,}000$ benign training examples, one adapter seed
 per scale).
 
 Each adapter was scored under the strictest protocol available, the
 fold-aligned protocol of Section~\ref{sec:protocols}: each of r6.2's four
-malicious users is held out in turn and ranked against $800$ benign test
-users never used in training, a user's score is the maximum of its daily
-scores, and the AUC is averaged over the four folds. Uncertainty is the
-paper's primary instrument, the cluster bootstrap that resamples the
-malicious users ten thousand times; because the same users are resampled
-for every arm, it also yields a paired test of the difference between
-two arms.
+malicious users is held out in turn and ranked against all $406$ benign users of this pool never used in training
+(the protocol's cap of $800$ exceeds the pool), a user's score is the maximum of its daily
+scores, and the AUC is averaged over the four folds. Uncertainty is the cluster bootstrap that resamples the four malicious users
+ten thousand times; because the same users are resampled for every arm, it
+also yields a paired interval for the difference between two arms. With four
+malicious users these intervals are descriptive: they are conditional on the
+trained adapters and the fixed comparison cohort, and they say nothing about
+variation across training runs.
 
 \begin{center}
 \begin{tabular}{lcc}
@@ -763,60 +778,75 @@ Training serialization & 3B unseen-user AUC & 8B unseen-user AUC \\
 \textsc{no-profile} & $0.956$ [$0.88$, $0.99$] & $\mathbf{0.903}$ [$0.84$, $0.96$] \\
 \textsc{shuffle}    & $0.656$ [$0.50$, $0.81$] & $0.485$ [$0.29$, $0.68$] \\
 \midrule
-removal (\textsc{no-profile}$-$\textsc{full}) & $+0.03$ [$-0.07$, $+0.14$], $p{=}0.32$ & $\mathbf{+0.37}$ [$+0.07$, $+0.69$], $p{=}0.005$ \\
+removal (\textsc{no-profile}$-$\textsc{full}) & $+0.03$ [$-0.07$, $+0.14$] & $\mathbf{+0.37}$ [$+0.07$, $+0.69$] \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\emph{At the headline scale the collapse is causal and reversible.} The
-8B \textsc{full} adapter collapses on unseen users (user-level AUC
-$0.532$; day-level $0.399$), qualitatively reproducing the collapse of
-Section~\ref{sec:collapse} on a capped-corpus adapter. Removing the
-profile restores user-level AUC to $0.903$, a paired removal effect of
-$+0.371$ whose bootstrap interval excludes zero ($p = 0.005$); the
-bootstrap establishes the effect from a single adapter, so it does not
-rest on seed replication. Removing the personality line alone recovers
-just as much ($0.906$), so that line is the carrier and the
-organizational header adds little. Profile availability during
-adaptation is therefore causally responsible for the unseen-user
-collapse, not a correlate of it.
+\emph{In the audited 8B run the collapse is caused by profile content and is reversible.}
+The 8B \textsc{full} adapter collapses on unseen users (user-level AUC
+$0.532$; day-level $0.399$), qualitatively reproducing the headline collapse of
+Section~\ref{sec:collapse} on a capped-corpus adapter. Removing the profile
+restores user-level AUC to $0.903$, a paired removal effect of $+0.371$ whose
+descriptive bootstrap interval excludes zero (one-sided bootstrap tail
+fraction $0.005$). The four per-user differences are $-0.05$, $+0.82$,
+$+0.42$, and $+0.29$: the effect is carried by three of the four users, and
+the interval characterizes evaluation uncertainty for these two adapters
+rather than replacing replication across adapter seeds. Dropping the
+personality line alone recovers as much ($0.906$): the psychometric line is
+the carrier, and the organizational header adds little. Because each condition
+changes the serialization used for both adaptation and scoring, the result
+attributes the collapse to profile content in the pipeline rather than to a
+training-only pathway; within that scope it is causal, not a correlate.
 
-\emph{At 3B the shortcut is captured but not yet harmful.} The 3B
-\textsc{full} adapter already generalizes ($0.926$; its day-level AUC of
-$0.741$ is in line with the better of the two repaired-serializer 3B
-seeds of Section~\ref{sec:robustness}, $0.738$), and removal changes
-nothing ($+0.03$, not significant). Yet the dictionary audit of the same
-adapter is profile-dominated: four of its five selected features carry
-close to $100$ percent profile mass. Capture without harm at 3B, capture
-with harm at 8B: the shortcut's \emph{damage} to generalization is
-capacity-emergent, the training-time face of the capacity explanation in
-Section~\ref{sec:classical}. (The two repaired-serializer 3B r6.2
-adapters differ widely in quality, $0.414$ versus $0.738$ day-level AUC,
-so the 3B statement is a single-seed one.)
+\emph{In the audited 3B run the shortcut is captured but removal has little effect.}
+The 3B \textsc{full} adapter already generalizes ($0.926$; its day-level AUC
+of $0.741$ is in line with the better of the paper's two repaired-serializer
+3B seeds, $0.738$, Section~\ref{sec:robustness}), and removal changes little
+($+0.03$, interval spanning zero). Yet the dictionary audit of the same adapter
+is profile-dominated (four of five top features at $\approx\!100\%$ profile
+mass). Capture without a measurable removal effect in the 3B run, capture
+with a large one in the 8B run: the difference is consistent with the
+capacity account of Section~\ref{sec:classical}, but the design does not
+isolate capacity. Qwen2.5-3B and Qwen3-8B differ in model generation and
+post-training as well as size, each arm has one adapter seed (the paper's own
+3B r6.2 adapters vary from $0.414$ to $0.738$ day-level AUC across seeds), and
+a non-significant 3B effect is not evidence of no effect.
 
-\emph{The 8B harm is concentrated, and psychometric familiarity predicts
-it.} The 8B collapse is not uniform across the four malicious users: one
-remains detected (user-level AUC $0.919$), two sit at chance ($0.527$),
-and one is inverted, ranked $344$th of $407$ test users, among the least
-anomalous. Removing the profile rescues every user at both scales
-($0.82$ to $0.99$). A direct check of the mechanism against the $3{,}590$
-benign training users: the inverted user has the least novel personality
-profile of the four ($12$ benign users within $L_1 \le 10$ of it in the
-five-dimensional Big Five space) and the user best detected at day level
-has the most novel ($0$); the two most psychometrically familiar users
-are exactly the two that collapse, while the organizational header is
-not predictive (the surviving user shares its role, department, and team
-with $29$ benign users). Ablation and novelty converge on the same
-carrier: the 8B adapter memorizes psychometric familiarity strongly
-enough that a malicious user whose scores resemble many benign trainees
-is scored as familiar and ranked below the unfamiliar unseen benigns.
-With four users this is consistent with, not proof of, the mechanism.
+\emph{The 8B collapse is concentrated, and psychometric familiarity tracks it.}
+The 8B collapse is not uniform across the four malicious users: one remains
+detected (user-level AUC $0.919$), two sit at chance ($0.527$), and one is
+\emph{inverted}---ranked $344$th of $407$ test users, among the least
+anomalous. With the profile removed, all four are ranked in the top fifth of
+the cohort at both scales (ranks $10$--$75$ of $407$ at 8B, $4$--$64$ at
+3B; user-level AUC $0.82$--$0.99$); the one user the 8B \textsc{full}
+adapter still detected moves slightly down ($0.919\!\to\!0.867$) and the three
+collapsed users move up. A direct check of the mechanism against the $3{,}590$
+benign training users: the inverted user has the least novel \texttt{PSY}
+profile of the four ($12$ benign users within $L_1\!\le\!10$ in the five-dimensional Big Five space)
+and the surviving user one of the most novel ($3$); the two most
+psychometrically familiar profiles belong to the inverted user and to one of
+the two chance-level users. The most novel profile ($0$ neighbours) belongs
+to the other chance-level user, which is however the best detected at day
+level ($0.653$), so novelty orders the users only approximately. The
+organizational header is not predictive (the surviving user shares
+its role, department, and team with $29$ benign users). Ablation and novelty
+point to the same carrier: the 8B adapter memorizes psychometric
+familiarity strongly enough that a malicious user whose personality scores
+resembles many benign trainees is scored as familiar and ranked below the
+unfamiliar unseen benigns. With four users this is consistent with, not proof
+of, the mechanism.
 
 \emph{Shuffling.} Deranging profiles never helps. At 8B the
-\textsc{shuffle} adapter sits with \textsc{full} at chance ($0.485$); at
-3B it falls well below the honest-profile adapter ($0.656$ versus
-$0.926$): a profile that lies misleads even a model for which an honest
-profile is harmless.
+\textsc{shuffle} adapter sits with \textsc{full} at chance ($0.485$); at 3B
+it falls well below the honest-profile adapter ($0.656$ versus $0.926$).
+Because the derangement preserves per-user constancy, what is lost is not a
+stable per-user token but the correspondence between the profile's content
+and its owner; and because the permutation runs over the whole population, an
+unseen user can carry a training user's profile, so profile familiarity no
+longer tracks whether a user was seen. A fixed profile that belongs to someone
+else is worse than none, even for a model for which the honest profile is
+harmless.
 
 \emph{Capture survives shuffling; usefulness does not.} Running the
 dictionary audit on the \textsc{full} and \textsc{shuffle} adapters
@@ -827,10 +857,11 @@ under \textsc{full}, five of five under \textsc{shuffle}), and at 8B both
 adapters place two features of essentially pure profile mass among their
 top five. The derangement keeps each user's borrowed profile constant
 across that user's days, so the per-user constancy that makes profile
-tokens cheap to predict is preserved; only the correlation with true
-identity is destroyed. Capture tracks predictability, which shuffling
-leaves intact, while usefulness tracks whether the profile is informative
-about identity, which shuffling removes: under \textsc{shuffle} the audit
+tokens cheap to predict is preserved; only the original correspondence between profile content and the user's
+behavior and labels is broken; the reassigned profile remains a stable
+pseudonym for the user. Capture tracks per-user constancy, which shuffling
+leaves intact, while usefulness tracks whether the profile content is
+informative about the unseen users being ranked, which shuffling degrades: under \textsc{shuffle} the audit
 reports the same profile capture alongside chance-level ranking of unseen
 users. This is a controlled instance of the methodological point that
 runs through the paper: attribution alone overstates a shortcut, and only
@@ -849,15 +880,14 @@ training objective and input representation determine \emph{which}
 detectors take an available shortcut: the likelihood-based sequence
 model took it, and three classical feature-vector detectors did not.
 Both factors were tested rather than assumed. The first by subsampling,
-by an out-of-setting prediction that the real-user dataset confirmed, by
-a train-matched retraining experiment showing that profile availability
-at adaptation time causes the unseen-user collapse at the headline scale
+by an out-of-setting prediction that the real-user dataset confirmed, by a train-matched retraining experiment showing that profile content in the serialization causes the unseen-user collapse in the audited 8B run
 (Section~\ref{sec:factorial}), and by a login log with no profile at all,
 where the shortcut relocates to the host field (Section~\ref{sec:lanl});
-the second by the cross-detector comparison. The retraining experiment
-adds a qualification the account did not anticipate: the shortcut's harm
-is capacity-emergent, present in the smaller model's representation but
-damaging only at the larger one.
+the second by the cross-detector comparison. The retraining experiment adds a qualification the account did not
+anticipate: the shortcut was captured in both audited runs but measurably
+damaged unseen-user ranking only in the larger one, a model-dependent
+difference that the single-seed, cross-family design does not attribute to
+capacity alone.
 
 Three practical conclusions carry beyond these datasets and this
 model. First, for anomaly detectors intended to detect behavior,
@@ -878,9 +908,10 @@ answer to be believed.
 The claims are scoped by design. The causal results concern the
 particular adaptation runs audited here; the r6.2 estimates rest on
 four malicious users dominated by one; the CERT data are synthetic; and
-the real-data studies are small; the retraining experiment uses one
-adapter seed per scale, its significance coming from resampling the
-malicious users rather than from seed replication; and the login-log
+the real-data studies are small; the retraining experiment uses one adapter seed per scale, its intervals
+coming from resampling the four malicious users, which characterizes
+evaluation uncertainty for those adapters and not variation across training
+runs; and the login-log
 study is a single 3B adapter per condition with a red-team rather than
 insider ground truth. What survives every variation we tested
 is the central dissociation and its explanation, and the method by

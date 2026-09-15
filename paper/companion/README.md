@@ -1,8 +1,16 @@
 # Companion editions of the paper
 
 Two re-tellings of `paper/main.tex`, regenerated 2026-09-14 to include the
-train-matched factorial (8B causal / 3B capacity contrast), the LANL real
-auth-log replication, the capture-vs-utility dissociation, and Fig. 2.
+train-matched serialization counterfactuals (8B causal; 3B small/non-significant,
+model-dependent rather than a demonstrated capacity effect), the LANL real
+auth-log replication (host = user-associated field, AUC + AP), the
+capture-vs-utility dissociation (shuffle = pseudonym), and Fig. 2. Corrected the
+same day after an external review pass: 406/407 comparison cohort (not 800),
+descriptive bootstrap intervals in place of p-values, Facade = Kantchelian et
+al., TWOS within-user AUC 0.78 over 16 users, AUC tie term, precision axis =
+average precision, r4.2 SAE size (m=2d, k=4), profile-swap dominance on both
+CERT releases (not reversed), per-user rescue ranks in place of "catches all
+four".
 
 - `plain_summary.tex` — for a mathematician reader (Dr. Tian): one linear
   narrative; every abbreviation and symbol defined at first use; ideas stated
