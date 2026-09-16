@@ -1,0 +1,551 @@
+% Supporting detail for readable_full.tex. Keep interpretive caveats in the body.
+\section{Data, model, and dictionary details}
+\label{app:populations}
+
+\subsection{What is included in the CERT evaluation?}
+
+The positive population is the intersection of the answer key and extracted
+session coverage: $70$ user-days from $4$ users on r6.2 and $1{,}309$
+from $60$ on r4.2. The corresponding answer-key counts are $99$ rows
+from $5$ users and $1{,}883$ from $70$. The four r6.2 users contribute
+$46$, $18$, $5$, and $1$ positive days. Claims do not cover incidents
+outside the extracted domain.
+
+The original language-model split excludes incident users from adaptation
+and assigns the remaining users by a deterministic hash. The validation
+comparison contains $405$ benign users on r6.2 and $79$ on r4.2.
+Other scored users can have no positive day in the matched domain. These
+differences matter: the later r6.2 factorial uses $406$ negative users
+($405$ validation users plus one evaluation user with no matched positive),
+and r4.2 scoring-time masking includes $89$ never-trained benign users
+($79$ validation users plus $10$ others). The classical probe uses its own
+random user split (Appendix~\ref{app:classical}).
+
+\subsection{Serialization and adapter training}
+
+The organizational line contains \texttt{week, project, role, b\_unit,
+f\_unit, dept, team, itadmin}; the personality line contains
+\texttt{O,C,E,A,N}. After \texttt{SESCOUNT}, session lines retain computer
+and timing descriptors, work-hour and weekend flags, duration, concurrency,
+logon and USB totals, USB duration, file and executable-file totals,
+email and attachment statistics, and HTTP categories including job,
+cloud, leak, and hacking sites.
+The original serializer omitted four hyphenated routing columns:
+\texttt{file\_n-to\_usb1}, \texttt{file\_n-from\_usb1},
+\texttt{file\_n-file\_act3}, and \texttt{file\_n-disk1}.
+The repaired r6.2 reruns restore all four; r4.2 contains one of them.
+The original experiments therefore concern the retained field set.
+Removing the entire \texttt{DAY} line also removes its week field, so
+that condition changes a temporal cue as well as organizational metadata.
+
+All adapters use 4-bit NF4 base weights with double quantization and
+bfloat16 computation; LoRA rank $16$, scale $32$, dropout $0.05$;
+attention q/k/v/o and feed-forward up/down/gate projections;
+sequence limit $2048$; cosine learning-rate decay with $3$ percent
+warmup; and zero weight decay. The original Qwen3-8B recipe uses one
+epoch, effective batch $8$, and learning rate $1.5\times10^{-4}$.
+Qwen2.5-3B uses effective batch $16$ and learning rate $2\times10^{-4}$.
+The 8B factorial uses batch $16$ across four GPUs while retaining its
+$1.5\times10^{-4}$ rate. Recipes are held fixed across input conditions
+within each model; they are not identical across model families.
+
+The repaired 3B runs use one epoch on all $287{,}827$ r4.2 training days
+or a $300{,}000$-day cap from approximately $1.25$ million r6.2 days,
+with adapter seeds $42$ and $43$. TWOS uses three epochs on its smaller
+benign corpus. The factorial and LANL runs use a $300{,}000$-example
+training cap and a $2{,}000$-example validation cap, seed $42$.
+
+Scores average next-token negative log-likelihood over attention-valid
+targets; padding is excluded. When full fp32 logits would exceed
+$28$ GiB, scoring computes cross-entropy in bounded slices from the
+hidden states and output embedding. This changes memory use, not the
+score's mathematical definition. Input removal also changes which tokens
+enter that average, one reason the factorial is a pipeline-level effect.
+
+\subsection{Dictionary fitting and feature selection}
+
+Token deltas come from the residual stream after the audited layer,
+in evaluation-example order. For coordinatewise mean $\mu$ and standard
+deviation $\sigma$, the encoder and decoder are
+\[
+ z_t=\operatorname{TopK}_k\!\left(\operatorname{ReLU}
+ (W_e((\delta_t-\mu)/\sigma)+b_e)\right),\qquad
+ \widehat\delta_t=\sigma\odot Dz_t+\mu.
+\]
+The decoder is untied and has no bias in standardized coordinates.
+Training uses Adam, learning rate $10^{-3}$, $20$ epochs, batches of
+$1024$--$4096$, and at most two million token rows per layer. The
+original fit retains all positive-example rows and subsamples benign
+rows; benign-only dictionaries are separately identified.
+
+Here $m$ is the number of dictionary columns. The core search varies
+$m/d\in\{2,4\}$, $k\in\{4,8\}$, and layers $18,26,34$ on r6.2
+or $18,26$ on r4.2. The headline r6.2 choice is layer $18$, $m/d=4$,
+$k=8$: standardized reconstruction MSE $0.054$, mean active count
+$7.98$, and $1.0$ percent dead features. The native r4.2 choice is
+layer $26$, $m/d=2$, $k=4$: MSE $0.093$, active count $4.0$,
+and $1.4$ percent dead features. These configurations were selected
+using exploratory intervention results on the full positive population.
+
+The candidate set contains the five largest positive-minus-benign mean
+activation gaps. The active control contains five other features with
+smallest absolute gap among those active on at least $0.002$ of token
+rows. Session-restricted selection recomputes gaps on \texttt{SES} rows
+and excludes features with more than $0.5$ profile mass on positive rows.
+Held-out analyses reselect feature identities, but inherit the dictionary,
+layer, size, sparsity, context menu, and edit grid unless explicitly refitted.
+
+\section{Detector measurements and input controls}
+\label{app:detectors}
+
+\subsection{Original baseline comparison}
+
+Each original fold (seed $42$) holds out one malicious user and samples
+$800$ benign users. The language model is fixed across folds and has
+trained on many of those benign users; baseline detectors retrain with
+test users excluded. Day metrics cover all test rows; user metrics use
+the maximum day score. Table~\ref{tab:readable_detectors} reports the
+fold averages. Deep SVDD is deep support vector data description
+\citep{ruff2018deepsvdd}; GRU and LSTM AE are gated recurrent unit and
+long short-term memory autoencoders; IF is Isolation Forest
+\citep{liu2008isolation}. Their distinct training exposure prevents
+interpreting the LM's higher ROC as a fair generalization advantage.
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabular}{llrrrr}
+\toprule
+Dataset & Detector & Day ROC & Day AP & User AP & Mean rank \\
+\midrule
+r6.2 & Adapted LM & $.953$ & $.000755$ & $.054$ & $24.0$ \\
+ & Deep SVDD & $.628$ & $.01155$ & $.211$ & $83.2$ \\
+ & GRU AE & $.766$ & $.00572$ & $.081$ & $24.8$ \\
+ & LSTM AE & $.768$ & $.00207$ & $.057$ & $24.2$ \\
+ & IF & $.713$ & $.000211$ & $.013$ & $153.0$ \\
+\midrule
+r4.2 & Adapted LM & $.964$ & $.01345$ & $.101$ & $26.4$ \\
+ & Deep SVDD & $.743$ & $.03372$ & $.382$ & $53.4$ \\
+ & GRU AE & $.696$ & $.02544$ & $.124$ & $86.6$ \\
+ & LSTM AE & $.714$ & $.02364$ & $.120$ & $92.1$ \\
+ & IF & $.715$ & $.000254$ & $.008$ & $186.4$ \\
+\bottomrule
+\end{tabular}
+\caption{Original fold-aligned comparison. Rank is the malicious user's
+position among $801$ users (smaller is better). AP is average precision,
+called PR-AUC in the result artifacts. Baseline user ROC is unavailable
+in this harness; adapted-LM fold averages are approximately $.971$ and
+$.968$ from the tracked rows. These are not the pooled values below.}
+\label{tab:readable_detectors}
+\end{table}
+
+Base-model NLL has day ROC $0.461$ on r6.2 and $0.581$ on r4.2 in
+the original comparison. Thus adaptation changes the ranking substantially,
+without establishing whether the acquired information is appropriate.
+In the full scored pool, restricting benigns to validation users changes
+day ROC from $0.954$ to $0.545$ on r6.2 and $0.959$ to $0.668$ on
+r4.2; user ROC changes from $0.970$ to $0.546$ and $0.969$ to $0.565$.
+The restricted day/user APs are $0.0005/0.013$ and $0.1023/0.521$.
+These APs have different class prevalence from the fold comparison and
+should not be treated as a direct cross-protocol performance gain.
+
+\subsection{Within-user ranking, masking, and swaps}
+
+Mean within-user ROC is $0.725$ on r6.2, with user-bootstrap interval
+$[0.654,0.795]$ and all four users above chance; the dominant user has
+$0.768$. On r4.2 the mean is $0.669$, interval $[0.619,0.717]$,
+with $52$ of $60$ users above chance. These compare each user's
+positive and own-benign days, not seen versus unseen identities.
+
+Scoring-time masking uses a fixed adapter and a fixed unseen comparison.
+The r4.2 pool contains $42{,}468$ days from $149$ users, including the
+$89$ benign users described above. Removing personality changes day
+ROC from $0.670$ to $0.797$ (paired change $+0.127$, interval
+$[0.061,0.193]$), day AP from $0.069$ to $0.112$, and user ROC
+from $0.666$ to $0.775$ (change $+0.108$, interval $[0.038,0.179]$).
+Further masking organizational identifiers gives day change $+0.063$
+with interval $[-0.003,0.130]$. On r6.2, original/no-personality/
+no-profile day ROC is $0.547/0.575/0.471$; all paired change intervals
+contain zero. Masking intervals use $10{,}000$ paired bootstrap draws,
+resampling users within both label strata. Scoring-time masking and
+the later removal-and-retraining experiment are distinct interventions.
+
+The swap probe replaces either the positive day's profile or its session
+content with an unseen validation user's values, keeping the complementary
+part fixed. Mean signed NLL changes are $+0.155$ versus $+0.072$ on
+r6.2 and $+0.180$ versus $+0.102$ on r4.2. Both profile swaps
+increase mean NLL more. These replacements can disrupt natural
+profile--behavior combinations; they measure sensitivity, not an
+isolated familiarity mechanism or a causal feature's semantic identity.
+
+\section{Exact interventions and uncertainty}
+\label{app:intervention}
+
+\subsection{Repair and ablation}
+
+Let $F$ be the candidate or control feature set and
+$T_F=\{t:\sum_{f\in F}z_{t,f}>0\}$ the active receiver positions.
+For a donor $d$, the prototype $p_f^d$ is the mean donor activation
+over positions active for $F$, falling back to all donor positions if
+that set is empty. For $f\in F$ and $t\in T_F$, repair sets
+\[
+ z'_{t,f}=(1-\alpha)z_{t,f}+\alpha p_f^d,
+ \qquad \alpha\in\{0.25,0.5,0.75,1\}.
+\]
+Other coefficients are unchanged. At every token, the patched delta is
+$\delta'_t=\sigma\odot Dz'_t+\mu$; a forward hook adds
+$\delta'_t-\delta_t$ to the adapted residual state. Thus both arms
+substitute a sparse reconstruction even away from edited positions.
+That shared baseline need not cancel after nonlinear downstream layers.
+
+For receiver $r$ and donor class $b\in\{\mathrm{ben},\mathrm{anom}\}$,
+the recorded outcome is
+\[
+ \Delta^F_b(r)=\min_{d\in\mathcal D_b(r),\,\alpha}
+ \{s(x_r;F,d,\alpha)-s(x_r)\}.
+\]
+Negative values mean score reduction. For the same complete receivers
+$\mathcal R$, repair is
+\[
+ \tau=\frac1{|\mathcal R|}\sum_{r\in\mathcal R}
+ \left[(\Delta^S_{\mathrm{anom}}(r)-\Delta^S_{\mathrm{ben}}(r))
+ -(\Delta^C_{\mathrm{anom}}(r)-\Delta^C_{\mathrm{ben}}(r))\right].
+\]
+This is maximal achievable repair under the permitted search, not a
+donor-averaged causal effect. Donor pools are capped at $16$ per receiver,
+drawn with a fixed random seed; malicious donors are scarcer (median
+$1$ on r6.2, mean $13$ on r4.2), creating unequal search opportunities.
+
+Ablation replaces the edited coordinates by $(1-\alpha)z_{t,f}$.
+For positive or matched-benign receiver $q$, let
+$e_F(q)=\min_\alpha\{s(x_q;F,\alpha)-s(x_q)\}$. Over complete
+positive/benign pairs $(r,b)$, the ablation contrast is
+\[
+ \nu=\overline{[e_S(b)-e_S(r)]-[e_C(b)-e_C(r)]}.
+\]
+Positive $\nu$ means more positive-specific score reduction from
+ablating the selected set than the control. It does not prove strict
+necessity of the features outside this operation.
+
+Donor and receiver pairs match role, department$\times$role,
+project$\times$role, team, or department as specified by the context.
+All donors and benign receiver matches exclude the positive receiver's
+user. Benign matches come from never-trained evaluation users.
+r4.2 repair has $1034$--$1157$ complete receivers across its contexts.
+r6.2 team has no complete malicious-donor contrast and is unavailable.
+Every contrast uses complete paired outcomes, not separate arm means
+with different missingness.
+
+\subsection{What the control checks establish}
+
+The initial active controls are not matched in edit size. Typical best-row
+repair norms are approximately $71$ versus $20$ (selected versus control)
+on r6.2 and $112$--$124$ versus $11$--$13$ on r4.2. Within a feature
+set, benign- and malicious-donor norms differ by only $0.2$ percent on
+r6.2 and at most $6$ percent on r4.2. These observations help diagnose
+the contrast but do not eliminate magnitude-related confounding.
+The reconstruction component has mean per-token norm approximately
+$7$ and $37$, respectively.
+
+Controls additionally matched on activation frequency, magnitude, and
+decoder norm reduce the selected/control norm ratio to $1.33$ on r6.2
+and $1.79$ on r4.2. The rerun results are:
+\begin{center}\small
+\begin{tabular}{lcc}
+\toprule
+ & Repair $\tau$ [95\% interval] & Ablation $\nu$ [95\% interval] \\
+\midrule
+r6.2 & $.0059$ [$-.0018,.0096$] & $.0609$ [$ .0074,.0843$] \\
+r4.2 & $.00168$ [$ .00105,.00228$] & $.0012$ [$-.0016,.0038$] \\
+\bottomrule
+\end{tabular}\end{center}
+The intervals are user-cluster bootstrap intervals; r6.2 has only four
+clusters. The r4.2 repair and r6.2 ablation contrasts retain intervals
+above zero. This is partial calibration, not exact equal-dose testing.
+
+Replacing best-donor search with the median of each donor's best-strength
+outcome yields positive headline repair contrasts of $0.0005$ (r6.2)
+and $0.0006$ (r4.2). Dividing each best-row score change by its edit
+norm gives r4.2 positive point estimates in three of four contexts
+(team $+0.0008$ per norm unit), but all context intervals include zero.
+r6.2 repair does not survive this rescaling (three usable user clusters).
+The rescaling assumes approximately linear response and is a sensitivity
+check, not an alternative identification proof.
+
+Ablation sizes also differ: selected/control norms approximately
+$45/21$ on r6.2 and $165$--$169$/$13$--$15$ on r4.2.
+Selected features have fewer active tokens on benign matches
+($0.2$--$0.8$ versus $3.0$ on r6.2; about $2$ versus $4.4$ on
+r4.2). The receiver-class contrast is therefore partly a comparison
+between small and large edits. The matched-control and replication
+checks are material qualifications to its interpretation.
+
+\subsection{Uncertainty and selection}
+
+Primary intervention intervals use $10{,}000$ draws of malicious users
+with replacement and recompute the pooled complete-case contrast.
+Users with more eligible days retain greater weight in the point
+estimate; clustering does not make it a mean of equally weighted users.
+Supplementary procedures use $4000$ receiver/pair draws or bootstrap a
+mean of user means. The figures use the primary user-cluster result.
+All contexts are reported without a multiple-comparison correction;
+a strongest-context example is not confirmation of every context.
+Intervals condition on trained models and selected configurations,
+and four-user intervals are descriptive.
+
+\section{Transfer and replication details}
+\label{app:robustness}
+
+\subsection{Literal transfer and geometric alignment}
+\label{app:transfer}
+
+Transferring the r6.2 dictionary and feature sets directly to all $1309$
+r4.2 positive receivers gives negative repair contrasts in every audited
+configuration. The best values in the three transferred sparsity settings
+are $-0.00094$, $-0.00105$, and $-0.00113$.
+Native r4.2 rediscovery at layer $26$ instead gives positive repair
+in all four contexts: team $0.00142$, role $0.00111$,
+department$\times$role $0.00107$, department $0.00098$, with primary
+intervals above zero. Native ablation is positive with intervals above
+zero for department$\times$role ($0.0029$) and role ($0.0021$),
+while team and department intervals cross zero (Figure~\ref{fig:effects}).
+A local session autoencoder evaluated at the same user-day unit gives
+best repair contrasts $0.0011$ on r6.2 and $0.00091$ on r4.2.
+Its reconstruction-error score has different units from LM NLL, so
+these numbers do not quantify a relative causal advantage.
+
+Feature alignment uses absolute cosine after undoing standardization:
+compare normalized $\sigma\odot D_{:,f}$. Each selected source direction
+is matched to the best target direction. The reference is the median
+best-match similarity across the whole source dictionary, not a formal
+statistical null test.
+\begin{center}\small
+\begin{tabular}{lcc}
+\toprule
+Comparison & Selected best matches & Dictionary reference \\
+\midrule
+r6.2, three seed pairs & $.807$--$.856$ & $.720$--$.750$ \\
+r4.2, three seed pairs & $.837$--$.946$ & $.814$--$.818$ \\
+Across datasets, layers 18/26 & $.218$--$.236$ & $.224$--$.405$ \\
+Across datasets, layer 18 & $.295$--$.652$ & $.370$--$.963$ \\
+\bottomrule
+\end{tabular}\end{center}
+r4.2's layer-18 comparison is away from its headline layer-26 mechanism.
+Fresh r6.2 dictionary seeds also yield positive repair in every finite
+context (role $0.0071$ and $0.0019$, versus original $0.0068$).
+This tests dictionaries on the same cached representations.
+
+\subsection{Held-out users and benign-only dictionaries}
+
+r4.2 discovery/confirmation splits $60$ malicious users into $30/30$
+($671/638$ positive days). Four of five selected features agree with
+full-population selection. Held-out repair is $0.00034$--$0.00076$;
+only department has a primary interval above zero ($0.00076$,
+$[0.00035,0.00121]$, $21/29$ contributing users positive).
+Held-out ablation is directionally positive for role and
+department$\times$role; team does not replicate a positive effect.
+
+With the original r6.2 selection, project$\times$role ablation is
+positive for all four users ($0.019$--$0.103$); pooled repair is largely
+driven by the $46$-day user. In leave-one-user-out selection, the three folds retaining the
+dominant user select nearly identical sets; excluding that user changes
+the set completely. The new set repairs the dominant user's held-out
+days ($0.0037$--$0.0038$), while effects for low-activity users are
+near zero. Held-out ablation is positive on the two other multi-day
+users (up to $0.043$) but negative on the dominant-user fold.
+Intervals within a single held-out user describe variability over
+that user's days, not independent-user replication.
+
+With dictionaries fitted only to benign deltas, r4.2 attribution remains
+at least $94$ percent session mass, with four features at $100$ percent.
+Held-out ablation is $+0.004$--$+0.013$ across contexts
+($528$--$638$ complete pairs), but repair is $-0.0002$--$-0.0004$.
+r6.2 remains at least $99$ percent profile mass in every fold;
+repair is positive in one held-out fold, while ablation is positive
+on the dominant-user fold. Dictionary choice changes which intervention
+and user combination replicates.
+
+\subsection{Population, new adapters, and secondary features}
+
+For the fixed r4.2 model and dictionary, positive-user subsamples of
+$4,10,20,30,60$ (ten draws each) give mean top-five profile share
+about $0.25$ at four users and $0.16$--$0.20$ otherwise. This is a
+selection-stage test conditional on a full-population dictionary.
+
+The repaired 3B adapters use fresh deltas at layers $12,18,24$ and
+benign-only dictionaries. On r4.2, all five features at the best layer
+have at least $94$ percent session mass under both adapter seeds;
+unseen-user day ROC is $0.678/0.718$. Ablation is $+0.00218/0.00215$
+on $1301$ complete pairs per seed, with repair about $-0.0004$ each.
+On r6.2, three or four of five layer-24 features are almost entirely
+profile-bound; shallower configurations can be behavioral. Day ROC is
+$0.414/0.738$; repair is $+0.0175$ in one seed and near zero in the other.
+These runs jointly change model, serializer, and training realization.
+
+r6.2 session-restricted leave-one-user-out selection recovers two recurring
+features across three of four folds, with near-zero profile mass.
+Held-out repair on the dominant user is $+0.0027$--$+0.0029$, around
+three-quarters of the unrestricted profile-family effect. Ablation
+replicates partially, including the dominant-user role context where
+the unrestricted profile-family result was negative. This shows a
+secondary session-concentrated family within the same model.
+
+\section{The two real-data studies}
+\label{app:realdata}
+
+TWOS contains $24$ real users over five days with real IPIP-50 personality
+questionnaires. The serialization yields $18{,}048$ ten-minute windows,
+$138$ positive ($101$ masquerade and $37$ traitor). The benign training
+pool is approximately $7000$ windows from $12$ users never masqueraded;
+future traitors contribute only pre-dismissal benign days. Both adapter
+seeds and audited layers $18/24$ yield at least $0.983$ session mass
+for each selected feature. Within-user ROC averages $0.783$ over the
+$16$ attacked users with logged windows. The quoted interventions
+($\nu=+0.0019$, $\tau=-0.0018$) use seed $42$, layer $24$,
+team matching, same-user exclusion, and $138$ receivers. Dictionaries
+are benign-only but feature selection uses the full positive pool;
+the quoted point estimates are exploratory and are not accompanied
+here by independent-user confirmation.
+
+LANL contains approximately $1.05$ billion authentication events over
+$58$ days. Keeping all $104$ red-team users and a one-in-ten sample
+of other users yields approximately $1.62$ million windows, $432$
+positive. A window contains up to $32$ events within a user-day and
+is positive if it includes a red-team event. Five deterministic MD5
+user folds assign fold $4$ to unseen evaluation; benign windows from
+folds $0$--$3$ supply training and validation. Evaluation keeps all
+positives and hash-samples benign windows, disjoint from the training
+and validation windows. Actual scored counts, rather than target sample
+budgets, are $22{,}563$ seen-fold windows ($234$ positive) and
+$30{,}410$ unseen-fold windows ($198$ positive). A seen-fold user can
+have benign training windows even if another window is red-team positive.
+
+Token-length checks cover all $52{,}973$ scored windows under the full
+and host-anonymized conditions: full maximum $1503$, 99th percentile
+$1408$, positive maximum $1417$; host-anonymized maximum $1311$,
+99th percentile $1263$, positive maximum $1212$. All are below $2048$.
+This check should not be expanded into a claim about every raw or
+generated window in all conditions. The host-constancy audit covers
+$9{,}414{,}753$ training events and $1180$ users with at least $20$
+events: modal source-host share has median $0.54$, quartiles
+$0.40/0.61$, mean $0.51$; modal destination-host share has median
+$0.16$. The full versus host-anonymized unseen AP is approximately
+$0.0133$ versus $0.0129$, at prevalence $0.00651$. These values are
+above prevalence but show no AP improvement from host masking.
+
+\section{Classical and train-matched comparisons}
+\label{app:classical}
+
+\subsection{The separate classical probe}
+
+The classical probe aggregates numeric session columns to user-days:
+profile columns take the first value; behavioral columns take means,
+with session count added. It includes $12$ profile and $230$ behavioral
+columns on r6.2, $11$ and $110$ on r4.2. It randomly holds out
+$399/94$ benign users, respectively (seed $42$), and scores their days
+plus all matched positive days. This differs from the LM's hash split.
+Training-day counts are $1{,}254{,}025/284{,}322$ and evaluation-day
+counts $138{,}138/33{,}789$.
+
+Features are standardized on training data. Isolation Forest uses
+$300$ trees; the one-class SVM uses $\nu=0.05$, scaled kernel width,
+and a $6000$-row training subsample; principal-component analysis (PCA)
+uses $10$ components with reconstruction norm as score. The input-removal
+variants refit each model; SVM subsamples need not be identical between
+variants. Permutation importance is one random permutation per column,
+with negative ROC drops clipped to zero before computing group shares.
+These shares are descriptive and differ from sparse activation mass.
+
+\begin{center}\small
+\begin{tabular}{llrrrr}
+\toprule
+ & Model & Profile share & Profile in top 5 & Full ROC & Removal change \\
+\midrule
+r6.2 & IF & $.040$ & $0$ & $.6408$ & $+.0030$ \\
+ & One-class SVM & $.065$ & $0$ & $.4914$ & $+.0225$ \\
+ & PCA & $.041$ & $0$ & $.6164$ & $+.0220$ \\
+r4.2 & IF & $.017$ & $0$ & $.8294$ & $-.0084$ \\
+ & One-class SVM & $.124$ & $1$ & $.6595$ & $-.0223$ \\
+ & PCA & $.024$ & $0$ & $.8382$ & $+.0089$ \\
+\bottomrule
+\end{tabular}\end{center}
+Profile reliance is small in the r6.2 probe. r4.2 is mixed: personality
+trait O enters the SVM's top five, and removal lowers two detectors'
+ROC. Thus the r6.2 pattern cannot be asserted unchanged on r4.2.
+
+\subsection{Factorial intervals and individual users}
+\label{app:factorial}
+
+Each arm uses the same capped benign corpus and input condition during
+adaptation and scoring. The audit pool includes all evaluation-user days
+and a seeded $12$ percent sample of validation days. Its fold re-score
+ranks each malicious user against the same $406$ negative users.
+User AUC with one positive is a measure of that user's position relative
+to negatives, not the probability of detecting that user at a chosen
+alert threshold. Table~\ref{tab:readable_factorial} retains the individual
+results behind the body averages.
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabular}{llcccc}
+\toprule
+ & Condition & ACM2278 & CDE1846 & CMP2946 & MBG3183 \\
+\midrule
+3B & Full & $.995$ (3) & $.803$ (81) & $.966$ (15) & $.941$ (25) \\
+ & No personality & $.916$ (35) & $.926$ (31) & $.924$ (32) & $.845$ (64) \\
+ & No profile & $.993$ (4) & $.993$ (4) & $.993$ (4) & $.845$ (64) \\
+ & Shuffle & $.894$ (44) & $.488$ (209) & $.520$ (196) & $.722$ (114) \\
+\midrule
+8B & Full & $.919$ (34) & $.155$ (344) & $.527$ (193) & $.527$ (193) \\
+ & No personality & $.931$ (29) & $.872$ (53) & $.911$ (37) & $.911$ (37) \\
+ & No profile & $.867$ (55) & $.978$ (10) & $.951$ (21) & $.818$ (75) \\
+ & Shuffle & $.345$ (267) & $.241$ (309) & $.574$ (174) & $.778$ (91) \\
+\bottomrule
+\end{tabular}
+\caption{User ROC and rank in parentheses, out of $407$ users per fold.
+All four users rank in the top fifth after profile removal in both
+models. This is a ranking result, not a demonstrated alert recall.}
+\label{tab:readable_factorial}
+\end{table}
+
+The $95$ percent bootstrap intervals for user ROC are:
+\begin{center}\small
+\begin{tabular}{lcc}
+\toprule
+Condition & 3B & 8B \\
+\midrule
+Full & $[.844,.982]$ & $[.248,.821]$ \\
+No personality & $[.865,.925]$ & $[.882,.926]$ \\
+No profile & $[.882,.993]$ & $[.842,.964]$ \\
+Shuffle & $[.504,.808]$ & $[.293,.676]$ \\
+\bottomrule
+\end{tabular}\end{center}
+Paired profile-removal changes are $+.030$ $[-.065,.142]$ and
+$+.371$ $[.067,.690]$. Resampling uses the same four malicious-user
+indices across contrasted arms and fixes the negative cohort. Bootstrap
+tail fractions in the raw logs are not additional training replications
+or a four-user significance guarantee.
+
+In the separately fitted full/shuffle dictionaries, selected profile
+fractions are:
+\begin{center}\small
+\begin{tabular}{lccccc}
+\toprule
+Model, layer, condition & Feature 1 & 2 & 3 & 4 & 5 \\
+\midrule
+3B, 12, full & $1$ & $.853$ & $.997$ & $.026$ & $.992$ \\
+3B, 12, shuffle & $1$ & $.920$ & $1$ & $1$ & $.985$ \\
+8B, 24, full & $.053$ & $.041$ & $.095$ & $1$ & $1$ \\
+8B, 24, shuffle & $.085$ & $.095$ & $.257$ & $.998$ & $1$ \\
+\bottomrule
+\end{tabular}\end{center}
+These are the capped factorial adapters, not the original layer-18
+8B audit; each has its own selected features.
+
+The exploratory novelty check compares each positive user with $3590$
+benign training users. In the table's user order, counts of training
+profiles within Big-Five $L_1$ distance $10$ are $3,12,11,0$;
+minimum distances are $9,7,6,12$; exact role/department/team matches
+are $29,13,22,4$. Corresponding full-8B day ROC values are
+$0.340,0.191,0.412,0.653$. The nearest-distance and neighborhood-count
+rankings differ, and neither perfectly orders user ROC. This four-case
+post hoc comparison cannot establish a general novelty mechanism.

@@ -1,8 +1,10 @@
-\documentclass[10pt]{article}
-\usepackage[accepted,preprint]{tmlr}
+\documentclass[10pt]{article} % For LaTeX2e
+\usepackage{tmlr}
+% Camera-ready: \usepackage[accepted]{tmlr}   Preprint: \usepackage[preprint]{tmlr}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
 \usepackage{tabularx}
+\usepackage{enumitem}
 \usepackage{graphicx}
 \usepackage{flafter}
 \usepackage{tikz}
@@ -12,19 +14,22 @@
 \hypersetup{hidelinks}
 \raggedbottom
 
+\newcommand{\rsix}{r6.2}
+\newcommand{\rfour}{r4.2}
+
 \def\month{09}
 \def\year{2026}
+\def\openreview{\url{https://openreview.net/forum?id=XXXX}}
 
-\title{What Does a Benign-Trained Anomaly Detector Actually Detect?}
+\title{What Do Benign-Trained Session Language Models Actually Detect? \\ A Mechanistic Audit on Insider-Threat Benchmarks}
 
-\author{\name Suramya Angdembay \email suramya.angdembay@usm.edu \\
-\addr University of Southern Mississippi
-\AND
-\name Haiyan Tian \email haiyan.tian@usm.edu \\
-\addr University of Southern Mississippi}
+\author{\name Anonymous Authors \email anonymous@example.com \\
+\addr Anonymous Institution}
 
 \begin{document}
+
 \maketitle
+
 
 \begin{abstract}
 High ranking performance does not reveal what an anomaly detector uses
@@ -50,7 +55,8 @@ quality, causal relevance, and the input locations of selected features,
 while making the limits of each measurement explicit.
 \end{abstract}
 
-\section{The problem}
+\section{Introduction}
+\label{sec:intro}
 
 Organizations record what employees do on their computers: logons, file
 transfers, web activity, e-mail volume, and so on. An \emph{insider
@@ -97,11 +103,83 @@ requires careful control of data splits and experimental assumptions
 \citep{arp2022dos,landauer2024critical}. Our contribution is the combined
 audit of adaptation changes, feature interventions, input locations, and
 user-disjoint evaluation; we do not introduce a new sparse-coding method
-or claim a detection leaderboard advance. Appendix~\ref{app:related}
+or claim a detection leaderboard advance. Section~\ref{sec:related}
 places this combination alongside earlier log detectors and interpretability
 methods.
 
-\section{The data}
+\paragraph{Contributions.}
+\begin{enumerate}[leftmargin=1.3em]
+\item An audit for benign-adapted anomaly language models that separates
+three questions a score cannot: whether a detector ranks well, which selected
+internal directions affect its score (a sparse dictionary over
+adapter-induced changes, repair and ablation against active controls,
+user-level uncertainty, same-user exclusion), and where those directions
+activate in the input (Sections~\ref{sec:detector}--\ref{sec:method}).
+\item On two CERT benchmarks with nearly identical ranking quality, the
+audited detectors rest on different selected evidence: profile positions on
+r6.2 ($99.8$--$100$ percent of the selected features' activation mass) and
+session positions on r4.2. Comparing malicious days only with benign users
+unseen during adaptation reduces day-level AUC from $0.95$ to $0.55$ and from
+$0.96$ to $0.67$ (Section~\ref{sec:findings}). The attribution pattern
+survives new dictionaries, benign-only dictionaries, and smaller-model reruns;
+some intervention effects do not (Section~\ref{sec:robustness}).
+\item Two real-data tests and a cross-detector comparison: real users with
+real personality questionnaires (TWOS) give a behavioral counterpart with
+within-user AUC $0.78$; a raw enterprise authentication log with no profile
+(LANL) shows the same seen-versus-unseen gap, sensitive to the
+user-associated host field; classical one-class detectors given the same
+r6.2 profile columns show little profile reliance
+(Sections~\ref{sec:realdata}--\ref{sec:classical}).
+\item A train-matched serialization experiment: removing profile content from
+adaptation and scoring raises unseen-user ranking from $0.53$ to $0.90$ in
+the audited Qwen3-8B run (descriptive paired interval excluding zero), with a
+small, non-significant change in the audited Qwen2.5-3B run; shuffling
+profiles into stable pseudonyms never helps while profile-dominated features
+persist, so capture and harm are different things
+(Section~\ref{sec:factorial}).
+\end{enumerate}
+
+\section{Related work}
+\label{sec:related}
+
+\emph{Insider-threat detection.} The CERT datasets
+\citep{glasser2013bridging,certdataset} are the standard public benchmarks;
+prior detectors range from unsupervised deep models over aggregated user-day
+features \citep{tuor2017deep,le2020analyzing,yuan2021deep} to one-class
+methods such as Deep SVDD \citep{ruff2018deepsvdd} and Isolation Forest
+\citep{liu2008isolation}, which serve as our baselines.
+\emph{Language models over logs.} Sequence models for log anomaly detection
+predate current large language models \citep{du2017deeplog,guo2021logbert};
+benign-trained event-level language models over authentication logs
+condition on user identity by construction \citep{tuor2018recurrent}, and
+LoRA-tuned and LLM-based insider-threat systems are now being built
+\citep{song2025dmfi,sun2025redchronos}. Facade \citep{kantchelian2024facade}
+names the pathology in which a detector separates classes by featurizing
+actions through the token of their principal and engineers around it on
+proprietary data; we instead open a benign-trained detector on public data
+and characterize the shortcut.
+\emph{Mechanistic interpretability.} Sparse autoencoders decompose
+activations into sparse features
+\citep{cunningham2023sparse,bricken2023monosemanticity,gao2024scaling};
+activation patching and ablation supply causal tests
+\citep{vig2020investigating,meng2022locating,zhang2023best,heimersheim2024use},
+with causal scrubbing as the formal standard \citep{chan2022causal}. Feature
+identity can split or be absorbed across dictionaries
+\citep{chanin2024absorption}, and LoRA delta activations have been analyzed
+with sparse autoencoders \citep{prasanth2026lora}. We follow the
+recommendation to measure effects against matched controls
+\citep{zhang2023best} and treat cross-dataset transfer as an empirical claim
+\citep{olah2020zoom,chughtai2023toy}.
+\emph{Shortcuts and evaluation pitfalls.} Our finding is an instance of
+shortcut learning
+\citep{geirhos2020shortcut,lapuschkin2019unmasking,damour2020underspecification},
+previously shown for anomaly detectors through input attribution
+\citep{kauffmann2020clever}. User-disjoint evaluation and profile masking are
+the evaluation hygiene that security work prescribes \citep{arp2022dos}, and
+the seen-versus-unseen collapse is the identity-leakage analogue of benchmark
+critiques for log anomaly detection \citep{landauer2024critical}.
+
+\section{Data and serialization}
 \label{sec:data}
 
 We use two versions, r4.2 and r6.2, of the CERT insider-threat
@@ -257,7 +335,7 @@ score effects and input locations.
 
 Figure~\ref{fig:architecture} summarizes the sequence.
 
-\input{figures/architecture.tex}
+\input{figures/architecture_linear.tex}
 
 \subsection{Step 1: isolate what fine-tuning changed}
 
@@ -535,89 +613,54 @@ autoencoder supplies another comparator, but its score has different
 units; raw effect sizes across those models are not a performance ratio
 (Appendix~\ref{app:transfer}).
 
-\section{Is the interpretation robust?}
+\section{Is the interpretation robust? A summary}
 \label{sec:robustness}
 
-The checks below separate a stable finding from a result that depends on
-how it was measured. The consistent result is the contrast in selected
-activation locations. Repair and ablation do not replicate equally well.
-Appendix~\ref{app:robustness} gives the supporting numbers.
+The checks below separate a stable finding from a measurement artifact;
+Appendix~\ref{app:robustness} gives every number. The consistent result is
+the contrast in selected activation locations. Repair and ablation do not
+replicate equally well.
+\begin{itemize}[leftmargin=1.3em]
+\item \emph{Held-out users.} On r4.2, features selected on thirty malicious
+users are evaluated on the other thirty: four of five reappear, held-out
+repair is positive but about half as large as the exploratory effect, and only
+the department context has a user-bootstrap interval excluding zero. On r6.2,
+leave-one-user-out selection shows that repair concentrates on the user who
+contributes $46$ of the $70$ positive days. Dictionary and configuration were
+chosen on the full population, so these are conditional, not fully
+independent, confirmations.
+\item \emph{Dictionary seeds.} Three dictionary seeds per benchmark recover
+aligned directions (absolute cosine $0.81$--$0.95$ against dictionary-wide
+medians of $0.72$--$0.82$); across benchmarks the selected directions align
+no better than typical features, including at matched depth.
+\item \emph{Benign-only dictionaries.} Dictionaries fitted without positive
+rows reproduce the attribution pattern (at least $94$ percent session mass on
+r4.2; at least $99$ percent profile mass in every r6.2 fold). The r4.2
+ablation contrast replicates; its repair contrast becomes slightly negative.
+\item \emph{Population size.} Reselecting features from $4$ to $60$ r4.2
+malicious users within the fixed dictionary keeps the profile share at
+$0.16$--$0.25$, far below r6.2, so count alone does not explain selection.
+\item \emph{New adapters and a repaired serializer.} Qwen2.5-3B adapters
+trained with two seeds per benchmark on a serializer that restores four
+omitted file-routing fields reproduce the attribution pattern and r4.2's
+ablation dependence ($+0.00218$ and $+0.00215$), not every original causal
+estimate.
+\item \emph{Secondary behavioral structure on r6.2.} Restricting selection to
+session positions reveals a second feature family with held-out repair on the
+dominant user ($+0.0027$--$+0.0029$); unrestricted selection prioritizes
+profile features but does not show that behavioral causal structure is
+absent.
+\item \emph{Input swaps.} Replacing a positive day's profile with an unseen
+user's profile changes mean NLL more than replacing all of its session content
+on both benchmarks ($+0.155$ versus $+0.072$ on r6.2; $+0.180$ versus $+0.102$
+on r4.2): raw score sensitivity is profile-dominated in both models, even
+though the selected features activate at different locations.
+\end{itemize}
 
-\emph{Does selection work on new users?} On r4.2, features selected with
-thirty malicious users were evaluated on the other thirty. Four of five
-features reappear. Held-out repair effects are positive but about half
-as large as the exploratory effects; only the department context has a
-user-bootstrap interval excluding zero. Held-out ablation is positive
-in some contexts, while team is a null. On r6.2, leaving one malicious
-user out of selection shows that repair concentrates on the user who
-contributes $46$ of the $70$ positive days. Held-out ablation of the
-original profile features does not transfer to that dominant user.
-The dictionary and configuration were chosen using the full population,
-so these checks establish independence of feature selection and testing
-conditional on those choices, not a wholly independent rediscovery.
+\section{Real data}
+\label{sec:realdata}
 
-\emph{Is the dictionary an accident of initialization?} Three dictionary
-seeds per benchmark recover closely aligned directions: absolute cosine
-similarities $0.81$--$0.95$, against dictionary-wide reference medians
-$0.72$--$0.82$. Cosine similarity compares the angle between two
-normalized directions. Across benchmarks the selected directions align
-at or below their reference medians, including when both dictionaries
-are compared at layer 18. Fresh dictionary seeds also reproduce positive
-r6.2 repair contrasts. This addresses dictionary randomness for fixed
-adapter representations; it does not establish reproducibility across
-training runs of the language model.
-
-\emph{Does including malicious data in the dictionary create the finding?}
-The original dictionaries include positive rows. Training new dictionaries
-only on benign rows reproduces the attribution pattern: at least $94$
-percent session mass on r4.2 and at least $99$ percent profile mass in
-every r6.2 leave-one-user-out selection. The r4.2 ablation contrast
-replicates in all contexts, but its repair contrast becomes slightly
-negative. On r6.2, held-out repair and ablation depend on which user
-is tested. The selected locations are more reproducible than the
-individual intervention effects.
-
-\emph{Is four versus sixty malicious users the explanation?} Holding the
-r4.2 model and dictionary fixed, we reselected features from populations
-of $4,10,20,30,$ and $60$ malicious users, with ten repetitions per size.
-Profile share is about $0.25$ at four users and $0.16$--$0.20$ at larger
-sizes, far below r6.2. Count alone therefore does not explain selection
-in this fixed dictionary. The test does not isolate an effect of count
-on dictionary formation or prove a particular alternative explanation.
-
-\emph{Does the pattern survive new adapters and a repaired serializer?}
-Four file-routing fields were accidentally omitted from the original
-r6.2 serialization; r4.2's release contains one of those fields. After
-repairing this defect, we trained new low-rank adapters on the pretrained
-Qwen2.5-3B model, using two seeds per benchmark and new benign-only
-dictionaries. The selected r4.2 features concentrate on sessions under
-both seeds. At the deepest tested r6.2 layer, three or four of the five
-features are almost entirely profile-bound, while shallower layers can
-be behavioral. The r4.2 ablation effect replicates under both seeds
-($+0.00218$ and $+0.00215$); repair does not (about $-0.0004$ each).
-r6.2 intervention effects vary by seed and measurement. These are
-replications of the attribution pattern and r4.2 ablation dependence,
-not of every original causal estimate.
-
-\emph{Is behavioral evidence absent from r6.2?} No. Restricting selection
-to session positions and excluding profile-dominated features reveals a
-second feature family. It carries held-out repair on the dominant user
-($+0.0027$--$+0.0029$), with partial held-out ablation dependence.
-Unrestricted selection prioritizes profile features; it does not show
-that the detector contains no behavioral causal structure.
-
-\emph{Do input changes agree with the internal audit?} Swapping a
-positive day's profile with an unseen benign user's profile changes
-mean NLL more than replacing all its session content on \emph{both}
-benchmarks: $+0.155$ versus $+0.072$ on r6.2, and $+0.180$ versus
-$+0.102$ on r4.2. These probes measure sensitivity to an input change,
-not the benefits of familiar profiles, because donors were unseen.
-Thus raw score sensitivity is profile-dominated in both models even
-though their selected features activate at different locations. The
-masking and within-user tests help separate this sensitivity from
-useful discrimination.
-
-\section{Real data with real personality scores}
+\subsection{Real users with real personality scores (TWOS)}
 \label{sec:twos}
 
 The CERT data are simulated, including the personality scores. The
@@ -663,7 +706,7 @@ so these intervention results are exploratory. They support a
 real-data behavioral counterpart without certifying the entire detector
 as shortcut-free or demonstrating generalization to a new enterprise.
 
-\section{Real data with no profile at all}
+\subsection{Real logs with no profile at all (LANL)}
 \label{sec:lanl}
 
 TWOS contains genuine profile measurements. A separate test asks whether
@@ -852,9 +895,10 @@ The four cases support a familiarity hypothesis, without establishing a
 predictive rule. Appendix~\ref{app:factorial} gives the per-user results,
 intervals, and novelty check so this qualification can be assessed directly.
 
-\section{Conclusions and limits}
-\label{sec:conclusions}
+\section{Discussion}
+\label{sec:discussion}
 
+\paragraph{What the evidence separates.}
 The central result is a separation between three questions: how well a
 detector ranks examples, which selected internal directions affect its
 score, and where those directions activate. The CERT audit finds a
@@ -864,18 +908,43 @@ retain within-user signal, and a secondary behavioral family exists on
 r6.2. Attribution is more stable across our replications than the
 repair effects of particular features.
 
-The additional datasets and interventions suggest that population
-structure and the training representation influence the available
-shortcuts. They do not establish a two-factor law. Subsampling changes
-feature selection in an existing model; TWOS shows a behavioral
-counterpart with real questionnaires; LANL shows a host-sensitive
-score-level generalization gap; and the classical comparison changes
-several modeling choices together. The strongest direct input evidence
-is the improvement after removing profiles from adaptation and scoring
-in the audited 8B run. Its small comparison in 3B and the persistence of
-profile attribution under shuffling show why attribution alone is
-insufficient to diagnose harm.
+\paragraph{Audits, not leaderboards.}
+Every component of the audit was needed. Score-level evaluation showed
+strong ranking on both benchmarks; the interventions established that the
+selected sets matter to the score; the seed controls showed stability across
+dictionary initializations. Only attribution revealed that one detector's
+selected evidence describes \emph{who a user is} rather than \emph{what they
+did}, and only the user-disjoint protocol showed the score-level cost. Any
+shorter audit would have licensed a stronger, and wrong, behavioral reading.
+For sequence-likelihood detectors trained on metadata-rich telemetry, causal
+validation and attribution are separate obligations, and only their
+conjunction says what a detector detects.
 
+\paragraph{An account, stated with its limits.}
+The evidence is consistent with a two-factor account. Population structure
+determines \emph{when} an identity shortcut is available: a small,
+profile-distinctive malicious minority on r6.2, and no such minority on TWOS,
+where half the users are attacked. The objective and the representation
+determine \emph{which} detectors take it: per-user-constant profile tokens
+are exactly what a next-token objective is rewarded for compressing, whereas
+the classical detectors given the same columns show little profile reliance
+on r6.2 and a mixed picture on r4.2. The train-matched experiment shows that
+profile content is causally responsible for the unseen-user collapse in the
+audited 8B run, and the authentication log shows that the shortcut is not
+tied to profile injection: a user-associated field will do. The account is
+not a law. Subsampling isolates the selection stage in one fixed dictionary;
+the classical comparison changes objective, representation, architecture, and
+size together; the two factorial runs differ in model family as well as size
+and were trained once each; and profile distinctiveness has not been varied
+independently of malicious-user count. One number is explained rather than
+merely observed: under user-disjoint evaluation the language model
+underperforms the classical baselines on r6.2 ($0.545$ against
+$0.63$--$0.77$), as expected if adaptation spent capacity on a shortcut that
+does not generalize while the baselines learned behavior. For deployment the
+implication is unchanged: an identity-proxy detector generalizes to
+\emph{new users being unusual}, not to insider behavior.
+
+\paragraph{A practical audit sequence.}
 For an audit, the practical sequence is simple: evaluate on users absent
 from training, inspect average precision and within-user ranking, test
 candidate features against active controls with same-user donors excluded,
@@ -883,33 +952,76 @@ and check the proposed interpretation through input interventions.
 Report failed replications along with successful ones. Here the small
 r6.2 population, dictionary dependence, unequal edit sizes, and failed
 feature transfer materially limit what can be claimed.
+Table~\ref{tab:claim_status} records, claim by claim, what the evidence
+supports, rejects, or leaves open.
 
-\paragraph{Scope and reproducibility.}
-The original 8B mechanism estimates concern one adapter per CERT release,
-one-layer edits, and the matched session domain. The headline dictionaries
-and configuration search use evaluation data; held-out feature selection
-is therefore conditional on them. The repaired 3B reruns and benign-only
-dictionaries provide additional checks, not independent replication of
-every 8B effect. TWOS is small and staged; LANL uses staged credential
-misuse and one held-out fold. No result establishes deployment readiness,
-a complete neural circuit, or a general effect of model size. The appendix
-records the protocols, quantitative controls, and artifact paths supporting
-these boundaries. Code and the reported result artifacts are available in
-\href{https://github.com/SuramyaAngdembay/llm-sequence-mi-remote}{the project repository};
-raw datasets and model checkpoints are separate inputs.
+\input{tables/claim_status.tex}
 
-\paragraph{Implications for people.}
+\section{Limitations}
+\label{sec:limitations}
+
+The evaluation population is the matched active-session domain, not the full
+CERT answer key, and the CERT data are simulated: their psychometric fields
+have no operational counterpart. The original 8B mechanism estimates concern
+one adapter per benchmark, one-layer edits under one dictionary family, and,
+on r6.2, four malicious users with highly unequal day counts, so r6.2 causal
+effects are dominated by one user; we report cluster intervals, per-user
+effects, and leave-one-user-out results for that reason. The headline
+dictionaries and the configuration search used evaluation data, so held-out
+feature selection is conditional on them; the repaired 3B reruns and
+benign-only dictionaries are additional checks, not independent replications
+of every 8B effect. Edits of the selected features remain larger than edits
+of the controls even after dose matching, and repair is a best-donor search
+rather than a donor-averaged effect. Attribution locates where features
+activate; it does not specify their computation. TWOS is small and staged.
+LANL uses staged credential misuse, one held-out fold, and one adapter per
+condition. The train-matched experiment uses one adapter seed per condition
+and model; its intervals characterize evaluation uncertainty for those
+adapters rather than variation across training runs, and its 3B-versus-8B
+contrast confounds model family with size. What remains untested is the
+profile-capture corner on real data, a small, profile-distinctive malicious
+minority inside an organization-scale population, which no public real
+dataset currently provides. No result establishes deployment readiness, a
+complete circuit, or a general effect of model size.
+
+\section{Broader Impact Statement}
+
 An insider-threat detector is also a workplace-monitoring system.
-Profile sensitivity can turn unusual personal attributes into suspicious
-scores, and an explanation can give weak evidence unwarranted authority.
-Benign-only training does not remove these risks. These experiments support
-auditing such systems, not autonomous action against individuals; any
-operational use would require appropriate human review and governance.
+Interpretability cuts both ways: mechanisms that make alerts auditable can
+also make monitoring more invasive or lend unearned authority to weak
+evidence, and profile sensitivity can turn unusual personal attributes into
+suspicious scores. Two properties of this work partially mitigate these
+risks: training is benign-only, so the system models normal behavior rather
+than profiling individuals against incident templates, and the protocol is
+designed to make claims falsifiable (active controls, exclusion rules,
+prespecified estimands) rather than persuasive. Benign-only training does not
+remove the risks. Nothing here justifies autonomous action against
+individuals; deployments would require human review, documented appeal
+processes, and governance appropriate to workplace monitoring, and our
+results are on simulated data and on small or single-run real datasets: they
+establish methodology, not operational readiness.
+
+\section*{Reproducibility Statement}
+
+All experiments derive from tracked artifacts: dataset construction and
+deterministic user-hash splits, training configurations
+(Appendix~\ref{app:populations}), full-population scoring and fold-aligned
+detector evaluation, and intervention evaluations with bootstrap reports
+whose estimands match the reported tables. Dataset rebuilds were verified
+byte-identical from checksummed transfer shards, and final mechanistic
+artifacts were audited for zero same-user donor rows and non-inert controls.
+For the train-matched experiment, the per-fold rows, bootstrap outputs,
+dictionary verdicts, and novelty check are tracked alongside the runner
+scripts; for LANL, the AUC/AP summaries and the host-constancy and
+token-length checks are tracked. An anonymized code and artifact package
+accompanies the submission and will be released publicly upon publication.
 
 \clearpage
 \appendix
-\input{readable_appendix.tex}
+\input{main2_appendix.tex}
+
 \bibliographystyle{tmlr}
-\bibliography{../references}
+\bibliography{references}
 
 \end{document}
+
