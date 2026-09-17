@@ -110,10 +110,8 @@ def fold_metrics(test: pd.DataFrame, s: np.ndarray, heldout_user: str) -> Dict[s
     return row
 
 
-def cluster_bootstrap(
-    per_fold: Dict[str, List[float]], n_draws: int, seed: int
-) -> Dict[str, Dict[str, float]]:
-    """Paired bootstrap over folds (= malicious users); identical draws per view."""
+def cluster_bootstrap(per_fold: Dict[str, List[float]], n_draws: int, seed: int):
+    """Returns (per-view CI dict, the shared draw indices, the per-view arrays)."""
     names = sorted(per_fold)
     n = len(next(iter(per_fold.values())))
     rng = np.random.default_rng(seed)
@@ -148,16 +146,27 @@ def main() -> None:
     out_dir = args.out_dir
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    score_cols: Dict[str, np.ndarray] = {}
-    for name, classes in views.items():
-        df[f"view_{name}"] = view_series(df, classes)
-        score_cols[name] = df[f"view_{name}"].to_numpy(dtype=float)
+    # merge the cached baseline BEFORE building any score array, so every array
+    # is taken from one dataframe in one row order
     if args.reference_scores is not None and Path(args.reference_scores).exists():
         ref = pd.read_parquet(args.reference_scores)[["example_idx", "adapted_nll"]]
-        df = df.merge(ref.rename(columns={"adapted_nll": "adapted_nll_cached"}), on="example_idx", how="left")
+        n_before = len(df)
+        df = df.merge(
+            ref.rename(columns={"adapted_nll": "adapted_nll_cached"}), on="example_idx", how="left"
+        )
+        if len(df) != n_before:
+            raise RuntimeError(f"reference merge changed row count {n_before} -> {len(df)}")
         views = dict(views)
         views["full_cached"] = ()
-        score_cols["full_cached"] = df["adapted_nll_cached"].to_numpy(dtype=float)
+    df = df.reset_index(drop=True)
+
+    score_cols: Dict[str, np.ndarray] = {}
+    for name, classes in views.items():
+        if name == "full_cached":
+            score_cols[name] = df["adapted_nll_cached"].to_numpy(dtype=float)
+            continue
+        df[f"view_{name}"] = view_series(df, classes)
+        score_cols[name] = df[f"view_{name}"].to_numpy(dtype=float)
 
     folds = make_folds(df[["user_id", "y"]].drop_duplicates(), args.seed, args.benign_test_users)
 
