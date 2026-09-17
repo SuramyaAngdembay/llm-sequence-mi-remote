@@ -28,6 +28,23 @@ def main() -> None:
     ap.add_argument("--save-steps", type=int, default=0, help="override training.save_steps (0=use config)")
     ap.add_argument("--eval-steps", type=int, default=0, help="override eval_steps (0=use save_steps)")
     ap.add_argument("--eval-strategy", choices=("no", "steps", "epoch"), default="steps")
+    ap.add_argument(
+        "--target-loss-mask",
+        choices=("none", "profile"),
+        default="none",
+        help="'profile' sets labels to -100 at DAY/PSY target tokens: the adapter is not "
+             "trained to PREDICT profile tokens, while the profile stays in the input context "
+             "(behavioural-token losses can still reward using it). 'none' = unchanged recipe.",
+    )
+    ap.add_argument(
+        "--loss-denominator",
+        choices=("scored_targets", "all_targets"),
+        default="scored_targets",
+        help="scored_targets: mean over non-ignored targets (HF default; with --target-loss-mask "
+             "profile this up-weights each behavioural token by 1/(1-p)). all_targets: divide by "
+             "the count of non-pad targets, so a retained token keeps exactly its unmasked weight "
+             "and masking only drops the profile terms.",
+    )
     ap.add_argument("--resume-from-checkpoint", type=Path, default=None)
     ap.add_argument("--ignore-data-skip", action="store_true")
     ap.add_argument(
@@ -47,6 +64,7 @@ def main() -> None:
             AutoTokenizer,
             BitsAndBytesConfig,
             DataCollatorForLanguageModeling,
+            DataCollatorForSeq2Seq,
             Trainer,
             TrainingArguments,
             set_seed,
@@ -74,12 +92,58 @@ def main() -> None:
         tokenizer.pad_token = tokenizer.eos_token
     max_seq_len = int(cfg["training"]["max_seq_len"])
 
-    def tokenize(batch):
-        tok = tokenizer(batch["text"], truncation=True, max_length=max_seq_len)
-        return tok
+    mask_profile_targets = args.target_loss_mask == "profile"
+
+    if not mask_profile_targets:
+        def tokenize(batch):
+            tok = tokenizer(batch["text"], truncation=True, max_length=max_seq_len)
+            return tok
+    else:
+        # Mask the *target token's* class after the causal shift: HF's causal LM
+        # loss compares logits[..., :-1, :] with labels[..., 1:], so setting
+        # labels[t] = -100 removes the prediction OF token t while leaving
+        # input_ids (the context) untouched. Classes come from the shared
+        # decomposition library, by line prefix, so `no_psy`/`no_profile`
+        # serializations cannot be mislabelled by line index.
+        from token_class_decomposition import (
+            CERT_PROFILE_CLASSES,
+            cert_class_spans,
+            classify_tokens,
+        )
+
+        profile_classes = set(CERT_PROFILE_CLASSES)
+
+        def tokenize(batch):
+            tok = tokenizer(
+                batch["text"],
+                truncation=True,
+                max_length=max_seq_len,
+                return_offsets_mapping=True,
+            )
+            labels = []
+            n_masked = []
+            for text, ids, offs in zip(batch["text"], tok["input_ids"], tok["offset_mapping"]):
+                classes, _ = classify_tokens([tuple(o) for o in offs], cert_class_spans(text))
+                lab = [(-100 if c in profile_classes else i) for i, c in zip(ids, classes)]
+                labels.append(lab)
+                n_masked.append(sum(1 for c in classes if c in profile_classes))
+            tok = {k: v for k, v in tok.items() if k != "offset_mapping"}
+            tok["labels"] = labels
+            tok["n_masked_targets"] = n_masked
+            return tok
 
     tokenized = ds.map(tokenize, batched=True, remove_columns=ds["train"].column_names)
-    collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
+    masked_target_frac = None
+    if mask_profile_targets:
+        n_masked = sum(tokenized["train"]["n_masked_targets"])
+        n_tok = sum(len(x) for x in tokenized["train"]["input_ids"])
+        masked_target_frac = float(n_masked) / max(n_tok, 1)
+        tokenized = tokenized.remove_columns(["n_masked_targets"])
+        collator = DataCollatorForSeq2Seq(
+            tokenizer=tokenizer, label_pad_token_id=-100, padding=True, return_tensors="pt"
+        )
+    else:
+        collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
     quant_cfg = BitsAndBytesConfig(
         load_in_4bit=bool(cfg["quantization"]["load_in_4bit"]),
@@ -170,8 +234,48 @@ def main() -> None:
     training_args = TrainingArguments(**training_arg_kwargs)
 
     trainer_cls = Trainer
+
+    if args.loss_denominator == "all_targets":
+        import torch.nn.functional as _F
+
+        class FixedDenominatorMixin:
+            """Sum of target losses divided by the count of NON-PAD targets.
+
+            With --target-loss-mask profile this keeps each retained
+            (behavioural) token at exactly the weight it has in the unmasked
+            recipe; masking then only removes the profile terms instead of
+            also rescaling the surviving ones by 1/(1-p). With no mask it is
+            arithmetically identical to the HF default.
+            """
+
+            def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
+                labels = inputs.pop("labels")
+                outputs = model(**inputs)
+                logits = outputs.logits[..., :-1, :].float()
+                target = labels[..., 1:]
+                loss_sum = _F.cross_entropy(
+                    logits.reshape(-1, logits.size(-1)),
+                    target.reshape(-1),
+                    ignore_index=-100,
+                    reduction="sum",
+                )
+                attn = inputs.get("attention_mask")
+                if attn is not None:
+                    denom = attn[..., 1:].sum()
+                else:
+                    denom = (target != -100).sum()
+                loss = loss_sum / denom.clamp_min(1)
+                return (loss, outputs) if return_outputs else loss
+
+        class FixedDenominatorTrainer(FixedDenominatorMixin, Trainer):
+            pass
+
+        trainer_cls = FixedDenominatorTrainer
+
     if args.skip_rng_state_resume:
-        class RngSkipTrainer(Trainer):
+        _base = trainer_cls
+
+        class RngSkipTrainer(_base):
             def _load_rng_state(self, checkpoint):
                 if self.is_world_process_zero():
                     print(f"skipping_rng_state_restore=1 checkpoint={checkpoint}")
@@ -210,6 +314,9 @@ def main() -> None:
             "micro_batch_size": micro_bs,
             "grad_accum": grad_accum,
             "effective_batch": micro_bs * grad_accum * world_size,
+            "target_loss_mask": args.target_loss_mask,
+            "loss_denominator": args.loss_denominator,
+            "masked_target_frac": masked_target_frac,
             "gradient_checkpointing": grad_ckpt,
             "save_steps": save_steps,
             "eval_strategy": args.eval_strategy,
