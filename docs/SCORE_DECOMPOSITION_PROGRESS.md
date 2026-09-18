@@ -4,8 +4,7 @@ Kept deliberately separated into what has been **verified**, what is a
 **hypothesis**, and what is an **unresolved limitation**. Results are appended
 as they land; nothing here is written into the paper before it is checked.
 
-Last updated: 2026-09-17 (Phase A/B implementation complete and validated on
-real data; scoring jobs and the Phase C 3B arm queued on Anvil).
+Last updated: 2026-09-18 (Phase A/B complete with results; Phase C 3B queued).
 
 ---
 
@@ -183,17 +182,62 @@ one A100 (~11 SU), not the ~7 h estimated earlier. Phase C at 3B is therefore
 ~11 SU of training plus ~5 SU of batch-1 scoring, and training is split into
 its own job rather than sharing a wall clock with scoring.
 
+**V14 — Phase A/B result: on the audited 8B adapter, removing the profile's
+direct score contribution moves unseen-user ranking from chance to 0.938.**
+Jobs 20814766 (8B, H100) and 20814767 (3B, A100), batch 1, full pool. The
+recomputed `full` view reproduces the published `adapted_nll` over all 159,064
+rows to max \|ΔNLL\| 1.4e-07 (rank corr 0.9999999999977), so the baseline is
+anchored exactly. Full tables in `results/score_decomposition/`.
+
+| 8B, mean of 4 folds | day ROC | day AP | user ROC | rank /407 | within-user ROC |
+|---|---|---|---|---|---|
+| full (published score) | 0.399 | 0.0001 | 0.532 | 191.0 | 0.751 |
+| profile_only | 0.213 | 0.0001 | 0.200 | 326.0 | 0.588 |
+| **behavior_only** | **0.836** | **0.0009** | **0.938** | **26.3** | 0.680 |
+
+Paired bootstrap: user ROC +0.406 [+0.163, +0.681]; all four folds improve
+(+0.071, +0.805, +0.438, +0.308). Per user 0.919→0.990, 0.155→0.961,
+0.527→0.966, 0.527→0.835. At 3B, where `full` already reaches 0.926, the same
+change gives +0.018 [−0.086, +0.123] (three of four folds up, MBG3183 down).
+
+The mechanism is visible in the exact mean-gap decomposition (reconstructs to
+5e-17): at 8B, PSY contributes **negatively** to the positives-minus-benign gap
+for three of four users and SES positively for all four, with the total
+negative for three — which is why the full score's day ROC is *below* chance.
+`profile_only` is below 0.5 for every user individually. The adapter finds
+these malicious users' profiles less surprising than unseen benign users'
+profiles, and that term buries a behavioural signal that is in fact strong.
+
+Bearing on H1: score inclusion is a material pathway in the audited 8B run.
+This is a scoring intervention on a frozen adapter with the profile still in
+context; it does not remove profile influence on behavioural predictions and
+says nothing yet about the training objective.
+
+**V15 — the same result's limits, measured rather than assumed.**
+(a) Average precision stays near the base rate: 8B day AP 0.0001 → 0.0009 at
+prevalence 3.2e-05, so alert precision remains unusable despite the ROC move.
+(b) At a 0.1 % false-positive budget the gain is exactly zero in every fold; at
+1 % it is +0.044 [0.000, +0.088] from two of four folds. (c) Within-user
+ranking, with identity held fixed, gets *worse*: 8B 0.751 → 0.680, 3B
+0.739 → 0.568 — the profile contribution helps there. One untested explanation
+is that within a user the profile text is constant, so its share of the mean
+varies only through N_profile/N_total, which tracks the number of session lines
+that day; the full score may partly encode day length. (d) Signed class
+contributions cancel, so shares exceed 100 % and flip sign (CMP2946 at 8B: PSY
++382 %, SES −406 %); this is an accounting identity for the mean gap, not an
+AUC decomposition and not a mechanism.
+
 ---
 
 ## Hypotheses (not yet tested)
 
-**H1 — direct score inclusion is a material part of the failure.** If the
-profile's own prediction losses dominate the seen/unseen mean-score gap, then
-the behaviour-only view should improve unseen-user ranking on the 8B `full`
-adapter. *Status: awaiting the scoring jobs.* Note that a mean-gap
-decomposition would not by itself establish this: ROC is a pairwise-ordering
-probability, not a difference of means, so the ranking of each view must be
-computed directly.
+**H1 — direct score inclusion is a material part of the failure.**
+*Status: supported for the audited 8B run* (V14): user ROC 0.532 → 0.938 with
+the adapter and input untouched, all four folds improving. Scope: one adapter,
+four malicious users, exploratory population, and a scoring change only. It
+does not follow that the adapter has stopped using identity, nor that this
+transfers to r4.2, LANL, or another detector — that is the portability question
+the decision rules put next.
 
 **H2 — being trained to predict profile tokens is a separate harm.** Tested by
 B → D in Phase C. Masking targets does not stop behavioural losses from
@@ -261,7 +305,7 @@ which is not established by anything in this record.
 | 2026-09-17 | `train_qlora.py` target-mask + explicit denominator (defaults unchanged) | done (V8) |
 | 2026-09-17 | Schema validation vs real tokenizer/data on the login node (CPU, no SU) | done (V9, V10) |
 | 2026-09-17 | Jobs 20807957/20807958 (both A100): pilots ran, **gate refused** the full run — 8B could not be anchored to a cache made on H100 | done (V11) |
-| 2026-09-18 | Rerun 20814766 (8B on `ai`/H100) and 20814767 (3B on `gpu`/A100), batch 1 on matched hardware, revised gate | queued |
+| 2026-09-18 | Rerun 20814766 (8B/H100) and 20814767 (3B/A100), batch 1 on matched hardware | **done** — gates passed with exact reproduction; results in `results/score_decomposition/` (V14, V15) |
 | 2026-09-17 | Phase C 3B authorized; job 20810414 ran the loss-path gate and **correctly aborted** (4.0x normalization error), ~0.25 SU | done (V12) |
 | 2026-09-18 | Phase C 3B resubmitted as job 20816765 with the corrected loss path: gate, then train-only (16 h cap, ~11 SU); scoring follows as a separate batch-1 job | queued |
 | — | Phase C 8B | held: ~20-25 SU (corrected from ~56; measured 1.07 s/it x 18,750 steps on 4xH100), pending the 3B run and the Phase A/B result |

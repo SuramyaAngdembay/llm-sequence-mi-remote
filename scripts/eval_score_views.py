@@ -241,9 +241,13 @@ def main() -> None:
     contrast_df.to_csv(out_dir / "score_view_contrasts.csv", index=False)
 
     # ---- exact mean-score-gap decomposition on the union of fold test rows
+    # partition classes only: DAY_WEEK is a SUBSET of DAY (a reported sub-class,
+    # not a partition member), so including it would double-count and break the
+    # accounting identity.
+    partition = set(VIEW_SETS[args.schema]["full"])
     class_cols = [c[len("loss_sum_"):] for c in df.columns
-                  if c.startswith("loss_sum_") and not c.startswith("loss_sum_total")
-                  and not c.startswith("base_")]
+                  if c.startswith("loss_sum_") and not c.startswith("base_")
+                  and c[len("loss_sum_"):] in partition]
     gap_rows: List[Dict[str, object]] = []
     for fold in folds:
         test_users = sorted(str(x) for x in fold["test_users"])
@@ -275,6 +279,11 @@ def main() -> None:
     if len(gap_df):
         chk = gap_df.groupby("fold").agg(s=("delta_contrib", "sum"), t=("total_mean_gap", "first"))
         recon_err = float((chk["s"] - chk["t"]).abs().max())
+        if recon_err > 1e-9:
+            raise RuntimeError(
+                f"mean-gap decomposition does not reconstruct the total gap "
+                f"(max err {recon_err:.3e}); classes used: {sorted(class_cols)}"
+            )
 
     meta = {
         "run_name": args.run_name,

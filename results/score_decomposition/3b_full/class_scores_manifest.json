@@ -1,0 +1,86 @@
+{
+  "script": "score_token_class_decomposition.py",
+  "model_name_or_path": "Qwen/Qwen2.5-3B",
+  "config": "configs/qwen3b_qlora_session.yaml",
+  "adapter_dir": "/anvil/scratch/x-bbhusal1/p1/adapter_full/adapter",
+  "adapter_digest": "125df41a569a366f",
+  "tokenizer_digest": "cd33debe00bd1d30",
+  "data_dir": "/anvil/scratch/x-bbhusal1/p1/pool_full",
+  "split": "eval",
+  "n_examples": 159064,
+  "max_seq_len": 2048,
+  "batch_size": 1,
+  "length_sorted": false,
+  "with_base": false,
+  "schema": "cert",
+  "classes": [
+    "DAY",
+    "PSY",
+    "SESCOUNT",
+    "SES",
+    "OTHER",
+    "SPECIAL"
+  ],
+  "subclass": "DAY_WEEK",
+  "views": {
+    "full": [
+      "DAY",
+      "PSY",
+      "SESCOUNT",
+      "SES",
+      "OTHER",
+      "SPECIAL"
+    ],
+    "profile_only": [
+      "DAY",
+      "PSY"
+    ],
+    "behavior_only": [
+      "SESCOUNT",
+      "SES",
+      "OTHER",
+      "SPECIAL"
+    ],
+    "behavior_ses_only": [
+      "SES"
+    ],
+    "psy_only": [
+      "PSY"
+    ],
+    "day_only": [
+      "DAY"
+    ]
+  },
+  "scoring_convention": "mean next-token NLL over attention-valid targets; token 0 never a target; loss attributed to the class of the predicted token",
+  "elapsed_sec": 17558.08,
+  "examples_per_sec": 9.059,
+  "peak_gpu_gb": 2.9,
+  "gpu": "NVIDIA A100-SXM4-40GB",
+  "torch": "2.5.1+cu121",
+  "python": "3.11.16",
+  "checks": {
+    "partition_loss_max_abs_err": 5.684341886080801e-13,
+    "partition_count_mismatches": 0,
+    "targets_equal_tokens_minus_one": 0,
+    "mean_nll_recon_max_abs_err": 0.0,
+    "boundary_target_frac": 0.0,
+    "class_target_share": {
+      "DAY": 0.11416410964228524,
+      "PSY": 0.0787104460307805,
+      "SESCOUNT": 0.03079973975117498,
+      "SES": 0.7763257045757593,
+      "OTHER": 0.0,
+      "SPECIAL": 0.0
+    },
+    "subclass_target_share": 0.009815505476285964,
+    "reference": {
+      "n_matched": 159064,
+      "n_token_mismatches": 0,
+      "nll_max_abs_diff": 1.4287947869284778e-07,
+      "nll_mean_abs_diff": 1.9161452301352022e-08,
+      "nll_p99_abs_diff": 6.881201419783878e-08,
+      "nll_corr": 0.9999999999999769,
+      "spearman_like_rank_corr": 0.9999999999975118
+    }
+  }
+}
