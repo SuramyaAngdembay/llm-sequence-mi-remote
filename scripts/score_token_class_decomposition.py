@@ -294,8 +294,13 @@ def main() -> None:
         )
 
     if args.reference_scores is not None and args.reference_scores.exists():
-        ref = pd.read_parquet(args.reference_scores)[["example_idx", "adapted_nll", "n_tokens"]]
-        m = df.merge(ref, on="example_idx", suffixes=("", "_ref"))
+        ref_all = pd.read_parquet(args.reference_scores)
+        # join on example_id when both sides carry it: robust to any difference
+        # in row order between this run and the cached one.
+        key = "example_id" if "example_id" in ref_all.columns and "example_id" in df.columns else "example_idx"
+        ref = ref_all[[key, "adapted_nll", "n_tokens"]]
+        m = df.merge(ref, on=key, suffixes=("", "_ref"))
+        checks["reference_join_key"] = key
         d = (m["adapted_nll"] - m["adapted_nll_ref"]).abs()
         checks["reference"] = {
             "n_matched": int(len(m)),

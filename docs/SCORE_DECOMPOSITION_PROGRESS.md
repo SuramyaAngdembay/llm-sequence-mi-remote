@@ -248,6 +248,35 @@ that identity information is absent.
 interventions is profile influence on behavioural predictions. No experiment
 here removes it; claiming otherwise would be unsupported.
 
+**V16 — portability runs are set up with their own protocols, not CERT's.**
+
+*LANL* (job 20826171): the `full` adapter, scored with the **field-level**
+schema (`su`/`du` -> ID_USER, `sc`/`dc` -> ID_HOST, `at`/`lt`/`or`/`res` ->
+BEHAV, bare `t<hh>` -> HOUR, `" | "` separators -> OTHER). Seen/unseen
+membership is **read from `eval.jsonl`**, which `lanl_split.py` writes as
+`fold`/`seen` fields (md5 leave-users-out, fold 4 unseen) — never recomputed.
+Evaluation is window-level AUC/AP within each pool with a cluster bootstrap
+over users, anchored to the published `ap_full.json` (seen AUC 0.9489 / AP
+0.1769; unseen AUC 0.4966 / AP 0.0133). 52,973 windows, 432 positive, mean
+1,256 tokens — ~4x CERT's tokens per example at a third of the examples.
+The published `host_anon` condition (unseen AUC 0.6266) is the retrained
+comparator, the LANL analogue of `no_profile`.
+
+*r4.2* (job 20826196): the **headline** 8B adapter
+(`qwen3_8b_session_qlora_r42_ddp_mb22_gc_on`), a separate line of evidence from
+the r6.2 factorial and not to be mixed with it. Pool = all days of the 60
+malicious users plus all validation-split benign days = 40,519 rows, 139 users,
+1,309 positives, which is the user-disjoint population behind the published
+day ROC 0.668 / user ROC 0.565. Sixty malicious users means the cluster
+bootstrap has **60 clusters here, against four on r6.2**.
+
+One caveat specific to r4.2: its cached scores came from a **batch-56 forward
+pass** (`score_adapter_examples.py` chunks only the cross-entropy, not the
+forward), so the exact reproduction available for the r6.2 factorial is not
+available here; ~1e-3 drift is expected and the gate tolerates it. The
+scientific comparison is within one forward pass, so the drift cancels. The
+reference join now keys on `example_id` rather than row position.
+
 ---
 
 ## Unresolved limitations
@@ -308,4 +337,5 @@ which is not established by anything in this record.
 | 2026-09-18 | Rerun 20814766 (8B/H100) and 20814767 (3B/A100), batch 1 on matched hardware | **done** — gates passed with exact reproduction; results in `results/score_decomposition/` (V14, V15) |
 | 2026-09-17 | Phase C 3B authorized; job 20810414 ran the loss-path gate and **correctly aborted** (4.0x normalization error), ~0.25 SU | done (V12) |
 | 2026-09-18 | Phase C 3B resubmitted as job 20816765 with the corrected loss path: gate, then train-only (16 h cap, ~11 SU); scoring follows as a separate batch-1 job | queued |
-| — | Phase C 8B | held: ~20-25 SU (corrected from ~56; measured 1.07 s/it x 18,750 steps on 4xH100), pending the 3B run and the Phase A/B result |
+| 2026-09-18 | **Portability** (the decision rule's next step now that behaviour-only scoring helps): LANL job 20826171 (`ai`/H100, field schema, seen/unseen protocol) and r4.2 headline job 20826196 (`gpu`/A100, 40,519-row user-disjoint pool) | queued, ~3 SU + ~1 SU |
+| — | Phase C 8B | held: ~20-25 SU, and now lower priority than portability - if score masking transfers, the cheap intervention is the result and the training arm is a secondary control |
