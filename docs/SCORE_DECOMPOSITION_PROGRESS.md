@@ -62,6 +62,37 @@ off-by-one detection, boundary-crossing tokens, truncation, the no_psy /
 no_profile line shift, DAY_WEEK ⊂ DAY, LANL field spans, and the Phase-C loss
 masking arithmetic).
 
+**V9 — class mapping validated against the real tokenizer and real data**
+(CPU only on the login node, 400 examples per condition, no allocation cost):
+
+| condition | DAY | PSY | SESCOUNT | SES | profile share p |
+|---|---|---|---|---|---|
+| full (3B and 8B, identical) | 0.0885 | 0.0601 | 0.0235 | 0.8279 | **0.1485** |
+| no_psy | 0.0941 | 0 | 0.0250 | 0.8809 | 0.0941 |
+| no_profile | 0 | 0 | 0.0246 | 0.9754 | 0 |
+
+Also measured: **zero** boundary-crossing target tokens and zero tokens whose
+class would change under end-assignment instead of start-assignment — the
+attribution ambiguity is empirically nil for this serialization, not merely
+assumed small. Zero OTHER and zero SPECIAL targets, so `n_targets = n_tokens −
+1` exactly. No example truncated. `DAY_WEEK` is 0.0075 of targets, entirely
+inside DAY (so `week=` is ~8% of the DAY class: removing DAY removes a small
+temporal cue as well as static attributes). The `no_psy` / `no_profile`
+conditions show exactly the line shift that would break index-based mapping.
+
+Consequences: the SESCOUNT choice moves 2.35% of targets, so the primary
+(includes SESCOUNT) and secondary (SES only) behaviour views are genuinely
+different definitions and both are reported. For Phase C, p = 0.1485 means the
+HF-default denominator would up-weight each behavioural token by
+1/(1−p) = 1.174 — which is why `--loss-denominator all_targets` is specified
+for cells C/D.
+
+**V10 — the LANL field schema matches real windows.** On real LANL eval
+windows: ID_USER 0.201, ID_HOST 0.201, BEHAV 0.401, HOUR 0.100, OTHER 0.097 of
+spans. OTHER is entirely the `" | "` event separator, which the LANL
+`behavior_only` view scores as non-identity; this is now stated in the library
+rather than left implicit. The LANL *scoring* path has still not been run.
+
 **V8 — Phase C is one new training run per scale per seed, not four.** Cells A
 and B are the existing `full` adapter scored two ways; C and D are one
 profile-target-masked adapter scored two ways. Implemented behind two flags
@@ -143,5 +174,6 @@ which is not established by anything in this record.
 | 2026-09-17 | `token_class_decomposition.py` + 47 correctness checks | done (V7) |
 | 2026-09-17 | `score_token_class_decomposition.py`, `eval_score_views.py` | done |
 | 2026-09-17 | `train_qlora.py` target-mask + explicit denominator (defaults unchanged) | done (V8) |
+| 2026-09-17 | Schema validation vs real tokenizer/data on the login node (CPU, no SU) | done (V9, V10) |
 | 2026-09-17 | Anvil jobs 20807957 (8B full) / 20807958 (3B full): unit tests → bounded 256-example pilot at batch N and batch 1 → hard gate → full-pool scoring → view evaluation | queued |
 | — | Phase C training | prepared, **not launched**; needs go-ahead (~5 SU for 3B, ~56 SU for 8B) |

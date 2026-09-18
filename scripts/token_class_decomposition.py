@@ -47,8 +47,11 @@ line *prefix*, never by line index. `build_session_jsonl_fast.py` deletes the
 
 LANL (`lanl_class_spans`): identity lives in *fields*, not lines, so classes
 are `key=value` spans within each event line (see `scripts/lanl/lanl_etl.py:
-serialize_event`). Provided here for a later phase; not yet validated against
-LANL data.
+serialize_event`). Events inside a window are joined by " | ", and those
+separator tokens fall into OTHER (~9.7% of spans on real windows); OTHER is
+part of the LANL `behavior_only` view, i.e. separators are scored as
+non-identity. Field classification checked against real windows; the *scoring*
+path has not yet been run on LANL.
 
 A token is assigned the class of the span containing its *first* character,
 which is the convention already used by `feature_token_attribution.py`. Tokens
@@ -100,6 +103,7 @@ LANL_CLASSES: Tuple[str, ...] = ("ID_USER", "ID_HOST", "BEHAV", "HOUR", "OTHER",
 LANL_VIEWS: Dict[str, Tuple[str, ...]] = {
     "full": LANL_CLASSES,
     "identity_only": ("ID_USER", "ID_HOST"),
+    # OTHER holds the " | " event separators, scored as non-identity
     "behavior_only": ("BEHAV", "HOUR", "OTHER", "SPECIAL"),
     "behavior_no_hour": ("BEHAV", "OTHER", "SPECIAL"),
 }
