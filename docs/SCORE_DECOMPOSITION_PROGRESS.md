@@ -334,12 +334,30 @@ paper and in V14 is unaffected. Day-level metrics move in the fourth decimal.
 `eval_score_views.py` now deduplicates on `example_id` and records how many rows
 it dropped; `results/score_decomposition/*_dedup/` holds the reruns.
 
-**V20 — the r4.2 padding explanation is being tested, not just asserted.** V17
-inferred padding from a length correlation on 256 examples spanning only
-196-215 tokens, which is suggestive rather than demonstrative. Job 20827737
-rescores the same examples at batch 56 and batch 8 and reports agreement with
-the cached (batch-56 forward) scores at each batch size; if padding is the
-cause, agreement should improve monotonically toward batch 56. ~0.3 SU.
+**V20 — the r4.2 padding explanation is now demonstrated, not inferred.** V17
+argued from a length correlation over a narrow token range, which is
+suggestive only. Job 20827737 (2 min 21 s, ~0.05 SU) rescored the same 256
+examples at three forward batch sizes and compared each against the cached
+(batch-56 forward) scores:
+
+| scoring batch | mean \|ΔNLL\| | max \|ΔNLL\| | rank corr |
+|---|---|---|---|
+| 1 | 1.295e-02 | 3.560e-02 | 0.9608 |
+| 8 | 1.060e-02 | 3.222e-02 | 0.9520 |
+| **56** (matches the cache) | **2.948e-03** | **2.029e-02** | **0.9899** |
+
+Matching the cached run's forward batch cuts the mean disagreement **4.4x** and
+lifts rank correlation to 0.990. `mean` and `max` move monotonically with batch
+size; rank correlation does not (batch 8 sits just below batch 1), which on 256
+examples is within noise and is reported rather than smoothed over. The
+residual 2.9e-3 at batch 56 is expected because batch *composition* still
+differs — the cached run batched over the full `all.jsonl` in file order, this
+one over a 40,519-row subset — so padding patterns are similar, not identical.
+
+Conclusion: the r4.2 cache differs from a batch-1 rescore because of padding in
+its own forward pass, not because of anything in the decomposition. Batch 1
+remains the cleaner estimate and the reported basis; the cache is not a
+reproduction target for r4.2.
 
 ---
 
