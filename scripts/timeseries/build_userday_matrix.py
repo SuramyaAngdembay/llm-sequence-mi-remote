@@ -130,7 +130,16 @@ def load_days(input_dir: str) -> Tuple[pd.DataFrame, List[str], List[str]]:
     labels = labels[["user_id", "day_index", "y"]].drop_duplicates()
     days = days.merge(labels, on=["user_id", "day_index"], how="left")
     days["y"] = days["y"].fillna(0).astype(int)
-    return days, prof, behav
+    # Split assignment must use the ANSWER-KEY positive users, exactly as
+    # `build_session_jsonl` does, not the users who still have a positive day
+    # after the merge to the matched session domain. On r6.2 the answer key has
+    # 5 positive users but only 4 of them retain a positive user-day in that
+    # domain, so deriving the set post-merge would move the fifth (PLJ1771)
+    # into train/val and silently desynchronise the populations from the LM
+    # branch. Verified: with the answer-key set, train/val/eval reproduce the
+    # LM's 1,251,225 / 140,711 rows and 3,590 / 405 users.
+    answer_key_positive_users = set(labels.loc[labels["y"] > 0, "user_id"].astype(str))
+    return days, prof, behav, answer_key_positive_users
 
 
 def main() -> None:
@@ -141,12 +150,12 @@ def main() -> None:
     ap.add_argument("--val-frac", type=float, default=0.10)
     args = ap.parse_args()
 
-    days, prof, behav = load_days(args.input_dir)
+    days, prof, behav, pos_users = load_days(args.input_dir)
     days["user_id"] = days["user_id"].astype(str)
     days = days.sort_values(["user_id", "day_index"]).reset_index(drop=True)
 
-    pos_users = set(days.loc[days["y"] == 1, "user_id"])
     days["split"] = [assign_split(u, pos_users, args.val_frac) for u in days["user_id"]]
+    matched_pos_users = set(days.loc[days["y"] == 1, "user_id"])
 
     channels = prof + behav
     classes = ["PROFILE"] * len(prof) + ["BEHAV"] * len(behav)
@@ -179,7 +188,9 @@ def main() -> None:
         "rows": int(len(days)),
         "users": int(days["user_id"].nunique()),
         "positive_rows": int(days["y"].sum()),
-        "positive_users": int(len(pos_users)),
+        "answer_key_positive_users": int(len(pos_users)),
+        "positive_users_with_a_matched_positive_day": int(len(matched_pos_users)),
+        "eval_users_without_a_matched_positive_day": sorted(pos_users - matched_pos_users),
         "n_profile_channels": len(prof),
         "n_behav_channels": len(behav),
         "profile_channels": prof,

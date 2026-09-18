@@ -1,0 +1,55 @@
+{
+  "tag": "r6.2",
+  "input_dir": "/data/suramya/insider_mi/cert-data/raw",
+  "rows": 1393297,
+  "users": 4000,
+  "positive_rows": 70,
+  "answer_key_positive_users": 5,
+  "positive_users_with_a_matched_positive_day": 4,
+  "eval_users_without_a_matched_positive_day": [
+    "PLJ1771"
+  ],
+  "n_profile_channels": 12,
+  "n_behav_channels": 32,
+  "profile_channels": [
+    "project",
+    "role",
+    "b_unit",
+    "f_unit",
+    "dept",
+    "team",
+    "ITAdmin",
+    "O",
+    "C",
+    "E",
+    "A",
+    "N"
+  ],
+  "split_rows": {
+    "train": 1251225,
+    "val": 140711,
+    "eval": 1361
+  },
+  "split_users": {
+    "eval": 5,
+    "train": 3590,
+    "val": 405
+  },
+  "profile_channel_constant_within_user_frac": 1.0,
+  "aggregation": "profile=first, behavioural=mean, plus n_sessions",
+  "channel_policy": "PROFILE = cross_arch_probe PROFILE_COLS (the LM DAY/PSY block minus week); BEHAV = build_session_jsonl.SESSION_COLS, so the detector sees the same fields as the language model",
+  "excluded": [
+    "day",
+    "day_index",
+    "endtime",
+    "insider",
+    "n_days",
+    "sessionid",
+    "starttime",
+    "user",
+    "user_id",
+    "week",
+    "y"
+  ],
+  "split_rule": "LM branch's stable_hash_frac; positive users reserved for eval; val_frac=0.1"
+}
