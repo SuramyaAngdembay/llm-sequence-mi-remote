@@ -60,14 +60,21 @@ recipe byte-for-byte:
   runs switch the collator to `DataCollatorForSeq2Seq(label_pad_token_id=-100)`
   so labels pad correctly.
 - `--loss-denominator {scored_targets,all_targets}`.
-  - `scored_targets` (HF default): mean over non-ignored targets. Under
-    masking this **up-weights each behavioural token by 1/(1−p)**, where p is
-    the profile share of targets — a gradient-scale change that could become
-    the explanation.
-  - `all_targets` (**use this for C/D**): sum of target losses divided by the
-    number of non-pad targets, so a retained token keeps exactly the weight it
-    has in the unmasked recipe and masking only drops the profile terms. With
-    no mask the two are arithmetically identical.
+  - `scored_targets` (HF default): labels carry −100 at profile targets, so the
+    trainer normalizes over behaviour targets only. This **up-weights each
+    behavioural token by 1/(1−p) = 1.174** (p = 0.1485 measured) — a
+    gradient-scale change that could become the explanation.
+  - `all_targets` (**use this for C/D**): labels stay unmasked so the trainer's
+    `num_items_in_batch` counts every non-pad target across the accumulation
+    window; a separate `profile_mask` is applied inside `compute_loss`, which
+    divides by that window count. A retained token then keeps exactly the
+    weight it has in the unmasked recipe. With no mask this is arithmetically
+    identical to the HF default.
+
+  Normalizing per micro-batch here is wrong and was caught by the gate:
+  `transformers` 5.16.1 skips its own `loss / gradient_accumulation_steps`
+  whenever `num_items_in_batch` is supplied, so a micro-batch mean comes out
+  `grad_accum` times too large (measured 4.0x at grad_accum 4, job 20810414).
 
 `train_summary.json` records `target_loss_mask`, `loss_denominator`, and the
 measured `masked_target_frac` (p), so the gradient scaling is documented rather

@@ -359,6 +359,54 @@ def test_training_loss_masking_semantics() -> None:
           {i for i, c in enumerate(classes) if c in profile})
 
 
+def test_accumulation_window_normalization() -> None:
+    """Pin the normalization contract that job 20810414's gate caught.
+
+    transformers >= 4.46 counts targets over the whole gradient-accumulation
+    window (`num_items_in_batch`) and then SKIPS its own
+    `/ gradient_accumulation_steps`. A compute_loss that normalizes per
+    micro-batch therefore returns a loss `grad_accum` times too large, which
+    scales the gradients and silently changes the effective learning rate.
+    Measured on the cluster: exactly 4.0x at grad_accum=4.
+    """
+    print("8. accumulation-window normalization")
+    rng = np.random.default_rng(8)
+    grad_accum = 4
+    micro = [rng.uniform(0.1, 3.0, size=n) for n in (40, 55, 33, 61)]
+    keep = [rng.random(len(m)) > 0.1485 for m in micro]   # ~p of targets masked
+
+    n_window_all = sum(len(m) for m in micro)
+    sum_behaviour = sum(float(m[k].sum()) for m, k in zip(micro, keep))
+
+    # correct: every micro-batch divides by the WINDOW count, and the four
+    # micro-batch losses sum to the window average
+    per_micro_correct = [float((m * k).sum()) / n_window_all for m, k in zip(micro, keep)]
+    window_loss = sum(per_micro_correct)
+    check("window-normalized micro-batches sum to the window average",
+          abs(window_loss - sum_behaviour / n_window_all) < 1e-12)
+
+    # wrong: dividing by the micro-batch count, which is ~1/grad_accum the size
+    per_micro_wrong = [float((m * k).sum()) / len(m) for m, k in zip(micro, keep)]
+    inflation = (sum(per_micro_wrong) / grad_accum) / (window_loss / grad_accum)
+    check("micro-batch normalization inflates the loss by ~grad_accum",
+          abs(inflation - grad_accum) / grad_accum < 0.10,
+          f"inflation = {inflation:.2f}x vs grad_accum = {grad_accum}")
+
+    # unmasked, the fixed-denominator form must equal the plain mean
+    per_micro_unmasked = [float(m.sum()) / n_window_all for m in micro]
+    plain_mean = sum(float(m.sum()) for m in micro) / n_window_all
+    check("with nothing masked, fixed denominator == plain mean",
+          abs(sum(per_micro_unmasked) - plain_mean) < 1e-12)
+
+    # and the two denominator choices differ by exactly 1/(1-p)
+    n_kept = sum(int(k.sum()) for k in keep)
+    p = 1.0 - n_kept / n_window_all
+    scored = sum_behaviour / n_kept
+    all_t = sum_behaviour / n_window_all
+    check("scored_targets == all_targets / (1-p)",
+          abs(scored - all_t / (1.0 - p)) < 1e-9, f"p = {p:.4f}")
+
+
 def main() -> int:
     print("token_class_decomposition correctness checks\n")
     test_naive_subtraction_is_wrong()
@@ -368,6 +416,7 @@ def main() -> int:
     test_line_index_trap()
     test_lanl_spans()
     test_training_loss_masking_semantics()
+    test_accumulation_window_normalization()
     print()
     if FAILURES:
         print(f"FAILED ({len(FAILURES)}): " + "; ".join(FAILURES))

@@ -137,6 +137,52 @@ Throughput measured: 8B 8.1 ex/s at batch 1 and 16.7 at batch 8 (A100, 11.3 GB
 peak); 3B 9.1 at batch 1 and 30.3 at batch 16. Full pool at batch 1 is
 therefore ~5 h per scale, ~5 SU each.
 
+**V12 — the Phase C gate caught a 4x loss-normalization error before any
+training SU was spent.** Job 20810414 trained 200 steps with **nothing masked**
+under the HF-default loss path and under the custom fixed-denominator path;
+with nothing masked the two are arithmetically identical, so they must agree.
+They did not:
+
+| step | default path | custom path | ratio |
+|---|---|---|---|
+| 1 | 2.7574 | 11.0802 | 4.02 |
+| 20 | 1.2885 | 5.1953 | 4.03 |
+| 40 | 0.2557 | 0.9886 | 3.87 |
+| 200 | 0.1357 | 0.5206 | 3.84 |
+
+The ratio is `gradient_accumulation_steps` (4 for the 3B recipe). Confirmed in
+the installed source — `transformers` 5.16.1 `Trainer.training_step` contains
+
+```
+if (not self.model_accepts_loss_kwargs or num_items_in_batch is None) and self.compute_loss_func is None:
+    loss = loss / self.current_gradient_accumulation_steps
+```
+
+so when `num_items_in_batch` is supplied the trainer skips its own division and
+expects `compute_loss` to have normalized over the **whole accumulation
+window**. The original implementation normalized per micro-batch, making the
+loss — and therefore the gradients and the effective learning rate — 4x too
+large. Had it run, cells C/D would have differed from A/B because of the
+learning rate, not the objective.
+
+Fix: stop masking `labels`. Labels stay unmasked (only padding is −100) so the
+trainer's `num_items_in_batch` counts **every non-pad target**; a separate
+`profile_mask` column is padded alongside the batch and applied inside
+`compute_loss`, which divides by `num_items_in_batch`. Then
+
+* nothing masked -> `sum(all target losses) / N_all` ≡ the HF default (the gate);
+* profile masked -> `sum(behaviour losses) / N_all`, i.e. each retained token
+  keeps exactly the weight it has in the unmasked recipe.
+
+`scripts/tests/` check 8 pins this (micro-batch normalization inflates by
+~grad_accum; `scored_targets == all_targets / (1-p)`).
+
+**V13 — measured 3B training rate.** The gate's own 200-step runs report
+`train_samples_per_second` 7.376, so one epoch of 300k examples is ~11.3 h on
+one A100 (~11 SU), not the ~7 h estimated earlier. Phase C at 3B is therefore
+~11 SU of training plus ~5 SU of batch-1 scoring, and training is split into
+its own job rather than sharing a wall clock with scoring.
+
 ---
 
 ## Hypotheses (not yet tested)
@@ -216,5 +262,6 @@ which is not established by anything in this record.
 | 2026-09-17 | Schema validation vs real tokenizer/data on the login node (CPU, no SU) | done (V9, V10) |
 | 2026-09-17 | Jobs 20807957/20807958 (both A100): pilots ran, **gate refused** the full run — 8B could not be anchored to a cache made on H100 | done (V11) |
 | 2026-09-18 | Rerun 20814766 (8B on `ai`/H100) and 20814767 (3B on `gpu`/A100), batch 1 on matched hardware, revised gate | queued |
-| 2026-09-17 | Phase C **3B authorized and launched** (job 20810414): 200-step loss-path gate (default vs fixed-denominator, nothing masked, must agree to 1%) -> masked training -> scoring -> views | queued, ~8-9 SU |
+| 2026-09-17 | Phase C 3B authorized; job 20810414 ran the loss-path gate and **correctly aborted** (4.0x normalization error), ~0.25 SU | done (V12) |
+| 2026-09-18 | Phase C 3B resubmitted as job 20816765 with the corrected loss path: gate, then train-only (16 h cap, ~11 SU); scoring follows as a separate batch-1 job | queued |
 | — | Phase C 8B | held: ~20-25 SU (corrected from ~56; measured 1.07 s/it x 18,750 steps on 4xH100), pending the 3B run and the Phase A/B result |

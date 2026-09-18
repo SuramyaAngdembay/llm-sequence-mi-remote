@@ -93,18 +93,16 @@ def main() -> None:
     max_seq_len = int(cfg["training"]["max_seq_len"])
 
     mask_profile_targets = args.target_loss_mask == "profile"
+    fixed_denominator = args.loss_denominator == "all_targets"
 
-    if not mask_profile_targets:
+    if not mask_profile_targets and not fixed_denominator:
         def tokenize(batch):
-            tok = tokenizer(batch["text"], truncation=True, max_length=max_seq_len)
-            return tok
+            return tokenizer(batch["text"], truncation=True, max_length=max_seq_len)
     else:
-        # Mask the *target token's* class after the causal shift: HF's causal LM
-        # loss compares logits[..., :-1, :] with labels[..., 1:], so setting
-        # labels[t] = -100 removes the prediction OF token t while leaving
-        # input_ids (the context) untouched. Classes come from the shared
-        # decomposition library, by line prefix, so `no_psy`/`no_profile`
-        # serializations cannot be mislabelled by line index.
+        # Profile *targets* are identified by the class of the token being
+        # predicted; `input_ids` (the context) is never touched. Classes come
+        # from the shared decomposition library, by line PREFIX, so `no_psy` /
+        # `no_profile` serializations cannot be mislabelled by line index.
         from token_class_decomposition import (
             CERT_PROFILE_CLASSES,
             cert_class_spans,
@@ -120,31 +118,70 @@ def main() -> None:
                 max_length=max_seq_len,
                 return_offsets_mapping=True,
             )
-            labels = []
-            n_masked = []
+            out = {k: v for k, v in tok.items() if k != "offset_mapping"}
+            masks, n_masked = [], []
             for text, ids, offs in zip(batch["text"], tok["input_ids"], tok["offset_mapping"]):
-                classes, _ = classify_tokens([tuple(o) for o in offs], cert_class_spans(text))
-                lab = [(-100 if c in profile_classes else i) for i, c in zip(ids, classes)]
-                labels.append(lab)
-                n_masked.append(sum(1 for c in classes if c in profile_classes))
-            tok = {k: v for k, v in tok.items() if k != "offset_mapping"}
-            tok["labels"] = labels
-            tok["n_masked_targets"] = n_masked
-            return tok
+                if mask_profile_targets:
+                    classes, _ = classify_tokens([tuple(o) for o in offs], cert_class_spans(text))
+                    m = [1 if c in profile_classes else 0 for c in classes]
+                else:
+                    m = [0] * len(ids)
+                masks.append(m)
+                n_masked.append(sum(m))
+            if fixed_denominator:
+                # labels stay unmasked (only padding becomes -100), so the
+                # trainer's `num_items_in_batch` counts EVERY non-pad target.
+                # The profile mask is applied inside compute_loss instead.
+                out["profile_mask"] = masks
+            else:
+                # HF-default semantics: -100 at profile targets, so the trainer
+                # normalizes over behaviour targets only.
+                out["labels"] = [
+                    [(-100 if mm else i) for i, mm in zip(ids, m)]
+                    for ids, m in zip(tok["input_ids"], masks)
+                ]
+            out["n_masked_targets"] = n_masked
+            return out
 
     tokenized = ds.map(tokenize, batched=True, remove_columns=ds["train"].column_names)
     masked_target_frac = None
-    if mask_profile_targets:
-        # bounded sample: materializing every input_ids list would cost GBs
+    if mask_profile_targets or fixed_denominator:
+        # bounded probe: materializing every input_ids list would cost GBs
         n_probe = min(5000, len(tokenized["train"]))
         probe = tokenized["train"].select(range(n_probe))
         n_masked = sum(probe["n_masked_targets"])
         n_tok = sum(len(x) for x in probe["input_ids"])
         masked_target_frac = float(n_masked) / max(n_tok, 1)
         tokenized = tokenized.remove_columns(["n_masked_targets"])
+
+    if mask_profile_targets and not fixed_denominator:
         collator = DataCollatorForSeq2Seq(
             tokenizer=tokenizer, label_pad_token_id=-100, padding=True, return_tensors="pt"
         )
+    elif fixed_denominator:
+        _lm_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
+
+        class ProfileMaskCollator:
+            """Pads `profile_mask` (with 0) alongside the usual LM batch."""
+
+            def __init__(self, base):
+                self.base = base
+
+            def __call__(self, features):
+                import torch as _t
+
+                masks = [list(f.pop("profile_mask")) for f in features]
+                batch = self.base(features)
+                width = batch["input_ids"].shape[1]
+                pm = _t.zeros((len(masks), width), dtype=_t.long)
+                for i, m in enumerate(masks):
+                    k = min(len(m), width)
+                    if k:
+                        pm[i, :k] = _t.tensor(m[:k], dtype=_t.long)
+                batch["profile_mask"] = pm
+                return batch
+
+        collator = ProfileMaskCollator(_lm_collator)
     else:
         collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
@@ -242,39 +279,46 @@ def main() -> None:
         import torch.nn.functional as _F
 
         class FixedDenominatorMixin:
-            """Sum of target losses divided by the count of NON-PAD targets.
+            """Sum of retained target losses over the count of NON-PAD targets.
 
-            With --target-loss-mask profile this keeps each retained
-            (behavioural) token at exactly the weight it has in the unmasked
-            recipe; masking then only removes the profile terms instead of
-            also rescaling the surviving ones by 1/(1-p). With no mask it is
-            arithmetically identical to the HF default.
+            `labels` here are unmasked (only padding is -100), so the trainer's
+            `num_items_in_batch` — which it computes over the whole gradient
+            accumulation window — counts every non-pad target. Dividing by it
+            keeps each retained (behavioural) token at exactly the weight it
+            carries in the unmasked recipe: masking then only removes the
+            profile terms rather than also rescaling the survivors by 1/(1-p).
+
+            Normalizing per micro-batch instead would be wrong: transformers
+            skips its own `/ gradient_accumulation_steps` whenever
+            `num_items_in_batch` is supplied, so a micro-batch mean comes out
+            `grad_accum` times too large (measured: exactly 4.0x at
+            grad_accum=4, job 20810414).
+
+            With nothing masked this is arithmetically identical to the HF
+            default, which is what the pre-training gate checks.
             """
 
             def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None, **kwargs):
                 labels = inputs.pop("labels")
+                pmask = inputs.pop("profile_mask", None)
                 outputs = model(**inputs)
                 logits = outputs.logits[..., :-1, :].float()
                 target = labels[..., 1:]
-                loss_sum = _F.cross_entropy(
+                tok_loss = _F.cross_entropy(
                     logits.reshape(-1, logits.size(-1)),
                     target.reshape(-1),
                     ignore_index=-100,
-                    reduction="sum",
-                )
-                attn = inputs.get("attention_mask")
-                if attn is not None:
-                    denom = attn[..., 1:].sum()
+                    reduction="none",
+                ).view(target.shape)
+                keep = (target != -100).to(tok_loss.dtype)
+                if pmask is not None:
+                    keep = keep * (1.0 - pmask[..., 1:].to(tok_loss.dtype))
+                loss_sum = (tok_loss * keep).sum()
+                if num_items_in_batch is not None:
+                    denom = float(num_items_in_batch)
                 else:
-                    denom = (target != -100).sum()
-                # `num_items_in_batch` is supplied by transformers >= 4.46 when it
-                # intends to normalize across the whole accumulated batch itself.
-                # Returning a per-microbatch mean in that case would normalize
-                # twice and silently change the effective learning rate, so the
-                # microbatch mean is only returned when the trainer is NOT going
-                # to normalize.
-                loss = loss_sum / denom.clamp_min(1)
-                self._fixed_denom_last = (float(loss_sum.detach()), int(denom))
+                    denom = float((target != -100).sum().clamp_min(1))
+                loss = loss_sum / max(denom, 1.0)
                 return (loss, outputs) if return_outputs else loss
 
         class FixedDenominatorTrainer(FixedDenominatorMixin, Trainer):
