@@ -100,24 +100,40 @@ all views, so cells C and D come out of one job.
 Billing on Anvil is 1 SU per GPU-hour (`billing=1` with `gres/gpu=1`;
 `billing=4` with `gres/gpu=4`).
 
+Measured, not guessed: the 8B factorial logs report **1.07 s/it**, and one
+epoch of 300k examples at effective batch 16 is **18,750 steps**, so 8B
+training is ~5.6 h of wall time on 4 GPUs. An earlier estimate of ~52 SU was
+wrong: it came from the *whole* 13 h 38 m factorial job, which also ran
+token-level delta extraction (base + adapted, three layers, batch 1) and SAE
+fitting. Training alone is about a third of that.
+
 | step | resource | estimate |
 |---|---|---|
-| 3B masked adapter (18,750 steps, 1 epoch of 300k) | 1×A100 | ~3 SU (~3 h) |
-| 3B scoring of the pool + views | 1×A100 | ~1–2 SU |
-| 8B masked adapter (18,750 steps) | 4×H100 | ~52 SU (~13 h × 4) |
-| 8B scoring of the pool + views | 1×A100 | ~2–4 SU |
-| **one seed, both scales** | | **~60 SU** (≈52 H100-SU + ≈8 A100-SU) |
+| 3B loss-path validation (2 × 200 steps) | 1×A100 | ~0.5 SU |
+| 3B masked adapter (18,750 steps) | 1×A100 | ~7 SU |
+| 3B scoring of the pool + views | 1×A100 | ~1 SU |
+| **Phase C at 3B** | | **~8–9 SU** (12 h wall cap) |
+| 8B masked adapter (18,750 steps @ 1.07 s/it) | 4×H100 | ~22 SU |
+| 8B scoring of the pool + views (separate 1-GPU job) | 1×A100 | ~2 SU |
+| **Phase C at 8B** | | **~20–25 SU** |
+
+The 8B path is split into a 4-GPU training job and a 1-GPU scoring job so four
+H100s are not held idle during single-GPU inference — the mistake the original
+factorial runner made.
 
 Available: `tra250034-ai` 732.5 SU (H100), `cis260991-gpu` 400.0 SU +
-`tra250034-gpu` 95.2 SU (A100). One seed at both scales uses ~7 % of the H100
-balance.
+`tra250034-gpu` 95.2 SU (A100). Phase C at both scales is ~3 % of the H100
+balance and ~2 % of the A100 balance.
 
-Recommended scope to authorize, if Phase A/B motivates it: **3B first** (~5 SU,
-validates the implementation and the mechanism cheaply), then **8B one seed**
-(~56 SU) only if the 3B run behaves as designed. The 3B `full` adapter already
-ranks unseen users at 0.926, so it has little headroom; a null mitigation
-effect there does **not** invalidate a remedy for the 8B failure, and must not
-be read as one.
+Order of execution: **3B first**, behind a hard gate that trains 200 steps with
+nothing masked under both the default and the custom fixed-denominator loss
+path and aborts unless they agree to within 1 % — transformers ≥ 4.46 passes
+`num_items_in_batch` and may normalize a second time, which would silently
+change the effective learning rate and become the explanation for any
+difference between cells. Only after the 3B run behaves as designed does the
+8B spend make sense. The 3B `full` adapter already ranks unseen users at 0.926,
+so it has little headroom; a null mitigation effect there does **not**
+invalidate a remedy for the 8B failure and must not be read as one.
 
 Seeds: one seed per cell answers "did this change anything in this run". It does
 not establish robustness for the recipe, and no number of training seeds

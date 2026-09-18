@@ -135,8 +135,11 @@ def main() -> None:
     tokenized = ds.map(tokenize, batched=True, remove_columns=ds["train"].column_names)
     masked_target_frac = None
     if mask_profile_targets:
-        n_masked = sum(tokenized["train"]["n_masked_targets"])
-        n_tok = sum(len(x) for x in tokenized["train"]["input_ids"])
+        # bounded sample: materializing every input_ids list would cost GBs
+        n_probe = min(5000, len(tokenized["train"]))
+        probe = tokenized["train"].select(range(n_probe))
+        n_masked = sum(probe["n_masked_targets"])
+        n_tok = sum(len(x) for x in probe["input_ids"])
         masked_target_frac = float(n_masked) / max(n_tok, 1)
         tokenized = tokenized.remove_columns(["n_masked_targets"])
         collator = DataCollatorForSeq2Seq(
@@ -248,7 +251,7 @@ def main() -> None:
             arithmetically identical to the HF default.
             """
 
-            def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
+            def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None, **kwargs):
                 labels = inputs.pop("labels")
                 outputs = model(**inputs)
                 logits = outputs.logits[..., :-1, :].float()
@@ -264,7 +267,14 @@ def main() -> None:
                     denom = attn[..., 1:].sum()
                 else:
                     denom = (target != -100).sum()
+                # `num_items_in_batch` is supplied by transformers >= 4.46 when it
+                # intends to normalize across the whole accumulated batch itself.
+                # Returning a per-microbatch mean in that case would normalize
+                # twice and silently change the effective learning rate, so the
+                # microbatch mean is only returned when the trainer is NOT going
+                # to normalize.
                 loss = loss_sum / denom.clamp_min(1)
+                self._fixed_denom_last = (float(loss_sum.detach()), int(denom))
                 return (loss, outputs) if return_outputs else loss
 
         class FixedDenominatorTrainer(FixedDenominatorMixin, Trainer):
