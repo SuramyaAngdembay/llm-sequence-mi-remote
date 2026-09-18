@@ -313,6 +313,34 @@ at 5 h and the Phase C 3B training (11.3 h) both wait for the window to close.
 The Phase C runner auto-resumes from checkpoints, so a maintenance kill would
 cost time rather than work.
 
+**V19 — the factorial audit pool double-counts 12 % of its benign days; the
+conclusions are unaffected.** Checked after an external suggestion to
+deduplicate. The pool is built as `eval.jsonl` + a 12 % sample of `val.jsonl`,
+but `val.jsonl` is a strict **subset** of `eval.jsonl` (verified: 140,711 ids,
+all present in `eval.jsonl`'s 142,072). So 16,992 validation days appear twice
+and carry double weight: 159,064 rows, only 142,072 distinct.
+
+This is inherited from the factorial runners, so it also affects the published
+factorial numbers. Impact, measured rather than assumed:
+
+| | 8B day ROC | 8B behaviour-only day ROC | 8B user ROC | 8B behaviour-only user ROC |
+|---|---|---|---|---|
+| with duplicates | 0.3992 | 0.8357 | 0.5320 | 0.9378 |
+| deduplicated | 0.3994 | 0.8357 | 0.5320 | 0.9378 |
+
+User-level metrics are **identical by construction** — max-aggregation over a
+user's days is idempotent under duplication — so every user-level number in the
+paper and in V14 is unaffected. Day-level metrics move in the fourth decimal.
+`eval_score_views.py` now deduplicates on `example_id` and records how many rows
+it dropped; `results/score_decomposition/*_dedup/` holds the reruns.
+
+**V20 — the r4.2 padding explanation is being tested, not just asserted.** V17
+inferred padding from a length correlation on 256 examples spanning only
+196-215 tokens, which is suggestive rather than demonstrative. Job 20827737
+rescores the same examples at batch 56 and batch 8 and reports agreement with
+the cached (batch-56 forward) scores at each batch size; if padding is the
+cause, agreement should improve monotonically toward batch 56. ~0.3 SU.
+
 ---
 
 ## Unresolved limitations

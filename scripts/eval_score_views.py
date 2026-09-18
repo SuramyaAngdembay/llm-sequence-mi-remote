@@ -146,6 +146,17 @@ def main() -> None:
     out_dir = args.out_dir
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # The factorial audit pool was built as `eval.jsonl + 12% of val.jsonl`, but
+    # val.jsonl is a strict SUBSET of eval.jsonl, so ~12% of the benign
+    # validation days appear twice and carry double weight. User-level metrics
+    # are immune (max-aggregation is idempotent under duplication) but
+    # day-level ROC/AP are not. Deduplicate on example_id and record how many
+    # rows were dropped.
+    n_raw = len(df)
+    if "example_id" in df.columns:
+        df = df.drop_duplicates(subset="example_id", keep="first").reset_index(drop=True)
+    n_dropped = n_raw - len(df)
+
     # merge the cached baseline BEFORE building any score array, so every array
     # is taken from one dataframe in one row order
     if args.reference_scores is not None and Path(args.reference_scores).exists():
@@ -294,6 +305,9 @@ def main() -> None:
         "benign_test_users_requested": args.benign_test_users,
         "n_folds": len(folds),
         "n_examples": int(len(df)),
+        "n_rows_before_dedup": int(n_raw),
+        "n_duplicate_rows_dropped": int(n_dropped),
+        "dedup_note": "audit pool = eval.jsonl + 12% of val.jsonl, and val.jsonl is a subset of eval.jsonl, so sampled benign days appeared twice; user-level metrics are unaffected by this (max-agg), day-level metrics are",
         "n_users": int(df["user_id"].nunique()),
         "n_positive_users": int(df.loc[df["y"] == 1, "user_id"].nunique()),
         "n_positive_rows": int((df["y"] == 1).sum()),
@@ -309,7 +323,8 @@ def main() -> None:
         ["day_roc_auc", "day_pr_auc", "user_roc_auc", "within_user_roc", "heldout_user_rank"]
     )].pivot(index="view", columns="metric", values="mean")
     order = [v for v in PRIMARY_VIEWS if v in piv.index] + [v for v in piv.index if v not in PRIMARY_VIEWS]
-    print(f"\n=== {args.run_name}: mean over {len(folds)} folds ===")
+    print(f"\n=== {args.run_name}: mean over {len(folds)} folds "
+          f"({len(df)} rows after dropping {n_dropped} duplicates of {n_raw}) ===")
     print(piv.loc[order].to_string(float_format=lambda x: f"{x:8.4f}"))
     print(f"\nmean-gap decomposition max reconstruction error: {recon_err:.3e}")
     print(f"wrote {out_dir}")

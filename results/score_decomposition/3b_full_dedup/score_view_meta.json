@@ -1,0 +1,55 @@
+{
+  "run_name": "3b_full_dedup",
+  "class_scores": "/anvil/scratch/x-bbhusal1/decomp/3b/full/class_scores.parquet",
+  "schema": "cert",
+  "views": {
+    "full": [
+      "DAY",
+      "PSY",
+      "SESCOUNT",
+      "SES",
+      "OTHER",
+      "SPECIAL"
+    ],
+    "profile_only": [
+      "DAY",
+      "PSY"
+    ],
+    "behavior_only": [
+      "SESCOUNT",
+      "SES",
+      "OTHER",
+      "SPECIAL"
+    ],
+    "behavior_ses_only": [
+      "SES"
+    ],
+    "psy_only": [
+      "PSY"
+    ],
+    "day_only": [
+      "DAY"
+    ]
+  },
+  "fold_seed": 42,
+  "benign_test_users_requested": 800,
+  "n_folds": 4,
+  "n_examples": 142072,
+  "n_rows_before_dedup": 159064,
+  "n_duplicate_rows_dropped": 16992,
+  "dedup_note": "audit pool = eval.jsonl + 12% of val.jsonl, and val.jsonl is a subset of eval.jsonl, so sampled benign days appeared twice; user-level metrics are unaffected by this (max-agg), day-level metrics are",
+  "n_users": 410,
+  "n_positive_users": 4,
+  "n_positive_rows": 70,
+  "split_counts": {
+    "val": 140711,
+    "eval": 1361
+  },
+  "fpr_budgets": [
+    0.001,
+    0.01
+  ],
+  "bootstrap": "paired cluster bootstrap over malicious users (folds); descriptive at n=4; conditional on these adapters and this benign cohort; not training-seed replication",
+  "mean_gap_decomposition_max_recon_err": 6.938893903907228e-17,
+  "population_note": "every user in this pool was excluded from adapter training (positives by construction; benign comparison users are validation-split). This is a user-disjoint comparison, not a seen-user detection test."
+}
