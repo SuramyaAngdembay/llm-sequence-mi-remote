@@ -277,6 +277,42 @@ available here; ~1e-3 drift is expected and the gate tolerates it. The
 scientific comparison is within one forward pass, so the drift cancels. The
 reference join now keys on `example_id` rather than row position.
 
+**V17 — the r4.2 cached baseline is a batch-56 artifact, so it is not a
+reproduction target.** Job 20826196's gate refused the run at mean \|ΔNLL\|
+0.0130 / rank corr 0.9608 against the cached scores. Diagnosis on the pilot:
+
+* model loading is **identical** — `score_adapter_examples.py` uses the same
+  `BitsAndBytesConfig`, the same dtype and the same `PeftModel`;
+* token counts match exactly (0 mismatches), and every structural check is
+  clean (partition 1.1e-13, `n_targets = n_tokens − 1`, zero boundary targets);
+* the signed difference **tracks sequence length**: corr(diff, n_tokens) =
+  0.388, with the shortest length quartile at −0.0093 and the longest at
+  +0.0046.
+
+That is the padding signature. `score_adapter_examples.py` chunks only the
+cross-entropy (`loss_batch_size`), not the forward pass, so the cached r4.2
+scores came from a **batch-56 forward** in which short sequences sat beside
+long ones. The rerun uses batch 1, which has no padding at all, so the new
+numbers are the *cleaner* estimate and the cached ones are not a gold standard.
+
+Consequence for the protocol: for r4.2 the structural checks stay hard, cache
+agreement is reported rather than gated, and the anchor that matters is
+metric-level — the recomputed `full` view's pooled user-disjoint ROC against
+the published day 0.668 / user 0.565, printed side by side with the cached
+scores' own ROC. This does not weaken the comparison of interest: every view
+comes from the same batch-1 forward pass, so any batching effect is common to
+all of them.
+
+**V18 — cluster maintenance blocks the long jobs.** Reservation
+`anvil-maint-2026-q3` runs 2026-09-18 23:30 → 2026-09-20 21:00 across all
+nodes (`Flags=MAINT,IGNORE_JOBS`). Jobs whose wall clock cannot fit before
+23:30 are deferred past it (Slurm's first estimate for the 8 h LANL job was
+2026-09-24). Adjusted: r4.2 resubmitted with a 2 h wall (~1.3 h of work) and is
+now pending on `Priority`, i.e. schedulable before the window; LANL resubmitted
+at 5 h and the Phase C 3B training (11.3 h) both wait for the window to close.
+The Phase C runner auto-resumes from checkpoints, so a maintenance kill would
+cost time rather than work.
+
 ---
 
 ## Unresolved limitations
@@ -337,5 +373,6 @@ which is not established by anything in this record.
 | 2026-09-18 | Rerun 20814766 (8B/H100) and 20814767 (3B/A100), batch 1 on matched hardware | **done** — gates passed with exact reproduction; results in `results/score_decomposition/` (V14, V15) |
 | 2026-09-17 | Phase C 3B authorized; job 20810414 ran the loss-path gate and **correctly aborted** (4.0x normalization error), ~0.25 SU | done (V12) |
 | 2026-09-18 | Phase C 3B resubmitted as job 20816765 with the corrected loss path: gate, then train-only (16 h cap, ~11 SU); scoring follows as a separate batch-1 job | queued |
-| 2026-09-18 | **Portability** (the decision rule's next step now that behaviour-only scoring helps): LANL job 20826171 (`ai`/H100, field schema, seen/unseen protocol) and r4.2 headline job 20826196 (`gpu`/A100, 40,519-row user-disjoint pool) | queued, ~3 SU + ~1 SU |
+| 2026-09-18 | Portability round 1: LANL 20826171, r4.2 20826196 | r4.2 **gate refused** (batch-56 cache, V17), ~0.1 SU; LANL deferred by maintenance (V18) |
+| 2026-09-18 | Portability round 2: r4.2 job 20827646 (2 h wall, corrected gate) and LANL job 20827647 (5 h) | r4.2 schedulable before maintenance; LANL waits for the window to close |
 | — | Phase C 8B | held: ~20-25 SU, and now lower priority than portability - if score masking transfers, the cheap intervention is the result and the training arm is a secondary control |
