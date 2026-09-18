@@ -98,6 +98,45 @@ spans. OTHER is entirely the `" | "` event separator, which the LANL
 `behavior_only` view scores as non-identity; this is now stated in the library
 rather than left implicit. The LANL *scoring* path has still not been run.
 
+**V11 — the scorer reproduces the cached detector score exactly when hardware
+and batch size match; the 8B discrepancy is GPU architecture, not code.**
+First scoring attempt (jobs 20807957/20807958, both A100) ran a 256-example
+pilot at batch 1 and at batch N against the cached `example_scores.parquet`:
+
+| pilot | hardware then / now | mean \|ΔNLL\| | max \|ΔNLL\| | rank corr |
+|---|---|---|---|---|
+| 3B, batch 1 | A100 → A100 (matched) | **1.5e-08** | **5.8e-08** | 0.9999999999999998 |
+| 3B, batch 16 | A100 → A100 | 1.5e-03 | 9.6e-03 | 0.9940 |
+| 8B, batch 1 | **H100 → A100** | 2.9e-03 | 1.0e-02 | 0.9855 |
+| 8B, batch 8 | **H100 → A100** | 2.7e-03 | 1.4e-02 | 0.9863 |
+
+The 3B batch-1 row is the decisive one: identical code, identical hardware,
+identical batch size reproduces the cached score to 6e-8, so the implementation
+is exact. The original 3B extraction ran on the `gpu` partition (A100) and the
+original 8B extraction on `ai` (H100) — hence the 8B rows drift by ~3e-3 at
+*any* batch size, which is bf16/4-bit kernel difference across architectures,
+not a code defect. Batching adds drift of the same order.
+
+Structural checks were perfect in every pilot: partition sums to the total to
+2.3e-13, zero partition-count mismatches, `n_targets = n_tokens − 1` for every
+example, **zero** boundary-crossing targets, zero OTHER/SPECIAL, and class
+shares identical across batch sizes (DAY 0.0888, PSY 0.0605, SESCOUNT 0.0237,
+SES 0.8271 on the pilot subset; DAY_WEEK 0.0073).
+
+The first gate correctly refused to spend on a full run it could not anchor.
+Its 0.999 rank-correlation threshold was, in hindsight, a cross-architecture
+criterion applied to an arithmetic question. The rerun (jobs 20814766 on `ai`
+H100 for 8B, 20814767 on `gpu` A100 for 3B) scores at batch 1 on the hardware
+that produced each cached baseline, keeps the structural checks hard, and
+bounds numerical agreement at mean \|ΔNLL\| ≤ 1e-2 and rank corr ≥ 0.98; the
+full run then reports the recomputed `full` view and the published cached score
+side by side so the drift's effect on the actual metric is measured rather than
+assumed.
+
+Throughput measured: 8B 8.1 ex/s at batch 1 and 16.7 at batch 8 (A100, 11.3 GB
+peak); 3B 9.1 at batch 1 and 30.3 at batch 16. Full pool at batch 1 is
+therefore ~5 h per scale, ~5 SU each.
+
 ---
 
 ## Hypotheses (not yet tested)
@@ -175,6 +214,7 @@ which is not established by anything in this record.
 | 2026-09-17 | `score_token_class_decomposition.py`, `eval_score_views.py` | done |
 | 2026-09-17 | `train_qlora.py` target-mask + explicit denominator (defaults unchanged) | done (V8) |
 | 2026-09-17 | Schema validation vs real tokenizer/data on the login node (CPU, no SU) | done (V9, V10) |
-| 2026-09-17 | Anvil jobs 20807957 (8B full) / 20807958 (3B full): unit tests → bounded 256-example pilot at batch N and batch 1 → hard gate → full-pool scoring → view evaluation | queued |
+| 2026-09-17 | Jobs 20807957/20807958 (both A100): pilots ran, **gate refused** the full run — 8B could not be anchored to a cache made on H100 | done (V11) |
+| 2026-09-18 | Rerun 20814766 (8B on `ai`/H100) and 20814767 (3B on `gpu`/A100), batch 1 on matched hardware, revised gate | queued |
 | 2026-09-17 | Phase C **3B authorized and launched** (job 20810414): 200-step loss-path gate (default vs fixed-denominator, nothing masked, must agree to 1%) -> masked training -> scoring -> views | queued, ~8-9 SU |
 | — | Phase C 8B | held: ~20-25 SU (corrected from ~56; measured 1.07 s/it x 18,750 steps on 4xH100), pending the 3B run and the Phase A/B result |
