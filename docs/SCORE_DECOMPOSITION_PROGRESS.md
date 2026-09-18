@@ -4,8 +4,8 @@ Kept deliberately separated into what has been **verified**, what is a
 **hypothesis**, and what is an **unresolved limitation**. Results are appended
 as they land; nothing here is written into the paper before it is checked.
 
-Last updated: 2026-09-17 (Phase A/B implementation complete; scoring jobs
-queued on Anvil).
+Last updated: 2026-09-17 (Phase A/B implementation complete and validated on
+real data; scoring jobs and the Phase C 3B arm queued on Anvil).
 
 ---
 
@@ -176,4 +176,5 @@ which is not established by anything in this record.
 | 2026-09-17 | `train_qlora.py` target-mask + explicit denominator (defaults unchanged) | done (V8) |
 | 2026-09-17 | Schema validation vs real tokenizer/data on the login node (CPU, no SU) | done (V9, V10) |
 | 2026-09-17 | Anvil jobs 20807957 (8B full) / 20807958 (3B full): unit tests → bounded 256-example pilot at batch N and batch 1 → hard gate → full-pool scoring → view evaluation | queued |
-| — | Phase C training | prepared, **not launched**; needs go-ahead (~5 SU for 3B, ~56 SU for 8B) |
+| 2026-09-17 | Phase C **3B authorized and launched** (job 20810414): 200-step loss-path gate (default vs fixed-denominator, nothing masked, must agree to 1%) -> masked training -> scoring -> views | queued, ~8-9 SU |
+| — | Phase C 8B | held: ~20-25 SU (corrected from ~56; measured 1.07 s/it x 18,750 steps on 4xH100), pending the 3B run and the Phase A/B result |

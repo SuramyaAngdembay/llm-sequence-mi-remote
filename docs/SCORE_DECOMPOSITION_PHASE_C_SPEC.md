@@ -1,8 +1,10 @@
 # Phase C — runnable specification: training-loss × scoring factorial
 
-Prepared 2026-09-17. **Not launched.** Training on the collaborator's Anvil
-allocation needs an explicit go-ahead; the scope and cost below are stated so
-that decision can be made on numbers.
+Prepared 2026-09-17; the **3B arm was authorized and launched** the same day
+(job 20810414, ~8-9 SU, behind the loss-path gate below). The **8B arm is
+held** pending (a) the 3B run behaving as designed and (b) the Phase A/B
+scoring result, since if score masking alone already helps, the 8B training
+spend should be judged against that.
 
 This design replaces the earlier context-versus-scoring 2×2, which was invalid:
 "profile absent but profile tokens scored" is not a cell that exists in an
@@ -90,10 +92,12 @@ same schedule, same `max_seq_len`.
 
 ## Runner
 
-`slurm/anvil_friend/train_target_mask.sh` (in the repo), invoked as
-`sbatch train_target_mask.sh 3b` / `8b`. It trains the masked adapter, builds
-the identical audit pool, scores it with the class decomposition, and evaluates
-all views, so cells C and D come out of one job.
+`slurm/anvil_friend/phase_c_3b.sh` (launched as job 20810414) runs the
+validation gate, then trains the masked adapter, builds the identical audit
+pool, scores it with the class decomposition and evaluates the views, so cells
+C and D come out of one job. `slurm/anvil_friend/train_target_mask.sh` is the
+generic two-scale form; for 8B it must be split into a 4-GPU training job and a
+separate 1-GPU scoring job (see Cost).
 
 ## Cost (measured rates, verified balances 2026-09-17)
 
