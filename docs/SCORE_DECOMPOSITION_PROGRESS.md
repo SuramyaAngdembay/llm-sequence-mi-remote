@@ -62,6 +62,11 @@ off-by-one detection, boundary-crossing tokens, truncation, the no_psy /
 no_profile line shift, DAY_WEEK ⊂ DAY, LANL field spans, and the Phase-C loss
 masking arithmetic).
 
+**V8 — Phase C is one new training run per scale per seed, not four.** Cells A
+and B are the existing `full` adapter scored two ways; C and D are one
+profile-target-masked adapter scored two ways. Implemented behind two flags
+whose defaults reproduce the current recipe exactly.
+
 **V9 — class mapping validated against the real tokenizer and real data**
 (CPU only on the login node, 400 examples per condition, no allocation cost):
 
@@ -92,11 +97,6 @@ windows: ID_USER 0.201, ID_HOST 0.201, BEHAV 0.401, HOUR 0.100, OTHER 0.097 of
 spans. OTHER is entirely the `" | "` event separator, which the LANL
 `behavior_only` view scores as non-identity; this is now stated in the library
 rather than left implicit. The LANL *scoring* path has still not been run.
-
-**V8 — Phase C is one new training run per scale per seed, not four.** Cells A
-and B are the existing `full` adapter scored two ways; C and D are one
-profile-target-masked adapter scored two ways. Implemented behind two flags
-whose defaults reproduce the current recipe exactly.
 
 ---
 

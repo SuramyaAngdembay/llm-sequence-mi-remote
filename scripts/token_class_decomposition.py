@@ -165,7 +165,10 @@ def lanl_class_spans(text: str) -> List[Span]:
     (spaces, newlines) attach to the preceding field's span so the text stays
     covered contiguously.
 
-    Not yet validated against LANL data; CERT line classes do not transfer.
+    Field classification checked against real LANL windows (ID_USER .201,
+    ID_HOST .201, BEHAV .401, HOUR .100, OTHER .097 of spans, OTHER being the
+    " | " event separators). The scoring path has not been run on LANL. CERT
+    line classes do not transfer.
     """
     spans: List[Span] = []
     n = len(text)
