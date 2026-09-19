@@ -3,11 +3,16 @@
 Dated 2026-09-19. Source specification:
 `~/Documents/mi-paper-review-2026-09-19/claude-next-experiments-prompt.md`.
 
-All work below ran on Aquaman at **zero cluster SU**. Anvil was unreachable for
-the entire session (`ssh: connect to host anvil.rcac.purdue.edu port 22:
-Operation timed out`, three separate probes), so packages 3 and 4 are written
-and tested offline but **unrun**. Nothing is assumed about jobs 20816765,
-20827646 or 20827647.
+All work below ran on Aquaman at **zero cluster SU**. Anvil is down for a
+two-day outage from 2026-09-19; the failure is below SSH (100 % ICMP loss, port
+22 unreachable) and identical on both accounts. Nothing is assumed about jobs
+20816765, 20827646 or 20827647.
+
+The outage did **not** block package 3. Aquaman holds both Qwen3-8B adapters,
+the repaired session data for r4.2 and r6.2, and the base model, and runs the
+8B in 4-bit across two RTX 3070s. Package 3 is therefore **complete**. Package
+4 still needs Anvil for CERT, whose token-delta cache and SAE frontier live
+only there, but has been run end to end on the **TWOS** replication.
 
 ---
 
@@ -17,8 +22,8 @@ and tested offline but **unrun**. Nothing is assumed about jobs 20816765,
 |---|---|
 | 1. Preserve and correct the r4.2 scoring-mitigation result | **Complete.** Result preserved; three overstatements corrected. |
 | 2. Forecasting fix, reproducible checkpoints, one shared metric, identical eligible examples | **Complete.** All four gates pass; one new limitation found. |
-| 3. Profile copying within the same frozen LM | **Code complete and tested offline; unrun.** Blocked on Anvil. |
-| 4. Checkpoint-matched SAE interventions against full / profile / behaviour loss | **Code complete and tested offline; unrun.** Blocked on Anvil. |
+| 3. Profile copying within the same frozen LM | **Complete.** Run on both releases and both prefix formats. Strong, replicated effect. |
+| 4. Checkpoint-matched SAE interventions against full / profile / behaviour loss | **Code complete; run on TWOS, CERT still blocked on Anvil.** |
 
 ---
 
@@ -61,6 +66,26 @@ Profile share of the malicious-benign mean score gap: **−3.7 %**, **+10.2 %**,
 Day AP is 0.0007–0.0019 at a prevalence of 0.00049. Nothing here is a usable
 detector.
 
+### Package 3 — history prefix (200 users per release, capped at 15 days each)
+
+Clustered by user, bootstrap over users. r6.2 with the training-format prefix,
+2,982 examples over 199 users:
+
+| view | B − A (own profile) | C − A (stranger) |
+|---|---|---|
+| psychometric only | −3.226 [−3.352, −3.102] | −0.413 [−0.548, −0.274] |
+| profile only | −1.304 [−1.362, −1.248] | +1.122 [+1.044, +1.199] |
+| behaviour only | +0.016 [+0.014, +0.018] | +0.133 [+0.125, +0.141] |
+| behaviour, SES lines only | −0.002 [−0.002, −0.001] | +0.124 [+0.116, +0.132] |
+
+Psychometric loss falls from 3.373 to 0.148 nats when the user's own profile is
+in context, in **100 % of users**, replicated on r4.2 and in both prefix
+formats. The all-60-malicious-user r4.2 sample gives −3.058 [−3.208, −2.908].
+
+Measured, not assumed: the static-profile overlap between a user's earlier and
+current record is **1.0000**, so condition B is a **copying** test, not a
+memory-of-a-different-past test.
+
 ---
 
 ## Implications for the paper's three questions
@@ -80,18 +105,38 @@ that "sequence model" claims should be made at the day level, not the user
 level. It also predicts what Package 3 should find, and that prediction is
 recorded before the run rather than after.
 
-**Causal features.** Not yet answerable. The intervention code now decomposes
-every repair by token class, and its correctness is established against an
-independent reference implementation, but no intervention has been run.
+**Causal features.** Partly answerable. The intervention code decomposes every
+repair by token class, its correctness is established against an independent
+reference implementation, and it has now run end to end on TWOS. The CERT run
+still needs Anvil. The TWOS smoke already vindicates one design choice
+concretely: the cached base score differs from a matched-batch recomputation by
+a mean of 1.1e-02 nats, which is **larger than the repair effects being
+measured**, so recomputing the base through the identical code path was not
+optional.
+
+**Profile copying.** Answered, and it reshapes the account. The adapted model
+has a strong, identity-specific in-context copy mechanism for profile tokens:
+the user's own profile collapses psychometric loss by 3.2 nats, a length-matched
+stranger's does not. But the correct profile buys **no** behavioural predictive
+value (+0.016 nats or less; −0.002 for the SES lines alone), while a wrong one
+**hurts** behaviour (+0.12 to +0.21). The profile functions as an identity key
+that conditions behaviour prediction, not as evidence about behaviour. The
+organizational and psychometric halves also dissociate: day fields are already
+cheap with no context (0.44 nats) while psychometric fields are not (3.37), so
+"the model memorized the profile" cannot be the whole story.
 
 ---
 
 ## Remaining uncertainties
 
-1. **The profile-copying mechanism is untested.** Package 3 distinguishes
-   memorization from in-context copying and has not run.
-2. **Whether SAE repairs act on profile or behaviour tokens is unknown.** This
-   is the load-bearing question for the mechanistic claim.
+1. **Condition B is a copying test, not a memory test.** CERT profiles are
+   static, so B re-presents information also present in the current day's own
+   profile line. It shows the copy mechanism exists and is identity-specific; it
+   does not establish that the *deployed* profile-token loss is copying-driven,
+   since in deployment no earlier profile is in context.
+2. **Whether SAE repairs act on profile or behaviour tokens is unknown for
+   CERT.** The TWOS run will answer it there; CERT remains the load-bearing
+   case and needs Anvil.
 3. **Four malicious users** in the time-series population. Every interval there
    is descriptive.
 4. **CERT profiles may be static per user**, which would make condition B a
@@ -102,7 +147,7 @@ independent reference implementation, but no intervention has been run.
 
 ## Single most informative next experiment
 
-**Package 4's smoke run**, then the full run. It is the only one that speaks
+**Package 4 on CERT r4.2**, the moment Anvil returns. It is the only one that speaks
 directly to the paper's mechanistic claim: the delta-SAE audit says specific
 features carry identity information, and the causal test says patching them
 repairs the score — but "the score" is a pooled mean over profile and behaviour
