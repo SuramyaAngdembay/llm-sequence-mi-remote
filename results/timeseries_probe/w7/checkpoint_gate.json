@@ -1,0 +1,7 @@
+{
+  "run_dir": "out/w7",
+  "objective": "reconstruct",
+  "window": 7,
+  "rescore_max_abs_diff": 0.0,
+  "failures": []
+}

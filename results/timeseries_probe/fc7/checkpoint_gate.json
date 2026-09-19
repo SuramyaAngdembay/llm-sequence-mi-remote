@@ -1,0 +1,7 @@
+{
+  "run_dir": "out/fc7",
+  "objective": "forecast",
+  "window": 8,
+  "rescore_max_abs_diff": 0.0,
+  "failures": []
+}

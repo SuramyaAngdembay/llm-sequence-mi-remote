@@ -1,0 +1,26 @@
+{
+  "population": "matched",
+  "population_rows": 142072,
+  "dropped_duplicates": 0,
+  "dropped_no_history": 410,
+  "common_eligible_rows": 141662,
+  "per_model_own_history_rows": {
+    "w1": 142072,
+    "w7": 142072,
+    "fc7": 141662
+  },
+  "malicious_users": [
+    "ACM2278",
+    "CDE1846",
+    "CMP2946",
+    "MBG3183"
+  ],
+  "tie_policy": "ROC/AP from sklearn (ties get the midpoint rank); recall@FPR uses a threshold at the (1-fpr) quantile of eligible negatives with method='higher' and counts scores strictly greater than it",
+  "models": {
+    "w1": "out/w1/channel_scores.npz",
+    "w7": "out/w7/channel_scores.npz",
+    "fc7": "out/fc7/channel_scores.npz"
+  },
+  "note": "every model is evaluated on this identical eligible set; the forecaster's missing-history rows are removed from ALL models so the comparison is like-for-like",
+  "bootstrap": "cluster bootstrap over 4 malicious users, 2000 draws, benign cohort fixed \u2014 DESCRIPTIVE at this cluster count"
+}
