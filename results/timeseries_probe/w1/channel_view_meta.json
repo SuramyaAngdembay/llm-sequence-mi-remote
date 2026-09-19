@@ -1,0 +1,25 @@
+{
+  "run_name": "r62_recon_w1",
+  "views": {
+    "full": [
+      "PROFILE",
+      "BEHAV"
+    ],
+    "profile_only": [
+      "PROFILE"
+    ],
+    "behavior_only": [
+      "BEHAV"
+    ]
+  },
+  "channel_counts": {
+    "PROFILE": 12,
+    "BEHAV": 32
+  },
+  "population": "positives + never-trained validation benign users (user-disjoint on both sides; not a seen-user test)",
+  "n_rows": 140781,
+  "n_positive_users": 4,
+  "bootstrap": "cluster bootstrap over malicious users; descriptive at n=4",
+  "mean_gap_recon_err": 6.938893903907228e-18,
+  "note": "every channel contributes exactly one squared-error term, so N_P and N_B are constant across rows; unlike the token-class case the naive difference and the exact conditional differ only by an affine map and leave the ranking unchanged"
+}
