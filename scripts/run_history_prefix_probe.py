@@ -66,18 +66,39 @@ from token_class_nll import build_class_index, per_example_class_nll, views_from
 CONDITIONS = ("A", "B", "C")
 
 
-def load_model(config: Dict, adapter_dir: Path):
-    from peft import PeftModel
-    from transformers import AutoModelForCausalLM, AutoTokenizer
+def load_model(cfg: Dict, adapter_dir: Path):
+    """Load the frozen adapted model exactly as `score_adapter_examples.py` does.
 
-    model_name = config["model"]["name"]
-    tok = AutoTokenizer.from_pretrained(model_name)
+    Same quantization block from the config, same tokenizer source (the adapter
+    directory, not the base repo), same `use_cache=False`. A probe that loaded
+    the model differently from the scorer that produced the published numbers
+    would not be measuring the same model.
+    """
+    from peft import PeftModel
+    from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+
+    model_name = cfg["model_name_or_path"]
+    q = cfg["quantization"]
+    quant_cfg = BitsAndBytesConfig(
+        load_in_4bit=bool(q["load_in_4bit"]),
+        bnb_4bit_quant_type=str(q["bnb_4bit_quant_type"]),
+        bnb_4bit_compute_dtype=getattr(torch, str(q["bnb_4bit_compute_dtype"])),
+        bnb_4bit_use_double_quant=bool(q["bnb_4bit_use_double_quant"]),
+    )
+    tok = AutoTokenizer.from_pretrained(str(adapter_dir), use_fast=True)
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
     base = AutoModelForCausalLM.from_pretrained(
-        model_name, torch_dtype=torch.bfloat16, device_map="auto")
+        model_name,
+        quantization_config=quant_cfg,
+        torch_dtype=torch.bfloat16 if bool(cfg["training"].get("bf16", True)) else torch.float16,
+        device_map="auto",
+    )
     model = PeftModel.from_pretrained(base, str(adapter_dir))
     model.eval()
+    model.config.use_cache = False
+    if hasattr(model, "base_model") and hasattr(model.base_model, "config"):
+        model.base_model.config.use_cache = False
     return model, tok
 
 
@@ -99,7 +120,9 @@ def score_batch(model, ids_list, tgt_list, cls_list, n_classes, pad_id, device):
         cls[b, :n] = torch.tensor(c, dtype=torch.long)
         scored[b, :n] = torch.tensor([1.0 if t else 0.0 for t in tgt])
     input_ids, attn, cls = input_ids.to(device), attn.to(device), cls.to(device)
-    out = model(input_ids=input_ids, attention_mask=attn, return_dict=True)
+    with torch.inference_mode():
+        out = model(input_ids=input_ids, attention_mask=attn,
+                    return_dict=True, use_cache=False)
     # reuse the shared accumulator, but with the SCORED mask in place of the
     # attention mask so prefix tokens contribute nothing
     sums, counts = per_example_class_nll(
@@ -121,6 +144,13 @@ def main() -> None:
     ap.add_argument("--max-examples", type=int, default=0)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--max-donor-candidates", type=int, default=200)
+    ap.add_argument("--max-per-user", type=int, default=0,
+                    help="at most this many eligible days per user, taken evenly "
+                         "spaced through the user's timeline (deterministic). 0 = all.")
+    ap.add_argument("--user-limit", type=int, default=0,
+                    help="sample this many users with a seeded shuffle. Users with "
+                         "any positive day are ALWAYS kept, so the sample can never "
+                         "be made easier by dropping malicious users.")
     args = ap.parse_args()
 
     cfg = load_yaml(args.config)
@@ -133,7 +163,31 @@ def main() -> None:
         by_user[str(r["user_id"])].append(r)
     for u in by_user:
         by_user[u].sort(key=lambda r: int(r["day_index"]))
-    print(f"loaded {len(rows)} examples over {len(by_user)} users", flush=True)
+    n_users_total = len(by_user)
+    print(f"loaded {len(rows)} examples over {n_users_total} users", flush=True)
+
+    # Sampling is declared here, before any scoring, and is label-aware only in
+    # the direction that cannot flatter the result: every user with a positive
+    # day is retained.
+    pos_users = {u for u, recs in by_user.items() if any(int(r["y"]) == 1 for r in recs)}
+    if args.user_limit and args.user_limit < n_users_total:
+        rng = np.random.default_rng(args.seed)
+        others = sorted(set(by_user) - pos_users)
+        rng.shuffle(others)
+        keep = pos_users | set(others[: max(0, args.user_limit - len(pos_users))])
+        by_user = {u: recs for u, recs in by_user.items() if u in keep}
+        print(f"user sample: {len(by_user)} users "
+              f"({len(pos_users)} with a positive day, all retained)", flush=True)
+    if args.max_per_user:
+        for u, recs in list(by_user.items()):
+            # positions 1.. are eligible (position 0 has no earlier record);
+            # take an evenly spaced, deterministic subset of them
+            elig = list(range(1, len(recs)))
+            if len(elig) > args.max_per_user:
+                pick = np.linspace(0, len(elig) - 1, args.max_per_user).round().astype(int)
+                elig = [elig[i] for i in sorted(set(pick.tolist()))]
+            by_user[u] = [recs[0]] + [recs[i] for i in elig]
+        print(f"per-user cap: {args.max_per_user} eligible days", flush=True)
 
     model, tok = load_model(cfg, args.adapter_dir)
     device = next(model.parameters()).device
@@ -265,6 +319,9 @@ def main() -> None:
     dump_json(out_dir / "history_prefix_meta.json", {
         "adapter_dir": str(args.adapter_dir), "split_file": args.split_file,
         "max_seq_len": max_seq_len, "seed": args.seed,
+        "n_users_total": n_users_total, "n_users_sampled": len(by_user),
+        "n_users_with_a_positive_day": len(pos_users),
+        "user_limit": args.user_limit, "max_per_user": args.max_per_user,
         "n_built": len(built), "n_excluded_no_earlier_record": n_no_earlier,
         "n_excluded_no_length_matched_donor": n_no_donor,
         "n_truncated_by_prefix_budget": n_truncated,
