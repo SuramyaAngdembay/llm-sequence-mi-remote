@@ -22,6 +22,7 @@ Usage:
 from __future__ import annotations
 
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -43,15 +44,48 @@ PROCESS_CLAIMS = [
     (r"\breproduc(es|ed) (the|its) (cache|published|original)\b", "reproduction"),
 ]
 
-# Things a reader can actually follow up.
-EVIDENCE = [
-    r"`?\b[0-9a-f]{7,64}\b`?",                 # commit hash or content digest
-    r"\b[\w./-]+\.(py|json|csv|md|yaml|sbatch|sh)\b",   # a file to open
-    r"\bV\d{1,3}\b",                           # progress-record entry
-    r"\bjob[ _]?\d{6,}\b",                     # a scheduler job id
-    r"\bcommit\b", r"\bdigest\b", r"\bmd5\b", r"\bsha256\b",
-    r"\bgit log\b", r"\bsee\s+`", r"\brecorded in\b",
+# Things a reader can actually follow up. Each is RESOLVED, not merely matched:
+# an earlier version of this linter accepted any citation-shaped token, so
+# "See nonexistent_evidence.json" passed. External review caught that. Bare
+# words like "commit" or "digest" are no longer evidence of anything.
+EVIDENCE_PATTERNS = [
+    ("hash", r"`?\b([0-9a-f]{7,40})\b`?"),                       # commit or digest
+    ("file", r"\b([\w./-]+\.(?:py|json|csv|md|yaml|sbatch|sh|tex|npz))\b"),
+    ("ventry", r"\b(V\d{1,3})\b"),                              # progress-record entry
+    ("job", r"\bjob[ _]?(\d{6,})\b"),                           # scheduler job id
 ]
+
+_REPO = Path(__file__).resolve().parents[1]
+_GIT_CACHE: dict[str, bool] = {}
+_PROGRESS = _REPO / "docs" / "SCORE_DECOMPOSITION_PROGRESS.md"
+
+
+def _commit_exists(h: str) -> bool:
+    if h not in _GIT_CACHE:
+        try:
+            _GIT_CACHE[h] = subprocess.run(
+                ["git", "cat-file", "-e", f"{h}^{{commit}}"], cwd=_REPO,
+                capture_output=True, timeout=10).returncode == 0
+        except Exception:
+            _GIT_CACHE[h] = False
+    return _GIT_CACHE[h]
+
+
+def _resolves(kind: str, token: str) -> bool:
+    """Does this citation point at something that exists?"""
+    if kind == "file":
+        # a path anywhere in the repo, or relative to it
+        if (_REPO / token).exists():
+            return True
+        name = Path(token).name
+        return any(True for _ in _REPO.rglob(name)) if name else False
+    if kind == "hash":
+        return _commit_exists(token)
+    if kind == "ventry":
+        return _PROGRESS.exists() and f"**{token}" in _PROGRESS.read_text(errors="replace")
+    if kind == "job":
+        return True          # scheduler ids cannot be resolved from here
+    return False
 
 # Lines that are meta-discussion of claim discipline, not claims themselves.
 EXEMPT = re.compile(
@@ -66,7 +100,12 @@ QUOTED_PAST = re.compile(
 
 
 def has_evidence(window: str) -> bool:
-    return any(re.search(p, window, re.I) for p in EVIDENCE)
+    """True only if a citation in the window RESOLVES to something real."""
+    for kind, pat in EVIDENCE_PATTERNS:
+        for m in re.finditer(pat, window, re.I):
+            if _resolves(kind, m.group(1)):
+                return True
+    return False
 
 
 def scan_file(path: Path) -> list[tuple[int, str, str]]:
@@ -118,6 +157,12 @@ def self_test() -> int:
          "results/provenance/adapter_fingerprints/aquaman_r62.json).", False,
          "same claim, with a digest and a file"),
         ("The day-field contrast is -0.0272 [-0.045, -0.010].", False, "a plain number"),
+        # External review defeated the first version with a citation-shaped
+        # string pointing at nothing. These two cases exist because of that.
+        ("This adapter is identical to the published adapter. See nonexistent_evidence.json",
+         True, "citation-SHAPED text pointing at a file that does not exist"),
+        ("Frozen before any result existed, commit deadbeefdeadbeef.",
+         True, "a commit hash that is not in this repository"),
     ]
     ok = True
     print("self-test: does this linter catch what actually got past review?\n")
@@ -177,8 +222,9 @@ def main() -> int:
           f"{n_struct} structural gaps, {n_hist} in historical records (exempt)")
     if n_claims or n_struct:
         print("\nA flagged line is not necessarily wrong. It is a line a reader must")
-        print("take on trust. Cite the commit, digest, file or V-entry -- or soften")
+        print("take on trust. Cite a commit, file or V-entry THAT EXISTS -- or soften")
         print("the claim to what is actually known.")
+        return 1          # findings fail the check; exit 0 previously hid them
     return 0
 
 

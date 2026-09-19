@@ -17,5 +17,8 @@
   "mean_overlap_self_vs_current": 1.0,
   "mean_overlap_donor_vs_current": 0.2937710437710438,
   "donor_rule": "earliest record of each donor user; seeded hash order; first exact prefix-token-length match within 200 candidates",
-  "target_rule": "current day's tokens at within-day positions 1..n-1, identical in all three conditions"
+  "target_rule": "current day's tokens at within-day positions 1..n-1, identical in all three conditions",
+  "label_dependent_sample": true,
+  "label_dependent_rule": "every user with a positive day is retained when --user-limit samples users",
+  "flag_backfilled": "added 2026-09-19 after external review noted these outputs predated the flag; derived from user_limit which these runs recorded"
 }

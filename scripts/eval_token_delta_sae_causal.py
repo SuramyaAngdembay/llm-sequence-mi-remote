@@ -1083,6 +1083,8 @@ def main() -> None:
         "donor_example_id",
         "alpha",
         "base_score",
+        "base_score_cached",
+        "base_is_recomputed",
         "patched_score",
         "delta",
         "n_selected_features",
@@ -1211,7 +1213,16 @@ def main() -> None:
                                         "patched per-class target counts differ from the base's; "
                                         "the two scorings are not over the same tokens"
                                     )
-                            deltas = patched_scores - base
+                            # The delta, and therefore `repair`, `strong_repair`
+                            # and every generated summary, must use the base that
+                            # came through the IDENTICAL code path and batch
+                            # composition. Using the cached adapted_nll here made
+                            # 8,162 of 35,328 rows in the TWOS run disagree with
+                            # the recomputed delta on the sign of the repair.
+                            # The cached base is retained as `base_score` for
+                            # provenance and its difference is reported.
+                            base_used = base if base_recomputed is None else base_recomputed
+                            deltas = patched_scores - base_used
                             batch_rows: List[Dict[str, Any]] = []
                             for i in range(len(recv_idx)):
                                 row = {
@@ -1226,7 +1237,9 @@ def main() -> None:
                                     "receiver_example_id": str(example_meta.iloc[recv_idx[i]]["example_id"]),
                                     "donor_example_id": str(example_meta.iloc[donor_idx[i]]["example_id"]),
                                     "alpha": float(alpha),
-                                    "base_score": float(base[i]),
+                                    "base_score": float(base_used[i]),
+                                    "base_score_cached": float(base[i]),
+                                    "base_is_recomputed": int(base_recomputed is not None),
                                     "patched_score": float(patched_scores[i]),
                                     "delta": float(deltas[i]),
                                     "n_selected_features": int(len(ids)),
@@ -1237,6 +1250,9 @@ def main() -> None:
                                 }
                                 if class_schema is not None:
                                     row["base_score_recomputed"] = float(base_recomputed[i])
+                                    # kept for continuity with runs made before the
+                                    # delta was switched to the recomputed base;
+                                    # equal to `delta` in any run made since
                                     row["delta_recomputed"] = float(patched_scores[i] - base_recomputed[i])
                                     row["base_cache_minus_recomputed"] = float(base[i] - base_recomputed[i])
                                     for vname in class_views:

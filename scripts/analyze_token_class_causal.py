@@ -106,7 +106,11 @@ def main() -> int:
             print()
 
         if ctrl and tops:
-            print(f"{'view':<18}{'contrast':<22}{'delta':>12}{'95% CI (users)':>26}")
+            # Both arms are printed beside the contrast. Reporting the
+            # difference alone once led to describing a -0.027 "repair" that was
+            # 95% the control arm degrading, which external review caught.
+            print(f"{'view':<18}{'top set':>11}{'control':>11}{'difference':>12}"
+                  f"{'95% CI (users)':>26}")
             print("-" * 78)
             for view in VIEWS:
                 for t in tops:
@@ -125,10 +129,15 @@ def main() -> int:
                     if not diffs:
                         continue
                     lo, hi = boot_ci(diffs)
-                    print(f"{view:<18}{t + ' - ' + ctrl:<22}{st.fmean(diffs):>12.5f}"
+                    tm = st.fmean([st.fmean(a_d[u]) for u in shared])
+                    cm = st.fmean([st.fmean(b_d[u]) for u in shared])
+                    print(f"{view:<18}{tm:>+11.5f}{cm:>+11.5f}{st.fmean(diffs):>+12.5f}"
                           f"{f'[{lo:+.5f}, {hi:+.5f}]':>26}")
-            print("\n(negative = the selected features lower that view's loss more than "
-                  "the activity-matched control does)")
+            print("\n(negative delta = the selected features lower that view's loss more "
+                  "than the\nactivity-matched control does. READ THE TWO ARMS: a large "
+                  "difference can come\nfrom the control degrading rather than the "
+                  "selected features helping, and a\nnear-zero difference means the two "
+                  "patches are SIMILAR, not that neither acts.)")
     return 0
 
 

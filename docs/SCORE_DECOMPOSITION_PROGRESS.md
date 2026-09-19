@@ -185,7 +185,7 @@ its own job rather than sharing a wall clock with scoring.
 **V14 — Phase A/B result: on the audited 8B adapter, removing the profile's
 direct score contribution moves unseen-user ranking from chance to 0.938.**
 Jobs 20814766 (8B, H100) and 20814767 (3B, A100), batch 1, full pool. The
-recomputed `full` view reproduces the published `adapted_nll` over all 159,064
+recomputed `full` view reproduces (see `results/score_decomposition/README.md`) the published `adapted_nll` over all 159,064
 rows to max \|ΔNLL\| 1.4e-07 (rank corr 0.9999999999977), so the baseline is
 anchored exactly. Full tables in `results/score_decomposition/`.
 

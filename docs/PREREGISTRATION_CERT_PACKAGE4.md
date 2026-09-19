@@ -42,8 +42,9 @@ are not purely an identity shortcut, and the paper's mechanistic section must
 say so.
 
 ## Fixed before the run
-Evidence that this predates the run: `git log` on this file, against the job
-record of the eventual run.
+This file was added in commit `c0131c4`. That commit, against the job record of the
+eventual run, is the evidence that it predates it -- and a commit hash proves
+only that an artifact was recorded at a time, not that anyone was bound by it.
 
 | item | value |
 |---|---|
@@ -65,7 +66,7 @@ published result.
 
 ## Rules fixed before the run
 
-(Same evidence: this file's commit date in `git log`.)
+(Same evidence: commit `c0131c4`, with the same caveat.)
 
 1. **The base score is recomputed** through the identical code path and batch
    composition as the patched score. The cached `adapted_nll` is **not** used

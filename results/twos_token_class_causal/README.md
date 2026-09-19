@@ -143,20 +143,61 @@ the contamination audit predicted before the replication was run.
 Two runs is not enough to characterise the distribution either. The correct
 next step is more seeds, not a choice between these two.
 
-## What the seed-42 run showed (NOT replicated — retained for the record)
+## A second, independent error in the seed-42 reading: the difference was not what I said it was
+
+Found by external review and confirmed by recomputation from the 35,328 saved
+rows. Reporting only `top5 − control` hid what each patch actually did. At
+α = 1.0, per receiver user, **positive means the patch made prediction worse**:
+
+| token group | selected-feature patch | control patch | difference |
+|---|---|---|---|
+| organizational / DAY | **−0.00143** | **+0.02574** | −0.02717 |
+| all profile tokens | −0.01113 | −0.00079 | −0.01035 |
+| psychometric | −0.01709 | −0.01652 | −0.00057 |
+| behaviour tokens | **+0.00338** | **+0.00346** | −0.00008 |
+| full | −0.00246 | +0.00189 | −0.00435 |
+
+Two things follow, and both contradict how I wrote this up:
+
+**1. The large day-field number is mostly the control degrading, not the
+selected features helping.** The selected features improve day-field loss by
+0.00143. The control *worsens* it by 0.02574. About 95 % of the −0.02717
+"advantage" is the control arm, so describing it as a repair produced by the
+selected features was wrong.
+
+**2. Both patches worsen behaviour-token prediction, by almost the same
+amount.** A near-zero difference means the two patches are *similar* on
+behaviour, not that neither touches it. Writing that the intervention "does not
+affect behaviour" inverted the meaning of a small contrast.
+
+### What the seed-42 run actually supports
+
+> On this run, the selected-versus-control difference is concentrated in
+> profile-token loss, with little detectable difference between the two patches
+> on behaviour-token loss.
+
+That is real mechanistic evidence and it is worth reporting. It does **not**
+establish an exclusively identity-related circuit, and the earlier claim that no
+confound could produce the dose-response was unjustified — a confound acting on
+the control arm would produce exactly this pattern.
+
+Together with the seed-43 reversal above, the position is: the contrast is not
+stable across seeds, and on the seed where it was largest it was driven mainly
+by the control.
+
+## What the seed-42 run showed (NOT replicated, and the reading above supersedes this — retained for the record)
 
 **1. The repair lands on identity tokens, not behaviour tokens.** At full patch
 strength the day-field view improves by −0.0272 while the behaviour view moves
 by −0.00008 — a factor of roughly **340**, with the behaviour interval tightly
 bracketing zero at every strength. The same holds for the SES lines alone.
 
-**2. There is a clean dose-response, and only on the identity views.** The
-day-field and profile effects grow monotonically with patch strength
-(−0.0093 → −0.0167 → −0.0240 → −0.0272), which is what a genuine causal handle
-looks like. The behaviour effect is **flat** across a fourfold change in patch
-strength (−0.00012 → −0.00008) and never separates from zero. A confound that
-merely perturbed the model would not produce a dose-response on one token class
-and a flat line on another.
+**2. ~~There is a clean dose-response, and only on the identity views.~~**
+~~A confound that merely perturbed the model would not produce a dose-response on
+one token class and a flat line on another.~~ **Both halves of this are
+withdrawn.** Seed 43 produces a dose-response on the behaviour views, and a
+confound acting on the control arm produces exactly this pattern — which the
+three-column table above shows is what happened.
 
 **3. The pooled result is real but understates where it comes from.** The full
 view's −0.0044 is the number the published pooled metric would report. It is

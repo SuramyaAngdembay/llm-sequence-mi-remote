@@ -113,28 +113,42 @@ class LabelDependentSampleError(RuntimeError):
     """A detection metric was asked for on a sample built using labels."""
 
 
-def assert_sample_usable_for_detection(meta: Dict[str, object] | str | "os.PathLike",
-                                       what: str = "this metric") -> None:
-    """Refuse to compute a detection metric on a label-dependent sample.
+def assert_sample_usable_for_detection(
+    meta: Dict[str, object] | str | "os.PathLike",
+    what: str = "this metric",
+    justification: str | None = None,
+) -> None:
+    """Stop, by default, before computing a detection metric on a label-dependent
+    sample -- and make the exception explicit rather than silent.
 
-    Some probes sample users with a rule that reads labels -- the history-prefix
-    probe retains every user with a positive day, so its sample cannot be made
-    easier by dropping malicious users. That is fine for the loss CONTRASTS the
-    probe reports, which use no labels at all. It is not fine for ROC, AP or
-    recall, where a label-dependent sample silently sets the prevalence.
+    Some probes sample users with a rule that reads labels: the history-prefix
+    probe retains every user with a positive day.
 
-    The audit against arXiv:2509.08713 found this recorded only as a sentence in
-    a help string. A sentence is not an invariant. This raises.
+    Two things this does NOT claim, both corrected after external review:
+
+    * **Label-dependent sampling does not automatically invalidate an AUC.**
+      Whether it does depends on how the sampling changes the evaluated
+      population. Retaining all positives and subsampling negatives changes
+      prevalence, which moves AP a lot and ROC not at all. A blanket
+      prohibition is the wrong rule; a blanket permission is worse. So this
+      raises by default and takes a written `justification` to proceed, which
+      puts the reasoning in the caller where a reader can check it.
+    * **Reporting only loss differences does not automatically make sampling
+      harmless.** If the sampling rule correlates with the quantity being
+      contrasted, a loss contrast is affected too.
     """
     if not isinstance(meta, dict):
         import json as _json
         meta = _json.loads(pathlib.Path(meta).read_text())
     if bool(meta.get("label_dependent_sample")):
+        if justification:
+            return
         raise LabelDependentSampleError(
             f"refusing to compute {what}: this sample was built with a "
             f"label-dependent rule ({meta.get('label_dependent_rule', 'unspecified')}). "
-            "Loss contrasts are fine; detection metrics are not. Rebuild the "
-            "sample without reading labels, or compute the metric elsewhere."
+            "Rebuild the sample without reading labels, or pass justification="
+            "'<why this metric is unaffected by that rule>' to proceed on the "
+            "record. Note that a loss contrast is not automatically safe either."
         )
 
 

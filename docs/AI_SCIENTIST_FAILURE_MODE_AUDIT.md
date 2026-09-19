@@ -9,8 +9,12 @@ code** reaches 74.0 %. This audit is therefore written against the logs and
 code, and it is the right document to hand a reviewer alongside the manuscript.
 
 **The most important finding of this audit, stated first:** the errors that
-mattered most in this project were caught by an **external human audit**
-(2026-09-19), not by self-audit. That audit found a population mismatch that had
+mattered most in this project were caught by **external review** (2026-09-19),
+not by self-audit. An earlier version of this file called that an "external
+human audit". I had no evidence of who or what wrote it, and a later review
+indicated it came from a Codex review rather than a person. The claim is
+corrected, and it is an instance of exactly the failure this document is about:
+asserting a fact about provenance from assumption. That audit found a population mismatch that had
 produced a wrong headline claim, a forecasting leak, an average-precision figure
 paired with the wrong prevalence, a miscounted fold tally, and a mechanism
 explanation that contradicted our own earlier finding. A self-written trace is
@@ -56,16 +60,18 @@ validation. Detected by injecting label noise and checking whether reported
 accuracy exceeds the theoretical ceiling. The paper's reviewer advice: "examine
 logs for unexpected dataset creation or subsetting."*
 
-**This project's record is good only because leaks were found.** Five, all
-documented in `docs/SCORE_DECOMPOSITION_PROGRESS.md`:
+**Five defects were found, and calling them all "leaks" was wrong.** External
+review pointed out that these are distinct failure types and that grouping them
+inflates the leakage claim. Only the first is leakage in the train/test sense.
+Reclassified:
 
-| leak | status |
+| defect | type | status |
 |---|---|
-| Forecast first day had itself as its own context (4,000 rows) | found, fixed, now asserted as an exact set equality (V26) |
-| Raw integer `user` column would have carried identity into the time-series model | excluded before training |
-| `val.jsonl` is a strict subset of `eval.jsonl` — 16,992 rows double-counted | found, dedup added |
-| Split keyed on post-merge positives (4) rather than the answer key (5) | found, fixed |
-| TWOS delta cache built from `audit_pool_v3` (2,275 rows), not `session_jsonl_v3` (10,354) | caught **by an assertion in the code**, 2026-09-19 |
+| Forecast first day had itself as its own context (4,000 rows) | **leakage** — target visible in its own input | found, fixed, now asserted as an exact set equality (V26) |
+| Raw integer `user` column would have carried identity into the time-series model | **feature validity** — a prevented identity shortcut, not a leak that occurred | excluded before training |
+| `val.jsonl` is a strict subset of `eval.jsonl` — 16,992 rows double-counted | **population definition** — double counting, not leakage | found, dedup added |
+| Split keyed on post-merge positives (4) rather than the answer key (5) | **split construction** | found, fixed |
+| TWOS delta cache built from `audit_pool_v3` (2,275 rows), not `session_jsonl_v3` (10,354) | **artifact mismatch** | caught **by an assertion in the code**, 2026-09-19 |
 
 The last one is the paper's own advice working: an unexpected subset was caught
 because the code refuses to proceed when row counts disagree.
@@ -94,7 +100,11 @@ put in the paper.
 reflecting the research objective. Their case: one system substituted the
 specified metric with F1 and training loss.*
 
-**Clean, and independently checkable.** The token-class views (`full`,
+**The metric SET is pre-registered; that is narrower than "metric use is
+clean".** External review is right that fixed definitions do not guarantee
+correct baselines, populations, aggregation or interpretation — and the TWOS
+baseline defect below proves the point. What is checkable is only this: the
+token-class views (`full`,
 `profile_only`, `behavior_only`, `behavior_ses_only`, `psy_only`, `day_only`)
 were frozen in `scripts/token_class_decomposition.py` on **2026-09-17, commit
 007ca54**, and `git log -S CERT_VIEWS` shows **no subsequent edit**. Every view
@@ -194,7 +204,7 @@ Anvil is unreachable and the run is therefore impossible.
 
 * **No pre-registration** until today, for a project this far along.
 * **The trace is self-authored.** Every serious correction this project has made
-  came from an external audit.
+  came from external review.
 * **Effect emphasis drifts toward the largest number** even when the metric set
   is fixed, as in the day-field lead.
 * **Provenance of a key artifact is assumed** — the Aquaman adapters.
@@ -243,3 +253,33 @@ One live trap was found and left deliberately untouched: `paper/main.tex:978`
 matches the withdrawal's *wording* but not its *claim*. Patching it would have
 introduced an error while "fixing" one. That is the case the skill's
 classification step exists to catch.
+
+---
+
+## External review of this audit (2026-09-19), and what it corrected
+
+This document was itself reviewed. Every empirical claim in that review was
+recomputed here before being accepted; all were correct.
+
+| review finding | verified? | action |
+|---|---|---|
+| The TWOS day-field "advantage" is mostly the **control degrading**: selected −0.00143, control +0.02574 | **confirmed to 5 dp** | interpretation rewritten; the analysis tool now prints both arms by default |
+| **Both** patches worsen behaviour (+0.00338 / +0.00346); a near-zero difference means *similar*, not *absent* | **confirmed** | "does not affect behaviour" withdrawn |
+| The repair flags still used the cached baseline — **8,162 of 35,328 rows** disagree on sign | **confirmed exactly** | `delta` now uses the matched-batch base; cached value kept as `base_score_cached` |
+| The claim linter accepts citation-**shaped** text: "See nonexistent_evidence.json" passed | **confirmed** | citations are now resolved against the filesystem and git; two self-tests added for this hole; findings now exit non-zero |
+| The sampling guard is optional and all four history-prefix outputs lack the flag | **confirmed** | flag backfilled into all four metas and CSVs, marked as backfilled |
+| "Five data leaks" conflates distinct defect types | agreed | reclassified: one leakage, one prevented feature shortcut, one population-definition error, one split error, one artifact mismatch |
+| "Label-dependent sampling invalidates AUC" is an incorrect blanket rule, in both directions | agreed | guard keeps a fail-safe default but now takes a written `justification`; docstring states both directions |
+| "Metric use is clean because views were fixed" is insufficient | agreed | narrowed to "the metric *set* is pre-registered", which is all that was checked |
+| The 2026-09-19 review was called an "external **human** audit" without evidence | **confirmed as unsupported** | corrected to "external review"; this was itself a provenance claim asserted from assumption |
+| Fingerprints prepare a verification; the comparison is still owed | agreed | unchanged — still blocked on Anvil |
+
+Two of these — the contrast decomposition and the stale baseline — are defects
+this audit **missed while auditing for exactly that class of defect**. The audit
+recomputed the contrast and confirmed it to five decimals without noticing that
+the number it confirmed did not mean what the write-up said. Arithmetic
+verification and interpretive verification are different checks, and passing the
+first is not evidence for the second.
+
+The review's overall verdict is recorded as stated: the corrections are specific
+and do not justify discarding the study.
