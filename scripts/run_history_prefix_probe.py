@@ -144,6 +144,11 @@ def main() -> None:
     ap.add_argument("--max-examples", type=int, default=0)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--max-donor-candidates", type=int, default=200)
+    ap.add_argument("--prefix-include-week", action="store_true",
+                    help="include the earlier record's own `week` value in the "
+                         "prefix DAY line, restoring the training format. Run "
+                         "both ways: the DAY view is sensitive to this, the PSY "
+                         "view is not.")
     ap.add_argument("--max-per-user", type=int, default=0,
                     help="at most this many eligible days per user, taken evenly "
                          "spaced through the user's timeline (deterministic). 0 = all.")
@@ -195,6 +200,8 @@ def main() -> None:
     n_classes = len(class_names)
     views = dict(tcd.CERT_VIEWS)
 
+    inc_week = bool(args.prefix_include_week)
+
     def tok_len(text: str) -> int:
         return len(tok(text, add_special_tokens=False)["input_ids"])
 
@@ -220,19 +227,20 @@ def main() -> None:
             prev = recs[pos - 1]
             prof_self = parse_profile(prev["text"])
             try:
-                pre_self = build_prefix(prof_self)
+                pre_self = build_prefix(prof_self, include_week=inc_week)
             except ValueError:
                 n_no_earlier += 1
                 continue
             pre_ids_self = tok(pre_self, add_special_tokens=False)["input_ids"]
             want = len(pre_ids_self)
             donor, _ = choose_length_matched_donor(
-                u, want, pool, donor_profile, tok_len, seed=args.seed,
-                max_candidates=args.max_donor_candidates)
+                u, want, pool, donor_profile,
+                lambda t: tok_len(t), seed=args.seed,
+                max_candidates=args.max_donor_candidates, include_week=inc_week)
             if donor is None:
                 n_no_donor += 1
                 continue
-            pre_ids_other = tok(build_prefix(donor_profile[donor]),
+            pre_ids_other = tok(build_prefix(donor_profile[donor], include_week=inc_week),
                                 add_special_tokens=False)["input_ids"]
             assert len(pre_ids_other) == want
 
@@ -319,6 +327,7 @@ def main() -> None:
     dump_json(out_dir / "history_prefix_meta.json", {
         "adapter_dir": str(args.adapter_dir), "split_file": args.split_file,
         "max_seq_len": max_seq_len, "seed": args.seed,
+        "prefix_include_week": inc_week,
         "n_users_total": n_users_total, "n_users_sampled": len(by_user),
         "n_users_with_a_positive_day": len(pos_users),
         "user_limit": args.user_limit, "max_per_user": args.max_per_user,

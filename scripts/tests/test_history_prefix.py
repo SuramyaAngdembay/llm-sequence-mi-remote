@@ -70,6 +70,13 @@ def test_prefix_content() -> None:
     check("prefix carries every static field",
           all(f"{f}={prof[f]}" in pre for f in DAY_STATIC_FIELDS + PSY_FIELDS))
     check("prefix ends on a line boundary", pre.endswith("\n"))
+    pre_w = build_prefix(prof, include_week=True)
+    check("include_week=True adds week as the FIRST DAY field",
+          pre_w.startswith(f"DAY week={prof['week']} "), pre_w.split("\n")[0][:40])
+    check("include_week changes the prefix, so the two variants are distinguishable",
+          pre_w != pre)
+    check("the PSY line is identical either way",
+          pre_w.split("\n")[1] == pre.split("\n")[1])
     missing = dict(prof); missing.pop("O")
     try:
         build_prefix(missing); check("missing field raises", False)

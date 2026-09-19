@@ -62,16 +62,27 @@ def parse_profile(text: str) -> Dict[str, str]:
     return out
 
 
-def build_prefix(profile: Dict[str, str]) -> str:
-    """The historical-profile prefix: static DAY fields (no `week`) then PSY.
+def build_prefix(profile: Dict[str, str], include_week: bool = False) -> str:
+    """The historical-profile prefix: static DAY fields then PSY.
 
     Ends with a newline so the current-day text starts on its own line, the
     same boundary the model saw between lines during adaptation.
+
+    `week` is omitted by default, because it is temporal rather than an identity
+    attribute. That choice has a measurable cost: the prefix's DAY line then
+    differs in FORMAT from every DAY line the model saw in training, and the
+    pilot shows the DAY view's loss rising under the own-profile condition,
+    which is the signature of a format surprise rather than of failed copying.
+    `include_week=True` restores the training format using the earlier record's
+    own week value, so the two can be compared and the DAY-view reading does not
+    rest on one formatting decision. The PSY line is identical either way, so
+    the PSY view is unaffected by this choice and is the clean test.
     """
-    missing = [f for f in DAY_STATIC_FIELDS + PSY_FIELDS if f not in profile]
+    fields = (("week",) + DAY_STATIC_FIELDS) if include_week else DAY_STATIC_FIELDS
+    missing = [f for f in fields + PSY_FIELDS if f not in profile]
     if missing:
         raise ValueError(f"profile is missing fields: {missing}")
-    day = "DAY " + " ".join(f"{f}={profile[f]}" for f in DAY_STATIC_FIELDS)
+    day = "DAY " + " ".join(f"{f}={profile[f]}" for f in fields)
     psy = "PSY " + " ".join(f"{f}={profile[f]}" for f in PSY_FIELDS)
     return day + "\n" + psy + PREFIX_SEPARATOR
 
@@ -102,9 +113,15 @@ def choose_length_matched_donor(
     token_len: "callable",
     seed: int = 42,
     max_candidates: int = 200,
+    include_week: bool = False,
 ) -> Tuple[Optional[str], int]:
     """First donor, in the deterministic order, whose prefix has exactly the
-    recipient's prefix token length. Returns (donor_id or None, n_examined)."""
+    recipient's prefix token length. Returns (donor_id or None, n_examined).
+
+    `include_week` MUST match the value used to build the recipient's prefix,
+    or the donor is matched against a differently formatted string and the
+    length equality is meaningless.
+    """
     for i, u in enumerate(donor_order(recipient, donor_pool, seed), start=1):
         if i > max_candidates:
             break
@@ -112,7 +129,7 @@ def choose_length_matched_donor(
         if prof is None:
             continue
         try:
-            if token_len(build_prefix(prof)) == recipient_prefix_len:
+            if token_len(build_prefix(prof, include_week=include_week)) == recipient_prefix_len:
                 return u, i
         except ValueError:
             continue
