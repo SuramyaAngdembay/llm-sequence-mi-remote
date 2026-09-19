@@ -1,6 +1,8 @@
 {
   "matrix": "out/r62_userday.npz",
   "window": 1,
+  "objective": "reconstruct",
+  "context_days": 1,
   "hidden": 256,
   "latent": 16,
   "epochs": 5,
@@ -14,10 +16,12 @@
     "PROFILE": 12
   },
   "n_train_rows": 1251225,
+  "n_rows_without_history_excluded": 0,
+  "positives_without_history": 0,
   "standardisation": "train-split mean/std only",
   "score": "mean squared reconstruction error over channels; class partition sums to the total",
   "partition_max_abs_err": 0.0,
-  "elapsed_sec": 6.6,
+  "elapsed_sec": 8.1,
   "torch": "2.7.1+cu118",
   "gpu": "NVIDIA GeForce RTX 3070"
 }

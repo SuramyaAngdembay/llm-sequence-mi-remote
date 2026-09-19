@@ -33,7 +33,10 @@ V20). It does not matter at the metric level, which is the anchor that counts:
 | recomputed `full` (batch 1) | 0.6591 | 0.0691 | 0.6525 | 0.5712 |
 | cached `full` (batch 56) | 0.6594 | 0.0697 | 0.6517 | 0.5783 |
 
-Agreement to three decimals on every metric.
+Agreement is close on the ROC metrics (|Δ| ≤ 0.0008) and on day AP (0.0006),
+but **not uniform**: pooled user AP differs by 0.0071 (0.5712 vs 0.5783). The
+metric-level anchor holds for the ranking metrics the argument rests on; it is
+not exact agreement across the board.
 
 Note on the published figure: `results/valonly_detector/r42.json` reports
 user-disjoint day ROC 0.668 / user ROC 0.565. This pool includes the malicious
@@ -62,9 +65,9 @@ behaviour-only versus the full score:
 |---|---|---|---|---|
 | user ROC | 0.6525 | 0.8633 | **+0.2108 [+0.1572, +0.2663]** | 51/60 |
 | day ROC | 0.6028 | 0.7454 | +0.1426 [+0.0658, +0.2235] | 34/60 |
-| day AP | 0.0053 | 0.0164 | +0.0111 [+0.0002, +0.0241] | 49/60 |
+| day AP (fold-average) | 0.0053 | 0.0164 | +0.0111 [+0.0002, +0.0241] | 49/60 |
 | within-user ROC | 0.6810 | 0.7647 | **+0.0836 [+0.0457, +0.1249]** | 44/60 |
-| held-out rank | 28.45 | 11.80 | −16.65 [−21.03, −12.42] | 54/60 |
+| held-out rank | 28.45 | 11.80 | −16.65 [−21.03, −12.42] | 51/60 (3 tied, 6 worse) |
 | recall @ 0.1 % FPR | — | — | +0.0172 [+0.0055, +0.0319] | 8/60 |
 | recall @ 1 % FPR | — | — | +0.0184 [−0.0214, +0.0511] | 17/60 |
 
@@ -87,14 +90,27 @@ Profile pushes malicious days *down*; behaviour pushes them *up*.
 3. **Within-user ranking improves here** (+0.084, 44/60 folds), unlike r6.2
    where it degraded. With identity held fixed, dropping the profile's direct
    contribution still helps on r4.2.
-4. **AP triples** (0.0053 → 0.0164) and recall at a 0.1 % false-positive budget
-   improves with an interval excluding zero — so unlike r6.2, this is not a
-   ROC-only gain.
+4. **Average precision and low-budget recall both improve.** Fold-average day
+   AP 0.0053 → 0.0164 (×3.1) and pooled day AP 0.0691 → 0.1452 (×2.1); recall
+   at a 0.1 % false-positive budget rises from 0 to 0.0172 with an interval
+   excluding zero. On r6.2 the AP ratio was actually larger (0.0001 → 0.0010,
+   ×10.9) but from a negligible base, and recall at 0.1 % FPR stayed **exactly
+   zero**. So the r6.2/r4.2 difference is not "ROC-only versus not" — it is
+   that on r4.2 the gain reaches a usable operating point at all.
 
 ## Limits
 
 One adapter, one benchmark, exploratory population (these users have been
 inspected in earlier phases). A scoring intervention only: the profile text
 stays in the context and still conditions every behavioural prediction, so
-nothing here shows the adapter has stopped representing identity. Absolute
-performance remains modest (day AP 0.0164 at 3.2 % prevalence).
+nothing here shows the adapter has stopped representing identity.
+
+**Do not pair the fold-average AP with the pooled prevalence.** Fold-average
+day AP 0.0164 belongs to folds whose mean prevalence is 0.00080 (one malicious
+user against 79 benign users). Pooled prevalence over the whole 40,519-row pool
+is 1,309/40,519 = 3.23 %, and the corresponding pooled AP is 0.0691 → 0.1452.
+An earlier version of this file quoted "day AP 0.0164 at 3.2 % prevalence",
+mixing the two populations.
+
+The bootstrap resamples the 60 malicious users only: it does not resample the
+79 benign users and says nothing about training-seed variation.

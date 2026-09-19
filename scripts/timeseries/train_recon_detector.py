@@ -129,19 +129,27 @@ def main() -> None:
     Xs = (X - mu) / sd
 
     win = build_windows(user_id, args.window)
+    # A user's FIRST day has no history: build_windows pads by repeating the
+    # earliest available row, so after dropping the target column every
+    # remaining context column still holds the target itself. Those rows are
+    # not forecastable and are excluded from training and flagged in the cache
+    # rather than silently scored as if they had a past.
+    first_of_user = np.zeros(len(user_id), dtype=bool)
+    first_of_user[np.unique(user_id, return_index=True)[1]] = True
+    has_history = ~first_of_user
     if args.objective == "forecast":
         if args.window < 2:
             raise SystemExit("--objective forecast needs --window >= 2")
-        # drop the last column (the day being scored) so the model predicts it
-        # from strictly earlier days of the same user
         win = win[:, :-1]
+    else:
+        has_history[:] = True      # autoencoding needs no past
     ctx_len = win.shape[1]
 
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     model = DayAutoencoder(n_ch, ctx_len, args.hidden, args.latent).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=args.lr)
 
-    train_rows = np.flatnonzero(tr)
+    train_rows = np.flatnonzero(tr & has_history)
     if args.max_train_rows > 0 and len(train_rows) > args.max_train_rows:
         rng = np.random.default_rng(args.seed)
         train_rows = np.sort(rng.choice(train_rows, args.max_train_rows, replace=False))
@@ -180,9 +188,15 @@ def main() -> None:
     total = sum(err_sums[c] for c in err_sums)
     n_total = sum(counts.values())
 
+    torch.save(
+        {"state_dict": model.state_dict(), "n_channels": n_ch, "ctx_len": int(ctx_len),
+         "hidden": args.hidden, "latent": args.latent, "objective": args.objective,
+         "mu": mu, "sd": sd, "channels": channels, "channel_classes": classes},
+        out_dir / "model.pt",
+    )
     np.savez_compressed(
         out_dir / "channel_scores.npz",
-        user_id=user_id, y=y, split=split,
+        user_id=user_id, y=y, split=split, has_history=has_history,
         err_sum_total=total, n_total=np.int64(n_total),
         **{f"err_sum_{c}": err_sums[c] for c in err_sums},
         **{f"n_{c}": np.int64(counts[c]) for c in err_sums},
@@ -198,6 +212,8 @@ def main() -> None:
         "seed": args.seed, "device": str(device),
         "n_channels": n_ch, "channel_counts": counts,
         "n_train_rows": int(len(train_rows)),
+        "n_rows_without_history_excluded": int((~has_history).sum()),
+        "positives_without_history": int(y[~has_history].sum()),
         "standardisation": "train-split mean/std only",
         "score": "mean squared reconstruction error over channels; class partition sums to the total",
         "partition_max_abs_err": recon_err,

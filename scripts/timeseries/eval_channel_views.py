@@ -59,6 +59,10 @@ def main() -> None:
     ap.add_argument("--run-name", required=True)
     ap.add_argument("--bootstrap-draws", type=int, default=10000)
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--population", choices=("matched", "positive_days_only"), default="matched",
+                    help="matched: all days of the answer-key users + validation benigns, as the "
+                         "language-model evaluation uses. positive_days_only: the malicious side "
+                         "restricted to attack days (not comparable to the LM numbers).")
     args = ap.parse_args()
 
     out_dir = args.out_dir
@@ -82,8 +86,23 @@ def main() -> None:
     if part > 1e-6:
         raise RuntimeError(f"channel partition does not sum to the total (max err {part:.3e})")
 
-    # user-disjoint population: positives + never-trained validation benigns
-    keep = (y == 1) | ((y == 0) & (split == "val"))
+    # Population. The language-model evaluation scores ALL days of the
+    # answer-key users plus the validation benign days, so a malicious user's
+    # max-aggregated score is taken over their whole day set. Restricting the
+    # malicious side to attack days only (the earlier default here) is a
+    # DIFFERENT population and is not comparable to the LM numbers: it lowered
+    # user AUC from 0.789 to 0.477 on the window-1 model. `matched` is the
+    # default for that reason.
+    if args.population == "matched":
+        keep = (split == "eval") | (split == "val")
+    else:
+        keep = (y == 1) | ((y == 0) & (split == "val"))
+    if "has_history" in z.files:
+        hh = z["has_history"].astype(bool)
+        n_drop = int((keep & ~hh).sum())
+        keep = keep & hh
+    else:
+        n_drop = 0
     pos_users = sorted(set(user_id[y == 1]))
 
     rows: List[Dict[str, object]] = []
@@ -115,6 +134,17 @@ def main() -> None:
                 wu.append(safe_auc(y[m], s_all[m], "roc"))
         row["within_user_roc"] = float(np.nanmean(wu)) if wu else float("nan")
         row["within_user_n"] = len(wu)
+        # A high user-level AUC says the malicious user ranks above benign
+        # users; it does NOT say the day driving that rank is an attack day.
+        # Report it, because max-aggregation can rank a user highly off one of
+        # their benign days.
+        top_is_attack = 0
+        for pu in pos_users:
+            sel = np.flatnonzero((user_id == pu) & keep)
+            if len(sel):
+                top_is_attack += int(y[sel[int(np.argmax(s_all[sel]))]] == 1)
+        row["n_users_whose_top_day_is_an_attack"] = top_is_attack
+        row["n_positive_users"] = len(pos_users)
         rows.append(row)
     res = pd.DataFrame(rows)
     res.to_csv(out_dir / "channel_view_summary.csv", index=False)
@@ -164,7 +194,9 @@ def main() -> None:
         "run_name": args.run_name,
         "views": {k: list(v) for k, v in VIEWS.items()},
         "channel_counts": counts,
-        "population": "positives + never-trained validation benign users (user-disjoint on both sides; not a seen-user test)",
+        "population": args.population,
+        "population_note": "matched = all days of the answer-key users + validation benigns, the population the language-model evaluation uses; user-disjoint on both sides and not a seen-user test",
+        "rows_dropped_for_missing_history": n_drop,
         "n_rows": int(keep.sum()), "n_positive_users": len(pos_users),
         "bootstrap": "cluster bootstrap over malicious users; descriptive at n=4",
         "mean_gap_recon_err": float(recon),

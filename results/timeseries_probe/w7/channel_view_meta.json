@@ -1,5 +1,5 @@
 {
-  "run_name": "r62_recon_w7",
+  "run_name": "r62_w7",
   "views": {
     "full": [
       "PROFILE",
@@ -16,10 +16,12 @@
     "PROFILE": 12,
     "BEHAV": 32
   },
-  "population": "positives + never-trained validation benign users (user-disjoint on both sides; not a seen-user test)",
-  "n_rows": 140781,
+  "population": "matched",
+  "population_note": "matched = all days of the answer-key users + validation benigns, the population the language-model evaluation uses; user-disjoint on both sides and not a seen-user test",
+  "rows_dropped_for_missing_history": 0,
+  "n_rows": 142072,
   "n_positive_users": 4,
   "bootstrap": "cluster bootstrap over malicious users; descriptive at n=4",
-  "mean_gap_recon_err": 0.0,
+  "mean_gap_recon_err": 2.0816681711721685e-17,
   "note": "every channel contributes exactly one squared-error term, so N_P and N_B are constant across rows; unlike the token-class case the naive difference and the exact conditional differ only by an affine map and leave the ranking unchanged"
 }

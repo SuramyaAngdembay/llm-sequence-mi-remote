@@ -359,6 +359,59 @@ its own forward pass, not because of anything in the decomposition. Batch 1
 remains the cleaner estimate and the reported basis; the cache is not a
 reproduction target for r4.2.
 
+**V21 — external audit of 2026-09-19: five claims checked, five upheld, and
+the corrections are recorded here rather than quietly applied.**
+
+1. *The time-series user-level comparison was not matched.* `eval_channel_views`
+   kept only the malicious users' **attack** days while the language-model
+   evaluation scores **all** of their days; with max-aggregation that is a
+   different population. Recomputed on the LM's own 142,072 rows, full-score
+   user AUC is **0.789 / 0.785 / 0.739**, not the 0.477 / 0.508 / 0.296 first
+   reported. The claim that these models "rank users near chance" was an
+   artifact and is withdrawn. Default changed to the matched population.
+2. *A higher user AUC there is not attack localization.* For **0 of 4**
+   malicious users, in every model and both views, is the top-scoring day an
+   attack day — the models rank those users highly off a *benign* day. The
+   evaluator now reports this count next to user AUC.
+3. *Forecasting boundary bug.* `build_windows` pads a short history by
+   repeating the earliest row, so after dropping the target column a user's
+   first day was its own context. 4,000 rows (one per user, 0 positives). Now
+   excluded from training and flagged; the profile share moves −0.14 % →
+   +0.24 %, so the reading is unchanged.
+4. *AP paired with the wrong prevalence.* Fold-average day AP 0.0164 belongs to
+   folds of mean prevalence 0.00080, not the pooled 3.23 %. Pooled AP is
+   0.0691 → 0.1452 (×2.1) against the fold-average ×3.1. The r4.2 README said
+   "0.0164 at 3.2 % prevalence"; corrected.
+5. *Two miscounts.* Held-out rank improves for **51** of 60 folds, not 54 — I
+   counted 3 ties as improvements. And cache agreement is not "three decimals
+   on every metric": ROC metrics agree to ≤ 0.0008 but pooled user AP differs
+   by 0.0071.
+
+Also upheld: r6.2's AP did improve (0.0001 → 0.0010, ×10.9), so "unlike r6.2,
+not a ROC-only gain" was the wrong contrast. The real difference is that r6.2's
+recall at a 0.1 % false-positive budget stayed **exactly zero** while r4.2's
+rose to 0.0172.
+
+**V22 — the mechanism hypothesis in V-prose was wrong in its key clause, and is
+corrected.** It said the LM's profile term is a *familiarity* signal, "seen
+users' profiles cheap, unseen users' expensive". That cannot be what separates
+these groups: **every** user in the factorial audit pool is unseen by the
+adapter (V5 — positives are eval-split, the benign comparison validation-split).
+The defensible version is **typicality**: because the identity block must be
+re-predicted from nothing in every independently scored unit, its cost measures
+how typical that profile is under the training distribution, not whether its
+owner was seen. The paper's own novelty check is consistent — the malicious user
+with the most training-set OCEAN neighbours is the one the 8B adapter ranks
+least anomalous. A forecaster escapes the whole mechanism by copying the
+profile from the unit's own history.
+
+This remains a hypothesis. The three time-series runs change daily aggregates
+vs session text, squared error vs token likelihood, personal history vs
+independent scoring, and 1.25 M vs 300 k training rows all at once, so they
+cannot isolate the cause. The discriminating test is inside the *same* frozen
+LM: score current-day targets with no history, with the user's own previous
+profile prepended, and with a matched other-user profile as control.
+
 ---
 
 ## Unresolved limitations

@@ -55,19 +55,22 @@ seven days as context, never crossing a user boundary.
 
 Training is ~7 s for 5 epochs over 1.25 M rows on one RTX 3070.
 
-## Result — user-disjoint (140,781 rows, 70 positive, 4 malicious users)
+## Result — user-disjoint, on the population the language model is scored on
+
+142,072 rows (141,662 for forecasting, which drops each user's first day — see
+below), 70 positive, 4 malicious users.
 
 | variant | view | day ROC | day AP | user ROC | within-user ROC |
 |---|---|---|---|---|---|
-| recon, w=1 | full | 0.6753 | 0.0011 | 0.4765 | 0.5408 |
-| recon, w=1 | profile_only | 0.5937 | 0.0007 | 0.4463 | 0.4766 |
-| recon, w=1 | behavior_only | 0.6870 | 0.0013 | 0.5074 | 0.5459 |
-| recon, w=7 | full | 0.6841 | 0.0015 | 0.5080 | 0.5876 |
-| recon, w=7 | profile_only | 0.5976 | 0.0008 | 0.5346 | 0.5792 |
-| recon, w=7 | behavior_only | 0.6992 | 0.0019 | 0.4883 | 0.5806 |
-| **forecast, 7-day context** | full | 0.7020 | 0.0010 | 0.2957 | 0.6298 |
-| **forecast** | profile_only | 0.5973 | 0.0006 | 0.3574 | 0.6149 |
-| **forecast** | behavior_only | 0.7029 | 0.0010 | 0.2957 | 0.6291 |
+| recon, w=1 | full | 0.6739 | 0.0010 | 0.7894 | 0.5408 |
+| recon, w=1 | profile_only | 0.5927 | 0.0007 | 0.7315 | 0.4766 |
+| recon, w=1 | behavior_only | 0.6856 | 0.0013 | 0.7734 | 0.5459 |
+| recon, w=7 | full | 0.6830 | 0.0015 | 0.7851 | 0.5876 |
+| recon, w=7 | profile_only | 0.5969 | 0.0008 | 0.8017 | 0.5792 |
+| recon, w=7 | behavior_only | 0.6980 | 0.0019 | 0.7777 | 0.5806 |
+| forecast | full | 0.7061 | 0.0010 | 0.7389 | 0.6300 |
+| forecast | profile_only | 0.5900 | 0.0007 | 0.6773 | 0.5820 |
+| forecast | behavior_only | 0.7068 | 0.0010 | 0.7389 | 0.6287 |
 
 Mean-score-gap decomposition (exact; reconstructs the total to < 1e-9):
 
@@ -75,57 +78,31 @@ Mean-score-gap decomposition (exact; reconstructs the total to < 1e-9):
 |---|---|---|
 | recon, w=1 | −0.00077 (**−3.7 %** of the gap) | +0.02154 (+103.7 %) |
 | recon, w=7 | +0.00417 (**+10.1 %**) | +0.03704 (+89.9 %) |
-| **forecast** | −0.00023 (**−0.14 %**) | +0.15956 (+100.14 %) |
+| forecast | +0.00038 (**+0.24 %**) | +0.16139 (+99.8 %) |
 
-The forecasting variant is the one the paper's prediction actually names — the
-target day is **excluded** from the input, so the model predicts it from the
-user's strictly earlier days.
+### Two corrections to an earlier version of this file
 
-## Reading
+**The user-level comparison was not matched.** The first evaluation kept only
+the malicious users' *attack* days, while the language-model evaluation scores
+**all** of their days; with max-aggregation that is a materially different
+population. Corrected, user AUC for the full score is 0.789 / 0.785 / 0.739,
+not the 0.477 / 0.508 / 0.296 first reported. The earlier claim that these
+models "rank users near chance" was an artifact of the mismatch and is
+withdrawn. `eval_channel_views.py` now defaults to the matched population.
 
-**This detector does not take the profile shortcut the language model takes.**
-Behaviour channels carry ~90–104 % of the positives-versus-benign score gap and
-profile channels carry −4 % to +10 %. Removing the profile channels from the
-score moves day ROC only 0.675 → 0.687 (window 1) and 0.684 → 0.699 (window 7).
+**A higher user AUC here is not attack localization.** For **0 of the 4**
+malicious users, in every model and for both the full and behaviour-only
+scores, is the highest-scoring day actually an attack day. These models rank
+malicious users above benign users on the strength of one of the users' *benign*
+days. The evaluator now reports this count alongside user AUC, because
+max-aggregated user ROC does not otherwise reveal it.
 
-The contrast with the 8B language model on the same benchmark is the point:
-there, the profile term was *anti*-predictive (profile-only user ROC 0.200,
-below chance for every malicious user individually), the full score's day ROC
-sat **below chance** at 0.399, and removing the profile's direct score
-contribution moved unseen-user ranking 0.532 → 0.938. Here there is little
-shortcut to remove.
-
-That is the predicted ordering: a sequence model with no pretrained language
-representation sits with the tabular detectors (published r6.2: IF 0.641,
-one-class SVM 0.491, PCA 0.616 — these 0.675–0.702 are at the top of that
-range) rather than with the language model.
-
-## Why — a mechanism this suggests, and how to test it
-
-Under **forecasting** the profile contributes −0.14 % of the score gap: nothing
-at all. There is a simple reason, and it may locate the shortcut's origin more
-precisely than "language model versus not".
-
-Profile channels are constant within a user. A forecasting model is given that
-user's **earlier days**, so the profile is simply *copyable from context*: its
-forecast error is near zero for everyone, seen or unseen, and carries no
-familiarity signal. Nothing has to be memorised about *which* user this is.
-
-The language model is in the opposite situation. Each example is a single
-user-day scored independently, and the profile block sits at the **start** of
-that text with no prior context to copy from. The only way to assign it high
-probability is to have memorised the population distribution of profiles — so
-seen users' profiles are cheap and unseen users' profiles are expensive, which
-is exactly the familiarity signal the r6.2 8B decomposition shows
-(`profile_only` below chance for every malicious user).
-
-If that is right, the shortcut's origin is not "being a language model" but
-**scoring each unit independently with the identity block re-predicted from
-nothing**. Two cheap tests would discriminate it, neither run yet: give the LM
-the user's previous day as context and see whether profile capture drops; and
-score the forecasting model *without* context on the profile channels, which
-should make its profile term behave like the LM's. Stated as a hypothesis with
-a test, not a finding.
+**Forecasting boundary.** `build_windows` pads a short history by repeating the
+earliest available row, so after dropping the target column a user's **first**
+day had itself as its own context — not forecasting. Those 4,000 rows (one per
+user; 0 positives) are now excluded from training and flagged in the cache. The
+fix moves the forecast profile share from −0.14 % to +0.24 %: still nil, so it
+does not change the reading.
 
 ## What this does not show
 

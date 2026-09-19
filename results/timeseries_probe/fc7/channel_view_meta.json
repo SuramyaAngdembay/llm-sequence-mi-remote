@@ -1,5 +1,5 @@
 {
-  "run_name": "r62_forecast_w7",
+  "run_name": "r62_fc7",
   "views": {
     "full": [
       "PROFILE",
@@ -16,8 +16,10 @@
     "PROFILE": 12,
     "BEHAV": 32
   },
-  "population": "positives + never-trained validation benign users (user-disjoint on both sides; not a seen-user test)",
-  "n_rows": 140781,
+  "population": "matched",
+  "population_note": "matched = all days of the answer-key users + validation benigns, the population the language-model evaluation uses; user-disjoint on both sides and not a seen-user test",
+  "rows_dropped_for_missing_history": 410,
+  "n_rows": 141662,
   "n_positive_users": 4,
   "bootstrap": "cluster bootstrap over malicious users; descriptive at n=4",
   "mean_gap_recon_err": 5.551115123125783e-17,
