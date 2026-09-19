@@ -354,9 +354,15 @@ residual 2.9e-3 at batch 56 is expected because batch *composition* still
 differs — the cached run batched over the full `all.jsonl` in file order, this
 one over a 40,519-row subset — so padding patterns are similar, not identical.
 
-Conclusion: the r4.2 cache differs from a batch-1 rescore because of padding in
-its own forward pass, not because of anything in the decomposition. Batch 1
-remains the cleaner estimate and the reported basis; the cache is not a
+Conclusion, stated at the strength the control supports: the disagreement is
+**batching-dependent**. Matching the cached forward batch removes most of it,
+so the cause lies in how the forward pass was batched rather than in the
+decomposition. The control does **not** isolate padding specifically — batch
+shape, kernel selection, padding and batch composition vary together, and
+composition was not held fixed while varying only the mask. It also does not
+show that every score view is equally insensitive to batching; that would need
+the views themselves compared across batch sizes, which was not run. Batch 1
+remains the reported basis as the no-padding computation; the cache is not a
 reproduction target for r4.2.
 
 **V21 — external audit of 2026-09-19: five claims checked, five upheld, and
@@ -411,6 +417,40 @@ independent scoring, and 1.25 M vs 300 k training rows all at once, so they
 cannot isolate the cause. The discriminating test is inside the *same* frozen
 LM: score current-day targets with no history, with the user's own previous
 profile prepended, and with a matched other-user profile as control.
+
+**V23 — Anvil unreachable on 2026-09-19; recorded as a failed check.**
+`ssh ... anvil.rcac.purdue.edu` returns `Operation timed out` (port 22). No
+inference is drawn about the cause or about the state of the LANL (20827647)
+or Phase C (20816765) jobs; they are neither assumed failed nor assumed
+queued. Consequences: r4.2's raw per-example scores could not be re-verified
+this session, so its verification rests on the **saved per-fold summaries**
+(reproduced to ~3.6e-15) rather than on raw scores; and work packages 3 and 4,
+which need the r6.2 8B factorial adapter and the r4.2 headline adapter plus its
+SAE, cannot run. Independent work proceeded on Aquaman, which is reachable
+(both RTX 3070s idle).
+
+**V24 — a shared metric implementation now backs both evaluators.**
+`scripts/eval_metrics_core.py`, with 19 checks in
+`scripts/tests/test_eval_metrics_core.py`. It fixes a defect the audit found
+and one the tests found:
+
+* *Eligibility now governs the bootstrap.* The previous numerical evaluator
+  changed the point-estimate population to matched but left the bootstrap
+  resampling malicious **attack days only** against validation negatives, so
+  the interval did not describe the statistic printed beside it. The core takes
+  one `eligible` index array and uses it for point estimates, user maxima,
+  within-user metrics, the mean-gap decomposition and the bootstrap alike. In
+  the regression test the two populations give user ROC 1.00 versus 0.00 on the
+  same scores, which is the size of error this class of mistake can reach.
+* *A degenerate test was caught and replaced.* The first version of that
+  regression used random scores, under which the statistic was 0.0 for both
+  populations and the check passed vacuously. Rebuilt with a construction that
+  mirrors the real finding (each malicious user's top row is benign).
+
+Also in the core: duplicate ids must agree on label and score or `dedup_by_id`
+raises; `recall_at_fpr` fixes its threshold with `method="higher"` and counts
+strictly-greater scores, so ties cannot inflate it; `user_max` returns the row
+that won, which is what makes a benign top row visible.
 
 ---
 

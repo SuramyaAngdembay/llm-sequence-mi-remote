@@ -25,17 +25,22 @@ OTHER/SPECIAL, token counts identical to the cache.
 
 The cached r4.2 scores came from a **batch-56 forward pass**, so a batch-1
 rescore does not reproduce them exactly (mean |ΔNLL| 9.96e-03 over all 40,519
-rows; demonstrated to be padding — see `docs/SCORE_DECOMPOSITION_PROGRESS.md`
-V20). It does not matter at the metric level, which is the anchor that counts:
+rows). Rescoring at batch 56 cuts that disagreement about fourfold, which
+establishes a **batching-dependent discrepancy**. It does not isolate padding
+specifically: batch shape, kernel selection, padding and batch composition all
+change together, and the control did not hold composition fixed while varying
+only the mask. Nor does it establish that every score view is equally
+insensitive to batching — that would need the views compared across batch
+sizes, which was not done. What is checked is the metric level:
 
 | | day ROC | day AP | user ROC | user AP |
 |---|---|---|---|---|
 | recomputed `full` (batch 1) | 0.6591 | 0.0691 | 0.6525 | 0.5712 |
 | cached `full` (batch 56) | 0.6594 | 0.0697 | 0.6517 | 0.5783 |
 
-Agreement is close on the ROC metrics (|Δ| ≤ 0.0008) and on day AP (0.0006),
-but **not uniform**: pooled user AP differs by 0.0071 (0.5712 vs 0.5783). The
-metric-level anchor holds for the ranking metrics the argument rests on; it is
+Agreement is close on the ROC metrics (day 0.0002, user 0.0008) and on day AP
+(0.0006), but **not uniform**: pooled user AP differs by 0.0071 (0.5712 vs
+0.5783). The anchor holds for the ranking metrics the argument rests on; it is
 not exact agreement across the board.
 
 Note on the published figure: `results/valonly_detector/r42.json` reports
@@ -45,6 +50,16 @@ score is the max over all their days, not over their positive days alone). That
 is the population the fold-aligned protocol uses and the operationally natural
 one, but it is not identical to the `valonly_detector` construction, so these
 numbers are close to rather than a reproduction of that figure.
+
+## Verification status
+
+Independently recomputed **from the saved per-fold CSV** (fold means and
+behaviour-versus-full bootstrap contrasts reproduce to ~3.6e-15). The raw
+per-example scores, example ids, token counts and reference joins have **not**
+been re-verified since the run, because Anvil SSH has been timing out
+(`connect to host anvil.rcac.purdue.edu port 22: Operation timed out`,
+2026-09-19). That is a failed check, recorded as such; no inference is drawn
+about job state or its cause. The original outputs are preserved unchanged.
 
 ## Result — pooled user-disjoint
 
@@ -68,8 +83,15 @@ behaviour-only versus the full score:
 | day AP (fold-average) | 0.0053 | 0.0164 | +0.0111 [+0.0002, +0.0241] | 49/60 |
 | within-user ROC | 0.6810 | 0.7647 | **+0.0836 [+0.0457, +0.1249]** | 44/60 |
 | held-out rank | 28.45 | 11.80 | −16.65 [−21.03, −12.42] | 51/60 (3 tied, 6 worse) |
-| recall @ 0.1 % FPR | — | — | +0.0172 [+0.0055, +0.0319] | 8/60 |
-| recall @ 1 % FPR | — | — | +0.0184 [−0.0214, +0.0511] | 17/60 |
+| recall @ 0.1 % FPR | 0 | 0.0172 | +0.0172 [+0.0055, +0.0319] | 8/60 |
+| recall @ 1 % FPR | 0.0377 | 0.0562 | +0.0184 [−0.0214, +0.0511] | 17/60 |
+
+**These are empirical ROC operating points, not deployment thresholds.** The
+threshold at each budget is taken on the *evaluation* negatives themselves, so
+it describes a point on the ROC curve computed from the same data it is scored
+against. A deployment claim would need a separate calibration cohort, and none
+exists here. In absolute terms recall at a 0.1 % false-positive budget is still
+only about **1.7 %**, and the change at 1 % has an interval spanning zero.
 
 Every interval excludes zero except recall at a 1 % false-positive budget.
 

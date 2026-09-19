@@ -1,216 +1,208 @@
 #!/usr/bin/env python3
-"""Evaluate full / profile-only / behaviour-channel-only views of the
-reconstruction score, on the user-disjoint population.
+"""Evaluate channel-class score views for one or more numerical detectors,
+through the shared metric core, on ONE common set of eligible examples.
 
-Population discipline matches the language-model branch: positives are scored
-against benign users the detector never trained on (the validation split), so
-the comparison is user-disjoint on both sides and is **not** a seen-user
-detection test. Uncertainty is a cluster bootstrap over the malicious users,
-which on r6.2 is four clusters and therefore descriptive only.
+Why several models in a single invocation: the corrected forecaster cannot
+score a user's first observation (no strictly earlier record), so it is
+eligible on fewer rows than the reconstruction models. Comparing models scored
+on different rows is exactly what produced the earlier mismatch. This script
+therefore intersects every model's eligibility, evaluates all of them on that
+one set, and records the set and its provenance.
 
-Also reports the exact mean-score-gap decomposition
+Populations (`--population`):
+  matched            all days of the answer-key users + the validation benign
+                     cohort — the population the language-model evaluator uses.
+                     Default.
+  positive_days_only HISTORICAL. Malicious side restricted to attack days.
+                     Retained only to reproduce the superseded numbers; it is
+                     not comparable to the language-model results.
 
-    E_pos[s] - E_neg[s] = sum_c ( E_pos[w_c s_c] - E_neg[w_c s_c] )
+Pooled and equal-malicious-user fold summaries are both reported, because they
+answer different questions and were previously mixed in prose.
 
-with w_c s_c = err_sum_c / n_total per row. Signed contributions cancel, so a
-class share can exceed the total or be negative; this is an accounting identity
-for the mean gap, not an AUC decomposition and not a mechanism.
+A view's score is the exact conditional mean over its channel classes (sum of
+class errors / sum of class counts); see `eval_metrics_core.weighted_view` for
+why `s_full - s_profile` is not that quantity.
+
+The superseded evaluator is kept as `eval_channel_views_HISTORICAL.py`.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Dict, List
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import average_precision_score, roc_auc_score
 
-VIEWS = {
-    "full": ("PROFILE", "BEHAV"),
-    "profile_only": ("PROFILE",),
-    "behavior_only": ("BEHAV",),
-}
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from eval_metrics_core import (  # noqa: E402
+    TIE_POLICY, cluster_bootstrap, dedup_by_id, paired_contrasts,
+    pooled_metrics, user_max, weighted_view, within_user_roc,
+)
+
+VIEWS = {"full": ("PROFILE", "BEHAV"), "profile_only": ("PROFILE",), "behavior_only": ("BEHAV",)}
 FPR_BUDGETS = (0.001, 0.01)
 
 
-def safe_auc(y: np.ndarray, s: np.ndarray, kind: str) -> float:
-    m = np.isfinite(s)
-    y, s = y[m], s[m]
-    if np.unique(y).size < 2:
-        return float("nan")
-    return float(average_precision_score(y, s) if kind == "pr" else roc_auc_score(y, s))
-
-
-def recall_at_fpr(y: np.ndarray, s: np.ndarray, fpr: float) -> float:
-    m = np.isfinite(s)
-    y, s = y[m], s[m]
-    neg = s[y == 0]
-    if neg.size == 0 or (y == 1).sum() == 0:
-        return float("nan")
-    return float((s[y == 1] > np.quantile(neg, 1.0 - fpr)).mean())
+def load_model(path: Path) -> Dict[str, object]:
+    z = np.load(path, allow_pickle=True)
+    counts = {c: int(z[f"n_{c}"]) for c in ("PROFILE", "BEHAV")}
+    sums = {c: z[f"err_sum_{c}"].astype(float) for c in ("PROFILE", "BEHAV")}
+    total = z["err_sum_total"].astype(float)
+    part = float(np.abs(sums["PROFILE"] + sums["BEHAV"] - total).max())
+    if part > 1e-6:
+        raise RuntimeError(f"{path}: class partition does not sum to the total ({part:.3e})")
+    has_hist = z["has_history"].astype(bool) if "has_history" in z.files else np.ones(len(total), bool)
+    return {
+        "user_id": z["user_id"].astype(str), "y": z["y"].astype(int),
+        "split": z["split"].astype(str), "has_history": has_hist,
+        "views": {n: weighted_view(sums, counts, cls) for n, cls in VIEWS.items()},
+        "class_sums": sums, "n_total": int(z["n_total"]), "partition_err": part,
+    }
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--channel-scores", type=Path, required=True)
-    ap.add_argument("--out-dir", type=Path, required=True)
-    ap.add_argument("--run-name", required=True)
-    ap.add_argument("--bootstrap-draws", type=int, default=10000)
-    ap.add_argument("--seed", type=int, default=42)
-    ap.add_argument("--population", choices=("matched", "positive_days_only"), default="matched",
-                    help="matched: all days of the answer-key users + validation benigns, as the "
-                         "language-model evaluation uses. positive_days_only: the malicious side "
-                         "restricted to attack days (not comparable to the LM numbers).")
-    args = ap.parse_args()
+    ap_ = argparse.ArgumentParser()
+    ap_.add_argument("--models", nargs="+", required=True, help="name=path/to/channel_scores.npz")
+    ap_.add_argument("--matrix", type=Path, required=True, help="user-day matrix (for stable ids)")
+    ap_.add_argument("--out-dir", type=Path, required=True)
+    ap_.add_argument("--population", choices=("matched", "positive_days_only"), default="matched")
+    ap_.add_argument("--bootstrap-draws", type=int, default=2000)
+    ap_.add_argument("--seed", type=int, default=42)
+    args = ap_.parse_args()
 
     out_dir = args.out_dir
     out_dir.mkdir(parents=True, exist_ok=True)
-    z = np.load(args.channel_scores, allow_pickle=True)
-    user_id = z["user_id"].astype(str)
-    y = z["y"].astype(int)
-    split = z["split"].astype(str)
 
-    counts = {c: int(z[f"n_{c}"]) for c in ("PROFILE", "BEHAV")}
-    err = {c: z[f"err_sum_{c}"].astype(float) for c in ("PROFILE", "BEHAV")}
+    mat = np.load(args.matrix, allow_pickle=True)
+    uid = mat["user_id"].astype(str)
+    day = mat["day_index"]
+    y = mat["y"].astype(int)
+    split = mat["split"].astype(str)
+    example_id = np.array([f"{u}:{d}" for u, d in zip(uid, day)])
 
-    scores: Dict[str, np.ndarray] = {}
-    for name, cls in VIEWS.items():
-        num = sum(err[c] for c in cls)
-        den = sum(counts[c] for c in cls)
-        scores[name] = num / den
+    paths = dict(s.split("=", 1) for s in args.models)
+    models: Dict[str, Dict[str, object]] = {}
+    for name, path in paths.items():
+        m = load_model(Path(path))
+        if len(m["y"]) != len(y) or not np.array_equal(m["user_id"], uid) or not np.array_equal(m["y"], y):
+            raise RuntimeError(f"{name}: score rows do not align with the matrix")
+        models[name] = m
 
-    # exact partition check
-    part = abs((err["PROFILE"] + err["BEHAV"]) - z["err_sum_total"].astype(float)).max()
-    if part > 1e-6:
-        raise RuntimeError(f"channel partition does not sum to the total (max err {part:.3e})")
+    keep_idx = dedup_by_id(example_id, {"y": y, **{f"{n}_full": m["views"]["full"] for n, m in models.items()}})
+    dedup_mask = np.zeros(len(y), bool)
+    dedup_mask[keep_idx] = True
 
-    # Population. The language-model evaluation scores ALL days of the
-    # answer-key users plus the validation benign days, so a malicious user's
-    # max-aggregated score is taken over their whole day set. Restricting the
-    # malicious side to attack days only (the earlier default here) is a
-    # DIFFERENT population and is not comparable to the LM numbers: it lowered
-    # user AUC from 0.789 to 0.477 on the window-1 model. `matched` is the
-    # default for that reason.
     if args.population == "matched":
-        keep = (split == "eval") | (split == "val")
+        pop = (split == "eval") | (split == "val")
     else:
-        keep = (y == 1) | ((y == 0) & (split == "val"))
-    if "has_history" in z.files:
-        hh = z["has_history"].astype(bool)
-        n_drop = int((keep & ~hh).sum())
-        keep = keep & hh
-    else:
-        n_drop = 0
-    pos_users = sorted(set(user_id[y == 1]))
+        pop = (y == 1) | ((y == 0) & (split == "val"))
+
+    # ONE eligibility set: population AND dedup AND every model's history mask
+    hist = np.ones(len(y), bool)
+    for m in models.values():
+        hist &= m["has_history"]
+    eligible = np.flatnonzero(pop & dedup_mask & hist)
+    pop_idx = np.flatnonzero(pop)
+    pos_users = sorted(set(uid[pop_idx][y[pop_idx] == 1]))
+
+    prov = {
+        "population": args.population,
+        "population_rows": int(pop.sum()),
+        "dropped_duplicates": int((~dedup_mask).sum()),
+        "dropped_no_history": int((pop & dedup_mask & ~hist).sum()),
+        "common_eligible_rows": int(len(eligible)),
+        "per_model_own_history_rows": {n: int((pop & m["has_history"]).sum()) for n, m in models.items()},
+        "malicious_users": pos_users,
+        "tie_policy": TIE_POLICY,
+        "models": paths,
+        "note": ("every model is evaluated on this identical eligible set; the forecaster's "
+                 "missing-history rows are removed from ALL models so the comparison is like-for-like"),
+    }
+    pd.DataFrame({"example_id": example_id[eligible]}).to_csv(out_dir / "common_eligible_ids.csv", index=False)
 
     rows: List[Dict[str, object]] = []
-    for name in VIEWS:
-        s = scores[name][keep]
-        yy = y[keep]
-        uu = user_id[keep]
-        u = pd.DataFrame({"u": uu, "y": yy, "s": s}).groupby("u").agg(y=("y", "max"), s=("s", "max"))
-        row = {
-            "run_name": args.run_name, "view": name,
-            "n_rows": int(keep.sum()), "n_positive": int(yy.sum()),
-            "prevalence": float(yy.mean()),
-            "n_users": int(len(u)), "n_positive_users": int(u.y.sum()),
-            "day_roc": safe_auc(yy, s, "roc"), "day_ap": safe_auc(yy, s, "pr"),
-            "user_roc": safe_auc(u.y.to_numpy(), u.s.to_numpy(), "roc"),
-            "user_ap": safe_auc(u.y.to_numpy(), u.s.to_numpy(), "pr"),
-        }
-        for b in FPR_BUDGETS:
-            row[f"day_recall_at_fpr_{b}"] = recall_at_fpr(yy, s, b)
-        # Within-user ranking, identity held fixed. This needs each malicious
-        # user's OWN benign days, which sit in the eval split and are therefore
-        # not in the user-disjoint population above; scoring it on `keep` alone
-        # leaves only positive days and yields NaN.
-        s_all = scores[name]
-        wu = []
-        for pu in pos_users:
-            m = user_id == pu
-            if np.unique(y[m]).size == 2:
-                wu.append(safe_auc(y[m], s_all[m], "roc"))
-        row["within_user_roc"] = float(np.nanmean(wu)) if wu else float("nan")
-        row["within_user_n"] = len(wu)
-        # A high user-level AUC says the malicious user ranks above benign
-        # users; it does NOT say the day driving that rank is an attack day.
-        # Report it, because max-aggregation can rank a user highly off one of
-        # their benign days.
-        top_is_attack = 0
-        for pu in pos_users:
-            sel = np.flatnonzero((user_id == pu) & keep)
-            if len(sel):
-                top_is_attack += int(y[sel[int(np.argmax(s_all[sel]))]] == 1)
-        row["n_users_whose_top_day_is_an_attack"] = top_is_attack
-        row["n_positive_users"] = len(pos_users)
-        rows.append(row)
-    res = pd.DataFrame(rows)
-    res.to_csv(out_dir / "channel_view_summary.csv", index=False)
+    maxday: List[Dict[str, object]] = []
+    for name, m in models.items():
+        for view, s in m["views"].items():
+            r = pooled_metrics(uid, y, s, eligible, FPR_BUDGETS)
+            wu, n_wu, _ = within_user_roc(uid, y, s, eligible, pos_users)
+            r.update({"model": name, "view": view, "within_user_roc": wu, "within_user_n": n_wu})
+            rows.append(r)
+            u = user_max(uid, y, s, eligible)
+            for _, rec in u.loc[u["user_id"].isin(pos_users)].iterrows():
+                j = int(rec["row"])
+                maxday.append({"model": name, "view": view, "user_id": rec["user_id"],
+                               "top_example_id": example_id[j], "top_day_index": int(day[j]),
+                               "top_day_is_attack": int(y[j] == 1), "top_score": float(s[j])})
+    pooled = pd.DataFrame(rows)
+    pooled.to_csv(out_dir / "pooled_summary.csv", index=False)
+    pd.DataFrame(maxday).to_csv(out_dir / "max_day_per_malicious_user.csv", index=False)
 
-    # paired cluster bootstrap over malicious users (descriptive at n=4)
-    rng = np.random.default_rng(args.seed)
-    draws = rng.integers(0, len(pos_users), size=(args.bootstrap_draws, len(pos_users)))
-    neg_mask = (y == 0) & (split == "val")
-    boot: Dict[str, np.ndarray] = {}
-    for name in VIEWS:
-        s_all = scores[name]
-        vals = np.empty(args.bootstrap_draws)
-        for d in range(args.bootstrap_draws):
-            sel = np.concatenate([np.flatnonzero((user_id == pos_users[j]) & (y == 1)) for j in draws[d]])
-            idx = np.concatenate([sel, np.flatnonzero(neg_mask)])
-            vals[d] = safe_auc(y[idx], s_all[idx], "roc")
-        boot[name] = vals
-    contrasts = []
-    for name in VIEWS:
-        if name == "full":
-            continue
-        d = boot[name] - boot["full"]
-        contrasts.append({
-            "view": name, "vs": "full", "metric": "day_roc",
-            "delta": float(res.loc[res.view == name, "day_roc"].iloc[0] - res.loc[res.view == "full", "day_roc"].iloc[0]),
-            "ci_lo": float(np.nanpercentile(d, 2.5)), "ci_hi": float(np.nanpercentile(d, 97.5)),
-        })
-    pd.DataFrame(contrasts).to_csv(out_dir / "channel_view_contrasts.csv", index=False)
+    fold_rows: List[Dict[str, object]] = []
+    benign_eligible = eligible[~np.isin(uid[eligible], pos_users)]
+    for name, m in models.items():
+        for view, s in m["views"].items():
+            for pu in pos_users:
+                sel = np.concatenate([eligible[uid[eligible] == pu], benign_eligible])
+                fr = pooled_metrics(uid, y, s, sel, FPR_BUDGETS)
+                fr.update({"model": name, "view": view, "heldout_user": pu})
+                fold_rows.append(fr)
+    folds = pd.DataFrame(fold_rows)
+    folds.to_csv(out_dir / "fold_rows.csv", index=False)
+    agg = {"day_roc": ("day_roc", "mean"), "day_ap": ("day_ap", "mean"),
+           "user_roc": ("user_roc", "mean"), "user_ap": ("user_ap", "mean")}
+    for b in FPR_BUDGETS:
+        agg[f"recall_fpr_{b}"] = (f"day_recall_at_fpr_{b}", "mean")
+    fold_mean = folds.groupby(["model", "view"]).agg(**agg).reset_index()
+    fold_mean.to_csv(out_dir / "fold_means.csv", index=False)
 
-    # exact mean-gap decomposition
-    gap_rows = []
-    total_gap = float(scores["full"][keep][y[keep] == 1].mean() - scores["full"][keep][y[keep] == 0].mean())
-    n_total = int(z["n_total"])
-    for c in ("PROFILE", "BEHAV"):
-        contrib = err[c][keep] / n_total
-        gp = float(contrib[y[keep] == 1].mean()); gn = float(contrib[y[keep] == 0].mean())
-        gap_rows.append({"class": c, "pos_mean_weighted_contrib": gp, "neg_mean_weighted_contrib": gn,
-                         "delta_contrib": gp - gn, "total_mean_gap": total_gap,
-                         "share_of_total_gap": (gp - gn) / total_gap if total_gap else float("nan")})
-    gap = pd.DataFrame(gap_rows)
-    gap.to_csv(out_dir / "channel_mean_gap.csv", index=False)
-    recon = abs(gap["delta_contrib"].sum() - total_gap)
-    if recon > 1e-9:
-        raise RuntimeError(f"mean-gap decomposition does not reconstruct the total ({recon:.3e})")
+    contrasts: List[Dict[str, object]] = []
+    for metric in ("user_roc", "day_roc"):
+        for name, m in models.items():
+            boot, _ = cluster_bootstrap(uid, y, m["views"], eligible, pos_users,
+                                        metric=metric, draws=args.bootstrap_draws, seed=args.seed)
+            point = {v: float(pooled.loc[(pooled.model == name) & (pooled.view == v), metric].iloc[0])
+                     for v in m["views"]}
+            for c in paired_contrasts(boot, point):
+                c["model"] = name
+                c["metric"] = metric
+                contrasts.append(c)
+    pd.DataFrame(contrasts).to_csv(out_dir / "contrasts.csv", index=False)
 
-    meta = {
-        "run_name": args.run_name,
-        "views": {k: list(v) for k, v in VIEWS.items()},
-        "channel_counts": counts,
-        "population": args.population,
-        "population_note": "matched = all days of the answer-key users + validation benigns, the population the language-model evaluation uses; user-disjoint on both sides and not a seen-user test",
-        "rows_dropped_for_missing_history": n_drop,
-        "n_rows": int(keep.sum()), "n_positive_users": len(pos_users),
-        "bootstrap": "cluster bootstrap over malicious users; descriptive at n=4",
-        "mean_gap_recon_err": float(recon),
-        "note": "every channel contributes exactly one squared-error term, so N_P and N_B are constant across rows; unlike the token-class case the naive difference and the exact conditional differ only by an affine map and leave the ranking unchanged",
-    }
-    (out_dir / "channel_view_meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
+    gaps: List[Dict[str, object]] = []
+    for name, m in models.items():
+        full = m["views"]["full"]
+        tot = float(full[eligible][y[eligible] == 1].mean() - full[eligible][y[eligible] == 0].mean())
+        acc = 0.0
+        for c in ("PROFILE", "BEHAV"):
+            contrib = m["class_sums"][c][eligible] / m["n_total"]
+            gp = float(contrib[y[eligible] == 1].mean())
+            gn = float(contrib[y[eligible] == 0].mean())
+            acc += gp - gn
+            gaps.append({"model": name, "class": c, "delta_contrib": gp - gn,
+                         "total_mean_gap": tot, "share": (gp - gn) / tot if tot else float("nan")})
+        if abs(acc - tot) > 1e-9:
+            raise RuntimeError(f"{name}: mean-gap decomposition does not reconstruct the total")
+    pd.DataFrame(gaps).to_csv(out_dir / "mean_gap.csv", index=False)
 
-    print(f"\n=== {args.run_name}: user-disjoint ({int(keep.sum())} rows, "
-          f"{int(y[keep].sum())} positive, {len(pos_users)} malicious users) ===")
-    print(res[["view", "day_roc", "day_ap", "user_roc", "within_user_roc"]].to_string(
-        index=False, float_format=lambda x: f"{x:8.4f}"))
-    print("\nmean-gap decomposition:")
-    print(gap[["class", "delta_contrib", "share_of_total_gap"]].to_string(index=False, float_format=lambda x: f"{x:+.5f}"))
-    print(f"wrote {out_dir}")
+    prov["bootstrap"] = (f"cluster bootstrap over {len(pos_users)} malicious users, "
+                         f"{args.bootstrap_draws} draws, benign cohort fixed"
+                         + (" — DESCRIPTIVE at this cluster count" if len(pos_users) <= 8 else ""))
+    (out_dir / "provenance.json").write_text(json.dumps(prov, indent=2), encoding="utf-8")
+
+    print(f"\n=== pooled, population={args.population}, common eligible rows={len(eligible)} ===")
+    print(pooled.pivot(index="model", columns="view", values=["day_roc", "user_roc"]).to_string(
+        float_format=lambda x: f"{x:.4f}"))
+    print("\n=== equal-malicious-user fold means ===")
+    print(fold_mean.to_string(index=False, float_format=lambda x: f"{x:.4f}"))
+    md = pd.DataFrame(maxday)
+    print("\nmalicious users whose top eligible row is an attack day:")
+    print(md.groupby(["model", "view"])["top_day_is_attack"].agg(["sum", "count"]).to_string())
+    print(f"\nwrote {out_dir}")
 
 
 if __name__ == "__main__":
