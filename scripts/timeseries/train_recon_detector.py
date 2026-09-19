@@ -96,6 +96,15 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--max-train-rows", type=int, default=0)
+    ap.add_argument(
+        "--objective",
+        choices=("reconstruct", "forecast"),
+        default="reconstruct",
+        help="reconstruct: the current day is in the input and is the target "
+             "(autoencoding). forecast: the target day is EXCLUDED from the "
+             "input, which is the sequence-prediction setting the paper's "
+             "prediction actually names; requires --window >= 2.",
+    )
     args = ap.parse_args()
 
     torch.manual_seed(args.seed)
@@ -120,9 +129,16 @@ def main() -> None:
     Xs = (X - mu) / sd
 
     win = build_windows(user_id, args.window)
+    if args.objective == "forecast":
+        if args.window < 2:
+            raise SystemExit("--objective forecast needs --window >= 2")
+        # drop the last column (the day being scored) so the model predicts it
+        # from strictly earlier days of the same user
+        win = win[:, :-1]
+    ctx_len = win.shape[1]
 
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
-    model = DayAutoencoder(n_ch, args.window, args.hidden, args.latent).to(device)
+    model = DayAutoencoder(n_ch, ctx_len, args.hidden, args.latent).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     train_rows = np.flatnonzero(tr)
@@ -176,7 +192,8 @@ def main() -> None:
     recon_err = float(np.abs(total - sum(err_sums[c] for c in err_sums)).max())
     manifest = {
         "matrix": str(args.matrix),
-        "window": args.window, "hidden": args.hidden, "latent": args.latent,
+        "window": args.window, "objective": args.objective, "context_days": int(ctx_len),
+        "hidden": args.hidden, "latent": args.latent,
         "epochs": args.epochs, "batch_size": args.batch_size, "lr": args.lr,
         "seed": args.seed, "device": str(device),
         "n_channels": n_ch, "channel_counts": counts,

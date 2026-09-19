@@ -57,21 +57,29 @@ Training is ~7 s for 5 epochs over 1.25 M rows on one RTX 3070.
 
 ## Result — user-disjoint (140,781 rows, 70 positive, 4 malicious users)
 
-| window | view | day ROC | day AP | user ROC | within-user ROC | recall@1 % FPR |
-|---|---|---|---|---|---|---|
-| 1 | full | 0.6753 | 0.0011 | 0.4765 | 0.5408 | 0.014 |
-| 1 | profile_only | 0.5937 | 0.0007 | 0.4463 | 0.4766 | 0.000 |
-| 1 | behavior_only | 0.6870 | 0.0013 | 0.5074 | 0.5459 | 0.043 |
-| 7 | full | 0.6841 | 0.0015 | 0.5080 | 0.5876 | 0.043 |
-| 7 | profile_only | 0.5976 | 0.0008 | 0.5346 | 0.5792 | 0.029 |
-| 7 | behavior_only | 0.6992 | 0.0019 | 0.4883 | 0.5806 | 0.043 |
+| variant | view | day ROC | day AP | user ROC | within-user ROC |
+|---|---|---|---|---|---|
+| recon, w=1 | full | 0.6753 | 0.0011 | 0.4765 | 0.5408 |
+| recon, w=1 | profile_only | 0.5937 | 0.0007 | 0.4463 | 0.4766 |
+| recon, w=1 | behavior_only | 0.6870 | 0.0013 | 0.5074 | 0.5459 |
+| recon, w=7 | full | 0.6841 | 0.0015 | 0.5080 | 0.5876 |
+| recon, w=7 | profile_only | 0.5976 | 0.0008 | 0.5346 | 0.5792 |
+| recon, w=7 | behavior_only | 0.6992 | 0.0019 | 0.4883 | 0.5806 |
+| **forecast, 7-day context** | full | 0.7020 | 0.0010 | 0.2957 | 0.6298 |
+| **forecast** | profile_only | 0.5973 | 0.0006 | 0.3574 | 0.6149 |
+| **forecast** | behavior_only | 0.7029 | 0.0010 | 0.2957 | 0.6291 |
 
 Mean-score-gap decomposition (exact; reconstructs the total to < 1e-9):
 
-| window | PROFILE contribution | BEHAV contribution |
+| variant | PROFILE contribution | BEHAV contribution |
 |---|---|---|
-| 1 | −0.00077 (**−3.7 %** of the gap) | +0.02154 (+103.7 %) |
-| 7 | +0.00417 (**+10.1 %**) | +0.03704 (+89.9 %) |
+| recon, w=1 | −0.00077 (**−3.7 %** of the gap) | +0.02154 (+103.7 %) |
+| recon, w=7 | +0.00417 (**+10.1 %**) | +0.03704 (+89.9 %) |
+| **forecast** | −0.00023 (**−0.14 %**) | +0.15956 (+100.14 %) |
+
+The forecasting variant is the one the paper's prediction actually names — the
+target day is **excluded** from the input, so the model predicts it from the
+user's strictly earlier days.
 
 ## Reading
 
@@ -87,19 +95,43 @@ sat **below chance** at 0.399, and removing the profile's direct score
 contribution moved unseen-user ranking 0.532 → 0.938. Here there is little
 shortcut to remove.
 
-That is the predicted ordering: a sequence model with a reconstruction
-objective and no pretrained language representation sits with the tabular
-detectors (published r6.2: IF 0.641, one-class SVM 0.491, PCA 0.616 — this
-detector's 0.675–0.684 is at the top of that range) rather than with the
-language model.
+That is the predicted ordering: a sequence model with no pretrained language
+representation sits with the tabular detectors (published r6.2: IF 0.641,
+one-class SVM 0.491, PCA 0.616 — these 0.675–0.702 are at the top of that
+range) rather than with the language model.
+
+## Why — a mechanism this suggests, and how to test it
+
+Under **forecasting** the profile contributes −0.14 % of the score gap: nothing
+at all. There is a simple reason, and it may locate the shortcut's origin more
+precisely than "language model versus not".
+
+Profile channels are constant within a user. A forecasting model is given that
+user's **earlier days**, so the profile is simply *copyable from context*: its
+forecast error is near zero for everyone, seen or unseen, and carries no
+familiarity signal. Nothing has to be memorised about *which* user this is.
+
+The language model is in the opposite situation. Each example is a single
+user-day scored independently, and the profile block sits at the **start** of
+that text with no prior context to copy from. The only way to assign it high
+probability is to have memorised the population distribution of profiles — so
+seen users' profiles are cheap and unseen users' profiles are expensive, which
+is exactly the familiarity signal the r6.2 8B decomposition shows
+(`profile_only` below chance for every malicious user).
+
+If that is right, the shortcut's origin is not "being a language model" but
+**scoring each unit independently with the identity block re-predicted from
+nothing**. Two cheap tests would discriminate it, neither run yet: give the LM
+the user's previous day as context and see whether profile capture drops; and
+score the forecasting model *without* context on the profile channels, which
+should make its profile term behave like the LM's. Stated as a hypothesis with
+a test, not a finding.
 
 ## What this does not show
 
-* **Objective, not architecture.** This is a *reconstruction* autoencoder. The
-  paper's prediction is about models that "share the sequence-prediction
-  objective"; a forecasting variant (predict day *t* from days < *t*) is the
-  closer analogue and has not been run. The window-7 model uses temporal
-  context but still autoencodes the current day.
+* **Not a pretrained model, and a small one.** These are from-scratch MLPs, so
+  "architecture" here means objective and input structure, not a specific
+  published model.
 * **Absolute performance is weak**: day AP 0.0011–0.0019 at a prevalence of
   0.0005, and recall at a 0.1 % false-positive budget is 0.000–0.029. Nothing
   here is a usable detector, and the ROC differences should not be read as
