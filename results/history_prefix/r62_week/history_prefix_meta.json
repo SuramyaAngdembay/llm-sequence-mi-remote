@@ -1,0 +1,21 @@
+{
+  "adapter_dir": "/data/suramya/insider_mi/cert-data/r62_adapter",
+  "split_file": "eval.jsonl",
+  "max_seq_len": 2048,
+  "seed": 42,
+  "prefix_include_week": true,
+  "n_users_total": 410,
+  "n_users_sampled": 200,
+  "n_users_with_a_positive_day": 4,
+  "user_limit": 200,
+  "max_per_user": 15,
+  "n_built": 2982,
+  "n_excluded_no_earlier_record": 200,
+  "n_excluded_no_length_matched_donor": 18,
+  "n_truncated_by_prefix_budget": 0,
+  "frac_self_profile_changed": 0.9332662642521797,
+  "mean_overlap_self_vs_current": 1.0,
+  "mean_overlap_donor_vs_current": 0.27067963335568973,
+  "donor_rule": "earliest record of each donor user; seeded hash order; first exact prefix-token-length match within 200 candidates",
+  "target_rule": "current day's tokens at within-day positions 1..n-1, identical in all three conditions"
+}
