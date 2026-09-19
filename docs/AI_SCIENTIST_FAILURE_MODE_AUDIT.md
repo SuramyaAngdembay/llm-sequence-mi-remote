@@ -208,3 +208,37 @@ Anvil is unreachable and the run is therefore impossible.
 4. Launched the TWOS seed-43 replication.
 5. Recorded adapter-provenance verification as a blocking item before package 3
    enters the paper.
+
+---
+
+## Damage-radius trace (2026-09-19)
+
+Applying step 2 of the `research-claim-triage` skill to this project's own
+corrections: a withdrawn number does not stay where it was withdrawn. Every
+corrected figure was traced through the repository, the manuscript sources and
+the shared notes repo.
+
+| withdrawn / corrected figure | found outside its correction notice? |
+|---|---|
+| Time-series user AUC 0.477 / 0.508 / 0.296 | **No.** The only matches are coincidental digit strings inside per-row CSV dumps in unrelated causal reports. |
+| "ranks users near chance" (time-series, user level) | **No.** `paper/main.tex:978` says "near chance" about a *different* claim — the **masking ablation** at the **day** level on r6.2 (ROC 0.547 / 0.575 / 0.471), already hedged as descriptive with four clusters. Correctly left alone. |
+| Fold tally "54 improved" (true: 51 improved, 3 tied, 6 worse) | **No.** Only the audit's own listing of the error. |
+| Average precision paired with the wrong prevalence | **No.** |
+
+**The honest reason the radius is clean: the new work has not reached the
+manuscript yet.** Searching `paper/main.tex` and `paper/main2.tex` for the
+probe's own figures (0.7894, 0.6739, 0.7061, 3.226, 1.304) returns nothing, and
+neither manuscript mentions the history-prefix probe or the token-class
+decomposition at all. This is not evidence of vigilance; it is evidence that the
+corrections happened before the writing.
+
+**Forward-looking consequence.** The next manuscript revision is precisely where
+these numbers will be transcribed for the first time. The corrected versions —
+not any figure quoted in an earlier chat, email, or handoff note — are the ones
+in `results/*/README.md`. The near-miss to avoid is quoting a number from
+conversation rather than from the artifact.
+
+One live trap was found and left deliberately untouched: `paper/main.tex:978`
+matches the withdrawal's *wording* but not its *claim*. Patching it would have
+introduced an error while "fixing" one. That is the case the skill's
+classification step exists to catch.
