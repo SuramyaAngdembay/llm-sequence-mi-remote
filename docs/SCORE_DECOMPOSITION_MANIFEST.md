@@ -90,6 +90,10 @@ of DAY, reported alongside it, not a partition class).
 
 ## Score definitions (frozen before any comparison)
 
+Verifiable: the views were defined in commit `007ca54` (2026-09-17) and
+`git log -S CERT_VIEWS -- scripts/token_class_decomposition.py` shows no
+later edit.
+
 The detector score is the mean next-token NLL over attention-valid targets
 (`extract_adapter_deltas.per_example_nll`). With classes `c` and counts `N_c`:
 
@@ -99,7 +103,7 @@ Views (defined once in `token_class_decomposition.CERT_VIEWS`):
 
 | view | target classes | note |
 |---|---|---|
-| `full` | all | reproduces the published `adapted_nll` |
+| `full` | all | reproduces the published `adapted_nll` (tolerance and gate recorded in `V14`/`V15` of `docs/SCORE_DECOMPOSITION_PROGRESS.md`) |
 | `profile_only` | DAY, PSY | direct profile contribution |
 | `behavior_only` (**primary**) | SESCOUNT, SES, OTHER, SPECIAL | every non-profile target; **includes SESCOUNT** |
 | `behavior_ses_only` (secondary) | SES | **excludes SESCOUNT** |

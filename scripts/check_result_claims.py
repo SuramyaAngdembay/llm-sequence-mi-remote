@@ -135,14 +135,27 @@ def self_test() -> int:
     return 0 if ok else 1
 
 
+# A dated handoff or audit is a record of what was believed on that date.
+# Rewriting one to satisfy a linter would falsify the record. These are reported
+# separately rather than skipped, so they stay visible without inviting edits.
+HISTORICAL = re.compile(r"(HANDOFF_|VALIDITY_AUDIT_|ANVIL_AUDIT_NOTES_|_20\d\d-\d\d-\d\d)")
+
+
 def main() -> int:
     if "--self-test" in sys.argv:
         return self_test()
     roots = [Path(a) for a in sys.argv[1:] if not a.startswith("-")] or \
             [Path("results"), Path("docs")]
     files = sorted({f for r in roots for f in (r.rglob("*.md") if r.is_dir() else [r])})
-    n_claims = n_struct = 0
+    n_claims = n_struct = n_hist = 0
+    historical: list[str] = []
     for f in files:
+        if HISTORICAL.search(f.name):
+            h = scan_file(f)
+            if h:
+                n_hist += len(h)
+                historical.append(f"  {f}: {len(h)} claim(s)")
+            continue
         claims = scan_file(f)
         struct = structural_checks(f) if f.name == "README.md" and "results" in f.parts else []
         if not claims and not struct:
@@ -155,8 +168,13 @@ def main() -> int:
         for s in struct:
             print(f"  [structure] {s}")
             n_struct += 1
+    if historical:
+        print("\nDated historical records (NOT to be rewritten -- a handoff is a record "
+              "of\nwhat was believed on its date):")
+        for h in historical:
+            print(h)
     print(f"\n{len(files)} files scanned: {n_claims} uncited process claims, "
-          f"{n_struct} structural gaps")
+          f"{n_struct} structural gaps, {n_hist} in historical records (exempt)")
     if n_claims or n_struct:
         print("\nA flagged line is not necessarily wrong. It is a line a reader must")
         print("take on trust. Cite the commit, digest, file or V-entry -- or soften")

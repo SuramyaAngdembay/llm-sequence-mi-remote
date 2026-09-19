@@ -146,6 +146,8 @@ descriptive and was not thresholded.
 
 ### Paired cluster bootstrap, 4 malicious users, 2,000 draws
 
+**12 intervals, uncorrected** (3 models × 2 views × 2 metrics), on 4 clusters.
+
 With 4 clusters these intervals are **descriptive**, not inferential.
 
 | model | metric | view vs full | Δ | 95 % interval |

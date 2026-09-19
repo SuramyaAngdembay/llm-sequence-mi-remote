@@ -121,7 +121,8 @@ six. The **pre-declared** comparison is `profile_only` against `behavior_only`;
 `day_only` is a decomposition of the profile view, offered as explanation. The
 pre-declared comparison also holds (−0.0104 against −0.00008), so the conclusion
 does not depend on the emphasis — but the emphasis was chosen after seeing which
-number was biggest, and the README should say so.
+number was biggest. Commit `9fb1152` is the write-up in question; the fix landed
+in `c0131c4`.
 
 **Previously corrected, listed for completeness.** Average precision paired with
 the wrong prevalence (fold-average 0.0164 belongs to fold prevalence 0.00080,

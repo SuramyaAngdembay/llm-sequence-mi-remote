@@ -45,6 +45,38 @@ one is **1.0000** in every run: CERT profiles do not change. So B is a test of
 **copying an identity block already in context**, not of recalling a different
 past. Donor profiles overlap the recipient's on 0.27–0.31 of fields.
 
+## Everything that was run, including what is not a result
+
+Disclosure in the sense of Simmons, Nelson & Simonsohn (2011): all runs on this
+probe, not only the reported ones.
+
+| run | scale | reported? |
+|---|---|---|
+| smoke | 8 examples, r6.2 val split | no — mechanics check |
+| **pilot** | **40 users × 5 days, r6.2 eval, no-week prefix** | **no — but it informed two decisions below** |
+| r62_noweek / r62_week / r42_noweek / r42_week | 200 users × 15 days | yes, all four |
+
+The pilot matters and was previously undisclosed. It ran on the **same
+evaluation data** as the reported runs, and it is what prompted (a) scaling to
+200 users and (b) writing the week-prefix variant after its day-field view moved
+the wrong way. The reported 200-user runs are therefore **not independent of**
+the pilot: this is a garden-of-forking-paths dependency, not a fresh test. The
+pilot's own numbers agreed with the final ones in direction and magnitude
+(profile B−A −1.06 against −1.10 final), which is reassuring but is not
+independence.
+
+## Multiplicity
+
+Each run's table reports 6 views × 3 contrasts = **18 intervals**; four runs give
+**72**, with **no multiplicity correction applied**. Read accordingly:
+
+* The psychometric and profile effects are 50–100× their interval widths. No
+  plausible correction touches them.
+* `behavior_ses_only` B−A, at −0.002 [−0.002, −0.001], is precisely the size of
+  effect that 72 uncorrected intervals manufacture. **It should not be cited as
+  a finding.** The behaviour-view conclusion rests on the effect being
+  *negligible*, which does not depend on its sign.
+
 ## Result — clustered by user, which is the unit of evidence
 
 Days from one user share that user's profile, so the bootstrap resamples

@@ -33,7 +33,7 @@ only if it passes all four and nothing about it is unverifiable.**
 |---|---|---|---|---|---|
 | History-prefix probe (pkg 3) | **verified** | none in-run | 72 uncorrected intervals | inherits project-wide reuse | **QUALIFIED** |
 | TWOS token-class causal (pkg 4) | **verified** | none in-run (config matched) | 24 uncorrected intervals | TWOS reused separately | **QUALIFIED** |
-| Time-series probe (pkg 2) | not yet recomputed | none found | contrasts, 4 clusters | new data build | **UNVERIFIED** |
+| Time-series probe (pkg 2) | **verified** | none found | 12 uncorrected, 4 clusters | new data build | **QUALIFIED** |
 | r4.2 SAE causal headline | not yet recomputed | **YES — documented** | 12 configs compared | 40+ evaluations | **CONTAMINATED (selection)** |
 | r6.2 SAE causal headline | not yet recomputed | likely same rule | 12 configs | 40+ evaluations | **UNVERIFIED** |
 | r4.2 scoring-mitigation (pkg 1) | fold CSVs reproduce to 3.6e-15 | n/a | 60 folds | raw scores never re-verified | **QUALIFIED** |
@@ -154,13 +154,38 @@ external replication.
 | Discovery/confirmation disjointness | `comm -12` the two user files | Anvil |
 | Whether the confirmation run was actually restricted | the `[receivers] restricted to…` log line | Anvil |
 | Whether frontier selectivity proxies used discovery users only | the frontier job's user file | Anvil |
-| Time-series table arithmetic | recompute from `channel_scores.npz` | Aquaman — doable now |
 | r4.2 scoring-mitigation raw scores | re-score and compare | Anvil |
 | LANL replication | not yet examined | — |
 | r6.2 configuration selection rule | find the equivalent handoff doc | — |
 
 ## Actions taken
 
-1. Job records must capture `receiver_user_file`. **Owed.**
-2. Disclose the 40-user pilot in the history-prefix write-up. **Owed.**
-3. State the multiplicity count beside every interval table. **Owed.**
+1. **Done.** The causal sbatch template now records `receiver_user_file` and
+   `exclude_same_user_donors` in the job JSON, so future runs state which users
+   they scored. This does not repair past records.
+2. **Done.** `results/history_prefix/README.md` now carries an
+   "Everything that was run" table disclosing the 8-example smoke and the
+   40-user pilot, and says plainly that the reported runs are **not independent
+   of** the pilot because it prompted both the scale-up and the week variant.
+3. **Done.** Multiplicity counts now sit beside every interval table: 72 for
+   history-prefix, 24 for TWOS, 12 for the time-series probe, each stating that
+   no correction is applied and which specific conclusions are and are not
+   robust to that.
+4. **Done.** `results/history_prefix/README.md` now states that
+   `behavior_ses_only` B−A (−0.002) **should not be cited as a finding** — it is
+   exactly the size of effect that 72 uncorrected intervals manufacture.
+
+## What would actually clear this project
+
+Nothing internal. The instruments that would settle it:
+
+1. **A fresh evaluation set** — CERT users never scored during development.
+   This is the only real answer to forty-plus adaptive evaluations.
+2. **The Anvil log lines**, to prove the discovery/confirmation separation held.
+3. **An external replication** of the headline causal result by someone who did
+   not run the configuration search.
+
+Until at least the second, the r4.2 mechanistic headline should be described in
+the paper as a result whose configuration was selected on a related outcome, with
+the discovery/confirmation design stated as the intended control and its
+verification stated as pending.

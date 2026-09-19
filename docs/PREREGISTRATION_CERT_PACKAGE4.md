@@ -42,6 +42,8 @@ are not purely an identity shortcut, and the paper's mechanistic section must
 say so.
 
 ## Fixed before the run
+Evidence that this predates the run: `git log` on this file, against the job
+record of the eventual run.
 
 | item | value |
 |---|---|
@@ -62,6 +64,8 @@ job 19379904, so the new columns describe the **same interventions** as the
 published result.
 
 ## Rules fixed before the run
+
+(Same evidence: this file's commit date in `git log`.)
 
 1. **The base score is recomputed** through the identical code path and batch
    composition as the patched score. The cached `adapted_nll` is **not** used

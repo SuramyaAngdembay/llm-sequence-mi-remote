@@ -41,6 +41,10 @@ TOPK="${TOPK:-8}"
 BATCH_SIZE="${BATCH_SIZE:-8}"
 LOSS_BATCH_SIZE="${LOSS_BATCH_SIZE:-0}"
 TOKEN_CLASS_SCHEMA="${TOKEN_CLASS_SCHEMA:-none}"
+# Recorded in the job JSON because the contamination audit found that no
+# archived run record stated WHICH users a run scored, leaving the
+# discovery/confirmation separation unprovable from artifacts alone.
+RECEIVER_USER_FILE="${RECEIVER_USER_FILE:-}"
 SAE_BATCH_SIZE="${SAE_BATCH_SIZE:-2048}"
 PATCH_CHUNK_SIZE="${PATCH_CHUNK_SIZE:-0}"
 TOKEN_DELTA_DTYPE="${TOKEN_DELTA_DTYPE:-float32}"
@@ -79,6 +83,8 @@ cat > "$JOB_META" <<EOM
   "batch_size": ${BATCH_SIZE},
   "loss_batch_size": ${LOSS_BATCH_SIZE},
   "token_class_schema": "${TOKEN_CLASS_SCHEMA}",
+  "receiver_user_file": "${RECEIVER_USER_FILE:-}",
+  "exclude_same_user_donors": "${EXCLUDE_SAME_USER_DONORS:-0}",
   "patch_chunk_size": ${PATCH_CHUNK_SIZE},
   "max_receivers": ${MAX_RECEIVERS},
   "max_candidate_donors": ${MAX_CANDIDATE_DONORS},

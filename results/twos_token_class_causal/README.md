@@ -70,6 +70,15 @@ would only say that some patch moved the score.
 | **behaviour only** | −0.00012 [−0.0005, +0.0002] | −0.00013 [−0.0005, +0.0002] | −0.00010 [−0.0005, +0.0003] | −0.00008 [−0.0005, +0.0003] |
 | behaviour, SES lines only | −0.00013 | −0.00015 | −0.00012 | −0.00009 |
 
+## Multiplicity
+
+The table above is **24 intervals** (6 views × 4 alphas) with **no multiplicity
+correction**. The day-field and profile contrasts are large, monotone in patch
+strength, and consistent across alphas, which multiplicity does not produce. The
+behaviour conclusion rests on an interval that *spans* zero, which multiplicity
+can only make more likely, not less — so it is conservative in the direction
+claimed.
+
 ## What this shows
 
 **1. The repair lands on identity tokens, not behaviour tokens.** At full patch
