@@ -581,7 +581,7 @@ service back around **2026-09-21**. The state of jobs 20816765 (Phase C 3B),
 20827646 (r4.2 portability) and 20827647 (LANL) remains **unknown**; nothing
 about their progress or completion is assumed.
 
-**V34 (capability, verified).** The outage does not block Package 3. Aquama
+**V34 (capability, verified).** The outage does not block Package 3. Aquaman
 holds everything it needs: the r4.2 and r6.2 Qwen3-8B adapters
 (`cert-data/{r42,r62}_adapter`, md5 bb68488338a5e283e53bb5df58536fe3 and
 1711135fce2932a3b58c0286f9589ac8), the repaired session JSONL for both
