@@ -10,8 +10,14 @@ from typing import Any, Dict, List, Sequence, Tuple
 import numpy as np
 import pandas as pd
 import torch
+
 import torch.nn.functional as F
 
+import token_class_decomposition as tcd
+from token_class_nll import (
+    build_class_index, class_ids_for_texts, per_example_class_nll,
+    per_example_class_nll_from_hidden, views_from_class,
+)
 from remote_common import dump_json, ensure_dir, load_yaml, read_jsonl
 from sae_core import TopKSAE, add_active_control_feature_sets, choose_feature_sets
 
@@ -666,10 +672,25 @@ def score_with_token_patches(
     loss_batch_size: int = 0,
     full_logits_max_gib: float = 28.0,
     max_logit_elements: int = 536_870_912,
-) -> np.ndarray:
+    class_schema: str | None = None,
+) -> Any:
+    """Score `texts` with per-token hidden-state patches applied at `layer`.
+
+    Returns the per-example mean NLL. When `class_schema` is given it returns
+    `(scores, class_sums, class_counts, class_names)` as well, where the sums
+    and counts are over the SAME tokens the scalar score uses, so
+    `class_sums.sum(1) / class_counts.sum(1)` reproduces it. That identity is
+    asserted per batch rather than assumed.
+    """
     layer_module = get_layer_module(model, layer)
     device = next(model.parameters()).device
     out_scores: List[np.ndarray] = []
+    out_sums: List[np.ndarray] = []
+    out_counts: List[np.ndarray] = []
+    class_names: List[str] = []
+    class_to_idx: Dict[str, int] = {}
+    if class_schema is not None:
+        class_names, class_to_idx = build_class_index(class_schema)
     chunked_notice_emitted = False
 
     for start in range(0, len(texts), batch_size):
@@ -681,7 +702,12 @@ def score_with_token_patches(
             padding=True,
             truncation=True,
             max_length=max_seq_len,
+            return_offsets_mapping=class_schema is not None,
         )
+        class_ids = None
+        if class_schema is not None:
+            offsets = tok.pop("offset_mapping")
+            class_ids = class_ids_for_texts(batch_texts, offsets, class_schema, class_to_idx).to(device)
         tok = {k: v.to(device) for k, v in tok.items()}
         attn = tok["attention_mask"]
 
@@ -710,6 +736,10 @@ def score_with_token_patches(
                 out = model(**tok, return_dict=True)
                 logits = out.logits
                 nll_t = per_example_nll(logits, tok["input_ids"], tok["attention_mask"], loss_batch_size=loss_batch_size)
+                if class_ids is not None:
+                    cs_t, cc_t = per_example_class_nll(
+                        logits, tok["input_ids"], tok["attention_mask"], class_ids,
+                        len(class_names), loss_batch_size=loss_batch_size)
                 del out, logits
             else:
                 if not chunked_notice_emitted:
@@ -738,17 +768,46 @@ def score_with_token_patches(
                     tok["attention_mask"],
                     max_logit_elements=int(max_logit_elements),
                 )
+                if class_ids is not None:
+                    cs_t, cc_t = per_example_class_nll_from_hidden(
+                        base_model.get_output_embeddings(),
+                        hidden_states,
+                        tok["input_ids"],
+                        tok["attention_mask"],
+                        class_ids,
+                        len(class_names),
+                        max_logit_elements=int(max_logit_elements),
+                    )
                 del out, hidden_states
         finally:
             handle.remove()
         nll = nll_t.cpu().numpy()
         out_scores.append(nll)
+        if class_ids is not None:
+            cs = cs_t.cpu().numpy()
+            cc = cc_t.cpu().numpy()
+            # The decomposition must reproduce the scalar score it decomposes.
+            # Checked here rather than downstream, so a tokenization or shift
+            # misalignment fails at the source instead of moving a result.
+            recon = cs.sum(axis=1) / np.maximum(cc.sum(axis=1), 1.0)
+            worst = float(np.abs(recon - nll).max()) if len(nll) else 0.0
+            if worst > 1e-4:
+                raise RuntimeError(
+                    f"per-class sums do not reconstruct the scalar NLL (max abs diff {worst:.3e})"
+                )
+            out_sums.append(cs)
+            out_counts.append(cc)
+            del cs_t, cc_t, cs, cc, class_ids
         del nll_t, nll, tok, attn, batch_patch, batch_texts
         if device.type == "cuda":
             torch.cuda.synchronize(device)
             torch.cuda.empty_cache()
 
-    return np.concatenate(out_scores, axis=0)
+    scores = np.concatenate(out_scores, axis=0)
+    if class_schema is None:
+        return scores
+    return (scores, np.concatenate(out_sums, axis=0),
+            np.concatenate(out_counts, axis=0), class_names)
 
 
 def summarize_best(best_df: pd.DataFrame, top_sets: Sequence[str], control_set: str) -> pd.DataFrame:
@@ -863,6 +922,18 @@ def main() -> None:
                     help="JSON {set_name: [feature_ids]} merged into feature_sets (e.g. norm-matched controls)")
     ap.add_argument("--batch-size", type=int, default=8)
     ap.add_argument("--loss-batch-size", type=int, default=0)
+    ap.add_argument(
+        "--token-class-schema",
+        choices=("none", "cert", "lanl"),
+        default="none",
+        help="when set, every intervention is additionally scored against the "
+             "profile-only and behaviour-only token views, so a repair can be "
+             "attributed to the token class it actually acts on. The base score "
+             "is RECOMPUTED through the identical code path and batch "
+             "composition as the patched score, because the cached adapted_nll "
+             "was produced under a different batching and differs from a "
+             "matched-batch forward by ~1e-2 mean absolute NLL.",
+    )
     ap.add_argument("--sae-batch-size", type=int, default=2048)
     ap.add_argument("--patch-chunk-size", type=int, default=0)
     ap.add_argument("--full-logits-max-gib", type=float, default=28.0)
@@ -1020,6 +1091,17 @@ def main() -> None:
         "repair",
         "strong_repair",
     ]
+    class_schema = None if args.token_class_schema == "none" else args.token_class_schema
+    class_views: Dict[str, Tuple[str, ...]] = {}
+    if class_schema is not None:
+        class_views = dict(tcd.CERT_VIEWS if class_schema == "cert" else tcd.LANL_VIEWS)
+        all_class_names, _ = build_class_index(class_schema)
+        candidate_fieldnames += ["base_score_recomputed", "delta_recomputed",
+                                 "base_cache_minus_recomputed"]
+        for vname in class_views:
+            candidate_fieldnames += [f"base_{vname}", f"patched_{vname}", f"delta_{vname}"]
+        candidate_fieldnames += [f"n_{c}" for c in all_class_names]
+        print(f"[token-class] schema={class_schema} views={sorted(class_views)}", flush=True)
     best_rows_by_key: Dict[Tuple[int, int, int, str, str, str, int], Dict[str, Any]] = {}
     candidate_row_count = 0
     empty_sparse = np.zeros((0, int(model_bundle["d_latent"])), dtype=np.float32)
@@ -1041,6 +1123,24 @@ def main() -> None:
                     donor_idx = np.asarray([p[1] for p in pair_batch], dtype=int)
                     receiver_texts = [texts[i] for i in recv_idx.tolist()]
                     base = base_scores[recv_idx]
+                    base_view: Dict[str, np.ndarray] = {}
+                    base_recomputed = None
+                    if class_schema is not None:
+                        zero_patch = [np.zeros((0, 1), dtype=np.float32)] * len(receiver_texts)
+                        base_recomputed, b_sums, b_counts, class_names = score_with_token_patches(
+                            adapted_model,
+                            tokenizer,
+                            receiver_texts,
+                            zero_patch,
+                            layer=args.layer,
+                            max_seq_len=int(cfg["training"]["max_seq_len"]),
+                            batch_size=args.batch_size,
+                            loss_batch_size=args.loss_batch_size,
+                            full_logits_max_gib=args.full_logits_max_gib,
+                            max_logit_elements=args.max_logit_elements,
+                            class_schema=class_schema,
+                        )
+                        base_view = views_from_class(b_sums, b_counts, class_names, class_views)
                     batch_example_ids = sorted(set(recv_idx.tolist()) | set(donor_idx.tolist()))
                     sparse_cache = build_sparse_cache_for_examples(
                         sae_model,
@@ -1084,7 +1184,7 @@ def main() -> None:
                                 patch_list.append(shift)
                                 active_counts.append(n_active)
 
-                            patched_scores = score_with_token_patches(
+                            patched_pack = score_with_token_patches(
                                 adapted_model,
                                 tokenizer,
                                 receiver_texts,
@@ -1095,7 +1195,22 @@ def main() -> None:
                                 loss_batch_size=args.loss_batch_size,
                                 full_logits_max_gib=args.full_logits_max_gib,
                                 max_logit_elements=args.max_logit_elements,
+                                class_schema=class_schema,
                             )
+                            patched_view: Dict[str, np.ndarray] = {}
+                            if class_schema is None:
+                                patched_scores = patched_pack
+                            else:
+                                patched_scores, p_sums, p_counts, class_names = patched_pack
+                                patched_view = views_from_class(p_sums, p_counts, class_names, class_views)
+                                # a patch changes hidden states, never the
+                                # tokenization, so the per-class target counts
+                                # must be identical to the base's
+                                if not np.array_equal(p_counts, b_counts):
+                                    raise RuntimeError(
+                                        "patched per-class target counts differ from the base's; "
+                                        "the two scorings are not over the same tokens"
+                                    )
                             deltas = patched_scores - base
                             batch_rows: List[Dict[str, Any]] = []
                             for i in range(len(recv_idx)):
@@ -1120,6 +1235,18 @@ def main() -> None:
                                     "repair": bool(deltas[i] < 0.0),
                                     "strong_repair": bool(deltas[i] <= -args.repair_threshold),
                                 }
+                                if class_schema is not None:
+                                    row["base_score_recomputed"] = float(base_recomputed[i])
+                                    row["delta_recomputed"] = float(patched_scores[i] - base_recomputed[i])
+                                    row["base_cache_minus_recomputed"] = float(base[i] - base_recomputed[i])
+                                    for vname in class_views:
+                                        bv = float(base_view[vname][i])
+                                        pv = float(patched_view[vname][i])
+                                        row[f"base_{vname}"] = bv
+                                        row[f"patched_{vname}"] = pv
+                                        row[f"delta_{vname}"] = pv - bv
+                                    for ci, cname in enumerate(class_names):
+                                        row[f"n_{cname}"] = int(b_counts[i, ci])
                                 batch_rows.append(row)
                                 key = (
                                     int(args.layer),
