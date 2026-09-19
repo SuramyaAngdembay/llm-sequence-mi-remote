@@ -40,6 +40,7 @@ LATENT_MULT="${LATENT_MULT:-2}"
 TOPK="${TOPK:-8}"
 BATCH_SIZE="${BATCH_SIZE:-8}"
 LOSS_BATCH_SIZE="${LOSS_BATCH_SIZE:-0}"
+TOKEN_CLASS_SCHEMA="${TOKEN_CLASS_SCHEMA:-none}"
 SAE_BATCH_SIZE="${SAE_BATCH_SIZE:-2048}"
 PATCH_CHUNK_SIZE="${PATCH_CHUNK_SIZE:-0}"
 TOKEN_DELTA_DTYPE="${TOKEN_DELTA_DTYPE:-float32}"
@@ -77,6 +78,7 @@ cat > "$JOB_META" <<EOM
   "topk": ${TOPK},
   "batch_size": ${BATCH_SIZE},
   "loss_batch_size": ${LOSS_BATCH_SIZE},
+  "token_class_schema": "${TOKEN_CLASS_SCHEMA}",
   "patch_chunk_size": ${PATCH_CHUNK_SIZE},
   "max_receivers": ${MAX_RECEIVERS},
   "max_candidate_donors": ${MAX_CANDIDATE_DONORS},
@@ -116,7 +118,7 @@ if [[ -n "$RECEIVER_USER_FILE" ]]; then
   EXTRA_ARGS+=(--receiver-user-file "$RECEIVER_USER_FILE")
 fi
 
-echo "job=$SLURM_JOB_ID node=$(hostname) partition=${SLURM_JOB_PARTITION:-} batch_size=$BATCH_SIZE loss_batch_size=$LOSS_BATCH_SIZE patch_chunk_size=$PATCH_CHUNK_SIZE max_receivers=$MAX_RECEIVERS"
+echo "job=$SLURM_JOB_ID node=$(hostname) partition=${SLURM_JOB_PARTITION:-} batch_size=$BATCH_SIZE loss_batch_size=$LOSS_BATCH_SIZE patch_chunk_size=$PATCH_CHUNK_SIZE max_receivers=$MAX_RECEIVERS token_class_schema=$TOKEN_CLASS_SCHEMA"
 nvidia-smi --query-gpu=index,name,memory.total --format=csv,noheader
 
 set +e
@@ -133,6 +135,7 @@ set +e
   --k "$TOPK" \
   --batch-size "$BATCH_SIZE" \
   --loss-batch-size "$LOSS_BATCH_SIZE" \
+  --token-class-schema "$TOKEN_CLASS_SCHEMA" \
   --sae-batch-size "$SAE_BATCH_SIZE" \
   --patch-chunk-size "$PATCH_CHUNK_SIZE" \
   --full-logits-max-gib "$FULL_LOGITS_MAX_GIB" \
