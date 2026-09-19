@@ -515,3 +515,66 @@ which is not established by anything in this record.
 | 2026-09-18 | Portability round 1: LANL 20826171, r4.2 20826196 | r4.2 **gate refused** (batch-56 cache, V17), ~0.1 SU; LANL deferred by maintenance (V18) |
 | 2026-09-18 | Portability round 2: r4.2 job 20827646 (2 h wall, corrected gate) and LANL job 20827647 (5 h) | r4.2 schedulable before maintenance; LANL waits for the window to close |
 | — | Phase C 8B | held: ~20-25 SU, and now lower priority than portability - if score masking transfers, the cheap intervention is the result and the training arm is a secondary control |
+
+---
+
+## 2026-09-19 — four-package review response
+
+**V25 (verified).** All three numerical-detector checkpoints reload and
+reproduce their cached per-class error sums with max abs difference
+**0.000e+00** over 1,393,297 rows (`scripts/timeseries/check_checkpoint.py`,
+records in `results/timeseries_probe/{w1,w7,fc7}/checkpoint_gate.json`).
+
+**V26 (verified).** The forecast boundary fix is exactly scoped: the rows that
+would contain themselves in their own context are **exactly** the rows excluded
+for lack of history (4,000 self-containing, 4,000 excluded; 0 eligible rows
+leak). The gate asserts set equality, not just "eligible rows are clean".
+
+**V27 (new limitation, not previously recorded).** 4,000 eligible rows — each
+user's *second* day — have a padding-collapsed context: one real prior day
+repeated across all seven columns. They leak nothing, but their effective
+history is 1 day, not 7, so "7-day forecaster" overstates the context for 2.8 %
+of eligible rows.
+
+**V28 (verified).** All models now share ONE eligible set of 141,662 rows
+(`shared_matched/common_eligible_ids.csv`, md5 07b7024ddff248e6e03c00980ec77523).
+Profile share of the malicious-benign mean score gap: **−3.7 %** (recon w=1),
+**+10.2 %** (recon w=7), **+0.24 %** (forecast). Given the same fields the
+language model gets, a non-language detector puts essentially none of its score
+gap into the profile channels.
+
+**V29 (verified, descriptive).** Replacing each target day's context with a
+different user's history drops the forecaster's day ROC from 0.7061 to 0.5725
+(Δ −0.1335) but its user ROC only from 0.7389 to 0.7137 (Δ −0.0252). Day-level
+detection uses history; user-level ranking largely does not.
+
+**V30 (verified, negative).** For **0 of 4** malicious users, in every model,
+for both the full and behaviour-only scores, is the highest-scoring day an
+attack day. High user AUC here is not attack localization. Unchanged by the
+shared evaluator.
+
+**V31 (verified).** `token_class_nll.py` agrees with the reference Python
+implementation in `token_class_decomposition.accumulate_class_losses` (max
+|Δ| 1.3e-05 on sums, exact on counts), reconstructs the scalar per-example NLL
+(9.5e-07), is independent of batch partners (0.0), and its chunked LM-head path
+matches the direct path (1.5e-05). 17 checks in
+`scripts/tests/test_token_class_nll.py`.
+
+**V32 (verified).** The history-prefix probe's three conditions score identical
+targets with identical per-class counts, no prefix token contributes loss, and
+identical current-day predictions give identical per-class sums (max |Δ| 0.0).
+10 checks in `scripts/tests/test_history_prefix_scoring.py`, including a
+sensitivity check confirming a wrong prefix mask would fail.
+
+**V33 (failed check, no inference).** Anvil has been unreachable for the whole
+session: `ssh: connect to host anvil.rcac.purdue.edu port 22: Operation timed
+out`, on three separate probes. The state of jobs 20816765 (Phase C 3B),
+20827646 (r4.2 portability) and 20827647 (LANL) is **unknown**. Nothing about
+their progress or completion is assumed.
+
+| date | what | status |
+|---|---|---|
+| 2026-09-19 | Package 1: r4.2 headline corrections (empirical ROC operating points; batching-dependent not padding-specific; verification status separating saved-summary checks from raw-score re-verification) | done |
+| 2026-09-19 | Package 2: shared metric core, checkpoint gate, multi-model evaluator on one eligible set, corrected README | **done** (V25–V30) |
+| 2026-09-19 | Package 3: `run_history_prefix_probe.py` + construction and scoring tests | code done and tested offline (V32); **run blocked on Anvil** (V33) |
+| 2026-09-19 | Package 4: per-class accumulation in `eval_token_delta_sae_causal.py`, submitter with smoke mode | code done and tested offline (V31); **run blocked on Anvil** (V33) |
