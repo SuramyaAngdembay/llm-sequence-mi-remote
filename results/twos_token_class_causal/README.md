@@ -1,5 +1,17 @@
 # Which tokens does an SAE intervention actually repair?
 
+> ## ⚠ THE DIRECTIONAL CONCLUSION BELOW DOES NOT REPLICATE. READ THIS FIRST.
+>
+> An independent replication on **seed 43** — a different adapter, a different
+> delta cache and a different SAE, same configuration and same data — **reverses
+> every sign**. The seed-42 conclusion that repairs act on identity tokens and
+> not on behaviour is **NOT supported**. Details in "Replication failure" below.
+> Results for seed 43 are in `results/twos_token_class_causal_s43/`.
+>
+> What survives: the per-class decomposition machinery, whose assertions passed
+> on both runs, and the finding that the pooled score hides which token class an
+> intervention acts on. What does not survive: any claim about *which* class.
+
 Work package 4, run on the **TWOS** replication. 2026-09-19 on Aquaman
 (1× RTX 3070), **zero cluster SU**, while Anvil was down.
 
@@ -79,7 +91,59 @@ behaviour conclusion rests on an interval that *spans* zero, which multiplicity
 can only make more likely, not less — so it is conservative in the direction
 claimed.
 
-## What this shows
+## Replication failure — seed 43 reverses every sign
+
+Both runs use layer 24, latent_mult 4, k 8, `top5` against `control5_active`,
+the same four alphas, the same context mode, the same 2,275 examples and the
+same 16 receiver users. They differ only in the seed of the whole pipeline: a
+separately trained adapter, its own delta cache, its own SAE. `top5` is
+therefore a different set of five features in each.
+
+top5 minus activity-matched control, pooled over alphas, clustered by receiver
+user:
+
+| view | seed 42 | seed 43 | agree? |
+|---|---|---|---|
+| day fields only | **−0.0193** [−0.0320, −0.0075] | **+0.0088** [−0.0082, +0.0290] | **no — sign flips** |
+| profile only | **−0.0074** [−0.0149, −0.0005] | **+0.0109** [+0.0024, +0.0203] | **no — flips, both exclude zero** |
+| psychometric only | −0.0005 [−0.0114, +0.0097] | **+0.0120** [+0.0014, +0.0252] | **no** |
+| full | **−0.0032** [−0.0062, −0.0003] | **+0.0030** [+0.0003, +0.0065] | **no — flips, both exclude zero** |
+| behaviour only | −0.00011 [−0.00047, +0.00023] | **−0.0024** [−0.0053, −0.0003] | **no — null becomes significant** |
+| behaviour, SES only | −0.00012 | **−0.0028** [−0.0061, −0.0004] | **no** |
+
+Seed 43 has a monotone dose-response too, in the opposite direction:
+profile-only runs +0.0087 → +0.0104 → +0.0111 → +0.0133 across α, and
+behaviour-only sits at −0.0024 → −0.0023 → −0.0024 → −0.0026 with every
+interval excluding zero.
+
+**So on seed 43 the selected features improve BEHAVIOUR tokens and make PROFILE
+tokens worse — the exact opposite of seed 42.** A dose-response was the main
+evidence offered for seed 42 being a genuine causal handle. Seed 43 shows a
+dose-response is reproducible in either direction and therefore cannot
+distinguish them.
+
+### What this costs the earlier reading
+
+Struck out, not softened:
+
+* ~~"The repair lands on identity tokens, not behaviour tokens."~~ Not supported.
+* ~~"There is a clean dose-response, and only on the identity views."~~ Seed 43
+  has one on the behaviour views.
+* ~~"The pooled result is real but understates where it comes from."~~ The pooled
+  result itself flips sign between seeds.
+
+### The honest reading
+
+Which token class a `top5` feature set acts on **depends on which features the
+pipeline happened to find**, and that varies with the seed. With 16 receiver
+users, 24 uncorrected intervals per run and one seed, the seed-42 result was
+within the range that this design produces by chance — which is exactly what
+the contamination audit predicted before the replication was run.
+
+Two runs is not enough to characterise the distribution either. The correct
+next step is more seeds, not a choice between these two.
+
+## What the seed-42 run showed (NOT replicated — retained for the record)
 
 **1. The repair lands on identity tokens, not behaviour tokens.** At full patch
 strength the day-field view improves by −0.0272 while the behaviour view moves
