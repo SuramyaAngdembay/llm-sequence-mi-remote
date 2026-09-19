@@ -24,7 +24,9 @@ pending.
 ## Provenance
 
 Every parameter except `--token-class-schema` matches the run that produced
-`twos_work/v3_causal_s42`: layer 24, latent_mult 4, k 8, `top5` against
+`twos_work/v3_causal_s42`, whose settings are recorded in that directory's
+`token_delta_sae_causal_summary.json` and were read from it rather than
+remembered: layer 24, latent_mult 4, k 8, `top5` against
 `control5_active`, alphas 0.25/0.5/0.75/1.0, context mode `team`,
 `patch_chunk_size` 2. The new columns therefore describe the **same
 interventions** as the published TWOS causal result.

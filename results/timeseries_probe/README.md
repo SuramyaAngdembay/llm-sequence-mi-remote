@@ -92,7 +92,16 @@ non-language detector puts essentially none of its malicious-versus-benign score
 gap into the profile channels. The language model puts a large share into the
 profile tokens. The shortcut is therefore not forced by the field set.
 
+### Primary comparison, declared
+
+The pre-declared test is the **profile share of the malicious-benign mean score
+gap**, per model. View-level ROC contrasts are secondary and, with 4 malicious
+users, descriptive.
+
 ### Checkpoint gates — every model reloads and reproduces its cache
+
+Verdicts are recorded per model in `{w1,w7,fc7}/checkpoint_gate.json`
+(`rescore_max_abs_diff`), not asserted here.
 
 `scripts/timeseries/check_checkpoint.py` reloads each saved `model.pt` with its
 stored standardisation and rescores all 1,393,297 rows.

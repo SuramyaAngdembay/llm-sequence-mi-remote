@@ -20,7 +20,7 @@ seen-user detection test. Folds come from
 users per fold and the same benign cohort in all four folds. Day-level
 prevalence per fold: 0.000032 (5 of 158,036 rows).
 
-**Provenance.** The recomputed `full` view reproduces the published
+**Provenance.** On CERT r4.2 and r6.2. The recomputed `full` view reproduces (to the tolerance recorded in the run's own gate JSON, and in `V14`/`V15` of `docs/SCORE_DECOMPOSITION_PROGRESS.md`) the published
 `adapted_nll` over all 159,064 rows to max |ΔNLL| = 1.4e-07 (mean 2.0e-08,
 rank corr 0.9999999999977), after scoring at batch 1 on the hardware that
 produced each cached baseline. Class sums reconstruct the total to 4e-13;

@@ -147,6 +147,46 @@ def test_subtraction_documentation() -> None:
     check("weighted_view returns the conditional behaviour mean", np.allclose(v, sB))
 
 
+def test_label_dependent_guard() -> None:
+    print("7. a label-dependent sample is REFUSED for detection metrics")
+    from eval_metrics_core import (  # noqa: E402
+        LabelDependentSampleError, assert_sample_usable_for_detection,
+    )
+    uid = np.array(["a", "a", "b", "b"])
+    y = np.array([1, 0, 0, 0])
+    s = np.array([0.9, 0.1, 0.5, 0.2])
+    el = np.arange(4)
+
+    clean = {"label_dependent_sample": False}
+    dirty = {"label_dependent_sample": True, "label_dependent_rule": "kept all positive users"}
+
+    # the guard must not fire on a clean sample, or it is useless
+    try:
+        assert_sample_usable_for_detection(clean, "test")
+        check("a clean sample passes the guard", True)
+    except LabelDependentSampleError:
+        check("a clean sample passes the guard", False)
+
+    try:
+        assert_sample_usable_for_detection(dirty, "test")
+        check("a label-dependent sample raises", False)
+    except LabelDependentSampleError as e:
+        check("a label-dependent sample raises", "kept all positive users" in str(e),
+              "and the message names the rule")
+
+    # and the guard must actually be wired into the metric, not merely exist
+    r = pooled_metrics(uid, y, s, el, sample_meta=clean)
+    check("pooled_metrics still computes on a clean sample", "day_roc" in r)
+    try:
+        pooled_metrics(uid, y, s, el, sample_meta=dirty)
+        check("pooled_metrics REFUSES a label-dependent sample", False)
+    except LabelDependentSampleError:
+        check("pooled_metrics REFUSES a label-dependent sample", True)
+    # omitting the meta must stay permissive, so existing call sites keep working
+    check("omitting sample_meta does not break existing callers",
+          "day_roc" in pooled_metrics(uid, y, s, el))
+
+
 def main() -> int:
     print("eval_metrics_core correctness checks\n")
     test_eligibility_governs_bootstrap()
@@ -155,6 +195,7 @@ def main() -> int:
     test_user_max_reports_winner()
     test_within_user_uses_eligibility()
     test_subtraction_documentation()
+    test_label_dependent_guard()
     print()
     if FAIL:
         print(f"FAILED ({len(FAIL)}): " + "; ".join(FAIL))

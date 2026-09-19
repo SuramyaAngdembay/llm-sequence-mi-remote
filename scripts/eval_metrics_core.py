@@ -24,6 +24,8 @@ elsewhere.
 """
 from __future__ import annotations
 
+import os
+import pathlib
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
 import numpy as np
@@ -107,10 +109,42 @@ def user_max(user_id: np.ndarray, y: np.ndarray, s: np.ndarray, eligible: np.nda
     return out.reset_index(drop=True)
 
 
+class LabelDependentSampleError(RuntimeError):
+    """A detection metric was asked for on a sample built using labels."""
+
+
+def assert_sample_usable_for_detection(meta: Dict[str, object] | str | "os.PathLike",
+                                       what: str = "this metric") -> None:
+    """Refuse to compute a detection metric on a label-dependent sample.
+
+    Some probes sample users with a rule that reads labels -- the history-prefix
+    probe retains every user with a positive day, so its sample cannot be made
+    easier by dropping malicious users. That is fine for the loss CONTRASTS the
+    probe reports, which use no labels at all. It is not fine for ROC, AP or
+    recall, where a label-dependent sample silently sets the prevalence.
+
+    The audit against arXiv:2509.08713 found this recorded only as a sentence in
+    a help string. A sentence is not an invariant. This raises.
+    """
+    if not isinstance(meta, dict):
+        import json as _json
+        meta = _json.loads(pathlib.Path(meta).read_text())
+    if bool(meta.get("label_dependent_sample")):
+        raise LabelDependentSampleError(
+            f"refusing to compute {what}: this sample was built with a "
+            f"label-dependent rule ({meta.get('label_dependent_rule', 'unspecified')}). "
+            "Loss contrasts are fine; detection metrics are not. Rebuild the "
+            "sample without reading labels, or compute the metric elsewhere."
+        )
+
+
 def pooled_metrics(
     user_id: np.ndarray, y: np.ndarray, s: np.ndarray, eligible: np.ndarray,
     fpr_budgets: Sequence[float] = (0.001, 0.01),
+    sample_meta: Dict[str, object] | None = None,
 ) -> Dict[str, object]:
+    if sample_meta is not None:
+        assert_sample_usable_for_detection(sample_meta, "pooled detection metrics")
     yy = np.asarray(y)[eligible]
     ss = np.asarray(s, dtype=float)[eligible]
     out: Dict[str, object] = {

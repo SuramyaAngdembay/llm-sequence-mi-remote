@@ -308,6 +308,8 @@ def main() -> None:
             print(f"  scored {start + len(chunk)}/{len(built)}", flush=True)
 
     df = pd.DataFrame(out_rows)
+    # travels with the data, not only with the metadata file
+    df["label_dependent_sample"] = int(bool(args.user_limit))
     df.to_csv(out_dir / "history_prefix_per_example.csv", index=False)
 
     summary: List[Dict] = []
@@ -328,6 +330,14 @@ def main() -> None:
         "adapter_dir": str(args.adapter_dir), "split_file": args.split_file,
         "max_seq_len": max_seq_len, "seed": args.seed,
         "prefix_include_week": inc_week,
+        # Declared so a downstream detection metric cannot be computed on this
+        # sample by accident: eval_metrics_core.assert_sample_usable_for_detection
+        # raises on it. The probe itself reports loss contrasts, which use no
+        # labels, so the flag costs nothing here.
+        "label_dependent_sample": bool(args.user_limit),
+        "label_dependent_rule": (
+            "every user with a positive day is retained when --user-limit samples users"
+            if args.user_limit else None),
         "n_users_total": n_users_total, "n_users_sampled": len(by_user),
         "n_users_with_a_positive_day": len(pos_users),
         "user_limit": args.user_limit, "max_per_user": args.max_per_user,

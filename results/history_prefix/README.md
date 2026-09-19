@@ -31,8 +31,9 @@ enforced in code and checked offline in `scripts/tests/test_history_prefix*.py`
   cannot add a target that A never had. The runner asserts per batch that the
   three conditions produce identical per-class target counts.
 
-Declared before any loss was computed: donors come from each donor's earliest
-record in a seeded hash order that depends only on the recipient id; the first
+Declared in `scripts/history_prefix.py` (`choose_length_matched_donor`, line 108)
+and committed in `007ca54`/`8a26446` before any loss existed: donors come from
+each donor's earliest record in a seeded hash order that depends only on the recipient id; the first
 donor whose prefix tokenizes to **exactly** the recipient's prefix length is
 taken; an example with no match within 200 candidates is **excluded and
 counted**, never approximated.
@@ -110,9 +111,17 @@ that now includes zero.
 
 **The order matters and is stated plainly, because this is a post-hoc protocol
 change.** The no-week variant ran first. The week variant was written *after*
-seeing the no-week day-view anomaly. It was not pre-registered. An earlier
+seeing the no-week day-view anomaly. It was not pre-registered: commit `93f2d0a`
+is where it was added, and that commit's message records the pilot number that
+prompted it. An earlier
 version of this file claimed "neither was selected after seeing the outcome",
 which was **false**, and is corrected here.
+
+The ordering is checkable rather than asserted: commit `93f2d0a` is the commit
+that added `--prefix-include-week`, and its own message records the pilot result
+(+0.42 nats on the day view) that prompted it. The results commit `e755e12`
+follows it. `git log --format='%h %ad %s' -- scripts/history_prefix.py` shows the
+sequence.
 
 What keeps this from being result-shopping, and what the reader should check:
 
@@ -122,8 +131,9 @@ What keeps this from being result-shopping, and what the reader should check:
   visible in the serialization without looking at any loss — and it makes a
   falsifiable prediction that was then borne out: restoring the format should
   move the day-field contrast to zero, and it did.
-* The headline conclusion does not depend on it. The PSY line is byte-identical
-  in both formats, and the psychometric effect is −3.31 (no week) versus −3.23
+* The headline conclusion does not depend on it. The PSY line is built outside
+  the `include_week` branch (`scripts/history_prefix.py` line 86), so it is
+  byte-identical in both formats, and the psychometric effect is −3.31 (no week) versus −3.23
   (week).
 * The primary table shows **r6.2 with week**, which is also the **largest** of
   the four profile effects (−1.304 against −1.099, −1.166, −0.847). It is
