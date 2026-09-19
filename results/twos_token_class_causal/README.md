@@ -45,6 +45,16 @@ tokenization.
 
 ## Result — top5 minus activity-matched control, clustered by receiver user
 
+**Which comparison is primary.** The pre-declared test is `profile_only`
+against `behavior_only`. The day-field and psychometric views are
+**decompositions of the profile view** and are secondary: they may explain a
+primary result, they do not stand in for one. This table leads with the
+day-field row because it is the largest effect, and that ordering was chosen
+**after** seeing the numbers — the pre-declared comparison is stated here so
+that emphasis cannot be mistaken for the test. The pre-declared comparison also
+holds on its own terms: −0.0104 [−0.0204, −0.0014] for profile against
+−0.00008 [−0.00049, +0.00031] for behaviour at α = 1.0.
+
 Negative means the selected features lower that view's loss **more than the
 control set does**. The control is the comparison; a raw delta against zero
 would only say that some patch moved the score.

@@ -99,16 +99,37 @@ Big Five integers are arbitrary per user and are only cheap when copyable. Any
 account of "the model memorized the profile" has to explain why it applies to
 one half of the profile and not the other.
 
-## A confound found, and turned into a control
+## A confound found, and turned into a control — with the order of events stated
 
 In the first run the day-field view moved the **wrong** way under the own-
 profile condition: +0.42 [+0.38, +0.46]. That is a format surprise, not failed
 copying. The prefix omitted `week`, so its DAY line differed in format from
 every DAY line seen in training. Re-running with the earlier record's own week
 value restored moves that contrast to **+0.021 [−0.016, +0.055]** — an interval
-that now includes zero. The psychometric line is identical in both formats,
-which is why conclusion 1 does not depend on this choice. Both variants are
-reported; neither was selected after seeing the outcome.
+that now includes zero.
+
+**The order matters and is stated plainly, because this is a post-hoc protocol
+change.** The no-week variant ran first. The week variant was written *after*
+seeing the no-week day-view anomaly. It was not pre-registered. An earlier
+version of this file claimed "neither was selected after seeing the outcome",
+which was **false**, and is corrected here.
+
+What keeps this from being result-shopping, and what the reader should check:
+
+* Both variants are reported in full, in the replication table above, and
+  neither is suppressed.
+* The change was driven by a *diagnosed mechanism* — a format mismatch that is
+  visible in the serialization without looking at any loss — and it makes a
+  falsifiable prediction that was then borne out: restoring the format should
+  move the day-field contrast to zero, and it did.
+* The headline conclusion does not depend on it. The PSY line is byte-identical
+  in both formats, and the psychometric effect is −3.31 (no week) versus −3.23
+  (week).
+* The primary table shows **r6.2 with week**, which is also the **largest** of
+  the four profile effects (−1.304 against −1.099, −1.166, −0.847). It is
+  presented as primary because restoring the training format is the
+  methodologically correct choice, not because it is largest — but a reader
+  should weigh that coincidence and use the four-row replication table.
 
 ## Limits
 
