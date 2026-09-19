@@ -7,6 +7,13 @@ everything, and recheck rather than assert.
 **Status: IN PROGRESS. Several items are unresolved and are marked so.** This
 file is not a clearance. It is a ledger.
 
+> **The audit's prediction was tested and confirmed the same day.** This file
+> flagged the TWOS package-4 result as exposed on three counts: 16 clusters, 24
+> uncorrected intervals, and a single seed. An independent seed-43 replication
+> then **reversed every sign**, and the directional claim has been withdrawn.
+> See `results/twos_token_class_causal/README.md`. This is the strongest
+> evidence in the project that these exposures are not theoretical.
+
 ## Standard applied
 
 From the primary literature rather than from intuition:
@@ -32,7 +39,7 @@ only if it passes all four and nothing about it is unverifiable.**
 | result family | arithmetic | selection on outcome | multiplicity | test-set reuse | verdict |
 |---|---|---|---|---|---|
 | History-prefix probe (pkg 3) | **verified** | none in-run | 72 uncorrected intervals | inherits project-wide reuse | **QUALIFIED** |
-| TWOS token-class causal (pkg 4) | **verified** | none in-run (config matched) | 24 uncorrected intervals | TWOS reused separately | **QUALIFIED** |
+| TWOS token-class causal (pkg 4) | **verified** | none in-run (config matched) | 24 uncorrected intervals | TWOS reused separately | **CLAIM WITHDRAWN — failed replication** |
 | Time-series probe (pkg 2) | **verified** | none found | 12 uncorrected, 4 clusters | new data build | **QUALIFIED** |
 | r4.2 SAE causal headline | not yet recomputed | **YES — documented** | 12 configs compared | 40+ evaluations | **CONTAMINATED (selection)** |
 | r6.2 SAE causal headline | not yet recomputed | likely same rule | 12 configs | 40+ evaluations | **UNVERIFIED** |
@@ -116,6 +123,56 @@ result can honestly be called clean of everything on internal evidence alone.
 The only instrument that settles it is a genuinely fresh evaluation set or an
 external replication.
 
+## A prediction of this audit, tested
+
+The TWOS package-4 run was marked QUALIFIED on 16 clusters, 24 uncorrected
+intervals and one seed. Replicating it on seed 43 — different adapter, delta
+cache and SAE; identical configuration, data, receivers and candidate-row count
+— produced:
+
+| view | seed 42 | seed 43 |
+|---|---|---|
+| profile only | −0.0074 [−0.0149, −0.0005] | **+0.0109** [+0.0024, +0.0203] |
+| behaviour only | −0.0001 [−0.0005, +0.0002] | **−0.0024** [−0.0053, −0.0003] |
+| full | −0.0032 [−0.0062, −0.0003] | **+0.0030** [+0.0003, +0.0065] |
+
+Every sign reverses, and several intervals exclude zero in **both** directions.
+The directional claim is withdrawn.
+
+The casualty beyond that result: **a monotone dose-response across patch
+strength no longer counts as evidence of a real causal handle here.** It was the
+strongest argument offered for seed 42. Seed 43 produces an equally clean
+dose-response the other way.
+
+## Selection surface, enumerated
+
+A full inventory of the project's reported tables gives the size of the garden.
+Disclosed selection dimensions and their counts:
+
+| dimension | values searched |
+|---|---|
+| SAE configs | 36 (3B pilot), 12 (8B r6.2 frontier), 8 (r4.2, stated in the paper), 4 (r4.2 native search) |
+| layers | {12,18,24} 3B · {18,26,34} r6.2 · {18,26} r4.2 · {12,18,24} TWOS |
+| latent_mult / k | {2,4,8} × {4,8,16,32} |
+| control sets | control1, control3 (found inert), control5_active, control5_matched |
+| context modes | 4–5 per dataset |
+| alphas | 4, all reported |
+| SAE seeds | 42, 43, 44 |
+| adapter seeds | 42, 43 (3B, TWOS); one seed per arm for the 8B factorial and LANL |
+| token-class views | 6 |
+| serialization conditions | 4 CERT factorial · 4 LANL · 3 masking |
+
+**In the project's favour:** the manuscript states its search grids explicitly
+(layers {18,26,34} × m{2,4} × k{4,8}), reports all four alphas and all context
+modes rather than a winner, and `docs/FINAL_TABLE_ROW_POLICY.md` pre-declares
+which result files are paper-safe and which are superseded. That is real
+disclosure, and it is what made this audit possible at all.
+
+**Against:** the r4.2 configuration was still chosen by a rule that reads the
+outcome, and single-seed arms — the 8B factorial and LANL both use one adapter
+seed per condition — are now known to be exactly where this project's
+measurements are unstable.
+
 ## Additional exposures found
 
 * **Multiplicity, uncorrected, everywhere.** The TWOS table reports 24 intervals;
@@ -132,7 +189,12 @@ external replication.
 * **Post-hoc protocol change**, already recorded: the week-prefix variant was
   written after an unfavourable day-view result.
 * **16 clusters (TWOS) and 4 clusters (time-series)** for bootstrap intervals.
-  Both are too few for inferential reading; both are labelled descriptive.
+  Both are too few for inferential reading; both are labelled descriptive. The
+  TWOS replication failure shows what "too few" costs in practice.
+* **Single-seed arms elsewhere.** The 8B CERT factorial and the LANL replication
+  each use one adapter seed per condition. Given that a seed change reversed the
+  TWOS result, these are now priority candidates for replication, not
+  afterthoughts.
 
 ## Checked and found NOT contaminated
 
