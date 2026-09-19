@@ -566,11 +566,38 @@ identical current-day predictions give identical per-class sums (max |Δ| 0.0).
 10 checks in `scripts/tests/test_history_prefix_scoring.py`, including a
 sensitivity check confirming a wrong prefix mask would fail.
 
-**V33 (failed check, no inference).** Anvil has been unreachable for the whole
-session: `ssh: connect to host anvil.rcac.purdue.edu port 22: Operation timed
-out`, on three separate probes. The state of jobs 20816765 (Phase C 3B),
-20827646 (r4.2 portability) and 20827647 (LANL) is **unknown**. Nothing about
-their progress or completion is assumed.
+**V33 (diagnosed).** Anvil is down. The failure is below SSH and identical on
+both accounts, so it is not credential- or account-related:
+
+| check | result |
+|---|---|
+| DNS for anvil.rcac.purdue.edu | resolves, 8 addresses |
+| ICMP ping, 5 packets | 100 % loss |
+| TCP port 22 | not reachable |
+| SSH as x-sangdembay | connect timed out |
+
+Reported by the user as a **full two-day outage from 2026-09-19**, so expect
+service back around **2026-09-21**. The state of jobs 20816765 (Phase C 3B),
+20827646 (r4.2 portability) and 20827647 (LANL) remains **unknown**; nothing
+about their progress or completion is assumed.
+
+**V34 (capability, verified).** The outage does not block Package 3. Aquama
+holds everything it needs: the r4.2 and r6.2 Qwen3-8B adapters
+(`cert-data/{r42,r62}_adapter`, md5 bb68488338a5e283e53bb5df58536fe3 and
+1711135fce2932a3b58c0286f9589ac8), the repaired session JSONL for both
+releases, and Qwen3-8B in the local HF cache. A virtualenv at
+`/data/suramya/insider_mi/lmenv` (transformers 4.53.2, peft 0.14.0,
+bitsandbytes 0.45.3, accelerate 1.6.0, inheriting torch 2.7.1+cu118) loads the
+8B in 4-bit NF4 across the two RTX 3070s. The probe's loader now mirrors
+`score_adapter_examples.py` exactly, so it measures the same model the
+published scorer measured.
+
+**V35 (capability, verified).** Package 4 cannot run on Aquaman for **CERT** --
+the r4.2 token-delta cache and SAE frontier live only on Anvil. It can be
+piloted on **TWOS**, which has a complete pipeline here (adapters, 2.7 GB token
+deltas, SAE frontier at layers 12/18/24, prior causal outputs). TWOS uses the
+same DAY/PSY/SESSIONS/SES line-prefix serialization as CERT, so the existing
+`cert` token-class schema applies unchanged.
 
 | date | what | status |
 |---|---|---|
