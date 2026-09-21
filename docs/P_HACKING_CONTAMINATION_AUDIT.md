@@ -209,14 +209,66 @@ measurements are unstable.
 * **A false-positive trap avoided.** `paper/main.tex:978` matches the wording of
   a withdrawn claim but is a different claim about a different experiment.
 
+## Resolved 2026-09-21, when Anvil returned
+
+Three open items closed by direct check, and one new finding that the checks
+produced.
+
+**CLOSED — the discovery/confirmation split is real and disjoint.**
+`comm -12` on the two user files: **30 discovery users, 30 confirmation users,
+0 overlap, union 60.** The split exists and partitions the malicious users
+exactly.
+
+**CLOSED — the confirmation run really was restricted.** Its job log contains
+the line this audit said was the only thing that would settle it:
+
+```
+[receivers] restricted to 30 users from .../user_splits_r42/confirmation_users.txt
+```
+
+The earlier suspicion, raised because both runs reported `n_positive_receivers:
+1309`, is fully retired: that field is a pre-filter count, and the log proves
+the filter applied.
+
+**CLOSED — adapter provenance verified, not assumed.** Content fingerprints of
+the Anvil and Aquaman adapters:
+
+| adapter | weights digest | verdict |
+|---|---|---|
+| r4.2 | `49bbbd4b0bf0cfe7…` both sides | **identical weights and configuration** |
+| r6.2 | `5a6c2ffa1ffa8ea6…` both sides | **identical weights and configuration** |
+
+Work package 3 ran on the same adapters that produced the published numbers.
+That criterion now passes for every result built on them.
+
+**NEW FINDING — the split protected feature selection but NOT configuration
+selection.** Checking `[receivers] restricted` across the **25** archived causal
+job logs:
+
+| runs | receiver restriction |
+|---|---|
+| job 19379904 (the confirmation run) | restricted to 30 users |
+| **the other 24, including the entire configuration search** | **ALL receivers** |
+
+So the layer/latent_mult/k choice — 1 of 12 in the frontier, then 1 of 4 in the
+native search — was made from runs that scored **all 60 malicious users**,
+including the 30 later designated confirmation. The confirmation run is a valid
+held-out test of the *features*, which were re-selected on discovery users, and
+is **not** a held-out test of the *configuration*, which had already seen those
+users.
+
+This is weaker than "contaminated" and stronger than "clean". Stated precisely:
+the r4.2 mechanistic headline rests on features selected on held-out-disjoint
+users, evaluated on 30 users never used for feature selection, under a
+configuration chosen with those users visible.
+
 ## Open items, with what would settle each
 
 | item | what settles it | blocked on |
 |---|---|---|
-| Discovery/confirmation disjointness | `comm -12` the two user files | Anvil |
-| Whether the confirmation run was actually restricted | the `[receivers] restricted to…` log line | Anvil |
-| Whether frontier selectivity proxies used discovery users only | the frontier job's user file | Anvil |
-| r4.2 scoring-mitigation raw scores | re-score and compare | Anvil |
+| Whether frontier selectivity proxies used discovery users only | the frontier job's user file | **answered indirectly: no causal job except the confirmation restricted receivers** |
+| Outputs of jobs 20827646 (r4.2 portability) and 20827647 (LANL) | reading them | the other account — `/anvil/scratch/x-bbhusal1` is mode 700 and unreadable from x-sangdembay |
+| r4.2 scoring-mitigation raw scores | re-score and compare | Anvil — now reachable, not yet run |
 | LANL replication | not yet examined | — |
 | r6.2 configuration selection rule | find the equivalent handoff doc | — |
 

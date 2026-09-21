@@ -30,6 +30,12 @@ python3 scripts/adapter_fingerprint.py COMPARE \
   results/provenance/adapter_fingerprints/aquaman_r42.json anvil_r42.json
 ```
 
-Exit status 0 means the package 3 numbers were produced on the published
-adapter. **Until that runs, package 3's provenance is "assumed", not
-"verified", and must be labelled that way anywhere it is cited.**
+**RESOLVED 2026-09-21.** Both comparisons ran and both returned exit status 0:
+
+| adapter | Aquaman | Anvil | verdict |
+|---|---|---|---|
+| r4.2 | `49bbbd4b0bf0cfe7…` | `49bbbd4b0bf0cfe7…` | identical weights and configuration |
+| r6.2 | `5a6c2ffa1ffa8ea6…` | `5a6c2ffa1ffa8ea6…` | identical weights and configuration |
+
+Work package 3's numbers were produced on the published adapters. The provenance
+label moves from **assumed** to **verified**.
