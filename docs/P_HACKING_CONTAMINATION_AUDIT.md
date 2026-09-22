@@ -43,8 +43,8 @@ only if it passes all four and nothing about it is unverifiable.**
 | Time-series probe (pkg 2) | **verified** | none found | 12 uncorrected, 4 clusters | new data build | **QUALIFIED** |
 | r4.2 SAE causal headline | not yet recomputed | **YES — documented** | 12 configs compared | 40+ evaluations | **CONTAMINATED (selection)** |
 | r6.2 SAE causal headline | not yet recomputed | likely same rule | 12 configs | 40+ evaluations | **UNVERIFIED** |
-| r4.2 scoring-mitigation (pkg 1) | fold CSVs reproduce to 3.6e-15 | n/a | 60 folds | raw scores never re-verified | **QUALIFIED** |
-| LANL replication | not yet checked | unknown | unknown | unknown | **UNVERIFIED** |
+| r4.2 scoring-mitigation (pkg 1) | **raw scores recomputed at batch 1; headline reproduces** (0.6525 → 0.8633) | n/a | 60 folds | inherits project-wide reuse | **QUALIFIED** |
+| LANL replication | **recomputed at batch 1; reproduces cache to 3.4e-04** | none in-run | 4 views × 2 pools | one seed, 23 unseen users | **QUALIFIED** |
 
 **No family is marked CLEAN.** See "Why nothing is clean" below.
 
@@ -268,8 +268,6 @@ configuration chosen with those users visible.
 |---|---|---|
 | Whether frontier selectivity proxies used discovery users only | the frontier job's user file | **answered indirectly: no causal job except the confirmation restricted receivers** |
 | Outputs of jobs 20827646 (r4.2 portability) and 20827647 (LANL) | reading them | the other account — `/anvil/scratch/x-bbhusal1` is mode 700 and unreadable from x-sangdembay |
-| r4.2 scoring-mitigation raw scores | re-score and compare | Anvil — now reachable, not yet run |
-| LANL replication | not yet examined | — |
 | r6.2 configuration selection rule | find the equivalent handoff doc | — |
 
 ## Actions taken

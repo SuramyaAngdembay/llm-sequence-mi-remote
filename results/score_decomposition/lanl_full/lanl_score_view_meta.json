@@ -1,0 +1,66 @@
+{
+  "run_name": "lanl_full",
+  "class_scores": "/anvil/scratch/x-bbhusal1/decomp/lanl/full/class_scores.parquet",
+  "data_dir": "/anvil/scratch/x-bbhusal1/lanl/data/full",
+  "views": {
+    "full": [
+      "ID_USER",
+      "ID_HOST",
+      "BEHAV",
+      "HOUR",
+      "OTHER",
+      "SPECIAL"
+    ],
+    "identity_only": [
+      "ID_USER",
+      "ID_HOST"
+    ],
+    "behavior_only": [
+      "BEHAV",
+      "HOUR",
+      "OTHER",
+      "SPECIAL"
+    ],
+    "behavior_no_hour": [
+      "BEHAV",
+      "OTHER",
+      "SPECIAL"
+    ],
+    "full_cached": []
+  },
+  "n_windows": 52973,
+  "seen_windows": 22563,
+  "unseen_windows": 30410,
+  "bootstrap": "cluster bootstrap over users within each pool; identical draws across views",
+  "protocol_note": "seen/unseen membership read from eval.jsonl (md5 leave-users-out, fold 4 unseen); never recomputed",
+  "scope_note": "identity fields remain in the context for every view; the behaviour view removes only their direct score contribution",
+  "published": {
+    "mode": "full",
+    "seen_ap": 0.1769,
+    "seen_auc": 0.9489,
+    "seen_pos": 234,
+    "seen_n": 22563,
+    "unseen_ap": 0.0133,
+    "unseen_auc": 0.4966,
+    "unseen_pos": 198,
+    "unseen_n": 30410
+  },
+  "reproduces_published_full": {
+    "seen_auc": [
+      0.9489,
+      0.949
+    ],
+    "unseen_auc": [
+      0.4966,
+      0.4957
+    ],
+    "seen_ap": [
+      0.1769,
+      0.1764
+    ],
+    "unseen_ap": [
+      0.0133,
+      0.0133
+    ]
+  }
+}

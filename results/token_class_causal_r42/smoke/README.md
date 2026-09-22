@@ -15,7 +15,8 @@ rows by `scripts/verify_token_class_smoke.py`, not inferred from exit status.
 | receivers restricted to held-out users | log line + 12 distinct users among 24 receivers | confirmed |
 
 The cache discrepancy is the same order as on TWOS (1.045e-02) and larger than
-the effects the full run will measure, which is why rule 1 was fixed before
+the effects the full run will measure, which is why rule 1 of
+`docs/PREREGISTRATION_CERT_PACKAGE4.md` (commit `c0131c4`) was fixed before
 either run.
 
 Token-class shares of scored targets — DAY 10.9 %, PSY 7.9 %, SESCOUNT 3.1 %,
@@ -33,5 +34,5 @@ requested without saying so.
 ## Full run
 
 Job **20840922**, `gpu` partition, 24 h wall, submitted 2026-09-21 with every
-parameter as pre-registered. Output:
+parameter as recorded in `docs/PREREGISTRATION_CERT_PACKAGE4.md` (commit `c0131c4`). Output:
 `outputs/token_class_causal_r42_confirmation/l26_m02_k04_top5_control5_active`.

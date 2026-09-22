@@ -136,3 +136,47 @@ mixing the two populations.
 
 The bootstrap resamples the 60 malicious users only: it does not resample the
 79 benign users and says nothing about training-seed variation.
+
+
+## Raw-score re-verification at batch 1 (job 20827646, 2026-09-18; collected 2026-09-22)
+
+The contamination audit listed one item for this result as owed: *"raw scores
+not re-verified"* — the fold CSVs reproduced to 3.6e-15 but the scores they
+were built from had never been recomputed. That is now done. All 40,519 rows
+were re-scored at **batch size 1** on an A100, through the same token-class
+scorer, and every view was re-evaluated. Artifacts in `batch1_recompute/`.
+
+**Primary comparison**, as in the original task specification: behaviour-only
+against full, on user ROC, fold-aligned over the 60 malicious users. Every
+other row is secondary.
+
+**The headline holds on recomputed raw scores.**
+
+| view | user ROC, published (cached batch-56) | user ROC, recomputed batch 1 | 95 % interval (60 clusters) |
+|---|---|---|---|
+| full | 0.653 | **0.6525** | [0.576, 0.723] |
+| behaviour only | 0.863 | **0.8633** | [0.832, 0.893] |
+| behaviour, SES lines only | — | 0.8527 | [0.819, 0.885] |
+| profile only | — | 0.4728 | — |
+
+Paired contrast, behaviour-only minus full, cluster bootstrap over the 60
+malicious users:
+
+| metric | Δ | 95 % interval | draws not favouring behaviour-only |
+|---|---|---|---|
+| user ROC | **+0.211** | [+0.157, +0.266] | **0 of 10,000** |
+| day ROC | +0.143 | [+0.066, +0.223] | 0.01 % |
+| within-user ROC | +0.084 | [+0.046, +0.125] | 0 |
+| held-out user rank (lower is better) | −16.7 | [−21.0, −12.4] | — |
+| user top-1 % recall | +0.067 | [+0.017, +0.133] | 1.5 % |
+
+The batch-56 cache and the batch-1 recomputation differ by a mean absolute
+0.00996 nats per row (rank correlation 0.9926), the batching drift already
+documented above. On the headline metric that drift is worth 0.0008 of user ROC
+(0.6517 cached against 0.6525 recomputed). Structural gate: partition error
+4.0e-13, mean-reconstruction error 0.
+
+**Status change.** This result moves from *"fold summaries verified, raw scores
+assumed"* to *"raw scores recomputed at batch 1 and the headline reproduces."*
+It remains subject to the project-wide caveat that the evaluation set has been
+consulted many times; nothing internal clears that.
