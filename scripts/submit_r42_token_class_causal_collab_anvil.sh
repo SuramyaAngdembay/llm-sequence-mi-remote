@@ -23,10 +23,16 @@ MODE="${1:-smoke}"
 S=/anvil/scratch/x-sangdembay/pkg4_share          # staged, world-readable
 OUTROOT=/anvil/scratch/x-bbhusal1/pkg4_out        # this account's own space
 
-export REPO_DIR=$S/repo
+# The job must run from a directory THIS account can write (logs/, sbatch
+# output). The code (33 MB) is mirrored into this account's scratch; the data
+# (272 GB) stays in the owner's share and is only read.
+export REPO_DIR=$OUTROOT/repo
+mkdir -p "$REPO_DIR"
+rsync -a --delete "$S/repo/" "$REPO_DIR/"
+
 export CONDA_ENV=/anvil/scratch/x-bbhusal1/conda_envs/cert-qlora
 export HF_HOME=/anvil/scratch/x-bbhusal1/hf_cache
-export CONFIG=$S/repo/configs/qwen3_8b_qlora_session_targeted.yaml
+export CONFIG=$REPO_DIR/configs/qwen3_8b_qlora_session_targeted.yaml
 export DATA_DIR=$S/session_jsonl_r42
 export ADAPTER_DIR=$S/adapter
 export EXTRACT_DIR=$S/token_deltas
