@@ -11,8 +11,8 @@
 # and HF cache differ.
 #
 # Environment difference to record: this account's env is transformers 5.16 /
-# torch 2.5.1 / peft 0.20, against 4.53 / 2.7 / 0.14 for the smoke on the owner
-# account. Base and patched scores are computed within one run, so the CONTRAST
+# torch 2.5.1 / peft 0.20, against 4.51.3 on the owner account. Tokenization
+# verified identical across the two (same vocab, same ids on a CERT sample). Base and patched scores are computed within one run, so the CONTRAST
 # is unaffected; absolute NLLs may differ from the published run.
 #
 # Usage:
@@ -31,7 +31,11 @@ mkdir -p "$REPO_DIR"
 rsync -a --delete "$S/repo/" "$REPO_DIR/"
 
 export CONDA_ENV=/anvil/scratch/x-bbhusal1/conda_envs/cert-qlora
+# This cache has models--* directly under it, with no hub/ subdirectory, so
+# HF_HOME alone does not resolve the base model offline. Caught by a CPU
+# check before any GPU time was spent.
 export HF_HOME=/anvil/scratch/x-bbhusal1/hf_cache
+export HF_HUB_CACHE=/anvil/scratch/x-bbhusal1/hf_cache
 export CONFIG=$REPO_DIR/configs/qwen3_8b_qlora_session_targeted.yaml
 export DATA_DIR=$S/session_jsonl_r42
 export ADAPTER_DIR=$S/adapter
