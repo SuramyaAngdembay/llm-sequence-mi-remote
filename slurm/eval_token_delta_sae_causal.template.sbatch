@@ -22,7 +22,9 @@ module load conda/2026.03
 CONDA_ENV="${CONDA_ENV:-/anvil/projects/x-cis230270/x-sangdembay/conda_envs/cert-qlora}"
 conda activate "$CONDA_ENV"
 
-export HF_HOME=/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/hf_cache
+# Overridable: the collaborator account cannot read this project path, so runs
+# charged to its allocation point HF_HOME at its own cache.
+export HF_HOME="${HF_HOME:-/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/hf_cache}"
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export TOKENIZERS_PARALLELISM=false
