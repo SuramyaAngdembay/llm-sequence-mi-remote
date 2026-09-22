@@ -304,9 +304,16 @@ def build_all_candidate_pairs(
     out: Dict[Tuple[str, str], List[Tuple[int, int]]] = {}
     receiver_indices: np.ndarray | None = None
     if max_receivers > 0:
-        positive_idx = example_meta.loc[example_meta["y"] == 1, "row_idx"].to_numpy(
-            dtype=int
-        )
+        # The shared receiver sample must be drawn from the receivers that are
+        # actually ELIGIBLE. Sampling from all positives and restricting to
+        # `receiver_users` afterwards made build_candidate_pairs look up row
+        # indices that its own filter had just removed (KeyError, job 20838328),
+        # and in any variant where the lookup did not raise it would silently
+        # have scored fewer receivers than requested.
+        positives = example_meta.loc[example_meta["y"] == 1]
+        if receiver_users is not None:
+            positives = positives[positives["user_id"].astype(str).isin(receiver_users)]
+        positive_idx = positives["row_idx"].to_numpy(dtype=int)
         if len(positive_idx) > max_receivers:
             receiver_indices = np.sort(
                 np.random.default_rng(seed).choice(
@@ -432,11 +439,17 @@ def build_candidate_pairs(
     if receiver_users is not None:
         recv_df = recv_df[recv_df["user_id"].astype(str).isin(receiver_users)].copy()
     if receiver_indices is not None:
-        recv_df = (
-            recv_df.set_index("row_idx")
-            .loc[np.asarray(receiver_indices, dtype=int)]
-            .reset_index()
-        )
+        want = np.asarray(receiver_indices, dtype=int)
+        have = set(recv_df["row_idx"].to_numpy(dtype=int).tolist())
+        missing = [int(i) for i in want if int(i) not in have]
+        if missing:
+            raise ValueError(
+                f"{len(missing)} of {len(want)} shared receiver rows are not eligible "
+                f"receivers here (first few: {missing[:5]}). The shared sample was "
+                "drawn from a wider pool than this call allows -- usually because a "
+                "receiver-user restriction was applied after sampling."
+            )
+        recv_df = recv_df.set_index("row_idx").loc[want].reset_index()
     else:
         recv_indices = recv_df["row_idx"].to_numpy(dtype=int)
         if max_receivers > 0 and len(recv_indices) > max_receivers:
