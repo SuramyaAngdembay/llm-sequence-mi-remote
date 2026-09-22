@@ -605,3 +605,33 @@ same DAY/PSY/SESSIONS/SES line-prefix serialization as CERT, so the existing
 | 2026-09-19 | Package 2: shared metric core, checkpoint gate, multi-model evaluator on one eligible set, corrected README | **done** (V25–V30) |
 | 2026-09-19 | Package 3: `run_history_prefix_probe.py` + construction and scoring tests | code done and tested offline (V32); **run blocked on Anvil** (V33) |
 | 2026-09-19 | Package 4: per-class accumulation in `eval_token_delta_sae_causal.py`, submitter with smoke mode | code done and tested offline (V31); **run blocked on Anvil** (V33) |
+
+
+## 2026-09-22 — Phase C 3B trained; scoring and the CERT package-4 run submitted
+
+**V36 (verified).** Phase C 3B training (job 20816765, collaborator allocation)
+**completed**, exit 0, 13 h 48 m. The adapter trained with the profile-masked
+loss is at `p1/adapter_targetmask/adapter`; `masked_target_frac = 0.2299`, pool
+159,064, "identical recipe to the factorial arms". Scoring did not run as part
+of the job by design.
+
+**V37 (submitted).** Phase C scoring submitted as job **20861905** on
+cis260991-gpu: the exact batch-1 recipe of `decomp_run2.sh` on the identical
+pool, structural gate first, then the full pool, then `eval_score_views.py`.
+No numerical reproduction gate because no cached score exists for this
+adapter. Expected ~5 h from the 3B full-arm throughput of 9.06 ex/s.
+
+**V38 (submitted).** CERT package-4 confirmation run submitted as job
+**20861865** (gpu, 24 h) with smoke **20861864** (gpu-debug), both on
+cis260991-gpu, after cis230270-gpu was found exhausted (2.2 SU). Inputs are
+staged in the owner's world-readable scratch; the staged adapter is
+fingerprint-identical to the published one. A CPU-only validation on the
+collaborator environment caught and fixed a cache-path defect (`HF_HUB_CACHE`)
+that would have failed the run at model load, and confirmed tokenization is
+identical across the two environments.
+
+| date | what | status |
+|---|---|---|
+| 2026-09-22 | Phase C 3B scoring (20861905) | queued, ~5 SU |
+| 2026-09-22 | CERT package-4 smoke (20861864) + full (20861865) | queued, ~24 SU |
+| 2026-09-22 | Outputs of 20827646 (r4.2 portability) and 20827647 (LANL) | completed on the collaborator account; **not yet collected** |
