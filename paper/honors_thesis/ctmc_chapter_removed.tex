@@ -1,0 +1,334 @@
+% Removed from thesis_mechinterp.tex on 2026-09-23 when the thesis was reframed around
+% dimensionality reduction. Kept verbatim so it can be restored or reused.
+% Section 3.6 (why -log p measures surprise) was NOT dropped: it moved into the
+% language-model chapter. Everything else below was removed.
+
+%%%%%%%%%% (1) the CTMC chapter %%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CHAPTER III (CTMC) -- original text unchanged; four sections added (marked NEW)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Temporal Behavioral Modeling via Continuous-Time Markov Chains}
+\label{ch:ctmc}
+
+\section{Overview and Motivation}
+While Principal Component Analysis provides a powerful mechanism for identifying anomalies in a flattened, static feature space, human behavior is inherently sequential. Insider threats are rarely defined by a single isolated action; rather, they emerge through patterns of behavior over time, such as normal daytime activity followed by unusual after-hours access, unexpected device usage, or abnormal file exfiltration.
+
+To model this behavioral evolution, we frame the user's activity as a Continuous-Time Markov Chain (CTMC). A CTMC represents behavior as movement through a finite set of interpretable states over continuous time. This approach respects the fact that user activity logs are discrete, state-based, and irregularly timed, allowing us to mathematically capture both how a user transitions between actions and how those transitions unfold across the working day. Furthermore, rather than operating on raw event streams directly, we convert this behavior into interpretable CTMC summaries for each specified time period (e.g., daily or weekly), which provides a stable signature for downstream anomaly detection.
+
+\section{Semantic Behavioral States}
+A CTMC requires a finite state space, denoted as $\mathcal{S}=\{s_1, s_2, \dots, s_K\}$. In the context of insider threat detection, a state is not a physical location, but a human-readable behavior label derived from a raw log event.
+
+These semantic states encode the action taking place and its relevant organizational or temporal context. Examples of states include:
+\begin{itemize}
+    \item \texttt{logon:workhours} vs. \texttt{logon:afterhours}
+    \item \texttt{file:copy}
+    \item \texttt{device:connect} vs. \texttt{device:disconnect}
+    \item \texttt{email:internal} vs. \texttt{email:external}
+    \item \texttt{http:work}
+\end{itemize}
+By abstracting raw logs into these semantic states, we translate a complex stream of metadata into an ordered sequence of meaningful behaviors.
+
+\section{Event Representation and Time Deltas}
+For any given user $u$, their events are sorted chronologically by timestamp, resulting in an ordered timeline sequence:
+$$ (s_1, t_1), (s_2, t_2), \dots, (s_n, t_n) $$
+Each consecutive pair of events produces a transition $s_k \rightarrow s_{k+1}$. The elapsed time between these events is given by:
+$$ \Delta t_k = t_{k+1} - t_k $$
+Unlike discrete-time models, the CTMC natively incorporates $\Delta t_k$, distinguishing between a user who sends an email three minutes after logging in versus a user who transfers a file eleven hours after their last recorded action.
+
+\section{Standard CTMC Formulation}
+A continuous-time Markov chain is a stochastic process $X(t) \in \mathcal{S}$ defined by a generator matrix $Q$:
+$$
+Q =
+\begin{bmatrix}
+q_{11} & q_{12} & \cdots & q_{1K} \\
+q_{21} & q_{22} & \cdots & q_{2K} \\
+\vdots & \vdots & \ddots & \vdots \\
+q_{K1} & q_{K2} & \cdots & q_{KK}
+\end{bmatrix}
+$$
+For $i \neq j$, the value $q_{ij} \ge 0$ represents the transition rate from state $i$ to state $j$. The diagonal entries are defined such that the rows sum to zero:
+$$ q_{ii} = -\sum_{j \neq i} q_{ij} $$
+The total exit rate from state $i$ is $\lambda_i = \sum_{j \neq i} q_{ij}$. The transition probability matrix after elapsed time $\Delta t$ is computed via the matrix exponential:
+$$ P(\Delta t) = e^{Q\Delta t} $$
+where $P_{ij}(\Delta t)$ represents the probability of being in semantic state $j$ after elapsed time $\Delta t$, given that the user was previously in state $i$.
+
+\section{Empirical Estimation and Surprisal}
+Because insider threat datasets are often large and highly sparse, true analytical transition rates are difficult to obtain. Instead, transition behavior is estimated empirically from observed data. For each source state $i$ and target state $j$, we count the occurrences $N_{ij} = \#(s_t = i, s_{t+1} = j)$ and the total outgoing transitions $N_i = \sum_j N_{ij}$.
+
+To account for rare but benign transitions, we apply a smoothed empirical transition probability:
+$$ \hat{P}(j|i) = \frac{N_{ij} + \alpha}{N_i + \alpha K} $$
+where $\alpha$ is a smoothing parameter and $K$ is the total number of states.
+
+From this, we define the \textit{surprisal} of a behavioral transition. Surprisal measures how mathematically unexpected a user's action is, defined as:
+$$ \text{surprisal}(i \rightarrow j) = -\log \hat{P}(j|i) $$
+A common daily routine yields high probability and low surprisal, whereas an unseen or rare behavioral leap (e.g., moving directly from a mundane web browsing state to a massive internal file copy) yields an exceptionally high surprisal score.
+
+%%%%% NEW SECTION (why the negative logarithm is the right measure of surprise)
+\section{Why the Negative Logarithm Measures Surprise}
+\label{sec:why-log}
+Surprisal, $-\log p$, is the central quantity of this chapter, of \chref{ch:lm} and of \chref{ch:mech}, so
+it is worth seeing why this particular function measures how surprising an event is, rather
+than, say, $1-p$ or $1/p$. We list what a measure of surprise $S(p)$ for an event of
+probability $p$ ought to satisfy, and show that two natural requirements leave only the
+logarithm. This is the measure of information introduced by Shannon \cite{shannon1948}.
+
+\subsection{Two requirements}
+\begin{enumerate}
+\item[(R1)] \textbf{Rarer is more surprising.} $S(p)$ decreases as $p$ increases.
+\item[(R2)] \textbf{Surprises of independent events add.} If two independent events $A$ and
+$B$ both happen, the combined surprise should be the surprise of $A$ plus the surprise of $B$.
+Because independence means $P(A \text{ and } B) = P(A)\,P(B)$, this says
+\begin{equation}
+S(pq) \;=\; S(p) + S(q) \qquad \text{for all } p, q \in (0, 1].
+\label{eq:surprise-additive}
+\end{equation}
+\end{enumerate}
+
+\subsection{The requirements force the logarithm}
+Write each probability as $p = e^{-x}$, that is $x = -\ln p \ge 0$, and define
+$g(x) = S(e^{-x})$. Then \eqref{eq:surprise-additive} becomes
+\[
+g(x + y) \;=\; S\bigl(e^{-x}e^{-y}\bigr) \;=\; S\bigl(e^{-x}\bigr) + S\bigl(e^{-y}\bigr)
+\;=\; g(x) + g(y),
+\]
+Cauchy's functional equation. We solve it one step at a time.
+\begin{enumerate}
+\item Setting $x = y = 0$ gives $g(0) = 2g(0)$, so $g(0) = 0$, that is $S(1) = 0$.
+\item Adding $x$ to itself $n$ times gives $g(nx) = n\,g(x)$ for every positive integer $n$.
+\item Taking $x = 1/m$ in step 2 with $n = m$ gives $g(1) = m\,g(1/m)$, so
+$g(1/m) = g(1)/m$, and then $g(n/m) = n\,g(1/m) = \tfrac{n}{m}\,g(1)$. Writing $c = g(1)$,
+this means $g(r) = c\,r$ for every positive rational number $r$.
+\item By (R1), $S$ decreases in $p$, so $g$ increases in $x$. For any real $x$, pick
+rationals $r < x < r'$; then $c\,r = g(r) \le g(x) \le g(r') = c\,r'$. Letting $r$ and $r'$
+approach $x$ squeezes $g(x) = c\,x$.
+\end{enumerate}
+Converting back with $x = -\ln p$,
+\begin{equation}
+S(p) \;=\; c\,(-\ln p) \;=\; -c \ln p, \qquad c > 0 .
+\label{eq:surprise-log}
+\end{equation}
+The constant $c$ only chooses the unit. With $c = 1$ the unit is the \emph{nat}, the natural
+logarithm used throughout this thesis; with $c = 1/\ln 2$ the formula becomes
+$S(p) = -\log_2 p$, measured in \emph{bits}.
+
+\subsection{What the formula says}
+\begin{itemize}
+\item $S(1) = 0$: an event that was certain carries no surprise.
+\item $S(p) \to \infty$ as $p \to 0$: an event the model thought impossible would be infinitely
+surprising. This is why the CTMC estimate is smoothed (Section~\ref{sec:ctmc-mle}).
+\item \textbf{Equal ratios, equal steps.} Every tenfold drop in probability adds the same
+amount, $\ln 10 = 2.3026$ nats. The alternatives do not behave this way:
+\end{itemize}
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+$p$ & $1-p$ & $1/p$ & $-\ln p$ \\
+\midrule
+0.1   & 0.9   & 10   & 2.3026 \\
+0.01  & 0.99  & 100  & 4.6052 \\
+0.001 & 0.999 & 1000 & 6.9078 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The measure $1-p$ barely separates a 1-in-100 event from a 1-in-1000 event
+($0.99$ against $0.999$). The measure $1/p$ separates them, but it multiplies instead of adding
+when independent events combine, violating (R2). Only $-\ln p$ does both.
+
+\subsection{A worked example: coin flips}
+A fair coin lands heads with $p = 1/2$, a surprise of $-\log_2(1/2) = 1$ bit. Ten heads in a
+row have probability $(1/2)^{10} = 1/1024$, so
+\[
+S = -\log_2 \tfrac{1}{1024} = 10 \text{ bits} = 10 \times (1 \text{ bit}).
+\]
+Ten independent flips carry ten times the surprise of one: requirement (R2) at work. In nats
+the same event costs $10 \ln 2 = 10 \times 0.6931 = 6.9315$, nearly the $6.9078$ of a
+1-in-1000 event in the table, as it should be, since $1/1024$ is close to $1/1000$.
+
+\subsection{Surprisal and the negative log-likelihood}
+In statistics, the probability that a model assigns to the data actually observed is called
+the \emph{likelihood}; its logarithm is the \emph{log-likelihood}, which is never positive
+because probabilities are at most 1; and its negative is the \emph{negative log-likelihood}.
+For a single observed event, the negative log-likelihood is exactly its surprisal. Fitting a
+model by maximum likelihood, as in Section~\ref{sec:ctmc-mle}, is therefore the same as making
+the observed data as unsurprising as possible.
+
+%%%%% NEW SECTION (links the counting estimate to the objective used in Chapter V)
+\section{Why the Counting Estimate Minimizes Surprisal}
+\label{sec:ctmc-mle}
+Before smoothing ($\alpha = 0$), the estimate $\hat{P}(j\mid i) = N_{ij}/N_i$ is not an
+arbitrary choice: it is the first-order transition model under which the benign training
+data is least surprising. Write $P_{ij} = P(j \mid i)$ for a candidate model. Each observed
+transition $i \to j$ contributes its surprisal $-\log P_{ij}$ once, so the total surprisal of
+the training transitions is
+\begin{equation}
+J(P) \;=\; \sum_{i=1}^{K}\sum_{j=1}^{K} N_{ij}\,\bigl(-\log P_{ij}\bigr).
+\label{eq:ctmc-total-surprisal}
+\end{equation}
+Every row must remain a probability distribution, $\sum_{j} P_{ij} = 1$. Using one Lagrange
+multiplier $\beta_i$ per row,
+\[
+\mathcal{L}(P,\beta) \;=\; \sum_{i}\sum_{j} N_{ij}\bigl(-\log P_{ij}\bigr)
+\;+\; \sum_{i} \beta_i\Bigl(\sum_{j} P_{ij} - 1\Bigr).
+\]
+Differentiating with respect to a single entry $P_{ij}$,
+\[
+\frac{\partial \mathcal{L}}{\partial P_{ij}} \;=\; -\frac{N_{ij}}{P_{ij}} + \beta_i \;=\; 0
+\quad\Longrightarrow\quad
+P_{ij} \;=\; \frac{N_{ij}}{\beta_i}.
+\]
+Substituting into the row constraint,
+\[
+\sum_{j} \frac{N_{ij}}{\beta_i} \;=\; 1
+\quad\Longrightarrow\quad
+\beta_i \;=\; \sum_{j} N_{ij} \;=\; N_i,
+\]
+and therefore
+\begin{equation}
+\hat{P}_{ij} \;=\; \frac{N_{ij}}{N_i}.
+\label{eq:ctmc-mle}
+\end{equation}
+Because $-\log$ is convex, $J$ is convex in $P$, and this stationary point is its minimum
+(cells with $N_{ij}=0$ receive probability zero). The counting estimate is therefore the
+maximum-likelihood estimate: among all first-order transition models, it makes benign
+behavior least surprising. Smoothing with $\alpha > 0$ adds $\alpha$ pseudo-counts to every
+cell, so that a transition never seen in training receives a large but finite surprisal
+instead of $-\log 0 = \infty$. \chref{ch:lm} fits a far more flexible model by
+minimizing exactly this kind of total surprisal.
+
+%%%%% NEW SECTION
+\section{Surprisal of a Whole Period}
+\label{sec:ctmc-period}
+A period (for example, one day) with ordered states $s_1,\dots,s_n$ contains $n-1$
+transitions. Its average surprisal is
+\begin{equation}
+\bar{\ell} \;=\; \frac{1}{n-1}\sum_{k=1}^{n-1} -\log \hat{P}(s_{k+1}\mid s_k).
+\label{eq:ctmc-avg-surprisal}
+\end{equation}
+A routine period made of common transitions has a small $\bar{\ell}$; a period containing
+rare transitions has a large $\bar{\ell}$. Averaging rather than summing keeps busy and
+quiet periods on the same scale. The same average, computed over the tokens of a text rather
+than over transitions, is the anomaly score of \chref{ch:lm}.
+
+%%%%% NEW SECTION (worked example in the style of the PCA example)
+\section{A Step-by-Step Numerical Example of Transition Surprisal}
+
+Consider $K=3$ states: state 1 = \texttt{logon:workhours}, state 2 = \texttt{email:internal},
+and state 3 = \texttt{file:copy}.
+
+\subsection{Step 1: Count Transitions in Benign Training Data}
+
+\begin{center}
+\begin{tabular}{cccc|c}
+\toprule
+from $\backslash$ to & 1 & 2 & 3 & $N_i$ \\
+\midrule
+1 & 0 & 6 & 1 & 7 \\
+2 & 1 & 3 & 0 & 4 \\
+3 & 2 & 0 & 0 & 2 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Step 2: Smoothed Transition Probabilities}
+
+With $\alpha = 1$ and $K = 3$, each row uses $\hat{P}(j\mid i) = (N_{ij}+1)/(N_i+3)$:
+\[
+\text{row 1: } \tfrac{(0+1,\;6+1,\;1+1)}{7+3} = (0.100,\; 0.700,\; 0.200),
+\]
+\[
+\text{row 2: } \tfrac{(1+1,\;3+1,\;0+1)}{4+3} = (0.2857,\; 0.5714,\; 0.1429),
+\]
+\[
+\text{row 3: } \tfrac{(2+1,\;0+1,\;0+1)}{2+3} = (0.600,\; 0.200,\; 0.200).
+\]
+Each row sums to 1.
+
+\subsection{Step 3: Surprisal of Individual Transitions}
+
+Using natural logarithms (units: \emph{nats}),
+\begin{gather*}
+-\log 0.700 = 0.3567, \qquad -\log 0.5714 = 0.5596, \\
+-\log 0.2857 = 1.2528, \qquad -\log 0.200 = 1.6094.
+\end{gather*}
+
+\subsection{Step 4: Average Surprisal of Two Periods}
+
+\emph{Day 1 (routine):} $1 \to 2 \to 2 \to 1$, with transitions $1\to2$, $2\to2$, $2\to1$:
+\[
+\bar{\ell}_1 = \frac{0.3567 + 0.5596 + 1.2528}{3} = \frac{2.1691}{3} = 0.7230.
+\]
+\emph{Day 2 (unusual):} $1 \to 3 \to 3 \to 3$, with transitions $1\to3$, $3\to3$, $3\to3$:
+\[
+\bar{\ell}_2 = \frac{1.6094 + 1.6094 + 1.6094}{3} = 1.6094.
+\]
+Day 2 is about $1.6094/0.7230 = 2.23$ times as surprising per transition as Day 1.
+
+\subsection{Step 5: Why Smoothing Is Needed}
+
+Without smoothing ($\alpha=0$), row 3 of \eqref{eq:ctmc-mle} gives
+$\hat{P}(3\mid 3) = 0/2 = 0$, so the repeated file copy on Day 2 would have surprisal
+$-\log 0 = \infty$. A single never-seen transition would then dominate every score. With
+$\alpha = 1$ it costs $1.6094$ nats: large, but comparable with other evidence.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{One-Class Anomaly Scoring}
+To evaluate the CTMC approach against the static PCA method, we utilize a one-class unsupervised anomaly detection paradigm. Instead of relying on complex deep learning reconstruction networks, we establish a robust statistical baseline using the CTMC-derived summaries for a given time period.
+
+After standardization, the benign training distribution of these CTMC features is summarized by a per-feature mean $\mu_j$ and standard deviation $\sigma_j$. The anomaly score for a user's summarized time window $x$ is calculated as the mean squared standardized deviation:
+$$ \text{score}(x) = \frac{1}{d} \sum_{j=1}^{d} \left( \frac{x_j - \mu_j}{\sigma_j + \epsilon} \right)^2 $$
+where $d$ is the number of features and $\epsilon$ is a small constant for numerical stability. This formulation tests the core hypothesis of this chapter: that explicit CTMC behavioral dynamics provide a sufficiently strong mathematical representation to identify anomalous users without requiring complex supervised classifiers.
+
+%%%%% NEW SECTION (bridge to Chapter V)
+\section{From One Step of Memory to Full Context}
+\label{sec:ctmc-bridge}
+The CTMC summarizes the entire past by a single quantity: the current state. A model with
+more memory conditions on more of the history,
+\[
+P(s_{k+1}\mid s_k)
+\;\longrightarrow\;
+P(s_{k+1}\mid s_{k-1}, s_k)
+\;\longrightarrow\; \cdots \;\longrightarrow\;
+P(s_{k+1}\mid s_1, \dots, s_k).
+\]
+A Markov chain of order $m$ over $K$ states needs one probability distribution for every
+possible history of length $m$: there are $K^m$ histories, each with $K-1$ free
+probabilities, for a total of $K^m(K-1)$ parameters. With $K = 10$ states,
+\[
+\begin{array}{lcl}
+\text{order } 1: & 10^1 \times 9 = & 90, \\
+\text{order } 2: & 10^2 \times 9 = & 900, \\
+\text{order } 5: & 10^5 \times 9 = & 900{,}000, \\
+\text{order } 10: & 10^{10} \times 9 = & 90{,}000{,}000{,}000.
+\end{array}
+\]
+A count table cannot be estimated at even moderate order, because almost every long history
+occurs zero or one times in the training data. A neural language model removes the table:
+one shared set of weights computes $P(\text{next}\mid\text{entire history})$ for any history.
+\chref{ch:lm} uses such a model and keeps surprisal as the score, so the CTMC's
+interpretation carries over unchanged: a high score means the benign-trained model found the
+period hard to predict.
+
+\newpage
+
+
+%%%%%%%%%% (2) the CTMC data-preparation section of the setup chapter %%%%%%%%%%
+\section{Data Preparation for Temporal CTMC Analysis}
+
+\subsection{Log Parsing and State Construction}
+To prepare the dataset for continuous-time modeling, raw log events (Logon, Device, Email, HTTP, File) were parsed and mapped to the predefined semantic state space. Organizational metadata, such as a user's department, role, and supervisor structure (LDAP data), were utilized to contextualize these states. For example, an HTTP request to an external cloud storage provider by an IT Admin is semantically distinct from the same request made by a sales representative.
+
+\subsection{Signature Aggregation}
+Because insider threats are evaluated over prolonged periods, raw event-by-event transitions were aggregated into fixed-window CTMC summaries. This research utilized two primary aggregation tables:
+\begin{itemize}
+    \item \textbf{Weekly CTMC Signatures:} Capturing user behavior grouped by week, yielding summary transition tables representing long-term routines.
+    \item \textbf{Daily Semantic LDAP Signatures:} Grouping behavior by day, generating a highly granular feature table that incorporates both transition metrics and organizational/host context.
+\end{itemize}
+These aggregated signatures formed the $d$-dimensional input vector $x$ evaluated by the anomaly scoring function.
+
+\subsection{One-Class Evaluation Split}
+To realistically simulate an operational cybersecurity environment, the CTMC experiments were conducted under a one-class, unsupervised framework. Training was conducted strictly on benign user data, preventing the model from learning specific hardcoded malicious patterns. The testing phase utilized a leave-one-malicious-user-out methodology. In this split, the model evaluated a test fold consisting of the held-out malicious user hidden among hundreds of sampled benign users. Performance was measured by how highly the anomaly scoring function ranked the malicious user relative to the benign population.
+
