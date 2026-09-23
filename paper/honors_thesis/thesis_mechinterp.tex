@@ -837,6 +837,97 @@ From this, we define the \textit{surprisal} of a behavioral transition. Surprisa
 $$ \text{surprisal}(i \rightarrow j) = -\log \hat{P}(j|i) $$
 A common daily routine yields high probability and low surprisal, whereas an unseen or rare behavioral leap (e.g., moving directly from a mundane web browsing state to a massive internal file copy) yields an exceptionally high surprisal score.
 
+%%%%% NEW SECTION (why the negative logarithm is the right measure of surprise)
+\section{Why the Negative Logarithm Measures Surprise}
+\label{sec:why-log}
+Surprisal, $-\log p$, is the central quantity of this chapter, of \chref{ch:lm} and of \chref{ch:mech}, so
+it is worth seeing why this particular function measures how surprising an event is, rather
+than, say, $1-p$ or $1/p$. We list what a measure of surprise $S(p)$ for an event of
+probability $p$ ought to satisfy, and show that two natural requirements leave only the
+logarithm. This is the measure of information introduced by Shannon \cite{shannon1948}.
+
+\subsection{Two requirements}
+\begin{enumerate}
+\item[(R1)] \textbf{Rarer is more surprising.} $S(p)$ decreases as $p$ increases.
+\item[(R2)] \textbf{Surprises of independent events add.} If two independent events $A$ and
+$B$ both happen, the combined surprise should be the surprise of $A$ plus the surprise of $B$.
+Because independence means $P(A \text{ and } B) = P(A)\,P(B)$, this says
+\begin{equation}
+S(pq) \;=\; S(p) + S(q) \qquad \text{for all } p, q \in (0, 1].
+\label{eq:surprise-additive}
+\end{equation}
+\end{enumerate}
+
+\subsection{The requirements force the logarithm}
+Write each probability as $p = e^{-x}$, that is $x = -\ln p \ge 0$, and define
+$g(x) = S(e^{-x})$. Then \eqref{eq:surprise-additive} becomes
+\[
+g(x + y) \;=\; S\bigl(e^{-x}e^{-y}\bigr) \;=\; S\bigl(e^{-x}\bigr) + S\bigl(e^{-y}\bigr)
+\;=\; g(x) + g(y),
+\]
+Cauchy's functional equation. We solve it one step at a time.
+\begin{enumerate}
+\item Setting $x = y = 0$ gives $g(0) = 2g(0)$, so $g(0) = 0$, that is $S(1) = 0$.
+\item Adding $x$ to itself $n$ times gives $g(nx) = n\,g(x)$ for every positive integer $n$.
+\item Taking $x = 1/m$ in step 2 with $n = m$ gives $g(1) = m\,g(1/m)$, so
+$g(1/m) = g(1)/m$, and then $g(n/m) = n\,g(1/m) = \tfrac{n}{m}\,g(1)$. Writing $c = g(1)$,
+this means $g(r) = c\,r$ for every positive rational number $r$.
+\item By (R1), $S$ decreases in $p$, so $g$ increases in $x$. For any real $x$, pick
+rationals $r < x < r'$; then $c\,r = g(r) \le g(x) \le g(r') = c\,r'$. Letting $r$ and $r'$
+approach $x$ squeezes $g(x) = c\,x$.
+\end{enumerate}
+Converting back with $x = -\ln p$,
+\begin{equation}
+S(p) \;=\; c\,(-\ln p) \;=\; -c \ln p, \qquad c > 0 .
+\label{eq:surprise-log}
+\end{equation}
+The constant $c$ only chooses the unit. With $c = 1$ the unit is the \emph{nat}, the natural
+logarithm used throughout this thesis; with $c = 1/\ln 2$ the formula becomes
+$S(p) = -\log_2 p$, measured in \emph{bits}.
+
+\subsection{What the formula says}
+\begin{itemize}
+\item $S(1) = 0$: an event that was certain carries no surprise.
+\item $S(p) \to \infty$ as $p \to 0$: an event the model thought impossible would be infinitely
+surprising. This is why the CTMC estimate is smoothed (Section~\ref{sec:ctmc-mle}).
+\item \textbf{Equal ratios, equal steps.} Every tenfold drop in probability adds the same
+amount, $\ln 10 = 2.3026$ nats. The alternatives do not behave this way:
+\end{itemize}
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+$p$ & $1-p$ & $1/p$ & $-\ln p$ \\
+\midrule
+0.1   & 0.9   & 10   & 2.3026 \\
+0.01  & 0.99  & 100  & 4.6052 \\
+0.001 & 0.999 & 1000 & 6.9078 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The measure $1-p$ barely separates a 1-in-100 event from a 1-in-1000 event
+($0.99$ against $0.999$). The measure $1/p$ separates them, but it multiplies instead of adding
+when independent events combine, violating (R2). Only $-\ln p$ does both.
+
+\subsection{A worked example: coin flips}
+A fair coin lands heads with $p = 1/2$, a surprise of $-\log_2(1/2) = 1$ bit. Ten heads in a
+row have probability $(1/2)^{10} = 1/1024$, so
+\[
+S = -\log_2 \tfrac{1}{1024} = 10 \text{ bits} = 10 \times (1 \text{ bit}).
+\]
+Ten independent flips carry ten times the surprise of one: requirement (R2) at work. In nats
+the same event costs $10 \ln 2 = 10 \times 0.6931 = 6.9315$, nearly the $6.9078$ of a
+1-in-1000 event in the table, as it should be, since $1/1024$ is close to $1/1000$.
+
+\subsection{Surprisal and the negative log-likelihood}
+In statistics, the probability that a model assigns to the data actually observed is called
+the \emph{likelihood}; its logarithm is the \emph{log-likelihood}, which is never positive
+because probabilities are at most 1; and its negative is the \emph{negative log-likelihood}.
+For a single observed event, the negative log-likelihood is exactly its surprisal. Fitting a
+model by maximum likelihood, as in Section~\ref{sec:ctmc-mle}, is therefore the same as making
+the observed data as unsurprising as possible.
+
 %%%%% NEW SECTION (links the counting estimate to the objective used in Chapter V)
 \section{Why the Counting Estimate Minimizes Surprisal}
 \label{sec:ctmc-mle}
@@ -1069,29 +1160,88 @@ exactly into a part describing \emph{who} the user is and a part describing \emp
 user did, and that the first part actively hides malicious users.
 
 \section{Writing a User-Day as Text}
-Each user-day is serialized as text. An example, with session fields abbreviated:
+Each \emph{user-day}, one user on one calendar day, is serialized as text. The record below is
+a real benign day from CERT release 4.2 (user \texttt{AAF0535}, day 7). The session line is a
+single line in the actual text; it is wrapped here only to fit the page.
 {\small
 \begin{verbatim}
-DAY week=0 project=114 role=31 b_unit=0 f_unit=9 dept=11 team=62 itadmin=0
-PSY O=36 C=35 E=19 A=44 N=21
-SESSIONS total=2 kept=2
-SES idx=0 pc=0 duration=187.667 n_logon=1 n_usb=0 n_file=0 ...
-SES idx=1 pc=0 duration=205.467 n_logon=1 n_usb=0 n_file=0 ...
+DAY week=1 project=na role=39 b_unit=0 f_unit=4 dept=15 team=11 itadmin=0
+PSY O=17 C=21 E=36 A=33 N=31
+SESSIONS total=1 kept=1
+SES idx=0 pc=0 isworkhour=1 isafterhour=0 isweekend=0 isweekendafterhour=0
+    duration=489 n_concurrent_sessions=1 start_with=1 end_with=1
+    ses_start=8.933 ses_end=17.083 n_allact=34 n_logon=1 n_usb=0
+    usb_mean_usb_dur=0 n_file=0 file_n-disk1=0 file_n_exef=0 n_email=3
+    email_mean_n_atts=1.333 n_http=29 http_n_jobf=0 http_n_cloudf=0
+    http_n_leakf=0 http_n_hackf=0
 \end{verbatim}
 }
-\noindent The lines fall into two classes:
+\noindent This user had one session that day: a working-hours session on their usual computer
+from 8.933 to 17.083 hours (about 8:56 to 17:05), lasting 489 minutes, with 3 emails and 29
+web requests. A day with more sessions has one \texttt{SES} line per session.
+
+The four kinds of line fall into two classes:
 \begin{itemize}
-\item \textbf{Profile lines} ($P$): the \texttt{DAY} line (project, role, business unit,
-department, team) and the \texttt{PSY} line (Big-Five personality scores). They describe
-\emph{who} the user is, and they barely change from one day to the next.
-\item \textbf{Behavior lines} ($B$): the \texttt{SESSIONS} line and one \texttt{SES} line per
-session (device, duration, logons, USB, file, email and web activity). They describe
-\emph{what the user did} that day.
+\item \textbf{Profile lines} ($P$): the \texttt{DAY} line (week number, project, role, business
+unit, functional unit, department, team, and whether the user is an IT administrator) and the
+\texttt{PSY} line (Big-Five personality scores: openness, conscientiousness, extraversion,
+agreeableness, neuroticism). They describe \emph{who} the user is. Apart from the week number,
+they are identical on every day of that user.
+\item \textbf{Behavior lines} ($B$): the \texttt{SESSIONS} line (how many sessions the user had,
+and how many were kept) and the \texttt{SES} lines (computer, time of day, duration, and counts
+of logons, USB, file, email and web activity). They describe \emph{what the user did} that day.
 \end{itemize}
-The text is split into \emph{tokens} $x_1,\dots,x_n$: short word pieces such as
-\texttt{dept}, \texttt{=}, or \texttt{11}. Each token inherits the class of the line it
-belongs to. On the malicious days of CERT release 4.2, about 22\% of scored tokens are profile
-tokens and 78\% are behavior tokens.
+
+\subsection{What the class of a token means}
+The model does not read lines; it reads \emph{tokens} $x_1,\dots,x_n$, short pieces of text
+such as \texttt{DAY}, \texttt{dept}, or \texttt{=}. Numbers are split into single digits, so
+\texttt{dept=15} is read as the four tokens \texttt{dept}, \texttt{=}, \texttt{1}, \texttt{5}.
+
+Every token lies on exactly one line, and a token's \emph{class} is simply the class of that
+line:
+\[
+c(x_t) \;=\;
+\begin{cases}
+P & \text{if } x_t \text{ lies on a \texttt{DAY} or \texttt{PSY} line,} \\
+B & \text{if } x_t \text{ lies on a \texttt{SESSIONS} or \texttt{SES} line.}
+\end{cases}
+\]
+The newline that ends a line counts as part of that line. A token's class is therefore decided
+by \emph{where} it sits, not by \emph{what} it is. The digit \texttt{1} shows this: in the
+record above it appears in \texttt{week=1}, \texttt{team=11} and \texttt{O=17}, where it is a
+profile token, and in \texttt{total=1} and \texttt{n\_logon=1}, where it is a behavior token.
+Same token, different classes.
+
+\begin{table}[H]
+\centering
+\caption{Scored tokens by line for the record above. The record has 213 tokens; the first
+token, \texttt{DAY}, is never scored because nothing comes before it.}
+\label{tab:token-classes}
+\begin{tabular}{lcc}
+\toprule
+line & scored tokens & class \\
+\midrule
+\texttt{DAY} & 31 & $P$ \\
+\texttt{PSY} & 23 & $P$ \\
+\texttt{SESSIONS} & 9 & $B$ \\
+\texttt{SES} & 149 & $B$ \\
+\midrule
+total & $N = 212$ & $N_P = 54$, $N_B = 158$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent In this record $54/212 = 25.5\%$ of the scored tokens are profile tokens. The profile
+lines have roughly the same length every day, while each additional session adds a
+\texttt{SES} line, so the profile share is smaller on busier days. Averaged over the malicious
+days of CERT release 4.2, about 22\% of scored tokens are profile tokens and 78\% are behavior
+tokens.
+
+\subsection{Which class a surprisal is counted in}
+Each surprisal $\ell_t$ (defined in the next section) is the cost of predicting token $x_t$,
+and it is counted in the class of $x_t$, the token being predicted. When the model predicts a
+behavior token, it still reads the profile lines above it as context. The split therefore
+decides which predictions are \emph{counted}, not what the model is allowed to \emph{see}.
 
 \section{Next-Token Probability and Surprisal}
 A language model with parameters $\theta$ assigns a probability to each actual token, given
@@ -1105,12 +1255,41 @@ The \emph{surprisal} of token $t$ is
 \label{eq:lm-token-surprisal}
 \end{equation}
 This is exactly the CTMC surprisal of \chref{ch:ctmc}, except that the condition is the
-entire preceding text rather than a single previous state. A token the model expects is cheap;
+entire preceding text rather than a single previous state, and Section~\ref{sec:why-log}
+explains why $-\log p$ is the right measure of surprise. A token the model expects is cheap;
 a token it doubts is expensive:
 \begin{gather*}
 p = 0.9 \Rightarrow \ell = 0.1054, \qquad p = 0.5 \Rightarrow \ell = 0.6931, \\
 p = 0.05 \Rightarrow \ell = 2.9957, \qquad p = 0.01 \Rightarrow \ell = 4.6052.
 \end{gather*}
+
+\subsection{The surprisal of a whole day is its negative log-likelihood}
+The model also assigns a probability to the whole text of a day. By the chain rule of
+probability, the probability of a sequence is the product of each token's probability given
+the tokens before it:
+\[
+p_\theta(x_2, \dots, x_n \mid x_1)
+\;=\; p_\theta(x_2 \mid x_1)\; p_\theta(x_3 \mid x_1, x_2) \cdots p_\theta(x_n \mid x_{<n})
+\;=\; \prod_{t=2}^{n} p_\theta(x_t \mid x_{<t}).
+\]
+Taking $-\log$ turns the product into a sum:
+\begin{equation}
+-\log p_\theta(x_2, \dots, x_n \mid x_1)
+\;=\; \sum_{t=2}^{n} -\log p_\theta(x_t \mid x_{<t})
+\;=\; \sum_{t=2}^{n} \ell_t .
+\label{eq:lm-chain-rule}
+\end{equation}
+The sum of a day's token surprisals is therefore exactly the surprisal of the day's entire
+text: its negative log-likelihood under the model. This is requirement (R2) of
+Section~\ref{sec:why-log} applied to a sequence. For example, if a three-token continuation
+has token probabilities $\tfrac12$, $\tfrac12$ and $\tfrac14$, the tokens cost $1$, $1$ and $2$
+bits, a total of $4$ bits; and the whole continuation has probability
+$\tfrac12 \cdot \tfrac12 \cdot \tfrac14 = \tfrac{1}{16}$, whose surprisal is
+$-\log_2 \tfrac{1}{16} = 4$ bits. In nats both equal $4 \ln 2 = 2.7726$.
+
+Days differ in length (between about 200 and 530 tokens in CERT release 4.2), and a longer text
+accumulates more total surprisal simply by being longer. The anomaly score of Section~\ref{sec:lm-score}
+therefore divides the total by the number of scored tokens, giving the surprisal per token.
 
 \subsection{Where the probability comes from}
 After reading $x_{<t}$, the model holds an internal vector $\mathbf{h}_{t-1} \in \mathbb{R}^{d}$
@@ -1163,6 +1342,7 @@ so the correction trains $131{,}072 / 16{,}777{,}216 = 0.78\%$ as many numbers. 
 approximation of \chref{ch:pca}, fine-tuning is confined to a low-dimensional subspace.
 
 \section{The Anomaly Score of a Day and of a User}
+\label{sec:lm-score}
 Let $\mathcal{T}$ be the set of scored positions of a day (every token except the first, which
 has nothing before it) and $N = |\mathcal{T}|$. The anomaly score of the day is its average
 token surprisal,
@@ -1772,6 +1952,11 @@ Towards monosemanticity: Decomposing language models with dictionary learning.
 Cunningham, H., Ewart, A., Riggs, L., Huben, R., \& Sharkey, L. (2023).
 Sparse autoencoders find highly interpretable features in language models.
 arXiv preprint arXiv:2309.08600.
+
+\bibitem{shannon1948}
+Shannon, C. E. (1948).
+A mathematical theory of communication.
+\textit{The Bell System Technical Journal}, 27(3), 379--423.
 
 \bibitem{gao2024scaling}
 Gao, L., Dupr{\'e} la Tour, T., Tillman, H., Goh, G., Troll, R., Radford, A., Sutskever, I., Leike, J., \& Wu, J. (2024).

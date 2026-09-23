@@ -8,11 +8,11 @@ every edit.
 |---|---|
 | Title, abstract, keywords, abbreviations | changed |
 | Chapter II, PCA | **unchanged, verbatim** |
-| Chapter III, CTMC | original text unchanged; four sections added |
+| Chapter III, CTMC | original text unchanged; five sections added, including 3.6 on why $-\log p$ measures surprise |
 | Chapter IV, setup | one section added (language-model data) |
 | Chapter V, language-model surprisal and its decomposition | new |
 | Chapter VI, mechanistic interpretability | new |
-| References | nine entries added, from `paper/references.bib` |
+| References | ten entries added: nine from `paper/references.bib`, plus Shannon (1948) |
 
 Compiles cleanly with TeX Live 2020 (two passes, no errors, no undefined
 references). It needs the seven PCA figure files alongside it. The one overfull
@@ -31,3 +31,4 @@ it was written:
 | layer 26, 8,192 features, k = 4, 2,000,000 training vectors | r4.2 frontier summary on Anvil |
 | feature and control selection rules | `scripts/sae_core.py` (`row_gap`, `_choose_active_low_gap_ids`) |
 | worked-example arithmetic | computed exactly, not by hand |
+| example user-day and its token counts (213 tokens; 54 profile, 158 behavior scored) | r4.2 `eval.jsonl` record `AAF0535:7`, tokenized with the adapter's tokenizer and labelled by `scripts/token_class_decomposition.py` |
