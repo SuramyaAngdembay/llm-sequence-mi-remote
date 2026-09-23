@@ -159,8 +159,9 @@ What keeps this from being result-shopping, and what the reader should check:
 
 * Both variants are reported in full, in the replication table above, and
   neither is suppressed.
-* The change was driven by a *diagnosed mechanism* — a format mismatch that is
-  visible in the serialization without looking at any loss — and it makes a
+* The change targets a *diagnosed mechanism*, a format mismatch that can be
+  confirmed from the serialization alone. It was noticed only because the
+  pilot's loss moved the wrong way, as commit `93f2d0a` records. It makes a
   falsifiable prediction that was then borne out: restoring the format should
   move the day-field contrast to zero, and it did.
 * The headline conclusion does not depend on it. The PSY line is built outside

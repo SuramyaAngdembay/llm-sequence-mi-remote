@@ -1,0 +1,1783 @@
+\documentclass[12pt]{report}
+
+% Packages
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb}
+\usepackage{bm} % Recommended for bolding math symbols consistently
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{url}
+\usepackage{refcount} %%%%% NEW: lets chapter cross-references print as Roman numerals
+
+%%%%% NEW: headings read "Chapter II", so references should too (plain \ref gives "2")
+\newcommand{\chref}[1]{Chapter~\uppercase\expandafter{\romannumeral\getrefnumber{#1}}}
+
+% Double spacing
+\doublespacing
+
+% Number chapters and sections, but not subsections.
+\setcounter{secnumdepth}{1}
+
+% Chapter formatting
+\titleformat{\chapter}[display]
+  {\normalfont\bfseries\center}
+  {Chapter \Roman{chapter}}
+  {0pt}
+  {\Large}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TITLE PAGE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{titlepage}
+\centering
+
+\vspace*{1in}
+
+%%%%% CHANGED: title now covers the language-model and interpretability chapters
+{\Large \textbf{Variance, Surprisal, and Mechanism: Interpretable Approaches to Insider Threat Detection}}
+
+\vspace{1.5in}
+
+by
+
+\vspace{1in}
+
+Suramya Raj Angdembay
+
+\vfill
+
+A Thesis\\
+Submitted to the Honors College of\\
+The University of Southern Mississippi\\
+in Partial Fulfillment\\
+of Honors Requirements
+
+\vspace{1in}
+
+Month Year
+
+\end{titlepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% APPROVAL PAGE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{center}
+Approved by:
+\end{center}
+
+\vspace{1in}
+
+\noindent
+Dr. Haiyan Tian, Degree\\
+School of Mathematics and Natural Sciences
+
+\vspace{0.8in}
+
+\noindent
+Thesis Co-Advisor Name, Degree\\
+School of Your School
+
+\vspace{0.8in}
+
+\noindent
+Director Name, Degree\\
+School of Your School
+
+\vspace{1in}
+
+\noindent
+Joyce Inman, Ph.D., Dean\\
+Honors College
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ABSTRACT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ABSTRACT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter*{ABSTRACT}
+\addcontentsline{toc}{chapter}{ABSTRACT}
+
+%%%%% CHANGED: abstract rewritten to include Chapters V and VI
+Insider threat represents a major cybersecurity challenge to companies, organizations, and government agencies. Detecting malicious insiders is difficult due to massive data volumes, extreme class imbalance, and the subtle nature of behavioral shifts over time. This thesis develops three one-class anomaly detectors of increasing expressiveness on the CMU CERT insider threat dataset, and then asks what the most expressive of them actually detects. First, a static approach uses Deep Feature Synthesis (DFS), Principal Component Analysis (PCA), and a Gaussian Mixture Model (GMM) to score departures from the dominant variance structure of user activity. Second, a Continuous-Time Markov Chain (CTMC) framework models the sequential, irregularly timed nature of behavior and measures how unexpected each transition is through its surprisal, the negative log-probability of the observed next state. Third, we extend surprisal from one step of memory to full context: a large language model, fine-tuned only on benign user-days written as text, scores a day by the average surprisal of its tokens. We show that this score splits exactly into a profile part, covering organizational and personality attributes, and a behavior part, and that the profile part ranks users backwards: on CERT release 4.2, profile tokens alone place malicious users below benign ones (user-level AUC 0.47), while scoring behavior tokens alone raises user-level AUC from 0.65 to 0.86. Finally, we apply mechanistic interpretability to the model itself. A sparse dictionary learned on the change that fine-tuning made to the model's internal representations finds that four of the five features most associated with malicious days fire almost exclusively on behavioral tokens, and that editing the selected features toward a benign colleague's values lowers the anomaly score more than editing comparably active control features, on malicious users held out from feature selection. The anomaly signal inside the model is largely behavioral; the profile shortcut enters through how the model's output is turned into a score.
+
+\vspace{0.5in}
+
+\noindent
+%%%%% CHANGED: keywords
+\textbf{Keywords:} Insider Threat; Principal Component Analysis (PCA); Continuous-Time Markov Chains (CTMC); Surprisal; Large Language Models; Mechanistic Interpretability; Sparse Autoencoders; One-Class Anomaly Detection
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DEDICATION (Optional)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter*{DEDICATION}
+\addcontentsline{toc}{chapter}{DEDICATION}
+
+Your dedication text here.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ACKNOWLEDGMENTS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter*{ACKNOWLEDGMENTS}
+\addcontentsline{toc}{chapter}{ACKNOWLEDGMENTS}
+
+Your acknowledgments begin here. Recognize advisors,
+faculty, funding agencies, and institutional support.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TABLE OF CONTENTS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tableofcontents
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LIST OF TABLES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\listoftables
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LIST OF FIGURES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\listoffigures
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LIST OF ABBREVIATIONS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter*{LIST OF ABBREVIATIONS}
+\addcontentsline{toc}{chapter}{LIST OF ABBREVIATIONS}
+
+%%%%% CHANGED: abbreviations for the new chapters added
+\begin{tabbing}
+APA \hspace{1in} \= American Psychological Association \\
+AUC \> Area Under the (Receiver Operating Characteristic) Curve \\
+CERT \> CERT Division of the Software Engineering Institute \\
+CTMC \> Continuous-Time Markov Chain \\
+DFS \> Deep Feature Synthesis \\
+GMM \> Gaussian Mixture Model \\
+LoRA \> Low-Rank Adaptation \\
+PCA \> Principal Component Analysis \\
+QLoRA \> Quantized Low-Rank Adaptation \\
+SAE \> Sparse Autoencoder \\
+USM \> The University of Southern Mississippi \\
+\end{tabbing}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CHAPTER I
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Introduction}
+
+Begin the first chapter here. Indent the first line of each paragraph.
+
+\section{Example 1st Level Heading}
+
+Text for first-level heading.
+
+\subsection{Example 2nd Level Heading}
+
+Text for second-level heading.
+
+\subsection*{Example 3rd Level Heading (In Paragraph)}
+
+\noindent \textbf{Example 3rd Level Heading.} Continue paragraph text immediately after the bold heading.
+
+\newpage
+
+%========================
+% CHAPTER 2: PCA  (UNCHANGED)
+%========================
+\chapter{Principal Component Analysis}
+\label{ch:pca}
+
+\section{Overview and Motivation}
+Principal Component Analysis (PCA) is a classical technique for identifying
+orthogonal directions along which the data exhibits the greatest variance. In applications such as behavioral cybersecurity logs,
+the raw feature space can be high-dimensional and strongly correlated, which complicates
+visualization, statistical modeling, and anomaly detection. PCA addresses these issues by
+constructing an orthonormal coordinate system whose axes (the \emph{principal components})
+are ordered by the amount of variance they explain. This chapter presents the mathematical
+formulation of PCA in the general $p$-dimensional setting, followed by a sequence of low-
+to high-dimensional illustrations to develop geometric intuition. We conclude with a
+reconstruction-error viewpoint that motivates PCA-based anomaly scoring. Historically,
+the geometric origins of PCA trace back to Pearson, while the familiar algebraic
+eigenvalue formulation was developed by Hotelling \cite{pearson1901,hotelling1933,jolliffe1986}.
+
+%%%
+
+\section{PCA in the $p$-Dimensional Setting}
+
+\subsection{Data assumptions for PCA}
+
+PCA operates under a set of assumptions about the structure of the data, independent
+of the specific preprocessing steps used:
+
+\begin{itemize}
+\item \textbf{Vector-space representation:} Each observation must be representable as a
+numerical vector in $\mathbb{R}^p$, so that linear algebraic operations such as inner
+products and projections are well-defined.
+
+\item \textbf{Linearity of structure:} PCA assumes that the relationships between features
+can be captured through linear combinations, and that the data can be meaningfully
+approximated by a linear subspace.
+
+\item \textbf{Variance as informative structure:} PCA assumes that directions with larger
+variance correspond to meaningful variation in the data, and therefore prioritizes these
+directions in constructing the principal components.
+
+\item \textbf{Euclidean geometry:} PCA relies on Euclidean distance, both in defining
+variance and in measuring reconstruction error. This assumes that distances between
+observations are meaningful in the feature space.
+
+\item \textbf{Comparable feature scales:} PCA is sensitive to the relative magnitude of
+features, and therefore needs standarization of the features.
+\end{itemize}
+
+\subsection{Data model and centering}
+
+Let $X \in \mathbb{R}^{n\times p}$ be a data matrix with $n$ observations and $p$ features,
+\[
+X =
+\begin{bmatrix}
+x_{11} & x_{12} & \cdots & x_{1p} \\
+x_{21} & x_{22} & \cdots & x_{2p} \\
+\vdots & \vdots & \ddots & \vdots \\
+x_{n1} & x_{n2} & \cdots & x_{np}
+\end{bmatrix}.
+\]
+The $i$th observation is the row vector $\mathbf{x}_i^\top \in \mathbb{R}^{1\times p}$.
+Equivalently, $\mathbf{x}_i \in \mathbb{R}^{p}$ denotes the corresponding column-vector form of
+the same observation.
+
+The sample mean vector is defined as
+\[
+\bar{\mathbf{x}} \;=\; \frac{1}{n}\sum_{i=1}^n \mathbf{x}_i
+=
+\begin{bmatrix}
+\bar{x}_1 \\
+\bar{x}_2 \\
+\vdots \\
+\bar{x}_p
+\end{bmatrix}
+\in \mathbb{R}^{p},
+\]
+where each scalar component $\bar{x}_j$ is the mean of the $j$th feature.
+
+Define the vector of ones
+\[
+\mathbf{1} =
+\begin{bmatrix}
+1 \\
+1 \\
+\vdots \\
+1
+\end{bmatrix}
+\in \mathbb{R}^{n}.
+\]
+
+The outer product $\mathbf{1}\bar{\mathbf{x}}^\top$ constructs an $n\times p$ matrix whose rows all equal the mean vector:
+\[
+\mathbf{1}\bar{\mathbf{x}}^\top
+=
+\begin{bmatrix}
+\bar{x}_1 & \bar{x}_2 & \cdots & \bar{x}_p \\
+\bar{x}_1 & \bar{x}_2 & \cdots & \bar{x}_p \\
+\vdots & \vdots & \ddots & \vdots \\
+\bar{x}_1 & \bar{x}_2 & \cdots & \bar{x}_p
+\end{bmatrix}.
+\]
+
+The centered data matrix is therefore defined as
+\[
+X_c \;=\; X - \mathbf{1}\bar{\mathbf{x}}^\top,
+\]
+which subtracts the sample mean vector from each observation. In component form,
+\[
+X_c =
+\begin{bmatrix}
+x_{11}-\bar{x}_1 & x_{12}-\bar{x}_2 & \cdots & x_{1p}-\bar{x}_p \\
+x_{21}-\bar{x}_1 & x_{22}-\bar{x}_2 & \cdots & x_{2p}-\bar{x}_p \\
+\vdots & \vdots & \ddots & \vdots \\
+x_{n1}-\bar{x}_1 & x_{n2}-\bar{x}_2 & \cdots & x_{np}-\bar{x}_p
+\end{bmatrix}.
+\]
+
+\subsection{Covariance matrix}
+The sample covariance matrix is
+\begin{equation}
+S \;=\; \frac{1}{n-1}X_c^\top X_c \in \mathbb{R}^{p\times p}.
+\label{eq:cov-matrix}
+\end{equation}
+The matrix $S$ is symmetric and positive semidefinite, hence it admits an orthonormal
+eigendecomposition.
+
+\subsection{Variance maximization and eigenvalue problem}
+The covariance matrix summarizes how variation is distributed across the feature space,
+so the next natural question is which direction captures as much of that variation as
+possible. PCA answers this by projecting the centered observations onto a unit vector
+and choosing the direction for which the projected scores have maximum variance. This
+variance-maximization view leads directly to the eigenvalue problem for $S$
+\cite{hotelling1933,jolliffe1986}.
+
+Consider a unit direction vector $\mathbf{a} \in \mathbb{R}^p$ with $\mathbf{a}^\top \mathbf{a} = 1$.
+Projecting each centered observation onto $\mathbf{a}$ yields scalar scores
+\[
+z_i \;=\; \mathbf{a}^\top (\mathbf{x}_i-\bar{\mathbf{x}}), \qquad i=1,\dots,n.
+\]
+Because the data is centered, the mean of these scores is zero. The empirical variance of these projected scores is
+\[
+\mathrm{Var}(z) \;=\; \frac{1}{n-1}\sum_{i=1}^n z_i^2 \;=\; \mathbf{a}^\top \left( \frac{1}{n-1}X_c^\top X_c \right) \mathbf{a} \;=\; \mathbf{a}^\top S \mathbf{a}.
+\]
+PCA selects the first principal direction by solving
+\begin{equation}
+\max_{\mathbf{a}\in\mathbb{R}^p}\; \mathbf{a}^\top S \mathbf{a} \quad \text{subject to}\quad \mathbf{a}^\top \mathbf{a} = 1.
+\label{eq:pca-opt}
+\end{equation}
+Using a Lagrange multiplier $\lambda$,
+\[
+\mathcal{L}(\mathbf{a},\lambda) = \mathbf{a}^\top S \mathbf{a} - \lambda(\mathbf{a}^\top \mathbf{a}-1),
+\]
+and differentiating with respect to $\mathbf{a}$ gives
+\begin{equation}
+S\mathbf{a} = \lambda \mathbf{a}.
+\label{eq:eig}
+\end{equation}
+Thus, principal directions are eigenvectors of $S$, and the corresponding eigenvalues
+equal the variance explained along those directions. We denote these principal directions
+by $\mathbf{u}_1,\dots,\mathbf{u}_p$ in the eigendecomposition below.
+
+\subsection{Eigendecomposition and ordering}
+Let the eigenvalues be ordered as
+\[
+\lambda_1 \ge \lambda_2 \ge \cdots \ge \lambda_p \ge 0,
+\]
+with associated orthonormal eigenvectors $\mathbf{u}_1,\dots,\mathbf{u}_p$.
+Collect them into
+\[
+U = [\mathbf{u}_1\;\mathbf{u}_2\;\cdots\;\mathbf{u}_p]\in\mathbb{R}^{p\times p},
+\qquad
+\Lambda = \mathrm{diag}(\lambda_1,\dots,\lambda_p).
+\]
+Then
+\[
+S = U\Lambda U^\top.
+\]
+
+\subsection{Dimensionality reduction by projection}
+For a target dimension $q<p$, we restrict our new coordinate system to the first $q$
+principal directions (the eigenvectors corresponding to the largest eigenvalues).
+We collect these into a projection matrix:
+\[
+U_q = [\mathbf{u}_1\;\mathbf{u}_2\;\cdots\;\mathbf{u}_q]\in\mathbb{R}^{p\times q}.
+\]
+To reduce the dimensionality of the $i$th centered observation $\mathbf{x}_{c,i} \in \mathbb{R}^p$,
+we project it onto this $q$-dimensional subspace. The new coordinates, or \emph{principal component scores},
+are given by the inner products of the observation with each of the $q$ eigenvectors:
+\[
+\mathbf{z}_i \;=\; U_q^\top \mathbf{x}_{c,i} \in \mathbb{R}^q.
+\]
+Applying this transformation simultaneously to all $n$ observations in our centered data
+matrix $X_c$ yields the reduced representation (score matrix) $Z$:
+\begin{equation}
+Z \;=\; X_c U_q \in \mathbb{R}^{n\times q}.
+\label{eq:projection}
+\end{equation}
+Here, the $i$th row of $Z$ is precisely the transposed score vector $\mathbf{z}_i^\top$.
+
+\subsection{Explained variance}
+The total variance in the dataset is equivalent to the trace of the covariance matrix $S$,
+which is equal to the sum of all its eigenvalues, $\sum_{j=1}^{p}\lambda_j$. Because the
+variance captured by the $j$th principal component is exactly its corresponding eigenvalue $\lambda_j$,
+the Proportion of Variance Explained (PVE) by retaining the first $q$ components is:
+\begin{equation}
+\mathrm{PVE}(q) \;=\; \frac{\sum_{j=1}^{q}\lambda_j}{\sum_{j=1}^{p}\lambda_j}.
+\label{eq:evr}
+\end{equation}
+A common practice is to choose the target dimension $q$ so that the cumulative proportion of
+variance exceeds a fixed threshold (e.g., $0.95$), thereby balancing data compression with
+information retention.
+\section{Reconstruction and Reconstruction Error}
+\subsection{Orthogonal reconstruction}
+Given $Z$ in \eqref{eq:projection}, the rank-$q$ PCA reconstruction in the original
+feature space is
+\begin{equation}
+\widehat{X}_c \;=\; ZU_q^\top \;=\; X_c U_qU_q^\top.
+\label{eq:recon-centered}
+\end{equation}
+Hence, for the $i$th centered observation vector $\mathbf{x}_{c,i} = \mathbf{x}_i-\bar{\mathbf{x}}$,
+\[
+\widehat{\mathbf{x}}_{c,i} \;=\; U_qU_q^\top \mathbf{x}_{c,i},
+\]
+which is precisely the orthogonal projection of $\mathbf{x}_{c,i}$ onto the principal subspace
+$\mathrm{span}\{\mathbf{u}_1,\dots,\mathbf{u}_q\}$.
+
+\subsection{Reconstruction error as distance to the principal subspace}
+Define the reconstruction residual for the $i$th observation
+\[
+\mathbf{r}_i \;=\; \mathbf{x}_{c,i} - \widehat{\mathbf{x}}_{c,i} \;=\; (I - U_qU_q^\top)\mathbf{x}_{c,i},
+\]
+where $I \in \mathbb{R}^{p \times p}$ is the identity matrix, and its squared magnitude is
+\begin{equation}
+\|\mathbf{r}_i\|_2^2 \;=\; \|\mathbf{x}_{c,i} - U_qU_q^\top \mathbf{x}_{c,i}\|_2^2.
+\label{eq:recon-error}
+\end{equation}
+Geometrically, $\|\mathbf{r}_i\|_2$ is the Euclidean distance from $\mathbf{x}_{c,i}$ to the $q$-dimensional
+principal subspace. This quantity forms the basis of PCA reconstruction-error anomaly
+scoring used later in this thesis.
+
+\section{A Step-by-Step Numerical Example of PCA and Reconstruction}
+
+To illustrate the full PCA pipeline in a concrete and computationally transparent manner,
+we consider a small two-dimensional dataset consisting of four observations:
+\[
+X =
+\begin{bmatrix}
+2 & 1 \\
+3 & 2 \\
+4 & 2 \\
+5 & 4
+\end{bmatrix}.
+\]
+Each row represents a single observation with two features.
+
+\subsection{Step 1: Compute the Sample Mean}
+
+The sample mean vector is
+\[
+\bar{x} = \frac{1}{4}
+\begin{bmatrix}
+2+3+4+5 \\
+1+2+2+4
+\end{bmatrix}
+=
+\begin{bmatrix}
+3.5 \\
+2.25
+\end{bmatrix}.
+\]
+
+\subsection{Step 2: Center the Data}
+
+We subtract the mean from each observation:
+\[
+X_c = X - \mathbf{1}\bar{x}^\top =
+\begin{bmatrix}
+-1.5 & -1.25 \\
+-0.5 & -0.25 \\
+0.5 & -0.25 \\
+1.5 & 1.75
+\end{bmatrix}.
+\]
+
+\subsection{Step 3: Compute the Covariance Matrix}
+
+The sample covariance matrix is
+\[
+S = \frac{1}{n-1} X_c^\top X_c = \frac{1}{3} X_c^\top X_c.
+\]
+
+First compute
+\[
+X_c^\top X_c =
+\begin{bmatrix}
+5 & 4.5 \\
+4.5 & 4.75
+\end{bmatrix},
+\]
+so that
+\[
+S =
+\begin{bmatrix}
+1.6667 & 1.5 \\
+1.5 & 1.5833
+\end{bmatrix}.
+\]
+
+\subsection{Step 4: Compute Eigenvalues and Eigenvectors}
+
+We solve
+\[
+\det(S - \lambda I) = 0,
+\]
+which yields eigenvalues approximately
+\[
+\lambda_1 \approx 3.125, \qquad \lambda_2 \approx 0.125.
+\]
+
+The corresponding unit eigenvectors are
+\[
+u_1 \approx
+\begin{bmatrix}
+0.72 \\
+0.69
+\end{bmatrix},
+\qquad
+u_2 \approx
+\begin{bmatrix}
+-0.69 \\
+0.72
+\end{bmatrix}.
+\]
+
+The first principal component $u_1$ captures the dominant direction of variation.
+
+\subsection{Step 5: Project the Data onto the First Principal Component}
+
+Using $u_1$, the one-dimensional PCA representation is the score vector
+\[
+z = X_c u_1.
+\]
+
+Computing each projection:
+\[
+z_1 \approx -1.94, \quad
+z_2 \approx -0.53, \quad
+z_3 \approx 0.19, \quad
+z_4 \approx 2.28.
+\]
+
+Thus, each observation is now represented by a single scalar value, namely one entry of
+the score vector $z$.
+
+\subsection{Step 6: Reconstruct the Data from the Reduced Representation}
+
+The rank-1 reconstruction is given by
+\[
+\widehat{X}_c = z u_1^\top.
+\]
+
+For example, the first reconstructed centered observation is
+\[
+\widehat{x}_{c,1} = z_1 u_1 \approx
+-1.94
+\begin{bmatrix}
+0.72 \\
+0.69
+\end{bmatrix}
+=
+\begin{bmatrix}
+-1.40 \\
+-1.34
+\end{bmatrix}.
+\]
+
+Adding back the mean:
+\[
+\widehat{x}_1 =
+\begin{bmatrix}
+-1.40 \\
+-1.34
+\end{bmatrix}
++
+\begin{bmatrix}
+3.5 \\
+2.25
+\end{bmatrix}
+=
+\begin{bmatrix}
+2.10 \\
+0.91
+\end{bmatrix}.
+\]
+
+\subsection{Step 7: Compute Reconstruction Error}
+
+The reconstruction error for each observation is defined as
+\[
+e_i = \|x_i - \widehat{x}_i\|_2^2.
+\]
+
+We compute the reconstructed points and corresponding errors for all observations:
+
+\begin{center}
+\begin{tabular}{cccccc}
+\toprule
+$i$ & $x_i$ & $\widehat{x}_i$ & $(x_i - \widehat{x}_i)$ & $\|x_i - \widehat{x}_i\|_2^2$ \\
+\midrule
+1 & $(2,\;1)$ & $(2.10,\;0.91)$ & $(-0.10,\;0.09)$ & $0.018$ \\
+2 & $(3,\;2)$ & $(3.12,\;1.88)$ & $(-0.12,\;0.12)$ & $0.029$ \\
+3 & $(4,\;2)$ & $(3.64,\;2.38)$ & $(0.36,\;-0.38)$ & $0.274$ \\
+4 & $(5,\;4)$ & $(5.15,\;3.82)$ & $(-0.15,\;0.18)$ & $0.054$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Interpretation}
+
+This example demonstrates the complete PCA pipeline:
+\begin{itemize}
+\item The data are centered using the sample mean.
+\item The covariance matrix captures relationships between features.
+\item Eigenvectors define directions of maximal variance.
+\item Projection onto the first principal component reduces dimensionality.
+\item Reconstruction approximates the original data using only dominant variation.
+\item Reconstruction error quantifies the information lost during compression.
+\end{itemize}
+
+Although this example is low-dimensional, the same sequence of operations applies
+directly to high-dimensional datasets. In particular, reconstruction error provides
+a natural basis for anomaly detection, as observations that lie far from the
+low-dimensional subspace that best represents the data, i.e., the subspace capturing
+the largest variation, are reconstructed poorly and therefore exhibit larger errors.
+
+\section{Low-Dimensional Geometric Intuition}
+\subsection{A two-dimensional illustration}
+In $\mathbb{R}^2$, PCA identifies a new pair of orthonormal axes $(u_1,u_2)$ obtained
+by rotating the original coordinate system so that $u_1$ aligns with the direction of maximum
+spread. If the data are approximately distributed along a line, then $u_1$ captures most of the
+variance, while $u_2$ captures minimal variance. Reducing from $2$D to $1$D corresponds
+to projecting points onto the line spanned by $u_1$ and discarding the orthogonal component.
+
+%--- Optional: include your 2D example figure (replace filename as needed)
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.95\textwidth]{pca-2d.png}
+  \caption{Illustration of PCA in two dimensions: PCA rotates the coordinate system so that
+  PC1 captures the largest variance while PC2 captures the smallest. Projecting onto PC1
+  yields a one-dimensional representation with minimal loss when PC2 contributes little variance.}
+  \label{fig:pca-2d}
+\end{figure}
+
+\subsection{A three-dimensional illustration}
+In $\mathbb{R}^3$, PCA produces three orthonormal directions $(u_1,u_2,u_3)$ ordered
+by explained variance $(\lambda_1,\lambda_2,\lambda_3)$. Reducing from $3$D to $2$D
+amounts to projecting onto the plane spanned by $(u_1,u_2)$ and discarding the smallest-
+variance direction $u_3$. This is particularly useful when data form an elongated ``cloud''
+that is difficult to interpret in the original coordinate system.
+
+%--- Optional: include your 3D example figure
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.95\textwidth]{pca-3d.png}
+  \caption{Illustration of PCA in three dimensions: PC1, PC2, and PC3 form an orthonormal
+  basis with decreasing explained variance. Dropping PC3 projects data onto a best-fit plane.}
+  \label{fig:pca-3d}
+\end{figure}
+
+\section{A High-Dimensional Example: A 17-Dimensional Dataset}
+PCA is often most valuable when $p$ is large and direct visualization is not possible.
+To illustrate this, consider a dataset where each observation corresponds to a country and
+each feature corresponds to a measured quantity, producing points in $\mathbb{R}^{17}$.
+For example, one may treat the weekly per-person consumption of 17 food categories as
+a vector in $\mathbb{R}^{17}$. Although we cannot visualize $\mathbb{R}^{17}$ directly, PCA
+provides low-dimensional views (e.g., $q=1$ or $q=2$) that reveal dominant contrasts among
+countries.
+
+Let $x_k\in\mathbb{R}^{17}$ denote the centered consumption vector for country $k$.
+The first PC score is $z_{k1} = u_1^\top x_k$, and the second is $z_{k2}=u_2^\top x_k$.
+Countries separated strongly along PC1 exhibit the greatest differences along the dominant
+consumption pattern, while PC2 captures the second most important pattern not explained
+by PC1.
+
+%--- Optional: include your 17D UK example figure
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.95\textwidth]{pca-17d.png}
+  \caption{A high-dimensional PCA illustration (17 features): PCA reveals dominant axes of
+  variation among observations (countries). Large separation along PC1 indicates an observation
+  that differs substantially along the primary pattern in the data.}
+  \label{fig:pca-17d}
+\end{figure}
+
+\section{Synthetic anomaly example}
+
+To visualize how PCA organizes behavioral observations and highlights deviations from dominant patterns, we construct a small synthetic experiment consisting of 30 two-dimensional data points. In this setup, 27 points represent typical observations concentrated around a common trend, while three points are intentionally placed away from this pattern to represent anomalous behavior.
+
+\subsection{Original Behavioral Space}
+
+We first examine the dataset in the original feature space. Each point corresponds to a single observation described by two behavioral variables. Figure~\ref{fig:pca_original} shows the dataset together with the two principal component directions computed from the data. Both components are drawn from the center of the dataset to illustrate the dominant directions of variation identified by PCA.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{fig1_original_with_pcs.png}
+\caption{Synthetic two-dimensional dataset with principal component directions drawn from the center of the data.}
+\label{fig:pca_original}
+\end{figure}
+
+The first component aligns with the primary trend in the data, while the second component captures variation orthogonal to that trend.
+
+\subsection{Projection into PCA Space}
+
+After computing the principal components, each observation is projected onto the PCA coordinate system. In this representation, every point is described by its coordinates along the first and second components.
+
+Figure~\ref{fig:pca_projected} shows the dataset in this transformed space.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{fig2_projected_pca_space.png}
+\caption{Dataset represented in the PCA coordinate system where each observation is described by its PC1 and PC2 coordinates.}
+\label{fig:pca_projected}
+\end{figure}
+
+This representation separates variation along the dominant direction from orthogonal variation.
+
+\subsection{Principal Component Coordinates}
+
+To further illustrate how individual observations relate to the learned components, we plot the principal component values of all data points. Figures~\ref{fig:pc1_scores} and~\ref{fig:pc2_scores} show the coordinates of each observation along the first and second principal components respectively.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{fig3_pc1_scores.png}
+\caption{Values of the first principal component for all observations.}
+\label{fig:pc1_scores}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{fig4_pc2_scores.png}
+\caption{Values of the second principal component for all observations.}
+\label{fig:pc2_scores}
+\end{figure}
+
+These plots show how each observation contributes to the dominant and secondary directions of variation. Points that deviate from the general pattern of the data become more clearly distinguishable when examined through their component coordinates.
+
+\subsection{Summary of the Illustration}
+
+The experiment proceeds through the following steps:
+
+\begin{enumerate}
+\item Generate a synthetic two-dimensional dataset with 30 observations, including a small number of anomalies.
+\item Compute the principal components from the dataset.
+\item Visualize the principal directions in the original feature space.
+\item Project the observations into the PCA coordinate system.
+\item Examine the component coordinates of each observation through line plots.
+\end{enumerate}
+
+This sequence of visualizations illustrates how PCA organizes the structure of the dataset and separates dominant behavioral variation from secondary deviations.
+\section{Summary}
+This chapter presented PCA in the general $p$-dimensional setting via the covariance matrix,
+eigendecomposition, and variance-maximization principle. We then interpreted PCA as an
+orthogonal projection onto a low-dimensional subspace, yielding an explicit reconstruction and
+a reconstruction-error quantity. The geometric illustrations in low dimensions and the
+high-dimensional example motivate the role of PCA as both a visualization tool and a
+foundation for reconstruction-error anomaly scoring developed in later chapters.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CHAPTER III (CTMC) -- original text unchanged; four sections added (marked NEW)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Temporal Behavioral Modeling via Continuous-Time Markov Chains}
+\label{ch:ctmc}
+
+\section{Overview and Motivation}
+While Principal Component Analysis provides a powerful mechanism for identifying anomalies in a flattened, static feature space, human behavior is inherently sequential. Insider threats are rarely defined by a single isolated action; rather, they emerge through patterns of behavior over time, such as normal daytime activity followed by unusual after-hours access, unexpected device usage, or abnormal file exfiltration.
+
+To model this behavioral evolution, we frame the user's activity as a Continuous-Time Markov Chain (CTMC). A CTMC represents behavior as movement through a finite set of interpretable states over continuous time. This approach respects the fact that user activity logs are discrete, state-based, and irregularly timed, allowing us to mathematically capture both how a user transitions between actions and how those transitions unfold across the working day. Furthermore, rather than operating on raw event streams directly, we convert this behavior into interpretable CTMC summaries for each specified time period (e.g., daily or weekly), which provides a stable signature for downstream anomaly detection.
+
+\section{Semantic Behavioral States}
+A CTMC requires a finite state space, denoted as $\mathcal{S}=\{s_1, s_2, \dots, s_K\}$. In the context of insider threat detection, a state is not a physical location, but a human-readable behavior label derived from a raw log event.
+
+These semantic states encode the action taking place and its relevant organizational or temporal context. Examples of states include:
+\begin{itemize}
+    \item \texttt{logon:workhours} vs. \texttt{logon:afterhours}
+    \item \texttt{file:copy}
+    \item \texttt{device:connect} vs. \texttt{device:disconnect}
+    \item \texttt{email:internal} vs. \texttt{email:external}
+    \item \texttt{http:work}
+\end{itemize}
+By abstracting raw logs into these semantic states, we translate a complex stream of metadata into an ordered sequence of meaningful behaviors.
+
+\section{Event Representation and Time Deltas}
+For any given user $u$, their events are sorted chronologically by timestamp, resulting in an ordered timeline sequence:
+$$ (s_1, t_1), (s_2, t_2), \dots, (s_n, t_n) $$
+Each consecutive pair of events produces a transition $s_k \rightarrow s_{k+1}$. The elapsed time between these events is given by:
+$$ \Delta t_k = t_{k+1} - t_k $$
+Unlike discrete-time models, the CTMC natively incorporates $\Delta t_k$, distinguishing between a user who sends an email three minutes after logging in versus a user who transfers a file eleven hours after their last recorded action.
+
+\section{Standard CTMC Formulation}
+A continuous-time Markov chain is a stochastic process $X(t) \in \mathcal{S}$ defined by a generator matrix $Q$:
+$$
+Q =
+\begin{bmatrix}
+q_{11} & q_{12} & \cdots & q_{1K} \\
+q_{21} & q_{22} & \cdots & q_{2K} \\
+\vdots & \vdots & \ddots & \vdots \\
+q_{K1} & q_{K2} & \cdots & q_{KK}
+\end{bmatrix}
+$$
+For $i \neq j$, the value $q_{ij} \ge 0$ represents the transition rate from state $i$ to state $j$. The diagonal entries are defined such that the rows sum to zero:
+$$ q_{ii} = -\sum_{j \neq i} q_{ij} $$
+The total exit rate from state $i$ is $\lambda_i = \sum_{j \neq i} q_{ij}$. The transition probability matrix after elapsed time $\Delta t$ is computed via the matrix exponential:
+$$ P(\Delta t) = e^{Q\Delta t} $$
+where $P_{ij}(\Delta t)$ represents the probability of being in semantic state $j$ after elapsed time $\Delta t$, given that the user was previously in state $i$.
+
+\section{Empirical Estimation and Surprisal}
+Because insider threat datasets are often large and highly sparse, true analytical transition rates are difficult to obtain. Instead, transition behavior is estimated empirically from observed data. For each source state $i$ and target state $j$, we count the occurrences $N_{ij} = \#(s_t = i, s_{t+1} = j)$ and the total outgoing transitions $N_i = \sum_j N_{ij}$.
+
+To account for rare but benign transitions, we apply a smoothed empirical transition probability:
+$$ \hat{P}(j|i) = \frac{N_{ij} + \alpha}{N_i + \alpha K} $$
+where $\alpha$ is a smoothing parameter and $K$ is the total number of states.
+
+From this, we define the \textit{surprisal} of a behavioral transition. Surprisal measures how mathematically unexpected a user's action is, defined as:
+$$ \text{surprisal}(i \rightarrow j) = -\log \hat{P}(j|i) $$
+A common daily routine yields high probability and low surprisal, whereas an unseen or rare behavioral leap (e.g., moving directly from a mundane web browsing state to a massive internal file copy) yields an exceptionally high surprisal score.
+
+%%%%% NEW SECTION (links the counting estimate to the objective used in Chapter V)
+\section{Why the Counting Estimate Minimizes Surprisal}
+\label{sec:ctmc-mle}
+Before smoothing ($\alpha = 0$), the estimate $\hat{P}(j\mid i) = N_{ij}/N_i$ is not an
+arbitrary choice: it is the first-order transition model under which the benign training
+data is least surprising. Write $P_{ij} = P(j \mid i)$ for a candidate model. Each observed
+transition $i \to j$ contributes its surprisal $-\log P_{ij}$ once, so the total surprisal of
+the training transitions is
+\begin{equation}
+J(P) \;=\; \sum_{i=1}^{K}\sum_{j=1}^{K} N_{ij}\,\bigl(-\log P_{ij}\bigr).
+\label{eq:ctmc-total-surprisal}
+\end{equation}
+Every row must remain a probability distribution, $\sum_{j} P_{ij} = 1$. Using one Lagrange
+multiplier $\beta_i$ per row,
+\[
+\mathcal{L}(P,\beta) \;=\; \sum_{i}\sum_{j} N_{ij}\bigl(-\log P_{ij}\bigr)
+\;+\; \sum_{i} \beta_i\Bigl(\sum_{j} P_{ij} - 1\Bigr).
+\]
+Differentiating with respect to a single entry $P_{ij}$,
+\[
+\frac{\partial \mathcal{L}}{\partial P_{ij}} \;=\; -\frac{N_{ij}}{P_{ij}} + \beta_i \;=\; 0
+\quad\Longrightarrow\quad
+P_{ij} \;=\; \frac{N_{ij}}{\beta_i}.
+\]
+Substituting into the row constraint,
+\[
+\sum_{j} \frac{N_{ij}}{\beta_i} \;=\; 1
+\quad\Longrightarrow\quad
+\beta_i \;=\; \sum_{j} N_{ij} \;=\; N_i,
+\]
+and therefore
+\begin{equation}
+\hat{P}_{ij} \;=\; \frac{N_{ij}}{N_i}.
+\label{eq:ctmc-mle}
+\end{equation}
+Because $-\log$ is convex, $J$ is convex in $P$, and this stationary point is its minimum
+(cells with $N_{ij}=0$ receive probability zero). The counting estimate is therefore the
+maximum-likelihood estimate: among all first-order transition models, it makes benign
+behavior least surprising. Smoothing with $\alpha > 0$ adds $\alpha$ pseudo-counts to every
+cell, so that a transition never seen in training receives a large but finite surprisal
+instead of $-\log 0 = \infty$. \chref{ch:lm} fits a far more flexible model by
+minimizing exactly this kind of total surprisal.
+
+%%%%% NEW SECTION
+\section{Surprisal of a Whole Period}
+\label{sec:ctmc-period}
+A period (for example, one day) with ordered states $s_1,\dots,s_n$ contains $n-1$
+transitions. Its average surprisal is
+\begin{equation}
+\bar{\ell} \;=\; \frac{1}{n-1}\sum_{k=1}^{n-1} -\log \hat{P}(s_{k+1}\mid s_k).
+\label{eq:ctmc-avg-surprisal}
+\end{equation}
+A routine period made of common transitions has a small $\bar{\ell}$; a period containing
+rare transitions has a large $\bar{\ell}$. Averaging rather than summing keeps busy and
+quiet periods on the same scale. The same average, computed over the tokens of a text rather
+than over transitions, is the anomaly score of \chref{ch:lm}.
+
+%%%%% NEW SECTION (worked example in the style of the PCA example)
+\section{A Step-by-Step Numerical Example of Transition Surprisal}
+
+Consider $K=3$ states: state 1 = \texttt{logon:workhours}, state 2 = \texttt{email:internal},
+and state 3 = \texttt{file:copy}.
+
+\subsection{Step 1: Count Transitions in Benign Training Data}
+
+\begin{center}
+\begin{tabular}{cccc|c}
+\toprule
+from $\backslash$ to & 1 & 2 & 3 & $N_i$ \\
+\midrule
+1 & 0 & 6 & 1 & 7 \\
+2 & 1 & 3 & 0 & 4 \\
+3 & 2 & 0 & 0 & 2 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Step 2: Smoothed Transition Probabilities}
+
+With $\alpha = 1$ and $K = 3$, each row uses $\hat{P}(j\mid i) = (N_{ij}+1)/(N_i+3)$:
+\[
+\text{row 1: } \tfrac{(0+1,\;6+1,\;1+1)}{7+3} = (0.100,\; 0.700,\; 0.200),
+\]
+\[
+\text{row 2: } \tfrac{(1+1,\;3+1,\;0+1)}{4+3} = (0.2857,\; 0.5714,\; 0.1429),
+\]
+\[
+\text{row 3: } \tfrac{(2+1,\;0+1,\;0+1)}{2+3} = (0.600,\; 0.200,\; 0.200).
+\]
+Each row sums to 1.
+
+\subsection{Step 3: Surprisal of Individual Transitions}
+
+Using natural logarithms (units: \emph{nats}),
+\begin{gather*}
+-\log 0.700 = 0.3567, \qquad -\log 0.5714 = 0.5596, \\
+-\log 0.2857 = 1.2528, \qquad -\log 0.200 = 1.6094.
+\end{gather*}
+
+\subsection{Step 4: Average Surprisal of Two Periods}
+
+\emph{Day 1 (routine):} $1 \to 2 \to 2 \to 1$, with transitions $1\to2$, $2\to2$, $2\to1$:
+\[
+\bar{\ell}_1 = \frac{0.3567 + 0.5596 + 1.2528}{3} = \frac{2.1691}{3} = 0.7230.
+\]
+\emph{Day 2 (unusual):} $1 \to 3 \to 3 \to 3$, with transitions $1\to3$, $3\to3$, $3\to3$:
+\[
+\bar{\ell}_2 = \frac{1.6094 + 1.6094 + 1.6094}{3} = 1.6094.
+\]
+Day 2 is about $1.6094/0.7230 = 2.23$ times as surprising per transition as Day 1.
+
+\subsection{Step 5: Why Smoothing Is Needed}
+
+Without smoothing ($\alpha=0$), row 3 of \eqref{eq:ctmc-mle} gives
+$\hat{P}(3\mid 3) = 0/2 = 0$, so the repeated file copy on Day 2 would have surprisal
+$-\log 0 = \infty$. A single never-seen transition would then dominate every score. With
+$\alpha = 1$ it costs $1.6094$ nats: large, but comparable with other evidence.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{One-Class Anomaly Scoring}
+To evaluate the CTMC approach against the static PCA method, we utilize a one-class unsupervised anomaly detection paradigm. Instead of relying on complex deep learning reconstruction networks, we establish a robust statistical baseline using the CTMC-derived summaries for a given time period.
+
+After standardization, the benign training distribution of these CTMC features is summarized by a per-feature mean $\mu_j$ and standard deviation $\sigma_j$. The anomaly score for a user's summarized time window $x$ is calculated as the mean squared standardized deviation:
+$$ \text{score}(x) = \frac{1}{d} \sum_{j=1}^{d} \left( \frac{x_j - \mu_j}{\sigma_j + \epsilon} \right)^2 $$
+where $d$ is the number of features and $\epsilon$ is a small constant for numerical stability. This formulation tests the core hypothesis of this chapter: that explicit CTMC behavioral dynamics provide a sufficiently strong mathematical representation to identify anomalous users without requiring complex supervised classifiers.
+
+%%%%% NEW SECTION (bridge to Chapter V)
+\section{From One Step of Memory to Full Context}
+\label{sec:ctmc-bridge}
+The CTMC summarizes the entire past by a single quantity: the current state. A model with
+more memory conditions on more of the history,
+\[
+P(s_{k+1}\mid s_k)
+\;\longrightarrow\;
+P(s_{k+1}\mid s_{k-1}, s_k)
+\;\longrightarrow\; \cdots \;\longrightarrow\;
+P(s_{k+1}\mid s_1, \dots, s_k).
+\]
+A Markov chain of order $m$ over $K$ states needs one probability distribution for every
+possible history of length $m$: there are $K^m$ histories, each with $K-1$ free
+probabilities, for a total of $K^m(K-1)$ parameters. With $K = 10$ states,
+\[
+\begin{array}{lcl}
+\text{order } 1: & 10^1 \times 9 = & 90, \\
+\text{order } 2: & 10^2 \times 9 = & 900, \\
+\text{order } 5: & 10^5 \times 9 = & 900{,}000, \\
+\text{order } 10: & 10^{10} \times 9 = & 90{,}000{,}000{,}000.
+\end{array}
+\]
+A count table cannot be estimated at even moderate order, because almost every long history
+occurs zero or one times in the training data. A neural language model removes the table:
+one shared set of weights computes $P(\text{next}\mid\text{entire history})$ for any history.
+\chref{ch:lm} uses such a model and keeps surprisal as the score, so the CTMC's
+interpretation carries over unchanged: a high score means the benign-trained model found the
+period hard to predict.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CHAPTER IV (PARTIAL)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Experimental Setup and Datasets}
+\label{ch:experimental_setup}
+
+\section{The CMU CERT Dataset}
+[General introduction to the CERT dataset, log types, and the concept of malicious scenarios goes here.]
+
+\section{Data Preparation for Static PCA Analysis}
+[This section will detail the Deep Feature Synthesis, tabular flattening, and setup for the PCA-GMM pipeline.]
+
+\section{Data Preparation for Temporal CTMC Analysis}
+
+\subsection{Log Parsing and State Construction}
+To prepare the dataset for continuous-time modeling, raw log events (Logon, Device, Email, HTTP, File) were parsed and mapped to the predefined semantic state space. Organizational metadata, such as a user's department, role, and supervisor structure (LDAP data), were utilized to contextualize these states. For example, an HTTP request to an external cloud storage provider by an IT Admin is semantically distinct from the same request made by a sales representative.
+
+\subsection{Signature Aggregation}
+Because insider threats are evaluated over prolonged periods, raw event-by-event transitions were aggregated into fixed-window CTMC summaries. This research utilized two primary aggregation tables:
+\begin{itemize}
+    \item \textbf{Weekly CTMC Signatures:} Capturing user behavior grouped by week, yielding summary transition tables representing long-term routines.
+    \item \textbf{Daily Semantic LDAP Signatures:} Grouping behavior by day, generating a highly granular feature table that incorporates both transition metrics and organizational/host context.
+\end{itemize}
+These aggregated signatures formed the $d$-dimensional input vector $x$ evaluated by the anomaly scoring function.
+
+\subsection{One-Class Evaluation Split}
+To realistically simulate an operational cybersecurity environment, the CTMC experiments were conducted under a one-class, unsupervised framework. Training was conducted strictly on benign user data, preventing the model from learning specific hardcoded malicious patterns. The testing phase utilized a leave-one-malicious-user-out methodology. In this split, the model evaluated a test fold consisting of the held-out malicious user hidden among hundreds of sampled benign users. Performance was measured by how highly the anomaly scoring function ranked the malicious user relative to the benign population.
+
+%%%%% NEW SECTION
+\section{Data Preparation for Language-Model Analysis}
+\label{sec:lm-data}
+
+\subsection{Serialization}
+Each user-day is written as plain text: one line of organizational attributes, one line of
+personality scores, a line counting the day's sessions, and one line per session describing
+what the user did. Texts longer than 2,048 tokens are truncated. \chref{ch:lm} shows an
+example.
+
+\subsection{Model and Training}
+The language model is Qwen3-8B \cite{qwen3}, adapted with QLoRA \cite{dettmers2023qlora}
+(low-rank adaptation of rank 16 on top of a 4-bit copy of the model). Only benign user-days
+are used for training; no malicious day is ever shown to the model.
+
+\subsection{User-Disjoint Evaluation}
+All results for the language model use CERT release 4.2 \cite{glasser2013}. The evaluation
+pool contains 60 malicious users and 79 benign users, none of whom appear in training:
+40,519 user-days, of which 1,309 are malicious. As in the CTMC evaluation, each malicious user
+is ranked against the benign population; here every malicious user is compared with the same
+79 benign users.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CHAPTER V (NEW)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Language-Model Surprisal and Its Decomposition}
+\label{ch:lm}
+
+\section{Overview and Motivation}
+\chref{ch:ctmc} measured how unexpected a transition is, given the previous state. This
+chapter measures how unexpected each piece of a user-day is, given everything before it in
+that day, using a large language model fine-tuned on benign activity. The score is the same
+idea as the CTMC's average surprisal, so it inherits the same interpretation. This follows a
+line of work that scores activity by how poorly a model trained on normal activity predicts
+it \cite{du2017deeplog,tuor2017deep}.
+
+The new contribution of this chapter is to take the score apart. We show that it splits
+exactly into a part describing \emph{who} the user is and a part describing \emph{what} the
+user did, and that the first part actively hides malicious users.
+
+\section{Writing a User-Day as Text}
+Each user-day is serialized as text. An example, with session fields abbreviated:
+{\small
+\begin{verbatim}
+DAY week=0 project=114 role=31 b_unit=0 f_unit=9 dept=11 team=62 itadmin=0
+PSY O=36 C=35 E=19 A=44 N=21
+SESSIONS total=2 kept=2
+SES idx=0 pc=0 duration=187.667 n_logon=1 n_usb=0 n_file=0 ...
+SES idx=1 pc=0 duration=205.467 n_logon=1 n_usb=0 n_file=0 ...
+\end{verbatim}
+}
+\noindent The lines fall into two classes:
+\begin{itemize}
+\item \textbf{Profile lines} ($P$): the \texttt{DAY} line (project, role, business unit,
+department, team) and the \texttt{PSY} line (Big-Five personality scores). They describe
+\emph{who} the user is, and they barely change from one day to the next.
+\item \textbf{Behavior lines} ($B$): the \texttt{SESSIONS} line and one \texttt{SES} line per
+session (device, duration, logons, USB, file, email and web activity). They describe
+\emph{what the user did} that day.
+\end{itemize}
+The text is split into \emph{tokens} $x_1,\dots,x_n$: short word pieces such as
+\texttt{dept}, \texttt{=}, or \texttt{11}. Each token inherits the class of the line it
+belongs to. On the malicious days of CERT release 4.2, about 22\% of scored tokens are profile
+tokens and 78\% are behavior tokens.
+
+\section{Next-Token Probability and Surprisal}
+A language model with parameters $\theta$ assigns a probability to each actual token, given
+all the tokens before it:
+\[
+p_\theta(x_t \mid x_1,\dots,x_{t-1}) \;=\; p_\theta(x_t \mid x_{<t}).
+\]
+The \emph{surprisal} of token $t$ is
+\begin{equation}
+\ell_t \;=\; -\log p_\theta(x_t \mid x_{<t}).
+\label{eq:lm-token-surprisal}
+\end{equation}
+This is exactly the CTMC surprisal of \chref{ch:ctmc}, except that the condition is the
+entire preceding text rather than a single previous state. A token the model expects is cheap;
+a token it doubts is expensive:
+\begin{gather*}
+p = 0.9 \Rightarrow \ell = 0.1054, \qquad p = 0.5 \Rightarrow \ell = 0.6931, \\
+p = 0.05 \Rightarrow \ell = 2.9957, \qquad p = 0.01 \Rightarrow \ell = 4.6052.
+\end{gather*}
+
+\subsection{Where the probability comes from}
+After reading $x_{<t}$, the model holds an internal vector $\mathbf{h}_{t-1} \in \mathbb{R}^{d}$
+(for our model, $d = 4096$). Each vocabulary item $v$ has a weight vector $\mathbf{w}_v$, and the
+probabilities come from the \emph{softmax} of the scores $\mathbf{w}_v^\top \mathbf{h}_{t-1}$:
+\[
+p_\theta(x_t = v \mid x_{<t}) \;=\;
+\frac{\exp(\mathbf{w}_v^\top \mathbf{h}_{t-1})}{\sum_{v'} \exp(\mathbf{w}_{v'}^\top \mathbf{h}_{t-1})}.
+\]
+For example, with a vocabulary of three items and scores $(2.0,\;1.0,\;0.1)$:
+\[
+\bigl(e^{2.0},\; e^{1.0},\; e^{0.1}\bigr) = (7.3891,\; 2.7183,\; 1.1052),
+\qquad \text{sum} = 11.2125,
+\]
+\[
+p = \Bigl(\tfrac{7.3891}{11.2125},\; \tfrac{2.7183}{11.2125},\; \tfrac{1.1052}{11.2125}\Bigr)
+= (0.6590,\; 0.2424,\; 0.0986).
+\]
+If the actual next token is the first item, its surprisal is $-\log 0.6590 = 0.4170$.
+The vector $\mathbf{h}_{t-1}$ itself is produced by a stack of transformer layers
+\cite{vaswani2017attention}; \chref{ch:mech} looks inside that stack.
+
+\section{Learning From Benign Days Only}
+Fine-tuning chooses $\theta$ to minimize the total surprisal of the benign training text,
+\begin{equation}
+\theta^\star \;=\; \arg\min_{\theta}\; \sum_{D \in \mathcal{B}} \;\sum_{t}\;
+-\log p_\theta\bigl(x^{(D)}_t \mid x^{(D)}_{<t}\bigr),
+\label{eq:lm-objective}
+\end{equation}
+where $\mathcal{B}$ is the set of benign training days and $x^{(D)}$ is the text of day $D$.
+This is the same objective as \eqref{eq:ctmc-total-surprisal}: there, the minimizer is the
+count table $N_{ij}/N_i$; here, the minimizer is found numerically over a model that can
+condition on the whole day.
+
+\subsection{Low-rank adaptation}
+Rather than changing every weight, fine-tuning adds a low-rank correction to the model's
+weight matrices and keeps the original weights frozen \cite{hu2022lora}. For a square matrix
+$W \in \mathbb{R}^{d \times d}$, such as one of the $4096 \times 4096$ attention projections,
+\[
+W' \;=\; W + G H, \qquad G \in \mathbb{R}^{d\times r},\;\; H \in \mathbb{R}^{r\times d},\;\;
+r \ll d.
+\]
+With $d = 4096$ and our rank $r = 16$:
+\[
+\underbrace{4096 \times 4096}_{\text{full matrix}} = 16{,}777{,}216,
+\qquad
+\underbrace{4096\times 16 + 16 \times 4096}_{\text{correction } GH} = 131{,}072,
+\]
+so the correction trains $131{,}072 / 16{,}777{,}216 = 0.78\%$ as many numbers. Like the rank-$q$
+approximation of \chref{ch:pca}, fine-tuning is confined to a low-dimensional subspace.
+
+\section{The Anomaly Score of a Day and of a User}
+Let $\mathcal{T}$ be the set of scored positions of a day (every token except the first, which
+has nothing before it) and $N = |\mathcal{T}|$. The anomaly score of the day is its average
+token surprisal,
+\begin{equation}
+\bar{\ell} \;=\; \frac{1}{N}\sum_{t\in\mathcal{T}} \ell_t .
+\label{eq:lm-day-score}
+\end{equation}
+A high $\bar{\ell}$ means that a model trained only on benign days found this day hard to
+predict. A user's score is the score of their most unusual day,
+\[
+\bar{\ell}(u) \;=\; \max_{D \in \mathcal{D}_u} \bar{\ell}(D),
+\]
+where $\mathcal{D}_u$ is the set of that user's days.
+
+\section{Splitting the Score by Token Class}
+\label{sec:lm-decomp}
+Divide the scored positions into profile and behavior positions,
+$\mathcal{T} = \mathcal{T}_P \cup \mathcal{T}_B$, with $N = N_P + N_B$, and write the class
+totals and class means as
+\[
+L_P = \sum_{t\in\mathcal{T}_P} \ell_t, \quad
+L_B = \sum_{t\in\mathcal{T}_B} \ell_t, \quad
+\bar{\ell}_P = \frac{L_P}{N_P}, \quad
+\bar{\ell}_B = \frac{L_B}{N_B}.
+\]
+
+\subsection{The exact decomposition}
+Starting from \eqref{eq:lm-day-score},
+\begin{align}
+\bar{\ell}
+&= \frac{1}{N}\sum_{t\in\mathcal{T}} \ell_t
+ = \frac{1}{N}\Bigl(\sum_{t\in\mathcal{T}_P} \ell_t + \sum_{t\in\mathcal{T}_B} \ell_t\Bigr)
+ = \frac{1}{N}\bigl(L_P + L_B\bigr) \nonumber\\
+&= \frac{1}{N}\bigl(N_P\,\bar{\ell}_P + N_B\,\bar{\ell}_B\bigr)
+ = \frac{N_P}{N}\,\bar{\ell}_P \;+\; \frac{N_B}{N}\,\bar{\ell}_B .
+\label{eq:lm-decomp}
+\end{align}
+The day's score is a weighted average of the profile mean and the behavior mean, weighted by
+their shares of the tokens. Nothing is approximated.
+
+\subsection{The behavior-only score}
+The behavior mean can be computed from the day's total and its profile part:
+\begin{equation}
+\bar{\ell}_B \;=\; \frac{L_B}{N_B} \;=\; \frac{L - L_P}{N - N_P},
+\qquad L = L_P + L_B .
+\label{eq:lm-behavior}
+\end{equation}
+Scoring days by $\bar{\ell}_B$ instead of $\bar{\ell}$ uses the same model, with no
+retraining; it simply stops counting profile tokens.
+
+\subsection{Why subtracting the profile mean does not work}
+A tempting shortcut is $\bar{\ell} - \bar{\ell}_P$. Using \eqref{eq:lm-decomp} and
+$1 - N_P/N = N_B/N$,
+\begin{align}
+\bar{\ell} - \bar{\ell}_P
+&= \frac{N_P}{N}\bar{\ell}_P + \frac{N_B}{N}\bar{\ell}_B - \bar{\ell}_P
+ = \frac{N_B}{N}\bar{\ell}_B - \Bigl(1 - \frac{N_P}{N}\Bigr)\bar{\ell}_P \nonumber\\
+&= \frac{N_B}{N}\bar{\ell}_B - \frac{N_B}{N}\bar{\ell}_P
+ = \frac{N_B}{N}\bigl(\bar{\ell}_B - \bar{\ell}_P\bigr).
+\label{eq:lm-naive}
+\end{align}
+This measures how much harder the behavior was to predict than the profile, not how hard the
+behavior was to predict, and it can reverse the order of two days (Step 6 below). Removing
+only the profile's weighted share gives
+\[
+\bar{\ell} - \frac{N_P}{N}\bar{\ell}_P \;=\; \frac{N_B}{N}\bar{\ell}_B ,
+\]
+which is proportional to $\bar{\ell}_B$; because $N_B/N$ varies from day to day, we compute
+$\bar{\ell}_B$ directly with \eqref{eq:lm-behavior}.
+
+\section{A Step-by-Step Numerical Example}
+Two user-days, each with $N = 5$ scored tokens: one profile token and four behavior tokens,
+so $N_P/N = 0.2$ and $N_B/N = 0.8$ (close to the real 22\%/78\% split).
+Day A belongs to a malicious user with a common profile and unusual behavior. Day B belongs to
+a benign user with a rare profile and routine behavior.
+
+\subsection{Step 1: Token Probabilities and Surprisals}
+
+\begin{center}
+\begin{tabular}{ccccccc}
+\toprule
+& & \multicolumn{2}{c}{Day A (malicious)} & & \multicolumn{2}{c}{Day B (benign)} \\
+\cmidrule{3-4} \cmidrule{6-7}
+token & class & $p$ & $\ell_t = -\log p$ & & $p$ & $\ell_t = -\log p$ \\
+\midrule
+1 & $P$ & 0.90 & 0.1054 & & 0.05 & 2.9957 \\
+2 & $B$ & 0.50 & 0.6931 & & 0.80 & 0.2231 \\
+3 & $B$ & 0.40 & 0.9163 & & 0.60 & 0.5108 \\
+4 & $B$ & 0.20 & 1.6094 & & 0.50 & 0.6931 \\
+5 & $B$ & 0.60 & 0.5108 & & 0.80 & 0.2231 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Step 2: Class Totals}
+\[
+\text{Day A: } L_P = 0.1054,\quad L_B = 0.6931+0.9163+1.6094+0.5108 = 3.7296,\quad L = 3.8350.
+\]
+\[
+\text{Day B: } L_P = 2.9957,\quad L_B = 0.2231+0.5108+0.6931+0.2231 = 1.6501,\quad L = 4.6458.
+\]
+
+\subsection{Step 3: Full Scores}
+\[
+\bar{\ell}(A) = \frac{3.8350}{5} = 0.7670, \qquad
+\bar{\ell}(B) = \frac{4.6458}{5} = 0.9292 .
+\]
+The full score ranks the benign Day B \emph{above} the malicious Day A.
+
+\subsection{Step 4: Class Means and the Decomposition Check}
+\begin{gather*}
+\text{Day A: } \bar{\ell}_P = 0.1054, \quad \bar{\ell}_B = \frac{3.7296}{4} = 0.9324; \\
+\text{Day B: } \bar{\ell}_P = 2.9957, \quad \bar{\ell}_B = \frac{1.6501}{4} = 0.4125.
+\end{gather*}
+Checking \eqref{eq:lm-decomp}:
+\[
+\bar{\ell}(A) = 0.2(0.1054) + 0.8(0.9324) = 0.02108 + 0.74592 = 0.76700,
+\]
+\[
+\bar{\ell}(B) = 0.2(2.9957) + 0.8(0.4125) = 0.59914 + 0.33002 = 0.92916 .
+\]
+The behavior-only score ranks Day A (0.9324) above Day B (0.4125): the correct order.
+
+\subsection{Step 5: Where the Full Score Went Wrong}
+The full scores differ by $0.92916 - 0.76700 = 0.16216$. Splitting that gap by class,
+\[
+\underbrace{(0.59914 - 0.02108)}_{\text{profile part}} +
+\underbrace{(0.33002 - 0.74592)}_{\text{behavior part}}
+= 0.57806 - 0.41590 = 0.16216 .
+\]
+The behavior part correctly favors Day A by 0.41590, but the profile part favors Day B by
+0.57806 and wins. A rare but harmless profile has outweighed genuinely unusual behavior.
+
+\subsection{Step 6: The Naive Subtraction Reverses a Ranking}
+Take two further days with the same token counts: Day C with $\bar{\ell}_P = 3.0$,
+$\bar{\ell}_B = 1.2$, and Day D with $\bar{\ell}_P = 0.2$, $\bar{\ell}_B = 0.8$.
+The behavior-only score ranks C above D ($1.2 > 0.8$). Then
+\[
+\bar{\ell}(C) = 0.2(3.0) + 0.8(1.2) = 1.56, \qquad
+\bar{\ell}(D) = 0.2(0.2) + 0.8(0.8) = 0.68,
+\]
+\[
+\text{naive: } \bar{\ell}(C) - \bar{\ell}_P(C) = 1.56 - 3.0 = -1.44, \qquad
+\bar{\ell}(D) - \bar{\ell}_P(D) = 0.68 - 0.2 = 0.48,
+\]
+so the naive subtraction ranks D above C, the wrong order, in agreement with
+\eqref{eq:lm-naive}: $0.8(1.2 - 3.0) = -1.44$ and $0.8(0.8-0.2) = 0.48$. Removing only the
+weighted share restores the order: $1.56 - 0.2(3.0) = 0.96 = 0.8(1.2)$ and
+$0.68 - 0.2(0.2) = 0.64 = 0.8(0.8)$.
+
+\section{Measuring Detection: The User-Level AUC}
+With one malicious user $m$ compared against $n_-$ benign users $u_1,\dots,u_{n_-}$, the
+area under the ROC curve for $m$ is the fraction of benign users that $m$ outranks,
+\begin{equation}
+\mathrm{AUC}_m \;=\; \frac{1}{n_-}\sum_{j=1}^{n_-}\mathbb{I}\bigl[\bar{\ell}(m) > \bar{\ell}(u_j)\bigr],
+\label{eq:auc}
+\end{equation}
+where $\mathbb{I}[\cdot]$ is 1 when the condition holds and 0 otherwise (a tie counts as
+$\tfrac12$). Averaging over $M$ malicious users gives $\mathrm{AUC} = \frac{1}{M}\sum_m
+\mathrm{AUC}_m$. Because every malicious user is compared with the same benign users, this
+average equals the pooled AUC over all $M \times n_-$ malicious--benign pairs:
+\[
+\frac{1}{M}\sum_{m}\frac{1}{n_-}\sum_{j}\mathbb{I}[\cdot]
+\;=\; \frac{1}{M\,n_-}\sum_{m}\sum_{j}\mathbb{I}[\cdot].
+\]
+A value of 0.5 is chance, 1 is perfect, and a value below 0.5 means malicious users are
+systematically ranked \emph{below} benign ones.
+
+For example, suppose four benign users have full scores $(0.93,\;0.70,\;0.85,\;0.60)$ and a
+malicious user has full score $0.77$. The malicious user outranks $0.70$ and $0.60$, so
+$\mathrm{AUC}_m = 2/4 = 0.50$. If the behavior-only scores are $(0.41,\;0.55,\;0.70,\;0.48)$
+for the benign users and $0.93$ for the malicious user, it outranks all four, and
+$\mathrm{AUC}_m = 4/4 = 1.00$.
+
+\section{Core Finding}
+\label{sec:lm-finding}
+Table~\ref{tab:lm-views} scores the same 60 malicious and 79 benign users of CERT release 4.2
+with four versions of the score, all computed from one set of model outputs.
+
+\begin{table}[H]
+\centering
+\caption{User-level AUC on CERT release 4.2 (60 malicious users, 79 benign users, none seen in
+training) for scores built from different token classes. Intervals are 95\% bootstrap
+intervals, resampling malicious users.}
+\label{tab:lm-views}
+\begin{tabular}{llcc}
+\toprule
+score & tokens counted & user AUC & 95\% interval \\
+\midrule
+full score $\bar{\ell}$ & all & 0.65 & [0.58, 0.72] \\
+behavior only $\bar{\ell}_B$ & behavior & \textbf{0.86} & [0.83, 0.89] \\
+profile only $\bar{\ell}_P$ & profile & 0.47 & [0.40, 0.54] \\
+organization line only & \texttt{DAY} & 0.22 & [0.15, 0.29] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Scoring behavior tokens alone raises the user-level AUC by $+0.21$, with a 95\% interval of
+$[+0.16,\;+0.27]$. Compared one malicious user at a time, 51 of the 60 malicious users are
+ranked higher among the benign users, 3 are unchanged, and 6 are ranked lower.
+
+Three observations explain the result.
+\begin{itemize}
+\item \textbf{The profile tokens are not neutral noise.} On their own they rank malicious users
+below benign ones (0.47), and the organization line alone does so strongly (0.22). In this
+benchmark, malicious users tend to have common profiles, so their profile tokens are cheap and
+pull their full scores down: exactly Day A of the worked example.
+\item \textbf{Surprisal measures typicality, not suspicion.} Every evaluated user is new to the
+model, so a profile's surprisal reflects how common that kind of employee was among benign
+training users. A rare but innocent job title is surprising; a malicious user with an ordinary
+job title is not.
+\item \textbf{The fix requires no new model.} The decomposition \eqref{eq:lm-decomp} is
+exact, so the behavior-only score is obtained from the same model outputs by not counting
+profile tokens.
+\end{itemize}
+The same concern applies to any representation that mixes context with behavior. The CTMC
+states of \chref{ch:ctmc} can carry organizational context, for example; keeping that
+context separable from the behavioral transitions makes the same check possible there.
+
+The user-level AUC measures how well users are ranked. It does not show that the score
+pinpoints the specific malicious day, and it should not be read that way.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CHAPTER VI (NEW)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Mechanistic Interpretability of the Fine-Tuned Model}
+\label{ch:mech}
+
+\section{Overview and Motivation}
+\chref{ch:lm} examined the score from the outside: which tokens its surprisal comes
+from. \emph{Mechanistic interpretability} asks what the model computes internally
+\cite{bricken2023monosemanticity,cunningham2023sparse}. This chapter looks at the change that
+benign fine-tuning made to the model's internal representations, decomposes that change into
+a sparse set of \emph{features} (an overcomplete, sparse relative of PCA), and tests two
+things about the features that best separate malicious from benign days: whether they read
+behavior or profile, and whether they causally drive the anomaly score.
+
+\section{Hidden States and the Adaptation Difference}
+The model processes text through a stack of 36 layers. After each layer, each token $t$ is
+represented by a \emph{hidden state} $\mathbf{h}_t \in \mathbb{R}^{d}$ with $d = 4096$. Running
+the same text through the model before fine-tuning (the \emph{base} model) and after it (the
+\emph{adapted} model) gives two hidden states for every token. Their difference,
+\begin{equation}
+\boldsymbol{\delta}_t \;=\; \mathbf{h}^{\mathrm{ada}}_t - \mathbf{h}^{\mathrm{base}}_t
+\;\in\; \mathbb{R}^{d},
+\label{eq:delta}
+\end{equation}
+is exactly what benign fine-tuning added to the representation of token $t$. We study the
+hidden states after layer 26. For instance, if $\mathbf{h}^{\mathrm{base}}_t = (0.5,\;1.0,\;-0.2)$ and
+$\mathbf{h}^{\mathrm{ada}}_t = (0.9,\;1.0,\;0.4)$ in a three-dimensional illustration, then
+$\boldsymbol{\delta}_t = (0.4,\;0.0,\;0.6)$: fine-tuning changed the first and third
+coordinates and left the second alone.
+
+\section{A Sparse Dictionary for the Difference}
+Recall the PCA reconstruction of \chref{ch:pca}: an observation is encoded by
+$\mathbf{z} = U_q^\top \mathbf{x}$ using $q < p$ orthonormal directions, decoded by
+$\widehat{\mathbf{x}} = U_q \mathbf{z}$, and the directions minimize the reconstruction error
+\eqref{eq:recon-error}. A \emph{sparse autoencoder} (SAE) keeps the reconstruction objective but
+changes two things: it uses \emph{more} directions than dimensions ($m > d$), and it lets only a
+few of them be active for any one token \cite{gao2024scaling}.
+
+\paragraph{Encode.} Compute a score for each of the $m$ dictionary directions and keep only the
+$k$ largest:
+\begin{equation}
+\mathbf{a}_t = W_{\mathrm{enc}}(\boldsymbol{\delta}_t - \mathbf{b}) \in \mathbb{R}^{m},
+\qquad
+\mathbf{z}_t = \mathrm{TopK}_k(\mathbf{a}_t),
+\label{eq:sae-encode}
+\end{equation}
+where $\mathrm{TopK}_k$ keeps the $k$ largest entries and sets the rest to zero.
+
+\paragraph{Decode.} Rebuild the difference from the active directions:
+\begin{equation}
+\widehat{\boldsymbol{\delta}}_t = W_{\mathrm{dec}}\,\mathbf{z}_t + \mathbf{b}
+= \sum_{f:\, z_{f,t}\neq 0} z_{f,t}\,\mathbf{w}_f + \mathbf{b},
+\label{eq:sae-decode}
+\end{equation}
+where $\mathbf{w}_f$ is column $f$ of $W_{\mathrm{dec}}$, the direction of \emph{feature} $f$.
+
+\paragraph{Train.} Choose $W_{\mathrm{enc}}$, $W_{\mathrm{dec}}$ and $\mathbf{b}$ to minimize
+$\sum_t \|\boldsymbol{\delta}_t - \widehat{\boldsymbol{\delta}}_t\|_2^2$, the same squared
+reconstruction error as PCA. No labels are used. (Each coordinate of $\boldsymbol{\delta}$ is
+standardized before encoding and restored after decoding; we suppress this in the notation.)
+
+\begin{table}[H]
+\centering
+\caption{PCA and the sparse autoencoder side by side.}
+\label{tab:pca-sae}
+\begin{tabular}{lll}
+\toprule
+& PCA (\chref{ch:pca}) & sparse autoencoder \\
+\midrule
+number of directions & $q < p$ & $m > d$ \\
+directions & orthonormal & not orthogonal \\
+active per observation & all $q$ & only $k$ \\
+objective & $\min \|\mathbf{x} - \widehat{\mathbf{x}}\|^2$ & $\min \|\boldsymbol{\delta} - \widehat{\boldsymbol{\delta}}\|^2$ \\
+our setting & --- & $d = 4096$, $m = 8192$, $k = 4$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent With $m = 8{,}192$ directions but only $k = 4$ active per token, each token's
+$\boldsymbol{\delta}_t$ is explained by four features. Because so few are active at once, each
+feature tends to specialize in one recognizable pattern. Our dictionary is trained on
+2,000,000 token-level differences.
+
+\section{A Step-by-Step Numerical Example of Sparse Coding}
+Take $d = 2$, a dictionary of $m = 3$ unit directions, $k = 1$ active feature, $\mathbf{b} =
+\mathbf{0}$, and, for illustration, $W_{\mathrm{enc}} = W_{\mathrm{dec}}^\top$:
+\[
+\mathbf{w}_1 = (1,\;0), \qquad \mathbf{w}_2 = (0,\;1), \qquad \mathbf{w}_3 = (0.6,\;0.8).
+\]
+
+\subsection{Step 1: Encode}
+For $\boldsymbol{\delta} = (1.2,\;1.6)$,
+\[
+\mathbf{a} = \bigl(\mathbf{w}_1^\top\boldsymbol{\delta},\; \mathbf{w}_2^\top\boldsymbol{\delta},\;
+\mathbf{w}_3^\top\boldsymbol{\delta}\bigr)
+= \bigl(1.2,\; 1.6,\; 0.6(1.2) + 0.8(1.6)\bigr) = (1.2,\; 1.6,\; 2.0).
+\]
+
+\subsection{Step 2: Keep the Top $k = 1$}
+The largest score belongs to feature 3, so $\mathbf{z} = (0,\;0,\;2.0)$.
+
+\subsection{Step 3: Decode and Measure the Error}
+\[
+\widehat{\boldsymbol{\delta}} = 2.0\,\mathbf{w}_3 = (1.2,\; 1.6), \qquad
+\|\boldsymbol{\delta} - \widehat{\boldsymbol{\delta}}\|^2 = 0 .
+\]
+
+\subsection{Step 4: Compare With the Two Axes Alone}
+If only $\mathbf{w}_1$ and $\mathbf{w}_2$ were available, with one active at a time, the best
+choice is $\mathbf{w}_2$: $\widehat{\boldsymbol{\delta}} = (0,\;1.6)$ with error
+$1.2^2 = 1.44$ (using $\mathbf{w}_1$ gives $1.6^2 = 2.56$). The larger dictionary represents
+$\boldsymbol{\delta}$ exactly with one active feature because it contains a direction aligned
+with it.
+
+\subsection{Step 5: A Different Token Uses a Different Feature}
+For $\boldsymbol{\delta}' = (1.0,\;0.1)$, $\mathbf{a}' = (1.0,\;0.1,\;0.68)$, so feature 1 is
+kept: $\widehat{\boldsymbol{\delta}}' = (1.0,\;0)$ with error $0.1^2 = 0.01$. Each token is
+described by the few features that fit it best: this is \emph{sparse coding}.
+
+\section{Choosing the Features to Test}
+For each feature $f$, its \emph{gap} compares how strongly it fires on malicious and benign
+days,
+\begin{equation}
+g_f \;=\; \bar{z}_f^{(+)} - \bar{z}_f^{(-)},
+\label{eq:gap}
+\end{equation}
+where $\bar{z}_f^{(+)}$ and $\bar{z}_f^{(-)}$ are the average activations of feature $f$ over
+the tokens of malicious days and of benign days. The \emph{selected set} $\mathcal{F}$ is the
+five features with the largest gaps. The \emph{control set} $\mathcal{C}$ is five other features
+that fire comparably often (each is active on at least 0.2\% of tokens) but have small gaps. The
+control answers the question: does editing \emph{any} active features change the score, or only
+the selected ones?
+
+\section{Where Features Fire: Token-Class Attribution}
+For a feature $f$ and a token class $c$, the share of the feature's total activation that
+lands on class-$c$ tokens is
+\begin{equation}
+\rho_f(c) \;=\; \frac{\sum_{t \in \mathcal{T}_c} z_{f,t}}{\sum_{t \in \mathcal{T}} z_{f,t}},
+\label{eq:attribution}
+\end{equation}
+and its \emph{enrichment} compares that share with the class's share of the tokens,
+\[
+E_f(c) \;=\; \frac{\rho_f(c)}{N_c / N}.
+\]
+An enrichment of 1 means the feature fires on class $c$ exactly as often as chance would
+suggest; larger values mean it prefers class $c$.
+
+For example, if a feature's activations over five tokens of classes $(P, P, B, B, B)$ are
+$(0,\;0,\;1.5,\;2.0,\;0.5)$, the total is 4.0, so $\rho_f(B) = 4.0/4.0 = 1.00$ and
+$\rho_f(P) = 0$. Behavior tokens are $3/5 = 0.60$ of the tokens, so
+$E_f(B) = 1.00/0.60 = 1.67$. The largest possible enrichment for a class is $1/(N_c/N)$,
+reached when all of a feature's activation lands on that class.
+
+\section{Causal Test: Editing Features and Re-Scoring}
+Attribution shows where a feature fires, not whether it matters. The causal test edits the
+features and measures the change in the anomaly score. Take a malicious \emph{receiver} day and
+a benign \emph{donor} day from a colleague in the same department.
+
+\subsection{Step 1: Encode the receiver}
+Compute $\mathbf{z}_t$ for each receiver token with \eqref{eq:sae-encode}.
+
+\subsection{Step 2: Move the selected features toward the donor}
+On tokens where the selected features are active, replace each selected feature's activation by
+\[
+z'_{f,t} \;=\; (1-\gamma)\,z_{f,t} + \gamma\,\bar{z}^{\,\mathrm{donor}}_f,
+\qquad f \in \mathcal{F},
+\]
+with patch strength $\gamma \in \{0.25,\;0.5,\;0.75,\;1\}$; all other features are unchanged.
+For example, if $z_{f,t} = 2.0$ and $\bar{z}^{\,\mathrm{donor}}_f = 0.4$, then $\gamma = 1$ gives
+$z'_{f,t} = 0.4$, and $\gamma = 0.5$ gives $z'_{f,t} = 0.5(2.0) + 0.5(0.4) = 1.2$.
+
+\subsection{Step 3: Decode and replace the hidden state}
+Decode the edited code, $\widehat{\boldsymbol{\delta}}'_t = W_{\mathrm{dec}}\mathbf{z}'_t +
+\mathbf{b}$, and replace the adapted hidden state at layer 26 by
+\[
+\mathbf{h}'_t \;=\; \mathbf{h}^{\mathrm{ada}}_t + \bigl(\widehat{\boldsymbol{\delta}}'_t -
+\boldsymbol{\delta}_t\bigr).
+\]
+Substituting $\mathbf{h}^{\mathrm{ada}}_t = \mathbf{h}^{\mathrm{base}}_t + \boldsymbol{\delta}_t$
+from \eqref{eq:delta},
+\[
+\mathbf{h}'_t \;=\; \mathbf{h}^{\mathrm{base}}_t + \boldsymbol{\delta}_t +
+\widehat{\boldsymbol{\delta}}'_t - \boldsymbol{\delta}_t
+\;=\; \mathbf{h}^{\mathrm{base}}_t + \widehat{\boldsymbol{\delta}}'_t .
+\]
+The edited model therefore sees the base representation plus the dictionary's version of the
+fine-tuning change, with the selected features moved toward the benign colleague.
+
+\subsection{Step 4: Re-score}
+Run the remaining layers from $\mathbf{h}'$ and recompute the day's score $\bar{\ell}'_{\mathcal{F}}$.
+The drop in the score is $\Delta_{\mathcal{F}} = \bar{\ell} - \bar{\ell}'_{\mathcal{F}}$; a
+positive drop means the edit made the day look less anomalous.
+
+\subsection{Step 5: Repeat with the control set and compare}
+Repeat Steps 2--4 with $\mathcal{C}$ in place of $\mathcal{F}$ to get $\Delta_{\mathcal{C}}$.
+The effect of the selected features is the average, over receiver days, of
+\begin{equation}
+\tau \;=\; \Delta_{\mathcal{F}} - \Delta_{\mathcal{C}}
+\;=\; \bigl(\bar{\ell} - \bar{\ell}'_{\mathcal{F}}\bigr) - \bigl(\bar{\ell} - \bar{\ell}'_{\mathcal{C}}\bigr)
+\;=\; \bar{\ell}'_{\mathcal{C}} - \bar{\ell}'_{\mathcal{F}} .
+\label{eq:tau}
+\end{equation}
+The unedited score $\bar{\ell}$ cancels, so $\tau$ compares the two edited models directly.
+Both edits also pass through the same dictionary reconstruction, so $\tau$ reflects
+\emph{which} features were edited rather than the fact that a dictionary was used. For example,
+if $\bar{\ell} = 1.500$, $\bar{\ell}'_{\mathcal{F}} = 1.460$ and $\bar{\ell}'_{\mathcal{C}} =
+1.492$, then $\Delta_{\mathcal{F}} = 0.040$, $\Delta_{\mathcal{C}} = 0.008$, and
+$\tau = 0.032 = 1.492 - 1.460$.
+
+\section{Core Mechanistic Finding}
+\label{sec:mech-finding}
+
+\subsection{The selected features read behavior}
+Table~\ref{tab:attribution} gives the attribution \eqref{eq:attribution} of the five features
+selected on all 60 malicious users of CERT release 4.2.
+
+\begin{table}[H]
+\centering
+\caption{Share of each selected feature's activation on each token class, over malicious days
+of CERT release 4.2 (layer 26). Session (\texttt{SES}) lines are 74.9\% of these tokens,
+the organization (\texttt{DAY}) line 12.6\%, and the personality (\texttt{PSY}) line 9.0\%.}
+\label{tab:attribution}
+\begin{tabular}{lcccc}
+\toprule
+feature & $\rho_f(\texttt{SES})$ & $\rho_f(\texttt{DAY})$ & $\rho_f(\texttt{PSY})$ & enrichment \\
+\midrule
+4596 & 0.999 & 0.000 & 0.001 & 1.334 on \texttt{SES} \\
+3673 & 1.000 & 0.000 & 0.000 & 1.335 on \texttt{SES} \\
+3455 & 1.000 & 0.000 & 0.000 & 1.335 on \texttt{SES} \\
+1268 & 1.000 & 0.000 & 0.000 & 1.335 on \texttt{SES} \\
+2302 & 0.001 & 0.998 & 0.001 & 7.907 on \texttt{DAY} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Four of the five features put at least 99.9\% of their activation on session tokens. Their
+enrichment of 1.334 to 1.335 is the maximum possible, since $1/0.7492 = 1.335$: essentially all
+of their activation lands on the session lines. One of them (3673) responds specifically to the session
+\emph{duration} fields. The fifth feature (2302) fires on the organization line instead.
+
+\subsection{Editing them changes the score, on held-out users}
+For the causal test, the 60 malicious users were split in half. Features were re-selected using
+only the 30 \emph{discovery} users; the re-selected set shares four of the five features above.
+The test was then run on the other 30 malicious users, whom feature selection never saw.
+Editing the selected features toward a benign colleague in the same department lowered the
+anomaly score more than editing the control features:
+\[
+\tau \;=\; 0.00076 \text{ nats}, \qquad 95\%\text{ interval } [0.00035,\;0.00121],
+\]
+over 605 held-out malicious days, and the effect was positive for 21 of 29 held-out users.
+The estimate is positive in all four organizational groupings tested (department, department
+and role, team, role: 0.00034 to 0.00076 nats); the department grouping is the one whose
+interval excludes zero.
+
+\subsection{Reading}
+The features that most distinguish malicious days inside the model are predominantly
+behavioral, and moving them toward a benign colleague's values makes a malicious day look less
+anomalous, on users held out from feature selection. Together with \chref{ch:lm}, this
+is consistent with the following picture: the adapted model does represent unusual
+\emph{behavior}, and the profile shortcut enters mainly through how the model's output is
+turned into a score, by averaging surprisal over every token, including the cheap profile
+tokens. Removing the profile tokens from the score exposes the behavioral signal the model
+already has.
+
+The effect is small in absolute terms ($0.00076$ nats against day scores near 1), and it is
+about half the size of the estimate obtained before the held-out split. The claim is about the
+direction of the effect and where the features fire, not about its size.
+
+\section{Limitations}
+\begin{itemize}
+\item The dictionary's layer, size and sparsity (layer 26, $m = 8{,}192$, $k = 4$) were chosen
+among twelve candidate settings using runs that included all 60 malicious users. The
+features were re-selected on held-out users, but this setting was not.
+\item All results come from a single fine-tuned model. In a companion dataset, a result of this
+kind reversed direction when the whole pipeline was retrained with a different random seed, so
+these findings should be replicated before being generalized.
+\item One benchmark release was used, CERT release 4.2. It is synthetic, and it was evaluated
+many times during development.
+\item The user-level AUC ranks users; it does not show that the model identifies the specific
+malicious day.
+\end{itemize}
+
+\newpage
+
+%-------------------------
+% References
+%-------------------------
+\chapter*{REFERENCES}
+\addcontentsline{toc}{chapter}{REFERENCES}
+
+%%%%% CHANGED: widest-label argument is 99 (the list now has more than nine entries)
+\begin{thebibliography}{99}
+
+\bibitem{pearson1901}
+Pearson, K. (1901).
+On lines and planes of closest fit to systems of points in space.
+\textit{The London, Edinburgh, and Dublin Philosophical Magazine and Journal of Science},
+2(11), 559--572.
+
+\bibitem{hotelling1933}
+Hotelling, H. (1933).
+Analysis of a complex of statistical variables into principal components.
+\textit{Journal of Educational Psychology}, 24(6), 417--441.
+
+\bibitem{jolliffe1986}
+Jolliffe, I. T. (1986).
+\textit{Principal Component Analysis}.
+Springer Series in Statistics.
+Springer, New York.
+https://doi.org/10.1007/978-1-4757-1904-8
+
+\bibitem{certdataset2016}
+Software Engineering Institute. (2016).
+\textit{Insider Threat Test Dataset}.
+Carnegie Mellon University Software Engineering Institute.
+https://doi.org/10.1184/R1/12841247.v1
+
+\bibitem{glasser2013}
+Glasser, J., \& Lindauer, B. (2013).
+Bridging the gap: A pragmatic approach to generating insider threat data.
+In \textit{2013 IEEE Security and Privacy Workshops} (pp. 98--104).
+IEEE.
+https://doi.org/10.1109/SPW.2013.37
+
+\bibitem{shlens2014}
+Shlens, J. (2014).
+\textit{A Tutorial on Principal Component Analysis}.
+arXiv.
+https://doi.org/10.48550/arXiv.1404.1100
+
+\bibitem{cappelli2012}
+Cappelli, D., Moore, A., \& Trzeciak, R. (2012).
+\textit{The CERT Guide to Insider Threats: How to Prevent, Detect, and Respond to Information Technology Crimes (Theft, Sabotage, Fraud)}.
+Addison-Wesley Professional.
+
+\bibitem{usmHPC2024}
+HPC Wiki, The University of Southern Mississippi. (2024).
+\textit{Main Page}.
+Magnolia HPC Wiki.
+Suggested infrastructure acknowledgment: The authors acknowledge HPC at The University of Southern Mississippi supported by the National Science Foundation under the Major Research Instrumentation (MRI) program via Grant \# ACI 1626217.
+\url{http://magnolia.usm.edu/index.php?title=Main_Page&oldid=1116}
+
+%%%%% NEW references (entries taken from the research paper's bibliography)
+\bibitem{du2017deeplog}
+Du, M., Li, F., Zheng, G., \& Srikumar, V. (2017).
+DeepLog: Anomaly detection and diagnosis from system logs through deep learning.
+In \textit{Proceedings of the ACM SIGSAC Conference on Computer and Communications Security}.
+
+\bibitem{tuor2017deep}
+Tuor, A., Kaplan, S., Hutchinson, B., Nichols, N., \& Robinson, S. (2017).
+Deep learning for unsupervised insider threat detection in structured cybersecurity data streams.
+In \textit{AAAI Workshop on Artificial Intelligence for Cyber Security}.
+
+\bibitem{vaswani2017attention}
+Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, L., \& Polosukhin, I. (2017).
+Attention is all you need.
+In \textit{Advances in Neural Information Processing Systems}.
+
+\bibitem{hu2022lora}
+Hu, E. J., Shen, Y., Wallis, P., Allen-Zhu, Z., Li, Y., Wang, S., Wang, L., \& Chen, W. (2022).
+LoRA: Low-rank adaptation of large language models.
+In \textit{International Conference on Learning Representations}.
+
+\bibitem{dettmers2023qlora}
+Dettmers, T., Pagnoni, A., Holtzman, A., \& Zettlemoyer, L. (2023).
+QLoRA: Efficient finetuning of quantized LLMs.
+In \textit{Advances in Neural Information Processing Systems}.
+
+\bibitem{qwen3}
+Qwen Team. (2025).
+\textit{Qwen3 technical report}.
+arXiv preprint arXiv:2505.09388.
+
+\bibitem{bricken2023monosemanticity}
+Bricken, T., Templeton, A., Batson, J., Chen, B., Jermyn, A., Conerly, T., Turner, N. L., et al. (2023).
+Towards monosemanticity: Decomposing language models with dictionary learning.
+\textit{Transformer Circuits Thread}.
+\url{https://transformer-circuits.pub/2023/monosemantic-features}
+
+\bibitem{cunningham2023sparse}
+Cunningham, H., Ewart, A., Riggs, L., Huben, R., \& Sharkey, L. (2023).
+Sparse autoencoders find highly interpretable features in language models.
+arXiv preprint arXiv:2309.08600.
+
+\bibitem{gao2024scaling}
+Gao, L., Dupr{\'e} la Tour, T., Tillman, H., Goh, G., Troll, R., Radford, A., Sutskever, I., Leike, J., \& Wu, J. (2024).
+Scaling and evaluating sparse autoencoders.
+arXiv preprint arXiv:2406.04093.
+
+\end{thebibliography}
+
+\end{document}

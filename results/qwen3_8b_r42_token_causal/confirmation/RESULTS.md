@@ -1,8 +1,17 @@
 # r4.2 Held-Out-User Confirmation — Causal + Necessity
 
-Selection-free confirmation of the native r4.2 token mechanism, addressing the
-discovery/confirmation contamination critique: features and configuration were
-chosen without ever seeing the evaluation users.
+Confirmation of the native r4.2 token mechanism on held-out users, addressing
+the discovery/confirmation contamination critique.
+
+> **Correction (2026-09-23).** This file originally said: "features and configuration were chosen without ever seeing the evaluation users".
+> That is true of the **features** and false of the **configuration**. The features
+> were re-selected on the 30 discovery users only (job `19377535`). The
+> configuration (layer 26, m=2, k=4) was frozen at the exploratory choice, and
+> that choice was made from runs that scored all 60 malicious users: of the 25
+> archived causal job logs, only this confirmation run (job `19379904`)
+> restricted receivers. See `docs/P_HACKING_CONTAMINATION_AUDIT.md`. The
+> estimates below are therefore held out for feature selection, not for the
+> configuration search.
 
 ## Protocol
 

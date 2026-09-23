@@ -35,6 +35,10 @@ PROCESS_CLAIMS = [
     # past review -- needs the negation and the verb to be allowed to separate.
     (r"\b(not|neither|none|never)\b[^.]{0,40}\b(selected|chosen|picked|decided|run)\b[^.]{0,20}\bafter\b", "ordering"),
     (r"\b(after|before) seeing\b", "ordering"),
+    # "chosen without ever seeing the evaluation users" passed every pattern
+    # above and was false. Found 2026-09-23 while writing up the result.
+    (r"\bwithout (ever )?(seeing|looking at|touching|using)\b", "ordering"),
+    (r"\bnever (saw|seen|looked at|touched)\b", "ordering"),
     (r"\bnever (edited|changed|modified|touched)\b", "immutability"),
     (r"\b(unchanged|untouched) (since|from)\b", "immutability"),
     (r"\bidentical to the (published|original|reference)\b", "provenance"),
@@ -157,6 +161,8 @@ def self_test() -> int:
          "results/provenance/adapter_fingerprints/aquaman_r62.json).", False,
          "same claim, with a digest and a file"),
         ("The day-field contrast is -0.0272 [-0.045, -0.010].", False, "a plain number"),
+        ("features and configuration were chosen without ever seeing the evaluation users.",
+         True, "the confirmation-README sentence that got past the earlier patterns"),
         # External review defeated the first version with a citation-shaped
         # string pointing at nothing. These two cases exist because of that.
         ("This adapter is identical to the published adapter. See nonexistent_evidence.json",

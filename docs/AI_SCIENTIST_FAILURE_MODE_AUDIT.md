@@ -100,8 +100,9 @@ put in the paper.
 reflecting the research objective. Their case: one system substituted the
 specified metric with F1 and training loss.*
 
-**The metric SET is pre-registered; that is narrower than "metric use is
-clean".** External review is right that fixed definitions do not guarantee
+**The metric SET was recorded before any result existed (commit `007ca54`);
+that is narrower than "metric use is clean", and a commit proves only that the
+definitions existed then, not that anyone was bound by them.** External review is right that fixed definitions do not guarantee
 correct baselines, populations, aggregation or interpretation — and the TWOS
 baseline defect below proves the point. What is checkable is only this: the
 token-class views (`full`,
@@ -158,8 +159,9 @@ which was **false**. Corrected in `results/history_prefix/README.md` this
 session, which now states the order of events explicitly.
 
 What keeps it from being result-shopping, and what a reviewer should check: both
-variants are reported in the four-row replication table; the change was driven
-by a mechanism visible in the serialization without looking at any loss; it made
+variants are reported in the four-row replication table; the mismatch it fixes
+can be confirmed from the serialization alone, though it was noticed only because
+the pilot's loss moved the wrong way (commit `93f2d0a` records this); it made
 a falsifiable prediction (restoring the format should send the day contrast to
 zero) that was borne out (+0.42 → +0.021, interval now spanning zero); and the
 headline psychometric conclusion is −3.31 versus −3.23 across the two variants,
@@ -270,7 +272,7 @@ recomputed here before being accepted; all were correct.
 | The sampling guard is optional and all four history-prefix outputs lack the flag | **confirmed** | flag backfilled into all four metas and CSVs, marked as backfilled |
 | "Five data leaks" conflates distinct defect types | agreed | reclassified: one leakage, one prevented feature shortcut, one population-definition error, one split error, one artifact mismatch |
 | "Label-dependent sampling invalidates AUC" is an incorrect blanket rule, in both directions | agreed | guard keeps a fail-safe default but now takes a written `justification`; docstring states both directions |
-| "Metric use is clean because views were fixed" is insufficient | agreed | narrowed to "the metric *set* is pre-registered", which is all that was checked |
+| "Metric use is clean because views were fixed" is insufficient | agreed | narrowed to "the metric *set* was recorded in advance" (commit `007ca54`), which is all that was checked |
 | The 2026-09-19 review was called an "external **human** audit" without evidence | **confirmed as unsupported** | corrected to "external review"; this was itself a provenance claim asserted from assumption |
 | Fingerprints prepare a verification; the comparison is still owed | agreed | unchanged — still blocked on Anvil |
 

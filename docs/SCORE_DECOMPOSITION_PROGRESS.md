@@ -625,7 +625,8 @@ adapter. Expected ~5 h from the 3B full-arm throughput of 9.06 ex/s.
 **20861865** (gpu, 24 h) with smoke **20861864** (gpu-debug), both on
 cis260991-gpu, after cis230270-gpu was found exhausted (2.2 SU). Inputs are
 staged in the owner's world-readable scratch; the staged adapter is
-fingerprint-identical to the published one. A CPU-only validation on the
+fingerprint-identical to the published one (compared against
+`results/provenance/adapter_fingerprints/anvil_r42.json`). A CPU-only validation on the
 collaborator environment caught and fixed a cache-path defect (`HF_HUB_CACHE`)
 that would have failed the run at model load, and confirmed tokenization is
 identical across the two environments.
