@@ -163,13 +163,38 @@ def _select_token_chunks(
     layer_manifest["chunk_id"] = layer_manifest["chunk_id"].astype(int)
     layer_manifest = layer_manifest.loc[layer_manifest["chunk_id"].isin(needed_chunk_ids)].sort_values("chunk_id")
 
+    # Resolve every manifest entry to the file inside THIS extract_dir.
+    #
+    # The manifest records absolute paths from wherever the cache was built, so
+    # trusting them made a relocated copy read the ORIGINAL location: on an
+    # account that cannot read it the job dies (jobs 20861864/5, PermissionError),
+    # and on one that can it would silently read a different cache than the one
+    # it was pointed at. Missing entries were also skipped silently, so a partial
+    # cache would quietly drop examples. Now: only files under
+    # extract_dir/layer_<layer>/ are ever read, matched by name, and any needed
+    # chunk that is absent is an error.
+    layer_dir = extract_dir / f"layer_{layer}"
+    by_name = {Path(p).name: Path(p) for p in chunk_paths}
     selected: List[Path] = []
+    missing: List[str] = []
     for text_path in layer_manifest["path"].tolist():
-        path = Path(str(text_path))
-        if not path.is_absolute():
-            path = extract_dir / path
-        if path.exists():
-            selected.append(path)
+        recorded = Path(str(text_path))
+        if recorded.parent.name not in ("", f"layer_{layer}"):
+            raise ValueError(
+                f"manifest row for layer {layer} points into '{recorded.parent.name}': "
+                f"{recorded}. Refusing to guess which file was meant."
+            )
+        local = by_name.get(recorded.name)
+        if local is None:
+            missing.append(recorded.name)
+        else:
+            selected.append(local)
+    if missing:
+        raise FileNotFoundError(
+            f"{len(missing)} needed chunk(s) are in the manifest but absent from {layer_dir} "
+            f"(first: {missing[:3]}). Refusing to continue on a partial cache, which "
+            "would silently drop examples."
+        )
 
     if not selected:
         print(
