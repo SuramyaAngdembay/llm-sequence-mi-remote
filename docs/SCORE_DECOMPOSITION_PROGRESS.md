@@ -636,3 +636,73 @@ identical across the two environments.
 | 2026-09-22 | Phase C 3B scoring (20861905) | queued, ~5 SU |
 | 2026-09-22 | CERT package-4 smoke (20861864) + full (20861865) | queued, ~24 SU |
 | 2026-09-22 | Outputs of 20827646 (r4.2 portability) and 20827647 (LANL) | completed on the collaborator account; **not yet collected** |
+
+
+## 2026-09-23 — Phase C 3B result: the training mask adds nothing beyond score masking
+
+**V39 (verified).** Phase C 3B scoring (job 20861905, collaborator allocation)
+completed, exit 0, 4 h 49 m. Structural gate passed on the full pool: partition
+sum error 1.3e-12, zero count mismatches, `n_targets = n_tokens − 1` for every
+example, mean reconstruction error 0.0. No numerical reproduction gate exists for
+a new adapter. The masked run's class shares equal the full-adapter run's on the
+same pool to every printed digit (DAY 0.11416, PSY 0.07871, SESCOUNT 0.03080,
+SES 0.77633), so both adapters were scored on identical token classes. The
+tokenizer digests differ (`cd33debe…` vs `22576a18…`); the digest hashes file
+names and sizes of the adapter's tokenizer files, and identical class counts
+over 159,064 examples show the token sequences match. Both evaluations drop the
+same 16,992 duplicate rows and have identical folds (rows, positives, users and
+fold ids checked per fold). Outputs copied to
+`results/score_decomposition/3b_targetmask/`.
+
+User ROC, mean of four folds (CERT r6.2, Qwen2.5-3B, four malicious users):
+
+| | score all targets | score behaviour targets only |
+|---|---|---|
+| train on all target losses | **A** 0.9261 | **B** 0.9440 |
+| train on behaviour losses only | **C** 0.8011 | **D** 0.9415 |
+
+Per user, A / B / C / D: ACM2278 0.9951 / 0.9975 / 0.9951 / 0.9975;
+CDE1846 0.8030 / 0.9655 / 0.6232 / 0.9754; CMP2946 0.9655 / 0.9975 / 0.9877 /
+0.9975; MBG3183 0.9409 / 0.8153 / 0.5985 / 0.7956.
+
+- **B → D, the clean training-objective contrast (H2): −0.0025**, exact
+  cluster bootstrap over all 256 resamples of the four users [−0.0148, +0.0074];
+  one user up (CDE1846 +0.0099), one down (MBG3183 −0.0197), two tied at the
+  ceiling. No detectable effect.
+- C → D (score inclusion, masked adapter): +0.140 [+0.006, +0.275], from the
+  run's own contrast file; same direction as A → B.
+- A → C: −0.125. Diagnostic only, as the spec says: C scores profile targets the
+  masked adapter was never trained to predict.
+
+Reading, within the spec's declared limits: at 3B, once profile tokens are left
+out of the score, also leaving them out of the training loss changes nothing
+measurable. H2 is not supported at this scale, but B was already 0.944, so there
+was little headroom, and the spec states a 3B null does not speak to 8B. One
+training seed and four positive users.
+
+**V40 (verified) — the masked fraction is reconciled.** V36 recorded
+`masked_target_frac = 0.2299` against V9's p = 0.1485. A CPU recount on the
+collaborator login node with the same tokenizer, `max_seq_len` 2048 and class
+library gives:
+
+| sample | profile / all tokens | mean tokens per example |
+|---|---|---|
+| train, first 5,000 in file order (what `train_qlora.py` probes) | **0.2299** | 249.5 |
+| train, random 5,000 of the first 300k | 0.1936 | 296.4 |
+| scoring pool, random 5,000 | 0.1951 | 294.0 |
+| scoring pool, all 159,064 (targets, from the manifest) | 0.1929 | — |
+
+The exact match on the first 5,000 confirms that the mask covers DAY and PSY
+tokens only. Those examples are shorter days, which raises their profile share.
+The training corpus and the scoring pool agree at about 0.19. V9's 0.1485 came
+from 400 examples and understates p. With p ≈ 0.19, the HF-default denominator
+would up-weight behavioural tokens by about 1.24, not 1.174. Cells C and D used
+`--loss-denominator all_targets`, which applies no reweighting, so neither
+figure enters this result.
+
+| date | what | status |
+|---|---|---|
+| 2026-09-23 | Phase C 3B scoring (20861905) | **done** (V39, V40) |
+| 2026-09-23 | CERT package-4 smoke (20879548, gpu-debug) + full (20879549, gpu), cis260991-gpu; resubmissions of 20861864/5 after the chunk-path fix | queued (Priority); scheduler estimate 2026-09-27 |
+| 2026-09-23 | 20840922, same causal script on cis230270-gpu (submitted 2026-09-21) | pending forever: `AssocGrpGRESMinutes`, 2.2 SU left of 1,005. Duplicates 20879549 if the allocation is refilled; cancel it or let it lapse |
+| — | Phase C 8B | held, as before |

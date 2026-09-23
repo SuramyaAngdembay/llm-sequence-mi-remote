@@ -71,6 +71,24 @@ User ROC +0.018 [−0.086, +0.123] — interval spans zero; three folds improve,
 MBG3183 gets worse (0.941 → 0.815). The `full` adapter starts at 0.926, so
 there is little headroom here.
 
+### Phase C at 3B: masking profile targets during training
+
+Added 2026-09-23 (job 20861905; `3b_targetmask/`). A new 3B adapter was trained
+with profile-token losses removed (`--target-loss-mask profile
+--loss-denominator all_targets`), then scored on the identical pool with the
+same de-duplication and folds as `3b_full_dedup/`. User ROC, mean of four folds:
+
+| | score all targets | score behaviour only |
+|---|---|---|
+| train on all targets (existing adapter) | 0.926 | 0.944 |
+| train on behaviour targets only (new adapter) | 0.801 | 0.942 |
+
+The clean contrast is the right-hand column: −0.0025, with an exact cluster
+bootstrap interval of [−0.015, +0.007]. Removing profile tokens from the
+training loss adds nothing measurable once they are removed from the score. One
+seed and four positive users; the existing adapter had little headroom at 3B.
+Details and checks: V39 and V40 in `docs/SCORE_DECOMPOSITION_PROGRESS.md`.
+
 ## What must be reported with it
 
 - **Average precision stays near the base rate.** 8B day AP 0.0001 → 0.0009 at
