@@ -1243,30 +1243,185 @@ and it is counted in the class of $x_t$, the token being predicted. When the mod
 behavior token, it still reads the profile lines above it as context. The split therefore
 decides which predictions are \emph{counted}, not what the model is allowed to \emph{see}.
 
+%%%%% REVISED SECTION (fully explained: context vector, scores, softmax, surprisal)
 \section{Next-Token Probability and Surprisal}
-A language model with parameters $\theta$ assigns a probability to each actual token, given
-all the tokens before it:
+\label{sec:lm-softmax}
+A language model reads a text one token at a time, and at every position it makes a
+prediction. Before seeing token $x_t$, it assigns a probability to \emph{every} item in its
+vocabulary $\mathcal{V}$, the set of all tokens it knows (151,669 of them for our model).
+These probabilities are nonnegative and add up to 1, so they form a probability distribution
+over what might come next. The anomaly score needs only one of them: the probability of the
+token that actually came next,
 \[
-p_\theta(x_t \mid x_1,\dots,x_{t-1}) \;=\; p_\theta(x_t \mid x_{<t}).
+p_\theta(x_t \mid x_1,\dots,x_{t-1}) \;=\; p_\theta(x_t \mid x_{<t}),
 \]
-The \emph{surprisal} of token $t$ is
+where $\theta$ stands for all the numbers (parameters) inside the model. This section explains,
+in four steps, how that probability is produced and how it becomes a surprisal. One running
+example is used throughout: the model has just read \texttt{n\_logon=} in a session line and
+must predict the digit that comes next.
+
+\subsection{Step 1: Summarize the context as a vector}
+After reading $x_1,\dots,x_{t-1}$, the model condenses everything it has read into a single
+vector,
+\[
+\mathbf{h}_{t-1} \in \mathbb{R}^{d}, \qquad d = 4096,
+\]
+called the \emph{context vector}. The subscript $t-1$ records that it summarizes the tokens up
+to position $t-1$; it is used to predict token $t$. The vector is computed by a stack of 36
+layers \cite{vaswani2017attention}. This chapter treats that stack as a black box, and
+\chref{ch:mech} opens it. What matters here is that $\mathbf{h}_{t-1}$ encodes what the model
+expects to come next.
+
+\subsection{Step 2: Score every candidate token}
+Every vocabulary item $v$ has its own learned vector $\mathbf{w}_v \in \mathbb{R}^{d}$. The model
+scores $v$ by the dot product of that vector with the context vector:
+\begin{equation}
+o_v \;=\; \mathbf{w}_v^\top \mathbf{h}_{t-1}
+\;=\; \sum_{i=1}^{d} w_{v,i}\, h_{t-1,i}
+\;=\; \|\mathbf{w}_v\|\,\|\mathbf{h}_{t-1}\|\cos\phi_v ,
+\label{eq:score}
+\end{equation}
+where $\phi_v$ is the angle between the two vectors. The score is large when $\mathbf{w}_v$ is
+long and points in the same direction as the context, near zero when the two are
+perpendicular, and negative when they point in opposite directions. Stacking the vectors
+$\mathbf{w}_v$ as the rows of a matrix $W_{\mathrm{out}} \in \mathbb{R}^{|\mathcal{V}| \times d}$
+produces every score at once, as one matrix--vector product:
+\[
+\mathbf{o} \;=\; W_{\mathrm{out}}\,\mathbf{h}_{t-1} \;\in\; \mathbb{R}^{|\mathcal{V}|}.
+\]
+In machine learning these raw scores are called \emph{logits}.
+
+For the running example, take toy numbers with $d = 2$ and only three candidate tokens:
+\[
+\mathbf{h}_{t-1} = (1.0,\; 2.0), \qquad
+\mathbf{w}_{\texttt{1}} = (0.4,\; 0.8), \qquad
+\mathbf{w}_{\texttt{2}} = (0.2,\; 0.4), \qquad
+\mathbf{w}_{\texttt{9}} = (0.1,\; 0.0).
+\]
+The scores are
+\begin{gather*}
+o_{\texttt{1}} = 0.4(1.0) + 0.8(2.0) = 2.0, \qquad
+o_{\texttt{2}} = 0.2(1.0) + 0.4(2.0) = 1.0, \\
+o_{\texttt{9}} = 0.1(1.0) + 0.0(2.0) = 0.1 .
+\end{gather*}
+The vector for \texttt{1} points exactly along the context and is the longest, so it scores
+highest. The vector for \texttt{2} points the same way but is half as long, so it scores half as
+much. The vector for \texttt{9} is short and points in a different direction
+($\cos\phi_{\texttt{9}} = 0.447$), so it scores lowest.
+
+Scores are not yet probabilities: they can be any real number, including a negative one, and
+they do not add up to 1. Step 3 fixes both problems.
+
+\subsection{Step 3: Turn scores into probabilities with the softmax}
+The \emph{softmax} function converts scores into probabilities:
+\begin{equation}
+p_\theta(x_t = v \mid x_{<t}) \;=\; \frac{e^{o_v}}{\sum_{v' \in \mathcal{V}} e^{o_{v'}}} .
+\label{eq:softmax}
+\end{equation}
+It performs two operations, each for a reason.
+\begin{enumerate}
+\item \textbf{Exponentiate.} $e^{o}$ is positive for every real number $o$, and it increases as
+$o$ increases. Every token therefore receives a positive weight, and a higher score always
+means a larger weight.
+\item \textbf{Normalize.} Dividing each weight by the total of all the weights makes the results
+add up to exactly 1.
+\end{enumerate}
+In the running example,
+\[
+\bigl(e^{2.0},\; e^{1.0},\; e^{0.1}\bigr) = (7.3891,\; 2.7183,\; 1.1052),
+\qquad \text{total} = 11.2125,
+\]
+\[
+p = \Bigl(\tfrac{7.3891}{11.2125},\; \tfrac{2.7183}{11.2125},\; \tfrac{1.1052}{11.2125}\Bigr)
+= (0.6590,\; 0.2424,\; 0.0986).
+\]
+The model thinks the next digit is most likely \texttt{1}, less likely \texttt{2}, and unlikely
+to be \texttt{9}.
+
+Four properties explain how to read the softmax.
+\begin{itemize}
+\item \textbf{Score differences become probability ratios.} Dividing \eqref{eq:softmax} for two
+tokens $a$ and $b$ cancels the total:
+\[
+\frac{p(a)}{p(b)} \;=\; \frac{e^{o_a}}{e^{o_b}} \;=\; e^{\,o_a - o_b}.
+\]
+Raising a token's score by 1 makes it $e \approx 2.718$ times more likely relative to any other
+token. In the example, $o_{\texttt{1}} - o_{\texttt{2}} = 1$, and indeed
+$0.6590/0.2424 = 2.72$.
+\item \textbf{Only differences between scores matter.} Adding the same constant $c$ to every
+score changes nothing, because $e^{o_v + c} = e^{c}\,e^{o_v}$ and the factor $e^{c}$ cancels
+between each weight and the total. Adding $5$ to every score in the example gives weights
+$(1096.6332,\; 403.4288,\; 164.0219)$ with total $1664.0839$, and exactly the same
+probabilities $(0.6590,\; 0.2424,\; 0.0986)$.
+\item \textbf{It is a ``soft'' maximum.} If all the scores are equal, for example
+$(1.0,\;1.0,\;1.0)$, the probabilities are equal: $(\tfrac13,\;\tfrac13,\;\tfrac13)$. As the
+gaps between scores grow, probability piles onto the largest. Multiplying the example's scores
+by 10 gives $(20,\;10,\;1)$ and probabilities
+$(0.99995,\; 4.5\times10^{-5},\; 5.6\times10^{-9})$, almost all on the top token. The softmax is a
+smoothed version of ``pick the highest score'': it favors the top score, keeps some probability
+on the others, and the size of the gaps sets how sharply it chooses.
+\item \textbf{No token is ever impossible.} Every probability is positive, so every surprisal is
+finite. This plays the role that the smoothing parameter $\alpha$ plays for the CTMC
+(Section~\ref{sec:ctmc-mle}).
+\end{itemize}
+
+\subsection{Step 4: From probability to surprisal}
+The \emph{surprisal} of the actual token $x_t$ is
 \begin{equation}
 \ell_t \;=\; -\log p_\theta(x_t \mid x_{<t}).
 \label{eq:lm-token-surprisal}
 \end{equation}
-This is exactly the CTMC surprisal of \chref{ch:ctmc}, except that the condition is the
-entire preceding text rather than a single previous state, and Section~\ref{sec:why-log}
-explains why $-\log p$ is the right measure of surprise. A token the model expects is cheap;
-a token it doubts is expensive:
-\begin{gather*}
-p = 0.9 \Rightarrow \ell = 0.1054, \qquad p = 0.5 \Rightarrow \ell = 0.6931, \\
-p = 0.05 \Rightarrow \ell = 2.9957, \qquad p = 0.01 \Rightarrow \ell = 4.6052.
-\end{gather*}
+This is exactly the CTMC surprisal of \chref{ch:ctmc}, except that the condition is the entire
+preceding text rather than a single previous state. Section~\ref{sec:why-log} explains why
+$-\log p$ is the right measure of surprise.
+
+Substituting the softmax \eqref{eq:softmax} shows what surprisal means in terms of the scores:
+\begin{equation}
+\ell_t \;=\; -\log \frac{e^{o_{x_t}}}{\sum_{v} e^{o_v}}
+\;=\; \log \sum_{v} e^{o_v} \;-\; \log e^{o_{x_t}}
+\;=\; \mathrm{LSE}(\mathbf{o}) \;-\; o_{x_t},
+\label{eq:lse-surprisal}
+\end{equation}
+where $\mathrm{LSE}(\mathbf{o}) = \log \sum_{v} e^{o_v}$ is called the \emph{log-sum-exp} of the
+scores. The log-sum-exp is itself a soft maximum of the scores. Write
+$o_{\max} = \max_v o_v$. The total $\sum_v e^{o_v}$ contains the term $e^{o_{\max}}$, and it has
+$|\mathcal{V}|$ terms, none larger than $e^{o_{\max}}$. Therefore
+\[
+e^{o_{\max}} \;\le\; \sum_{v} e^{o_v} \;\le\; |\mathcal{V}|\, e^{o_{\max}}
+\quad\Longrightarrow\quad
+o_{\max} \;\le\; \mathrm{LSE}(\mathbf{o}) \;\le\; o_{\max} + \log|\mathcal{V}| .
+\]
+Equation \eqref{eq:lse-surprisal} therefore says:
+\begin{center}
+\emph{surprisal is how far the actual token's score falls below the soft maximum of all the
+scores.}
+\end{center}
+A token costs little when the model scored it at or near the top, and costs a lot when the
+model preferred other tokens by a wide margin.
+
+In the running example, $\mathrm{LSE} = \log 11.2125 = 2.4170$, which lies between the largest
+score, $2.0$, and $2.0 + \log 3 = 3.0986$, as the bound requires. Then:
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+actual next token & score $o$ & $\ell = \mathrm{LSE} - o$ & check: $-\log p$ \\
+\midrule
+\texttt{1} & 2.0 & $2.4170 - 2.0 = 0.4170$ & $-\log 0.6590 = 0.4170$ \\
+\texttt{2} & 1.0 & $2.4170 - 1.0 = 1.4170$ & $-\log 0.2424 = 1.4170$ \\
+\texttt{9} & 0.1 & $2.4170 - 0.1 = 2.3170$ & $-\log 0.0986 = 2.3170$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+If the log line reads \texttt{n\_logon=1}, the day pays $0.4170$ nats for this token; if it
+reads \texttt{n\_logon=9}, it pays $2.3170$. The tokens that the benign-trained model scored low
+are exactly the ones that push a day's anomaly score up.
 
 \subsection{The surprisal of a whole day is its negative log-likelihood}
-The model also assigns a probability to the whole text of a day. By the chain rule of
-probability, the probability of a sequence is the product of each token's probability given
-the tokens before it:
+The model also assigns a probability to the whole text of a day. The \emph{chain rule of
+probability} says that the probability that two events both happen is the probability of the
+first times the probability of the second given the first:
+$P(A \text{ and } B) = P(A)\,P(B \mid A)$. Applied token by token, the probability of the day's
+text is the product of each token's probability given the tokens before it:
 \[
 p_\theta(x_2, \dots, x_n \mid x_1)
 \;=\; p_\theta(x_2 \mid x_1)\; p_\theta(x_3 \mid x_1, x_2) \cdots p_\theta(x_n \mid x_{<n})
@@ -1280,37 +1435,19 @@ Taking $-\log$ turns the product into a sum:
 \label{eq:lm-chain-rule}
 \end{equation}
 The sum of a day's token surprisals is therefore exactly the surprisal of the day's entire
-text: its negative log-likelihood under the model. This is requirement (R2) of
-Section~\ref{sec:why-log} applied to a sequence. For example, if a three-token continuation
-has token probabilities $\tfrac12$, $\tfrac12$ and $\tfrac14$, the tokens cost $1$, $1$ and $2$
-bits, a total of $4$ bits; and the whole continuation has probability
+text: its negative log-likelihood under the model. This is the additivity of
+Section~\ref{sec:why-log} with one refinement. Tokens are not independent, so each token's
+surprisal is measured \emph{given the tokens before it}, and it is these conditional surprisals
+that add. For example, if a three-token continuation has token probabilities $\tfrac12$,
+$\tfrac12$ and $\tfrac14$ (each given what came before), the tokens cost $1$, $1$ and $2$ bits,
+a total of $4$ bits; and the whole continuation has probability
 $\tfrac12 \cdot \tfrac12 \cdot \tfrac14 = \tfrac{1}{16}$, whose surprisal is
 $-\log_2 \tfrac{1}{16} = 4$ bits. In nats both equal $4 \ln 2 = 2.7726$.
 
 Days differ in length (between about 200 and 530 tokens in CERT release 4.2), and a longer text
-accumulates more total surprisal simply by being longer. The anomaly score of Section~\ref{sec:lm-score}
-therefore divides the total by the number of scored tokens, giving the surprisal per token.
-
-\subsection{Where the probability comes from}
-After reading $x_{<t}$, the model holds an internal vector $\mathbf{h}_{t-1} \in \mathbb{R}^{d}$
-(for our model, $d = 4096$). Each vocabulary item $v$ has a weight vector $\mathbf{w}_v$, and the
-probabilities come from the \emph{softmax} of the scores $\mathbf{w}_v^\top \mathbf{h}_{t-1}$:
-\[
-p_\theta(x_t = v \mid x_{<t}) \;=\;
-\frac{\exp(\mathbf{w}_v^\top \mathbf{h}_{t-1})}{\sum_{v'} \exp(\mathbf{w}_{v'}^\top \mathbf{h}_{t-1})}.
-\]
-For example, with a vocabulary of three items and scores $(2.0,\;1.0,\;0.1)$:
-\[
-\bigl(e^{2.0},\; e^{1.0},\; e^{0.1}\bigr) = (7.3891,\; 2.7183,\; 1.1052),
-\qquad \text{sum} = 11.2125,
-\]
-\[
-p = \Bigl(\tfrac{7.3891}{11.2125},\; \tfrac{2.7183}{11.2125},\; \tfrac{1.1052}{11.2125}\Bigr)
-= (0.6590,\; 0.2424,\; 0.0986).
-\]
-If the actual next token is the first item, its surprisal is $-\log 0.6590 = 0.4170$.
-The vector $\mathbf{h}_{t-1}$ itself is produced by a stack of transformer layers
-\cite{vaswani2017attention}; \chref{ch:mech} looks inside that stack.
+accumulates more total surprisal simply by being longer. The anomaly score of
+Section~\ref{sec:lm-score} therefore divides the total by the number of scored tokens, giving
+the surprisal per token.
 
 \section{Learning From Benign Days Only}
 Fine-tuning chooses $\theta$ to minimize the total surprisal of the benign training text,

@@ -10,7 +10,7 @@ every edit.
 | Chapter II, PCA | **unchanged, verbatim** |
 | Chapter III, CTMC | original text unchanged; five sections added, including 3.6 on why $-\log p$ measures surprise |
 | Chapter IV, setup | one section added (language-model data) |
-| Chapter V, language-model surprisal and its decomposition | new |
+| Chapter V, language-model surprisal and its decomposition | new; Section 5.3 explains in four steps how the probability is produced: context vector, dot-product scores, softmax, and surprisal as log-sum-exp minus the actual token's score |
 | Chapter VI, mechanistic interpretability | new |
 | References | ten entries added: nine from `paper/references.bib`, plus Shannon (1948) |
 
