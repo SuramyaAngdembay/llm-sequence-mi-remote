@@ -1,0 +1,100 @@
+{
+  "frontier_cfg_dir": "/anvil/scratch/x-bbhusal1/twos_corrected_2026_09_24/inputs/frontier/twos_s42_reselect_discovery/layer_24/m04_k08",
+  "ranking_file": "/anvil/scratch/x-bbhusal1/twos_corrected_2026_09_24/inputs/frontier/twos_s42_reselect_discovery/layer_24/m04_k08/delta_sae_top_features.csv",
+  "ranking_file_sha256": "12b1069034954d01a83232a6f2c73be39b2f04e3a2e8454116f159659bf03ce5",
+  "top_sets": {
+    "top5": [
+      6036,
+      7375,
+      1197,
+      7420,
+      3218
+    ]
+  },
+  "control_set": "control5_active",
+  "control_ids": [
+    7962,
+    972,
+    8082,
+    7232,
+    3157
+  ],
+  "criteria": {
+    "n_features": 8192,
+    "min_active_frac": 0.002,
+    "sets": {
+      "top5": {
+        "ids": [
+          6036,
+          7375,
+          1197,
+          7420,
+          3218
+        ],
+        "row_gap": [
+          0.1278631632579014,
+          0.0976051116179173,
+          0.0863468510981829,
+          0.0794815217391323,
+          0.0765828316829695
+        ],
+        "row_active_frac": [
+          0.0026013337747717,
+          0.0025540367970486,
+          0.0080877831906541,
+          0.0023884973750177,
+          0.0036418672846805
+        ],
+        "mean_row_gap": 0.09357589587922069,
+        "mean_active_frac": 0.0038547036844345205,
+        "gap_rank_check": true
+      },
+      "control5_active": {
+        "ids": [
+          7962,
+          972,
+          8082,
+          7232,
+          3157
+        ],
+        "row_gap": [
+          -4.040364710540707e-06,
+          -4.448415068004918e-06,
+          -2.015189165897185e-05,
+          -2.58201642001684e-05,
+          -2.7253179165746128e-05
+        ],
+        "row_active_frac": [
+          0.0021283639975405,
+          0.0052499645272667,
+          0.0020574185309558,
+          0.0024830913304639,
+          0.0080168377240694
+        ],
+        "mean_row_gap": -1.6342802960686403e-05,
+        "mean_active_frac": 0.00398713522205926,
+        "max_abs_gap": 2.7253179165746128e-05,
+        "frac_features_with_abs_gap_at_most_max": 0.3834228515625,
+        "meets_min_active": true,
+        "matches_stated_rule": true,
+        "activity_criterion": "threshold_only",
+        "activity_ratio_to_top": 1.0343558282208576
+      }
+    }
+  },
+  "receiver_user_file": "/anvil/scratch/x-bbhusal1/twos_corrected_2026_09_24/inputs/split/twos_confirmation_users.txt",
+  "n_receiver_users": 8,
+  "reselect_summary": {
+    "discovery_user_file": "/data/suramya/insider_mi/review_2026_09_24/twos_split/twos_discovery_users.txt",
+    "n_discovery_users": 8,
+    "row_stats": {
+      "n_rows": 42286,
+      "n_positive_rows_kept": 7539,
+      "n_positive_rows_dropped_confirmation": 7070,
+      "n_benign_rows": 34747,
+      "n_benign_rows_dropped_excluded_users": 18820
+    },
+    "benign_sample_prob": 0.25
+  },
+  "held_out_from_selection": true
+}

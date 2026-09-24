@@ -193,3 +193,26 @@ This verifies that the environment change does not move these smoke rows
 (team, alpha 1, 24 receivers). It is not a check of the other context modes
 or alphas, which only the full run contains. The smoke's own contrasts are a
 validation subset and are not read as results.
+
+**Addendum item 8, implementation — recorded 2026-09-24, while full run
+20879549 is running and before any of its rows have been read.** The corrected
+TWOS run (job 20890658) showed that an arm's alpha-1 contrast can be dominated
+by reconstruction: there the controls were active on more receiver days, and
+reconstruction alone raised their profile-token loss by 0.012
+(`results/twos_corrected_bounded/README.md`). CERT's controls are active on
+about twice as many tokens as its selected features, so the same risk applies
+to the selected-minus-control difference, not only to absolute effects.
+
+The reconstruction-only control is therefore run separately, with the full
+run's code copied unchanged, the same inputs, confirmation receivers,
+selection, batching and same-user donor exclusion, and only these changes:
+alpha 0.0, one candidate donor per donor type, context mode `team` (which
+lists all 638 confirmation receivers). Alpha 0 decodes the unedited code, so
+its delta depends only on the receiver and the arm. Each (arm, receiver)
+alpha-0 delta is applied to every context mode and donor type
+(`analyze_intervention_endpoints.py --recon-run`, self-tested).
+
+Reading rule: the per-class selected-minus-control differences of the full run
+are interpreted **net of reconstruction** (the edit effect, alpha 1 minus alpha
+0, per arm). The raw alpha-1 difference is reported beside it and labelled as
+including reconstruction coverage.

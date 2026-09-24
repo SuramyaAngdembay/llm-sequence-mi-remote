@@ -791,3 +791,15 @@ This verifies that the environment change does not move these smoke rows
 (team, alpha 1, 24 receivers). It is not a check of the other context modes
 or alphas, which only the full run contains. The smoke's own contrasts are a
 validation subset and are not read as results.**
+
+**V47 — corrected TWOS held-out run (job 20890658): inconclusive; reconstruction
+confounds the raw contrast.** Every pre-declared gate passed: selection held out,
+68 receivers from the 8 confirmation users, planned feature ids. Benign donors at
+alpha 1, selected minus control: behaviour −0.0001 [−0.0050, +0.0052], profile
+−0.0129 [−0.0333, +0.0061] (8 users; every interval includes zero). Alpha 0 shows
+the controls, active on 59 of 68 receiver days against 43 for the selected set,
+gain +0.0121 of profile loss from reconstruction alone. Net of reconstruction the
+profile difference is −0.0021 [−0.0194, +0.0111]. Seed 43 not triggered. Details:
+`results/twos_corrected_bounded/README.md`. Consequence for CERT: the
+reconstruction-only control is run before the per-class differences are read
+(addendum, item 8 implementation).

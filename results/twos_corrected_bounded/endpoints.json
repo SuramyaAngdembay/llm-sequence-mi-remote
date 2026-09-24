@@ -1,0 +1,1721 @@
+{
+  "top_set": "top5",
+  "control_set": "control5_active",
+  "alphas_present": [
+    0.0,
+    1.0
+  ],
+  "primary_alpha": 1.0,
+  "by_context_and_donor": {
+    "team | anomalous donors": {
+      "at_alpha": {
+        "full": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 1.5383011710235022,
+            "ci95_cluster_users": [
+              0.7115315570004492,
+              2.220953291747719
+            ],
+            "secondary_receiver_weighted_mean": 1.4455664788442817,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": -0.002538450339823843,
+            "ci95_cluster_users": [
+              -0.007439270582131391,
+              0.002234925387153727
+            ],
+            "secondary_receiver_weighted_mean": -0.0027603592650128315,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 2,
+            "users_negative": 6
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.00461599072182758,
+            "ci95_cluster_users": [
+              -0.004930915708084487,
+              0.015978471861065678
+            ],
+            "secondary_receiver_weighted_mean": 0.003205538774517919,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 4
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.007154441061651423,
+            "ci95_cluster_users": [
+              -0.016894172485326493,
+              0.001299114591102042
+            ],
+            "secondary_receiver_weighted_mean": -0.005965898039530751,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 4
+          }
+        },
+        "profile_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 3.078478916444712,
+            "ci95_cluster_users": [
+              1.3086457046576672,
+              4.590275309979916
+            ],
+            "secondary_receiver_weighted_mean": 2.8700943777788113,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": -0.007402587314653728,
+            "ci95_cluster_users": [
+              -0.020609556800789304,
+              0.005355660493175188
+            ],
+            "secondary_receiver_weighted_mean": -0.007839706969855267,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 3
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.0074918720272502725,
+            "ci95_cluster_users": [
+              -0.013305687032906074,
+              0.03180957388960653
+            ],
+            "secondary_receiver_weighted_mean": 0.0046214276427328305,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 2
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.014894459341904,
+            "ci95_cluster_users": [
+              -0.03712553717195988,
+              0.00476020450393359
+            ],
+            "secondary_receiver_weighted_mean": -0.012461134612588099,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 3,
+            "users_negative": 5
+          }
+        },
+        "behavior_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 0.42526080234305164,
+            "ci95_cluster_users": [
+              0.280293975242262,
+              0.5615492889840554
+            ],
+            "secondary_receiver_weighted_mean": 0.4210349791373468,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": 0.001118697770912799,
+            "ci95_cluster_users": [
+              -0.002116313325458332,
+              0.004816934300608755
+            ],
+            "secondary_receiver_weighted_mean": 0.0010239682645109994,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.0020356568515934566,
+            "ci95_cluster_users": [
+              -0.0008376607723120185,
+              0.004611004399096903
+            ],
+            "secondary_receiver_weighted_mean": 0.0017973143863035184,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.0009169590806806579,
+            "ci95_cluster_users": [
+              -0.004782780534116595,
+              0.0033898142979495107
+            ],
+            "secondary_receiver_weighted_mean": -0.000773346121792519,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 4
+          }
+        },
+        "behavior_ses_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 0.4970221822413372,
+            "ci95_cluster_users": [
+              0.3295509581710951,
+              0.6544116782671254
+            ],
+            "secondary_receiver_weighted_mean": 0.49223363284818583,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": 0.0013323064274912227,
+            "ci95_cluster_users": [
+              -0.002434125304497439,
+              0.005626875477000362
+            ],
+            "secondary_receiver_weighted_mean": 0.0012192219369901286,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 3
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.0023784895850454514,
+            "ci95_cluster_users": [
+              -0.0009596966103547148,
+              0.005378284855973943
+            ],
+            "secondary_receiver_weighted_mean": 0.002102130941175321,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.0010461831575542288,
+            "ci95_cluster_users": [
+              -0.00555710723521539,
+              0.003957218807449358
+            ],
+            "secondary_receiver_weighted_mean": -0.0008829090041851923,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 4
+          }
+        },
+        "psy_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 2.455575406960996,
+            "ci95_cluster_users": [
+              1.0370079492352118,
+              3.8199902913636627
+            ],
+            "secondary_receiver_weighted_mean": 2.2589117696762258,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": -0.008439311439270606,
+            "ci95_cluster_users": [
+              -0.03195709475657162,
+              0.012379837765228292
+            ],
+            "secondary_receiver_weighted_mean": -0.009474374090903103,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 3,
+            "users_negative": 4
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.012731428710014757,
+            "ci95_cluster_users": [
+              -0.012687860592989892,
+              0.046520976790450023
+            ],
+            "secondary_receiver_weighted_mean": 0.008444892911993856,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 3
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.021170740149285362,
+            "ci95_cluster_users": [
+              -0.05558967311513723,
+              0.009145155555933747
+            ],
+            "secondary_receiver_weighted_mean": -0.01791926700289696,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 4
+          }
+        },
+        "day_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 4.178116495203641,
+            "ci95_cluster_users": [
+              1.8239070245375237,
+              6.26073969134854
+            ],
+            "secondary_receiver_weighted_mean": 3.9513505009897782,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": -0.005703852077325185,
+            "ci95_cluster_users": [
+              -0.021581980917188857,
+              0.0061066001653671265
+            ],
+            "secondary_receiver_weighted_mean": -0.005126894007321276,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 3
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": -0.0016761216438478893,
+            "ci95_cluster_users": [
+              -0.01533917474249999,
+              0.009075420060091549
+            ],
+            "secondary_receiver_weighted_mean": -0.0020684124841019997,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 2
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.004027730433477296,
+            "ci95_cluster_users": [
+              -0.010250799730420113,
+              0.000572067830297682
+            ],
+            "secondary_receiver_weighted_mean": -0.003058481523219277,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 2,
+            "users_negative": 4
+          }
+        }
+      },
+      "reconstruction_only_alpha0": {
+        "full": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 1.5383011710235022,
+            "ci95_cluster_users": [
+              0.7115315570004492,
+              2.220953291747719
+            ],
+            "secondary_receiver_weighted_mean": 1.4455664788442817,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": 0.001623415936058062,
+            "ci95_cluster_users": [
+              -0.004377297761421354,
+              0.007812466388309582
+            ],
+            "secondary_receiver_weighted_mean": 0.0010553655075691954,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.0063210906963499765,
+            "ci95_cluster_users": [
+              -0.0015374148343985398,
+              0.017003928621610005
+            ],
+            "secondary_receiver_weighted_mean": 0.0048430284674789836,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.004697674760291915,
+            "ci95_cluster_users": [
+              -0.011449809807042282,
+              0.00020004831760796527
+            ],
+            "secondary_receiver_weighted_mean": -0.0037876629599097886,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 4
+          }
+        },
+        "profile_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 3.078478916444712,
+            "ci95_cluster_users": [
+              1.3086457046576672,
+              4.590275309979916
+            ],
+            "secondary_receiver_weighted_mean": 2.8700943777788113,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": 0.001191814693932732,
+            "ci95_cluster_users": [
+              -0.011853032848901218,
+              0.014047723677423265
+            ],
+            "secondary_receiver_weighted_mean": 0.0002491419794025765,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 2
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.011963813270752629,
+            "ci95_cluster_users": [
+              -0.004741973968015777,
+              0.03375277431785233
+            ],
+            "secondary_receiver_weighted_mean": 0.009056428928244738,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 6,
+            "users_negative": 1
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.010771998576819897,
+            "ci95_cluster_users": [
+              -0.025205920450389385,
+              -0.0004346027970314026
+            ],
+            "secondary_receiver_weighted_mean": -0.00880728694884216,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 1,
+            "users_negative": 5
+          }
+        },
+        "behavior_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 0.42526080234305164,
+            "ci95_cluster_users": [
+              0.280293975242262,
+              0.5615492889840554
+            ],
+            "secondary_receiver_weighted_mean": 0.4210349791373468,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": 0.0018921307851939226,
+            "ci95_cluster_users": [
+              -0.0011017986139955206,
+              0.004690783961753672
+            ],
+            "secondary_receiver_weighted_mean": 0.0015839598619663458,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.0017921003021506802,
+            "ci95_cluster_users": [
+              -0.0009304672660720016,
+              0.004456865126525777
+            ],
+            "secondary_receiver_weighted_mean": 0.0014644905017822786,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": 0.00010003048304324263,
+            "ci95_cluster_users": [
+              -0.0006781637355396968,
+              0.0007680542743949603
+            ],
+            "secondary_receiver_weighted_mean": 0.00011946936018406704,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          }
+        },
+        "behavior_ses_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 0.4970221822413372,
+            "ci95_cluster_users": [
+              0.3295509581710951,
+              0.6544116782671254
+            ],
+            "secondary_receiver_weighted_mean": 0.49223363284818583,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": 0.0022142472652448638,
+            "ci95_cluster_users": [
+              -0.0012745785564350497,
+              0.005471573652106426
+            ],
+            "secondary_receiver_weighted_mean": 0.001856127542871408,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.0020838774651074634,
+            "ci95_cluster_users": [
+              -0.0010807654424940067,
+              0.005181236981159253
+            ],
+            "secondary_receiver_weighted_mean": 0.001701763335851923,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": 0.00013036980013740024,
+            "ci95_cluster_users": [
+              -0.0007872167350133025,
+              0.0009251499254744322
+            ],
+            "secondary_receiver_weighted_mean": 0.0001543642070194851,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          }
+        },
+        "psy_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 2.455575406960996,
+            "ci95_cluster_users": [
+              1.0370079492352118,
+              3.8199902913636627
+            ],
+            "secondary_receiver_weighted_mean": 2.2589117696762258,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": 0.005066130007828444,
+            "ci95_cluster_users": [
+              -0.011835556072872084,
+              0.02130273905327979
+            ],
+            "secondary_receiver_weighted_mean": 0.0032366296240136498,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 3
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.01978120904542651,
+            "ci95_cluster_users": [
+              -0.0012180265805833796,
+              0.04892021687422969
+            ],
+            "secondary_receiver_weighted_mean": 0.01542722721896866,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 2
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.014715079037598064,
+            "ci95_cluster_users": [
+              -0.034850950335639175,
+              0.0002332652875831324
+            ],
+            "secondary_receiver_weighted_mean": -0.012190597594955013,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 3,
+            "users_negative": 3
+          }
+        },
+        "day_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 4.178116495203641,
+            "ci95_cluster_users": [
+              1.8239070245375237,
+              6.26073969134854
+            ],
+            "secondary_receiver_weighted_mean": 3.9513505009897782,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": -0.005703852077325185,
+            "ci95_cluster_users": [
+              -0.021581980917188857,
+              0.0061066001653671265
+            ],
+            "secondary_receiver_weighted_mean": -0.005126894007321276,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 3
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": -0.0016761216438478893,
+            "ci95_cluster_users": [
+              -0.01533917474249999,
+              0.009075420060091549
+            ],
+            "secondary_receiver_weighted_mean": -0.0020684124841019997,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 2
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.004027730433477296,
+            "ci95_cluster_users": [
+              -0.010250799730420113,
+              0.000572067830297682
+            ],
+            "secondary_receiver_weighted_mean": -0.003058481523219277,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 2,
+            "users_negative": 4
+          }
+        }
+      },
+      "edit_net_of_reconstruction": {
+        "full": {
+          "selected_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": -0.004161866275881905,
+            "ci95_cluster_users": [
+              -0.01226287805752474,
+              0.0016853678001401324
+            ],
+            "secondary_receiver_weighted_mean": -0.003815724772582028,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 3,
+            "users_negative": 5
+          },
+          "control_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": -0.0017050999745223967,
+            "ci95_cluster_users": [
+              -0.0041604344252615215,
+              0.00030625133501691005
+            ],
+            "secondary_receiver_weighted_mean": -0.0016374896929610648,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 2,
+            "users_negative": 5
+          },
+          "difference": {
+            "primary_mean_of_user_means": -0.0024567663013595085,
+            "ci95_cluster_users": [
+              -0.011101262786588264,
+              0.004050100286535564
+            ],
+            "secondary_receiver_weighted_mean": -0.0021782350796209623,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 4
+          }
+        },
+        "profile_only": {
+          "selected_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": -0.008594402008586459,
+            "ci95_cluster_users": [
+              -0.025783206025759377,
+              0.0
+            ],
+            "secondary_receiver_weighted_mean": -0.008088848949257843,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 0,
+            "users_negative": 1
+          },
+          "control_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": -0.0044719412435023555,
+            "ci95_cluster_users": [
+              -0.010237890606125196,
+              1.836035932822674e-09
+            ],
+            "secondary_receiver_weighted_mean": -0.004435001285511907,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 1,
+            "users_negative": 2
+          },
+          "difference": {
+            "primary_mean_of_user_means": -0.004122460765084103,
+            "ci95_cluster_users": [
+              -0.023861224128909054,
+              0.009571859936806417
+            ],
+            "secondary_receiver_weighted_mean": -0.003653847663745938,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 2,
+            "users_negative": 2
+          }
+        },
+        "behavior_only": {
+          "selected_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": -0.0007734330142811237,
+            "ci95_cluster_users": [
+              -0.004735642359943114,
+              0.004152461779229934
+            ],
+            "secondary_receiver_weighted_mean": -0.0005599915974553461,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 3,
+            "users_negative": 5
+          },
+          "control_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": 0.00024355654944277673,
+            "ci95_cluster_users": [
+              -0.00042393105104565626,
+              0.0009950864209612416
+            ],
+            "secondary_receiver_weighted_mean": 0.0003328238845212397,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 4
+          },
+          "difference": {
+            "primary_mean_of_user_means": -0.0010169895637239003,
+            "ci95_cluster_users": [
+              -0.0052752710034145,
+              0.004021260982780303
+            ],
+            "secondary_receiver_weighted_mean": -0.0008928154819765858,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 3,
+            "users_negative": 5
+          }
+        },
+        "behavior_ses_only": {
+          "selected_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": -0.0008819408377536411,
+            "ci95_cluster_users": [
+              -0.005510424522198885,
+              0.004838997197507452
+            ],
+            "secondary_receiver_weighted_mean": -0.0006369056058812794,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 3,
+            "users_negative": 5
+          },
+          "control_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": 0.0002946121199379881,
+            "ci95_cluster_users": [
+              -0.0004985357518307865,
+              0.0011870399547559726
+            ],
+            "secondary_receiver_weighted_mean": 0.00040036760532339796,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 4
+          },
+          "difference": {
+            "primary_mean_of_user_means": -0.0011765529576916289,
+            "ci95_cluster_users": [
+              -0.006159605656977786,
+              0.0046963327614422375
+            ],
+            "secondary_receiver_weighted_mean": -0.0010372732112046772,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 3,
+            "users_negative": 5
+          }
+        },
+        "psy_only": {
+          "selected_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": -0.01350544144709905,
+            "ci95_cluster_users": [
+              -0.04051632434129715,
+              0.0
+            ],
+            "secondary_receiver_weighted_mean": -0.012711003714916753,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 0,
+            "users_negative": 1
+          },
+          "control_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": -0.007049780335411752,
+            "ci95_cluster_users": [
+              -0.016392720863223076,
+              2.387228294407704e-09
+            ],
+            "secondary_receiver_weighted_mean": -0.0069823343069748064,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 1,
+            "users_negative": 2
+          },
+          "difference": {
+            "primary_mean_of_user_means": -0.006455661111687299,
+            "ci95_cluster_users": [
+              -0.03756472422169117,
+              0.01524614076702329
+            ],
+            "secondary_receiver_weighted_mean": -0.005728669407941946,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 2,
+            "users_negative": 2
+          }
+        },
+        "day_only": {
+          "selected_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": 0.0,
+            "ci95_cluster_users": [
+              0.0,
+              0.0
+            ],
+            "secondary_receiver_weighted_mean": 0.0,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 0,
+            "users_negative": 0
+          },
+          "control_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": 0.0,
+            "ci95_cluster_users": [
+              0.0,
+              0.0
+            ],
+            "secondary_receiver_weighted_mean": 0.0,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 0,
+            "users_negative": 0
+          },
+          "difference": {
+            "primary_mean_of_user_means": 0.0,
+            "ci95_cluster_users": [
+              0.0,
+              0.0
+            ],
+            "secondary_receiver_weighted_mean": 0.0,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 0,
+            "users_negative": 0
+          }
+        }
+      },
+      "profile_minus_behavior_of_selected_minus_control": {
+        "primary_mean_of_user_means": -0.013977500261223344,
+        "ci95_cluster_users": [
+          -0.036936726569870695,
+          0.006813787974810804
+        ],
+        "secondary_receiver_weighted_mean": -0.01168778849079558,
+        "n_receivers": 68,
+        "n_users": 8,
+        "users_positive": 3,
+        "users_negative": 5
+      }
+    },
+    "team | benign donors": {
+      "at_alpha": {
+        "full": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 1.5383420192604211,
+            "ci95_cluster_users": [
+              0.7115315567197588,
+              2.221075836868517
+            ],
+            "secondary_receiver_weighted_mean": 1.4456049243111493,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": -0.0013364728617792326,
+            "ci95_cluster_users": [
+              -0.005234782418443097,
+              0.00251677059309764
+            ],
+            "secondary_receiver_weighted_mean": -0.0016010338029659847,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 4
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.004461137108349552,
+            "ci95_cluster_users": [
+              -0.005508635440168695,
+              0.016010259582091953
+            ],
+            "secondary_receiver_weighted_mean": 0.003052129177376628,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 4
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.005797609970128785,
+            "ci95_cluster_users": [
+              -0.014627987764672275,
+              0.0018366369975006415
+            ],
+            "secondary_receiver_weighted_mean": -0.004653162980342612,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 4
+          }
+        },
+        "profile_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 3.0785879623144865,
+            "ci95_cluster_users": [
+              1.3086457046576672,
+              4.590275309979916
+            ],
+            "secondary_receiver_weighted_mean": 2.8701970091856577,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": -0.0057930781764702665,
+            "ci95_cluster_users": [
+              -0.01659307644392053,
+              0.005724129784438346
+            ],
+            "secondary_receiver_weighted_mean": -0.006324874839800245,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 3
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.007066004859128346,
+            "ci95_cluster_users": [
+              -0.014683488806864868,
+              0.03184723574668169
+            ],
+            "secondary_receiver_weighted_mean": 0.0042088074637029104,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 2
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.012859083035598613,
+            "ci95_cluster_users": [
+              -0.033330032598072046,
+              0.006053100857469771
+            ],
+            "secondary_receiver_weighted_mean": -0.010533682303503156,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 3,
+            "users_negative": 5
+          }
+        },
+        "behavior_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 0.425250947574063,
+            "ci95_cluster_users": [
+              0.2802939758678096,
+              0.5615394336588603
+            ],
+            "secondary_receiver_weighted_mean": 0.4210257040651734,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": 0.0019505838016306775,
+            "ci95_cluster_users": [
+              -0.002009440402293371,
+              0.006589464862675717
+            ],
+            "secondary_receiver_weighted_mean": 0.0018531561431968037,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.0020637181708783223,
+            "ci95_cluster_users": [
+              -0.0008672876340117202,
+              0.004603527416798493
+            ],
+            "secondary_receiver_weighted_mean": 0.0018183237064958496,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.0001131343692476447,
+            "ci95_cluster_users": [
+              -0.004994509172198984,
+              0.005241358441708144
+            ],
+            "secondary_receiver_weighted_mean": 3.4832436700954154e-05,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          }
+        },
+        "behavior_ses_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 0.49701074334831596,
+            "ci95_cluster_users": [
+              0.3295509592306593,
+              0.6544002388869153
+            ],
+            "secondary_receiver_weighted_mean": 0.49222286685150773,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": 0.0023103678864168213,
+            "ci95_cluster_users": [
+              -0.00232650702754553,
+              0.0076989955301137855
+            ],
+            "secondary_receiver_weighted_mean": 0.0021930385572726235,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.0024110383021050236,
+            "ci95_cluster_users": [
+              -0.0009984429699317037,
+              0.005383059336519282
+            ],
+            "secondary_receiver_weighted_mean": 0.002126333153094439,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.0001006704156882029,
+            "ci95_cluster_users": [
+              -0.005801673330521832,
+              0.0061453105817135005
+            ],
+            "secondary_receiver_weighted_mean": 6.670540417818462e-05,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          }
+        },
+        "psy_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 2.4555685482876353,
+            "ci95_cluster_users": [
+              1.0370079492352118,
+              3.819976574016942
+            ],
+            "secondary_receiver_weighted_mean": 2.258905314454239,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": -0.005912239758810895,
+            "ci95_cluster_users": [
+              -0.025202263250119154,
+              0.012431749039226107
+            ],
+            "secondary_receiver_weighted_mean": -0.007095953685764551,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 3,
+            "users_negative": 4
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.012046671987303961,
+            "ci95_cluster_users": [
+              -0.014878654683075985,
+              0.04627857281522868
+            ],
+            "secondary_receiver_weighted_mean": 0.007782288693930142,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 3
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.017958911746114855,
+            "ci95_cluster_users": [
+              -0.0489829768981363,
+              0.011190967604671954
+            ],
+            "secondary_receiver_weighted_mean": -0.014878242379694692,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 4
+          }
+        },
+        "day_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 4.178428371540374,
+            "ci95_cluster_users": [
+              1.824218900874257,
+              6.261051567685273
+            ],
+            "secondary_receiver_weighted_mean": 3.951644031659645,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": -0.005700138376818763,
+            "ci95_cluster_users": [
+              -0.021581980917188857,
+              0.006121884120835198
+            ],
+            "secondary_receiver_weighted_mean": -0.0051233987597858206,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 3
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": -0.0016724079433414671,
+            "ci95_cluster_users": [
+              -0.015335461041993566,
+              0.009082847461104392
+            ],
+            "secondary_receiver_weighted_mean": -0.0020649172365665436,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 2
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.004027730433477296,
+            "ci95_cluster_users": [
+              -0.010250799730420113,
+              0.000572067830297682
+            ],
+            "secondary_receiver_weighted_mean": -0.003058481523219277,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 2,
+            "users_negative": 4
+          }
+        }
+      },
+      "reconstruction_only_alpha0": {
+        "full": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 1.5383420192604211,
+            "ci95_cluster_users": [
+              0.7115315567197588,
+              2.221075836868517
+            ],
+            "secondary_receiver_weighted_mean": 1.4456049243111493,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": 0.0016961992310825734,
+            "ci95_cluster_users": [
+              -0.004376866970495838,
+              0.007962096884148196
+            ],
+            "secondary_receiver_weighted_mean": 0.0011238673195133313,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 6,
+            "users_negative": 2
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.006393874491590799,
+            "ci95_cluster_users": [
+              -0.0015374142799474714,
+              0.017086583319016628
+            ],
+            "secondary_receiver_weighted_mean": 0.004911530824542484,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 2
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.004697675260508226,
+            "ci95_cluster_users": [
+              -0.011449809755302137,
+              0.00020004657562822104
+            ],
+            "secondary_receiver_weighted_mean": -0.0037876635050291523,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 3,
+            "users_negative": 5
+          }
+        },
+        "profile_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 3.0785879623144865,
+            "ci95_cluster_users": [
+              1.3086457046576672,
+              4.590275309979916
+            ],
+            "secondary_receiver_weighted_mean": 2.8701970091856577,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": 0.0013422501946075097,
+            "ci95_cluster_users": [
+              -0.01184752220287919,
+              0.01434859467877282
+            ],
+            "secondary_receiver_weighted_mean": 0.0003907283329788376,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 2
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.012114248771427406,
+            "ci95_cluster_users": [
+              -0.004741680601404773,
+              0.033903209818527104
+            ],
+            "secondary_receiver_weighted_mean": 0.009198015281821,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 6,
+            "users_negative": 1
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.010771998576819897,
+            "ci95_cluster_users": [
+              -0.025205920450389385,
+              -0.0004346027970314026
+            ],
+            "secondary_receiver_weighted_mean": -0.00880728694884216,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 1,
+            "users_negative": 5
+          }
+        },
+        "behavior_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 0.425250947574063,
+            "ci95_cluster_users": [
+              0.2802939758678096,
+              0.5615394336588603
+            ],
+            "secondary_receiver_weighted_mean": 0.4210257040651734,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": 0.0019074666145671574,
+            "ci95_cluster_users": [
+              -0.0010963379289023576,
+              0.004690905705986855
+            ],
+            "secondary_receiver_weighted_mean": 0.0015983936746659525,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 6,
+            "users_negative": 2
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.001807435296036096,
+            "ci95_cluster_users": [
+              -0.0009273127749717484,
+              0.004487535697990097
+            ],
+            "secondary_receiver_weighted_mean": 0.0014789234230513958,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": 0.00010003131853106119,
+            "ci95_cluster_users": [
+              -0.0006781631910901827,
+              0.0007680561277084052
+            ],
+            "secondary_receiver_weighted_mean": 0.00011947025161455659,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 4
+          }
+        },
+        "behavior_ses_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 0.49701074334831596,
+            "ci95_cluster_users": [
+              0.3295509592306593,
+              0.6544002388869153
+            ],
+            "secondary_receiver_weighted_mean": 0.49222286685150773,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": 0.0022319367030932983,
+            "ci95_cluster_users": [
+              -0.0012745773118998235,
+              0.005478787302854471
+            ],
+            "secondary_receiver_weighted_mean": 0.0018727764870752307,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 6,
+            "users_negative": 2
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.00210156638673248,
+            "ci95_cluster_users": [
+              -0.0010807650383665328,
+              0.005216615396784618
+            ],
+            "secondary_receiver_weighted_mean": 0.001718411742545226,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": 0.00013037031636081844,
+            "ci95_cluster_users": [
+              -0.0007872165639936509,
+              0.0009251515258155349
+            ],
+            "secondary_receiver_weighted_mean": 0.0001543647445300046,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 3
+          }
+        },
+        "psy_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 2.4555685482876353,
+            "ci95_cluster_users": [
+              1.0370079492352118,
+              3.819976574016942
+            ],
+            "secondary_receiver_weighted_mean": 2.258905314454239,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": 0.0053004044084335395,
+            "ci95_cluster_users": [
+              -0.011835556072872084,
+              0.021722279721430482
+            ],
+            "secondary_receiver_weighted_mean": 0.0034571231775243285,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 3
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": 0.020015483446031605,
+            "ci95_cluster_users": [
+              -0.0012180265805833796,
+              0.04915449127483479
+            ],
+            "secondary_receiver_weighted_mean": 0.01564772077247934,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 2
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.014715079037598064,
+            "ci95_cluster_users": [
+              -0.034850950335639175,
+              0.0002332652875831324
+            ],
+            "secondary_receiver_weighted_mean": -0.012190597594955013,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 3,
+            "users_negative": 3
+          }
+        },
+        "day_only": {
+          "base_unpatched": {
+            "primary_mean_of_user_means": 4.178428371540374,
+            "ci95_cluster_users": [
+              1.824218900874257,
+              6.261051567685273
+            ],
+            "secondary_receiver_weighted_mean": 3.951644031659645,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 8,
+            "users_negative": 0
+          },
+          "selected_delta": {
+            "primary_mean_of_user_means": -0.005700138376818763,
+            "ci95_cluster_users": [
+              -0.021581980917188857,
+              0.006121884120835198
+            ],
+            "secondary_receiver_weighted_mean": -0.0051233987597858206,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 3
+          },
+          "control_delta": {
+            "primary_mean_of_user_means": -0.0016724079433414671,
+            "ci95_cluster_users": [
+              -0.015335461041993566,
+              0.009082847461104392
+            ],
+            "secondary_receiver_weighted_mean": -0.0020649172365665436,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 2
+          },
+          "selected_minus_control": {
+            "primary_mean_of_user_means": -0.004027730433477296,
+            "ci95_cluster_users": [
+              -0.010250799730420113,
+              0.000572067830297682
+            ],
+            "secondary_receiver_weighted_mean": -0.003058481523219277,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 2,
+            "users_negative": 4
+          }
+        }
+      },
+      "edit_net_of_reconstruction": {
+        "full": {
+          "selected_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": -0.0030326720928618065,
+            "ci95_cluster_users": [
+              -0.008967018404897923,
+              0.0020778903498366056
+            ],
+            "secondary_receiver_weighted_mean": -0.0027249011224793162,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 4
+          },
+          "control_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": -0.0019327373832412477,
+            "ci95_cluster_users": [
+              -0.00473369392631058,
+              0.00031790420309536993
+            ],
+            "secondary_receiver_weighted_mean": -0.001859401647165856,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 2,
+            "users_negative": 6
+          },
+          "difference": {
+            "primary_mean_of_user_means": -0.0010999347096205586,
+            "ci95_cluster_users": [
+              -0.007819199862165584,
+              0.004743985598906875
+            ],
+            "secondary_receiver_weighted_mean": -0.0008654994753134601,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 4
+          }
+        },
+        "profile_only": {
+          "selected_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": -0.007135328371077776,
+            "ci95_cluster_users": [
+              -0.021405985113233328,
+              0.0
+            ],
+            "secondary_receiver_weighted_mean": -0.006715603172779083,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 0,
+            "users_negative": 1
+          },
+          "control_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": -0.00504824391229906,
+            "ci95_cluster_users": [
+              -0.01210370659828186,
+              4.214234650135041e-09
+            ],
+            "secondary_receiver_weighted_mean": -0.004989207818118089,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 1,
+            "users_negative": 2
+          },
+          "difference": {
+            "primary_mean_of_user_means": -0.002087084458778716,
+            "ci95_cluster_users": [
+              -0.019383667850504733,
+              0.01110009721143999
+            ],
+            "secondary_receiver_weighted_mean": -0.001726395354660995,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 2,
+            "users_negative": 2
+          }
+        },
+        "behavior_only": {
+          "selected_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": 4.31171870635202e-05,
+            "ci95_cluster_users": [
+              -0.005045641608497438,
+              0.005792303413909394
+            ],
+            "secondary_receiver_weighted_mean": 0.0002547624685308512,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          },
+          "control_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": 0.0002562828748422261,
+            "ci95_cluster_users": [
+              -0.00040042200190429063,
+              0.0009567490326137177
+            ],
+            "secondary_receiver_weighted_mean": 0.0003394002834444537,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 3,
+            "users_negative": 5
+          },
+          "difference": {
+            "primary_mean_of_user_means": -0.00021316568777870595,
+            "ci95_cluster_users": [
+              -0.005501409968160766,
+              0.005711182342363625
+            ],
+            "secondary_receiver_weighted_mean": -8.463781491360244e-05,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 4
+          }
+        },
+        "behavior_ses_only": {
+          "selected_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": 7.843118332352286e-05,
+            "ci95_cluster_users": [
+              -0.005848887586034834,
+              0.006776852506542733
+            ],
+            "secondary_receiver_weighted_mean": 0.0003202620701973929,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 5,
+            "users_negative": 3
+          },
+          "control_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": 0.00030947191537254384,
+            "ci95_cluster_users": [
+              -0.0004699175543565717,
+              0.0011395309469662608
+            ],
+            "secondary_receiver_weighted_mean": 0.0004079214105492129,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 3,
+            "users_negative": 5
+          },
+          "difference": {
+            "primary_mean_of_user_means": -0.00023104073204902094,
+            "ci95_cluster_users": [
+              -0.0064131866542286135,
+              0.0066826504879928614
+            ],
+            "secondary_receiver_weighted_mean": -8.765934035181999e-05,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 4,
+            "users_negative": 4
+          }
+        },
+        "psy_only": {
+          "selected_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": -0.011212644167244434,
+            "ci95_cluster_users": [
+              -0.0336379325017333,
+              0.0
+            ],
+            "secondary_receiver_weighted_mean": -0.01055307686328888,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 0,
+            "users_negative": 1
+          },
+          "control_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": -0.007968811458727644,
+            "ci95_cluster_users": [
+              -0.01904331628854076,
+              6.186619216919098e-09
+            ],
+            "secondary_receiver_weighted_mean": -0.007865432078549199,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 1,
+            "users_negative": 2
+          },
+          "difference": {
+            "primary_mean_of_user_means": -0.0032438327085167907,
+            "ci95_cluster_users": [
+              -0.030532248410576654,
+              0.017695066193869638
+            ],
+            "secondary_receiver_weighted_mean": -0.0026876447847396807,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 2,
+            "users_negative": 2
+          }
+        },
+        "day_only": {
+          "selected_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": 0.0,
+            "ci95_cluster_users": [
+              0.0,
+              0.0
+            ],
+            "secondary_receiver_weighted_mean": 0.0,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 0,
+            "users_negative": 0
+          },
+          "control_edit_net_of_reconstruction": {
+            "primary_mean_of_user_means": 0.0,
+            "ci95_cluster_users": [
+              0.0,
+              0.0
+            ],
+            "secondary_receiver_weighted_mean": 0.0,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 0,
+            "users_negative": 0
+          },
+          "difference": {
+            "primary_mean_of_user_means": 0.0,
+            "ci95_cluster_users": [
+              0.0,
+              0.0
+            ],
+            "secondary_receiver_weighted_mean": 0.0,
+            "n_receivers": 68,
+            "n_users": 8,
+            "users_positive": 0,
+            "users_negative": 0
+          }
+        }
+      },
+      "profile_minus_behavior_of_selected_minus_control": {
+        "primary_mean_of_user_means": -0.012745948666350967,
+        "ci95_cluster_users": [
+          -0.034996422386353115,
+          0.008082858687137357
+        ],
+        "secondary_receiver_weighted_mean": -0.01056851474020411,
+        "n_receivers": 68,
+        "n_users": 8,
+        "users_positive": 3,
+        "users_negative": 5
+      }
+    }
+  },
+  "historical_best_candidate_did_full": {
+    "team": {
+      "primary_mean_of_user_means": -0.0007521128592391809,
+      "ci95_cluster_users": [
+        -0.002597329444769356,
+        0.0004916364637513955
+      ],
+      "secondary_receiver_weighted_mean": -0.0006922739831840291,
+      "n_receivers": 68,
+      "n_users": 8,
+      "users_positive": 2,
+      "users_negative": 6
+    }
+  }
+}

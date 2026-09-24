@@ -52,6 +52,11 @@ Rankings whose discovery set was every positive user are finite but in-sample
 positive users and evaluated the same users. Status: exploratory, in-sample.
 The held-out test is the corrected run, job 20890658 (`docs/TWOS_CORRECTED_INTERVENTION_PLAN.md`).
 
+**Held-out result (job 20890658, 2026-09-24).** Inconclusive on 8 confirmation
+users: no selected-versus-control difference is detectable on behaviour or
+profile loss. Most of the raw alpha-1 profile contrast came from the controls
+reconstructing more receiver days. `results/twos_corrected_bounded/README.md`.
+
 ## T3. The TWOS "seed reversal" interpretation
 
 **Withdrawn.** The two runs differ measurably, but both used invalid

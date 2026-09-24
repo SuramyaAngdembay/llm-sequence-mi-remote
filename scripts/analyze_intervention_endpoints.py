@@ -140,7 +140,30 @@ def arm_table(rows: Sequence[dict], top: str, ctrl: str, margin: Optional[float]
     return out
 
 
-def analyze(rows: List[dict], alpha: float, margin: Optional[float]) -> dict:
+def external_recon(recon_rows: Sequence[dict], top: str, ctrl: str) -> Dict[str, dict]:
+    """Per-receiver alpha-0 deltas from a separate reconstruction-only run.
+
+    Alpha 0 decodes the unedited code, so its delta does not depend on the
+    donor or the context mode: each (arm, receiver) value is averaged over all
+    of that run's alpha-0 rows and applied to every context and donor type.
+    """
+    zero = [r for r in recon_rows if float(r["alpha"]) == 0.0]
+    if not zero:
+        raise SystemExit("the reconstruction run has no alpha-0 rows")
+    out: Dict[str, dict] = {}
+    for view in VIEWS:
+        if f"delta_{view}" not in zero[0]:
+            continue
+        d = receiver_means(zero, f"delta_{view}")
+        out[view] = {
+            "_per_receiver_sel": {rid: v for (fs, rid), v in d.items() if fs == top},
+            "_per_receiver_con": {rid: v for (fs, rid), v in d.items() if fs == ctrl},
+        }
+    return out
+
+
+def analyze(rows: List[dict], alpha: float, margin: Optional[float],
+            recon_rows: Optional[Sequence[dict]] = None) -> dict:
     sets = sorted({r["feature_set"] for r in rows})
     ctrl = next((s for s in sets if s.startswith("control")), None)
     tops = [s for s in sets if s != ctrl]
@@ -150,6 +173,9 @@ def analyze(rows: List[dict], alpha: float, margin: Optional[float]) -> dict:
     alphas = sorted({float(r["alpha"]) for r in rows})
     result: dict = {"top_set": top, "control_set": ctrl, "alphas_present": alphas, "primary_alpha": alpha,
                     "by_context_and_donor": {}}
+    ext = external_recon(recon_rows, top, ctrl) if recon_rows else None
+    if ext is not None:
+        result["reconstruction_source"] = "separate alpha-0 run"
     for mode in sorted({r["context_mode"] for r in rows}):
         for donor in sorted({r["donor_type"] for r in rows}):
             sub = [r for r in rows if r["context_mode"] == mode and r["donor_type"] == donor]
@@ -158,15 +184,28 @@ def analyze(rows: List[dict], alpha: float, margin: Optional[float]) -> dict:
                 continue
             entry = {"at_alpha": arm_table(at, top, ctrl, margin)}
             zero = [r for r in sub if float(r["alpha"]) == 0.0]
+            z = None
             if zero and alpha != 0.0:
                 z = arm_table(zero, top, ctrl, None)
                 entry["reconstruction_only_alpha0"] = z
+            elif ext is not None and alpha != 0.0:
+                z = ext
+                here = {r["receiver_example_id"] for r in at}
+                entry["reconstruction_only_alpha0"] = {
+                    "source": "separate alpha-0 run, per receiver and arm",
+                    **{view: {
+                        "selected_delta": summarize({k: v for k, v in z[view]["_per_receiver_sel"].items() if k in here}, None),
+                        "control_delta": summarize({k: v for k, v in z[view]["_per_receiver_con"].items() if k in here}, None),
+                    } for view in z},
+                }
+            if z is not None:
                 net = {}
                 for view in entry["at_alpha"]:
                     if view not in z:
                         continue
                     a1, a0 = entry["at_alpha"][view], z[view]
-                    shared = sorted(set(a1["_per_receiver_sel"]) & set(a0["_per_receiver_sel"]))
+                    shared = sorted(set(a1["_per_receiver_sel"]) & set(a0["_per_receiver_sel"])
+                                    & set(a0["_per_receiver_con"]))
                     sel_net = {rid: a1["_per_receiver_sel"][rid] - a0["_per_receiver_sel"][rid] for rid in shared}
                     con_net = {rid: a1["_per_receiver_con"][rid] - a0["_per_receiver_con"][rid] for rid in shared}
                     net[view] = {
@@ -260,6 +299,12 @@ def self_test() -> int:
         res = analyze(load_rows(Path(td)), alpha=1.0, margin=0.002)
     e = res["by_context_and_donor"]["team | benign donors"]
     beh = e["at_alpha"]["behavior_only"]
+    one = [r for r in rows if float(r["alpha"]) == 1.0]
+    zero = [dict(r, context_mode="dept", donor_example_id="X") for r in rows
+            if float(r["alpha"]) == 0.0 and r["donor_example_id"] == "D0"]
+    res_ext = analyze(one, alpha=1.0, margin=None, recon_rows=zero)
+    net_ext = res_ext["by_context_and_donor"]["team | benign donors"]["edit_net_of_reconstruction"]["behavior_only"]["difference"]
+    net_in = e["edit_net_of_reconstruction"]["behavior_only"]["difference"]
     checks = {
         "selected absolute effect = recon + edit + mean donor offset":
             abs(beh["selected_delta"]["primary_mean_of_user_means"] - (0.001 - 0.010 + 0.0001)) < 1e-12,
@@ -272,6 +317,8 @@ def self_test() -> int:
         "profile-minus-behaviour of the difference = +0.003":
             abs(e["profile_minus_behavior_of_selected_minus_control"]["primary_mean_of_user_means"] - 0.003) < 1e-12,
         "a -0.006 difference is not within a ±0.002 margin": beh["selected_minus_control"]["within_margin_tost"] is False,
+        "a separate alpha-0 run from another context and one donor gives the same net edit difference":
+            abs(net_ext["primary_mean_of_user_means"] - net_in["primary_mean_of_user_means"]) < 1e-12,
         "donor types are reported separately": set(res["by_context_and_donor"]) == {"team | benign donors", "team | anomalous donors"},
         "historical DiD = (-0.007 - -0.010) - (-0.001 - -0.004) = 0 on full":
             abs(res["historical_best_candidate_did_full"]["team"]["primary_mean_of_user_means"]) < 1e-12,
@@ -287,13 +334,16 @@ def main() -> int:
     ap.add_argument("--alpha", type=float, default=1.0, help="primary fixed patch strength")
     ap.add_argument("--margin", type=float, default=None, help="equivalence margin; TOST reported only if given")
     ap.add_argument("--json", type=Path, default=None)
+    ap.add_argument("--recon-run", type=Path, default=None,
+                    help="a separate run with alpha 0 only, used as the reconstruction-only control")
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args()
     if args.self_test:
         return self_test()
     if args.run_dir is None:
         ap.error("run_dir is required")
-    res = analyze(load_rows(args.run_dir), args.alpha, args.margin)
+    recon = load_rows(args.recon_run) if args.recon_run else None
+    res = analyze(load_rows(args.run_dir), args.alpha, args.margin, recon)
     print_report(res)
     if args.json:
         args.json.write_text(json.dumps(strip_private(res), indent=2) + "\n")
