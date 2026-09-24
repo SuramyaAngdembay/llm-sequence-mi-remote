@@ -704,6 +704,17 @@ figure enters this result.
 |---|---|---|
 | 2026-09-23 | Phase C 3B scoring (20861905) | **done** (V39, V40) |
 | 2026-09-23 | CERT package-4 smoke (20879548, gpu-debug) + full (20879549, gpu), cis260991-gpu; resubmissions of 20861864/5 after the chunk-path fix | queued (Priority); scheduler estimate 2026-09-27; at 21:21 EDT the estimate was 2026-09-26 ~19:35 (smoke) and ~20:05 (full). Both GPU partitions are saturated (gpu 380 pending / 43 running, ai 393 / 36), so moving to H100 would not help |
-| 2026-09-23 | 20840922, same causal script on cis230270-gpu (submitted 2026-09-21) | pending forever: `AssocGrpGRESMinutes`, 2.2 SU left of 1,005. Duplicates 20879549 if the allocation is refilled; cancel it or let it lapse |
+| 2026-09-23 | 20840922, same causal script on cis230270-gpu (submitted 2026-09-21) | **cancelled** 22:00 EDT. The owner's GPU allocation will not be refilled; all GPU work now runs on the collaborator account (A100 `gpu`/`gpu-debug` or H100 `ai`) |
 | 2026-09-23 | Outputs of 20827646 (r4.2 portability) and 20827647 (LANL) | **collected 2026-09-22**, per `results/score_decomposition/r42_headline/README.md` and `lanl_full/README.md`; the 2026-09-22 row saying "not yet collected" is stale |
 | — | Phase C 8B | held, as before |
+
+**Compute policy, 2026-09-23.** The owner's GPU allocations (cis230270-gpu,
+cis230270-ai) are exhausted permanently. GPU jobs run on the collaborator account
+only: A100 via `cis260991-gpu` or `tra250034-gpu`, H100 via `tra250034-ai`. At
+22:05 EDT `sbatch --test-only` put a *new* full-length job at 2026-10-10 on H100
+and 2026-10-20 on A100, against 2026-09-26 23:05 for the already-queued 20879549.
+Priority here is almost entirely age (PriorityWeightAge 20000, fair-share weight
+0, no ACCRUE_ALWAYS), so the queued jobs were kept rather than moved, and no
+smoke→full dependency was added, since an unsatisfied dependency stops age from
+accruing. A new 30-minute `gpu-debug` job tested at 2026-09-24 02:44, so the
+queued smoke 20879548 may start well before its listed estimate.
