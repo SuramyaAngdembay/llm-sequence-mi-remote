@@ -703,6 +703,7 @@ figure enters this result.
 | date | what | status |
 |---|---|---|
 | 2026-09-23 | Phase C 3B scoring (20861905) | **done** (V39, V40) |
-| 2026-09-23 | CERT package-4 smoke (20879548, gpu-debug) + full (20879549, gpu), cis260991-gpu; resubmissions of 20861864/5 after the chunk-path fix | queued (Priority); scheduler estimate 2026-09-27 |
+| 2026-09-23 | CERT package-4 smoke (20879548, gpu-debug) + full (20879549, gpu), cis260991-gpu; resubmissions of 20861864/5 after the chunk-path fix | queued (Priority); scheduler estimate 2026-09-27; at 21:21 EDT the estimate was 2026-09-26 ~19:35 (smoke) and ~20:05 (full). Both GPU partitions are saturated (gpu 380 pending / 43 running, ai 393 / 36), so moving to H100 would not help |
 | 2026-09-23 | 20840922, same causal script on cis230270-gpu (submitted 2026-09-21) | pending forever: `AssocGrpGRESMinutes`, 2.2 SU left of 1,005. Duplicates 20879549 if the allocation is refilled; cancel it or let it lapse |
+| 2026-09-23 | Outputs of 20827646 (r4.2 portability) and 20827647 (LANL) | **collected 2026-09-22**, per `results/score_decomposition/r42_headline/README.md` and `lanl_full/README.md`; the 2026-09-22 row saying "not yet collected" is stale |
 | — | Phase C 8B | held, as before |
