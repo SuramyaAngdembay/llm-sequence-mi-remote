@@ -110,7 +110,7 @@ Honors College
 \addcontentsline{toc}{chapter}{ABSTRACT}
 
 %%%%% CHANGED: abstract rewritten around dimensionality reduction (CTMC chapter removed)
-Insider threat represents a major cybersecurity challenge to companies, organizations, and government agencies. Detecting malicious insiders is difficult due to massive data volumes, extreme class imbalance, and the subtle nature of behavioral shifts over time. This thesis approaches the problem through dimensionality reduction: describing high-dimensional behavior with a small number of informative directions, and treating what a model of normal behavior fails to explain as a sign of anomaly. First, a classical approach uses Deep Feature Synthesis (DFS) to generate features, Principal Component Analysis (PCA) to reduce them to their dominant directions of variance, and a Gaussian Mixture Model (GMM) to score observations that fall outside that structure. Second, a large language model is fine-tuned only on benign user-days written as text, with the fine-tuning restricted to low-rank changes of the model's weights, and it scores each day by its average surprisal, the negative log-probability of each token given the tokens before it. We show that this score splits exactly into a profile part, covering organizational and personality attributes, and a behavior part, and that the profile part ranks users backwards: on CERT release 4.2, profile tokens alone place malicious users below benign ones (user-level AUC 0.47), while scoring behavior tokens alone raises user-level AUC from 0.65 to 0.86. Third, we apply an interpretable form of dimensionality reduction to the model itself. A sparse autoencoder, an overcomplete and sparse relative of PCA, is learned on the change that fine-tuning made to the model's internal representations. Four of the five features most associated with malicious days fire almost exclusively on behavioral tokens, and editing the selected features toward a benign colleague's values lowers the anomaly score more than editing comparably active control features, on malicious users held out from feature selection. These results are consistent with a picture in which the model does represent unusual behavior, and the profile shortcut enters mainly when the score averages surprisal over every token, profile tokens included. All experiments use the CMU CERT insider threat dataset.
+Insider threat represents a major cybersecurity challenge to companies, organizations, and government agencies. Detecting malicious insiders is difficult due to massive data volumes, extreme class imbalance, and the subtle nature of behavioral shifts over time. This thesis approaches the problem through dimensionality reduction: describing high-dimensional behavior with a small number of informative directions, and treating what a model of normal behavior fails to explain as a sign of anomaly. First, a classical approach uses Deep Feature Synthesis (DFS) to generate features, Principal Component Analysis (PCA) to reduce them to their dominant directions of variance, and a Gaussian Mixture Model (GMM) to score observations that fall outside that structure. Second, a large language model is fine-tuned only on benign user-days written as text, with the fine-tuning restricted to low-rank changes of the model's weights, and it scores each day by its average surprisal, the negative log-probability of each token given the tokens before it. We show that this score splits exactly into a profile part, covering organizational and personality attributes, and a behavior part, and that the profile part ranks users backwards: on CERT release 4.2, profile tokens alone place malicious users below benign ones (user-level AUC 0.47), while scoring behavior tokens alone raises user-level AUC from 0.65 to 0.86. Third, we apply an interpretable form of dimensionality reduction to the model itself. A sparse autoencoder, an overcomplete and sparse relative of PCA, is learned on the change that fine-tuning made to the model's internal representations. Four of the five features most associated with malicious days activate almost only on behavioral tokens. On malicious users held out from feature selection, moving these features toward a benign colleague's values rather than another malicious user's lowers the anomaly score more than the same edit of control features does, by a small margin. Where a feature activates, what it represents and which predictions its edit changes are separate questions; the last is the subject of an experiment still in progress. All experiments use the CMU CERT insider threat dataset.
 
 \vspace{0.5in}
 
@@ -1285,7 +1285,9 @@ so the correction trains $131{,}072 / 16{,}777{,}216 = 0.78\%$ as many numbers. 
 input $\mathbf{x}$, the change in the matrix's output, $GH\mathbf{x} = G\,(H\mathbf{x})$, is a
 combination of the $r = 16$ columns of $G$. Just as the rank-$q$ reconstruction of
 \chref{ch:pca} keeps only $q$ directions, fine-tuning can change each adapted matrix's output
-along at most 16 directions.
+along at most 16 directions. The parallel is structural only: low-rank adaptation limits how the
+weights may change during training, whereas PCA, and the sparse dictionary of \chref{ch:mech},
+describe data.
 
 \section{The Anomaly Score of a Day and of a User}
 \label{sec:lm-score}
@@ -1502,7 +1504,9 @@ training users. A rare but innocent job title is surprising; a malicious user wi
 job title is not.
 \item \textbf{The fix requires no new model.} The decomposition \eqref{eq:lm-decomp} is
 exact, so the behavior-only score is obtained from the same model outputs by not counting
-profile tokens.
+profile tokens. It removes the profile's direct contribution to the score, not its influence:
+the profile is still in the context, so every behavior-token prediction is still conditioned on
+it.
 \end{itemize}
 The same check applies to any detector whose input mixes who a user is with what they did.
 
@@ -1528,8 +1532,8 @@ autoencoder} instead describes each observation with a few directions drawn from
 dictionary; because only a few are active at once, each direction, or \emph{feature}, tends to
 mean one recognizable thing. We apply it to the change that benign fine-tuning made to the
 model's internal representations, and test two things about the features that best separate
-malicious from benign days: whether they read behavior or profile, and whether they causally
-drive the anomaly score.
+malicious from benign days: where they activate, and whether editing them changes the anomaly
+score.
 
 \section{Hidden States and the Adaptation Difference}
 The model processes text through a stack of 36 layers. After each layer, each token $t$ is
@@ -1645,10 +1649,12 @@ g_f \;=\; \bar{z}_f^{(+)} - \bar{z}_f^{(-)},
 \end{equation}
 where $\bar{z}_f^{(+)}$ and $\bar{z}_f^{(-)}$ are the average activations of feature $f$ over
 the tokens of malicious days and of benign days. The \emph{selected set} $\mathcal{F}$ is the
-five features with the largest gaps. The \emph{control set} $\mathcal{C}$ is five other features
-that fire comparably often (each is active on at least 0.2\% of tokens) but have small gaps. The
-control answers the question: does editing \emph{any} active features change the score, or only
-the selected ones?
+five features with the largest gaps. The \emph{control set} $\mathcal{C}$ is the five features with
+the gaps closest to zero among those active on at least 0.2\% of tokens. The threshold keeps
+rarely firing features out of the control set, but it does not match the two sets' activity: in
+the held-out test below, the control features were active on 0.36\% of tokens on average and the
+selected features on 0.18\%. The control answers the question: does editing \emph{any} active
+features change the score, or only the selected ones?
 
 \section{Where Features Fire: Token-Class Attribution}
 For a feature $f$ and a token class $c$, the share of the feature's total activation that
@@ -1672,8 +1678,11 @@ reached when all of a feature's activation lands on that class.
 
 \section{Causal Test: Editing Features and Re-Scoring}
 Attribution shows where a feature fires, not whether it matters. The causal test edits the
-features and measures the change in the anomaly score. Take a malicious \emph{receiver} day and
-a benign \emph{donor} day from a colleague in the same department.
+features and measures the change in the anomaly score. Take a malicious \emph{receiver} day.
+A \emph{donor} day comes from another user in the same department, and it is one of two kinds:
+a benign day of a colleague, or a malicious day of another malicious user. Comparing the two
+kinds of donor asks whether the benign colleague's values in particular make the receiver look
+normal, rather than any edit of the same features.
 
 \subsection{Step 1: Encode the receiver}
 Compute $\mathbf{z}_t$ for each receiver token with \eqref{eq:sae-encode}.
@@ -1685,8 +1694,10 @@ z'_{f,t} \;=\; (1-\gamma)\,z_{f,t} + \gamma\,\bar{z}^{\,\mathrm{donor}}_f,
 \qquad f \in \mathcal{F},
 \]
 with patch strength $\gamma \in \{0.25,\;0.5,\;0.75,\;1\}$; all other features are unchanged.
-For example, if $z_{f,t} = 2.0$ and $\bar{z}^{\,\mathrm{donor}}_f = 0.4$, then $\gamma = 1$ gives
-$z'_{f,t} = 0.4$, and $\gamma = 0.5$ gives $z'_{f,t} = 0.5(2.0) + 0.5(0.4) = 1.2$.
+Here $\bar{z}^{\,\mathrm{donor}}_f$ is the average activation of feature $f$ over the donor
+day's tokens on which at least one selected feature is active. For example, if $z_{f,t} = 2.0$
+and $\bar{z}^{\,\mathrm{donor}}_f = 0.4$, then $\gamma = 1$ gives $z'_{f,t} = 0.4$, and
+$\gamma = 0.5$ gives $z'_{f,t} = 0.5(2.0) + 0.5(0.4) = 1.2$.
 
 \subsection{Step 3: Decode and replace the hidden state}
 Decode the edited code, $\widehat{\boldsymbol{\delta}}'_t = W_{\mathrm{dec}}\mathbf{z}'_t +
@@ -1702,34 +1713,66 @@ from \eqref{eq:delta},
 \widehat{\boldsymbol{\delta}}'_t - \boldsymbol{\delta}_t
 \;=\; \mathbf{h}^{\mathrm{base}}_t + \widehat{\boldsymbol{\delta}}'_t .
 \]
-The edited model therefore sees the base representation plus the dictionary's version of the
-fine-tuning change, with the selected features moved toward the benign colleague.
+If any token of the day has an active selected feature, this replacement is made at
+\emph{every} token of the day: tokens without an active selected feature receive their unedited
+reconstruction $W_{\mathrm{dec}}\mathbf{z}_t + \mathbf{b}$, and only the active tokens carry the
+edit. A day with no active selected feature is left unchanged. The reconstruction is not exact,
+so it can move the score even without an edit; Step 6 is built so that this movement cancels.
 
 \subsection{Step 4: Re-score}
-Run the remaining layers from $\mathbf{h}'$ and recompute the day's score $\bar{\ell}'_{\mathcal{F}}$.
-The drop in the score is $\Delta_{\mathcal{F}} = \bar{\ell} - \bar{\ell}'_{\mathcal{F}}$; a
-positive drop means the edit made the day look less anomalous.
+Run the remaining layers from $\mathbf{h}'$ and recompute the day's score $\bar{\ell}'$. The
+change in the score is $\delta = \bar{\ell}' - \bar{\ell}$; a negative change means the edit
+made the day look less anomalous.
 
-\subsection{Step 5: Repeat with the control set and compare}
-Repeat Steps 2--4 with $\mathcal{C}$ in place of $\mathcal{F}$ to get $\Delta_{\mathcal{C}}$.
-The effect of the selected features is the average, over receiver days, of
+\subsection{Step 5: Keep the best candidate}
+For each receiver day, up to 16 candidate donor days of each kind are tried, each at all four
+patch strengths. For each kind of donor, the most negative change is kept, giving
+$\delta_{\mathcal{F},\mathrm{ben}}$ and $\delta_{\mathcal{F},\mathrm{mal}}$. Repeating Steps 2--5
+with the control set gives $\delta_{\mathcal{C},\mathrm{ben}}$ and $\delta_{\mathcal{C},\mathrm{mal}}$.
+
+\subsection{Step 6: Compare donors, then compare feature sets}
+For each feature set, the \emph{donor advantage} is how much more the score falls with a benign
+donor than with a malicious one:
+\[
+a_{\mathcal{F}} \;=\; \delta_{\mathcal{F},\mathrm{mal}} - \delta_{\mathcal{F},\mathrm{ben}},
+\qquad
+a_{\mathcal{C}} \;=\; \delta_{\mathcal{C},\mathrm{mal}} - \delta_{\mathcal{C},\mathrm{ben}} .
+\]
+The effect of the selected features is the average, over receiver days that have all four
+values, of
 \begin{equation}
-\tau \;=\; \Delta_{\mathcal{F}} - \Delta_{\mathcal{C}}
-\;=\; \bigl(\bar{\ell} - \bar{\ell}'_{\mathcal{F}}\bigr) - \bigl(\bar{\ell} - \bar{\ell}'_{\mathcal{C}}\bigr)
-\;=\; \bar{\ell}'_{\mathcal{C}} - \bar{\ell}'_{\mathcal{F}} .
+\tau \;=\; a_{\mathcal{F}} - a_{\mathcal{C}}
+\;=\; \bigl(\delta_{\mathcal{F},\mathrm{mal}} - \delta_{\mathcal{F},\mathrm{ben}}\bigr)
+- \bigl(\delta_{\mathcal{C},\mathrm{mal}} - \delta_{\mathcal{C},\mathrm{ben}}\bigr).
 \label{eq:tau}
 \end{equation}
-The unedited score $\bar{\ell}$ cancels, so $\tau$ compares the two edited models directly.
-Both edits also pass through the same dictionary reconstruction, so $\tau$ reflects
-\emph{which} features were edited rather than the fact that a dictionary was used. For example,
-if $\bar{\ell} = 1.500$, $\bar{\ell}'_{\mathcal{F}} = 1.460$ and $\bar{\ell}'_{\mathcal{C}} =
-1.492$, then $\Delta_{\mathcal{F}} = 0.040$, $\Delta_{\mathcal{C}} = 0.008$, and
-$\tau = 0.032 = 1.492 - 1.460$.
+Two things cancel. The unedited score $\bar{\ell}$ appears in all four changes. And within one
+feature set, the benign-donor and malicious-donor edits reconstruct the same tokens of the same
+day, so the reconstruction's own effect is the same in both and cancels in $a_{\mathcal{F}}$ and
+in $a_{\mathcal{C}}$. What remains compares the edits alone.
+
+For example, if $\delta_{\mathcal{F},\mathrm{ben}} = -0.040$, $\delta_{\mathcal{F},\mathrm{mal}} =
+-0.028$, $\delta_{\mathcal{C},\mathrm{ben}} = -0.012$ and $\delta_{\mathcal{C},\mathrm{mal}} =
+-0.010$, then
+\begin{gather*}
+a_{\mathcal{F}} = -0.028 - (-0.040) = 0.012, \qquad
+a_{\mathcal{C}} = -0.010 - (-0.012) = 0.002, \\
+\tau = 0.012 - 0.002 = 0.010 .
+\end{gather*}
+A positive $\tau$ means that moving the selected features toward a benign colleague, rather than
+toward another malicious user, lowers the score by more than the same comparison does for the
+control features.
+
+A simpler comparison uses benign donors only: $\delta_{\mathcal{C},\mathrm{ben}} -
+\delta_{\mathcal{F},\mathrm{ben}}$, which is $0.028$ in the example. It is a different quantity. It
+mixes the effect of moving toward benign values with any effect of editing the selected
+features at all, whatever the donor, which $\tau$ removes. The interval reported below belongs to
+$\tau$ and cannot be attached to this simpler comparison.
 
 \section{Core Mechanistic Finding}
 \label{sec:mech-finding}
 
-\subsection{The selected features read behavior}
+\subsection{Where the selected features activate}
 Table~\ref{tab:attribution} gives the attribution \eqref{eq:attribution} of the five features
 selected on all 60 malicious users of CERT release 4.2.
 
@@ -1754,32 +1797,41 @@ feature & $\rho_f(\texttt{SES})$ & $\rho_f(\texttt{DAY})$ & $\rho_f(\texttt{PSY}
 
 Four of the five features put at least 99.9\% of their activation on session tokens. Their
 enrichment of 1.334 to 1.335 is the maximum possible, since $1/0.7492 = 1.335$: essentially all
-of their activation lands on the session lines. One of them (3673) responds specifically to the session
-\emph{duration} fields. The fifth feature (2302) fires on the organization line instead.
+of their activation lands on the session lines. The strongest activations of one of them
+(3673) all fall on the \texttt{\_dur} token that names the session-duration fields. The fifth
+feature (2302) fires on the organization line instead.
+
+This table answers one question only: \emph{where} each feature activates. It does not say what
+information a feature represents; a feature that activates on session tokens could still carry
+information about who the user is, such as the session lengths typical of a department. Nor does
+it say which predictions change when the feature is edited. Those are separate questions.
 
 \subsection{Editing them changes the score, on held-out users}
 For the causal test, the 60 malicious users were split in half. Features were re-selected using
 only the 30 \emph{discovery} users; the re-selected set shares four of the five features above.
-The test was then run on the other 30 malicious users, whom feature selection never saw.
-Editing the selected features toward a benign colleague in the same department lowered the
-anomaly score more than editing the control features:
+The test was then run on the other 30 malicious users, whom feature selection never saw. With
+donors from the same department, \eqref{eq:tau} gave
 \[
 \tau \;=\; 0.00076 \text{ nats}, \qquad 95\%\text{ interval } [0.00035,\;0.00121],
 \]
-over 605 held-out malicious days, and the effect was positive for 21 of 29 held-out users.
+over the 605 held-out malicious days with all four values, and $\tau$ was positive for 21 of 29
+held-out users. The interval resamples users. In the same data the donor advantage was
+$a_{\mathcal{F}} = 0.00063$ for the selected features and $a_{\mathcal{C}} = -0.00012$ for the
+controls. The benign-only comparison of Step 6 is $0.0028$ here; it has no interval of its own.
 The estimate is positive in all four organizational groupings tested (department, department
 and role, team, role: 0.00034 to 0.00076 nats); the department grouping is the one whose
 interval excludes zero.
 
 \subsection{Reading}
-The features that most distinguish malicious days inside the model are predominantly
-behavioral, and moving them toward a benign colleague's values makes a malicious day look less
-anomalous, on users held out from feature selection. Together with \chref{ch:lm}, this
-is consistent with the following picture: the adapted model does represent unusual
-\emph{behavior}, and the profile shortcut enters mainly through how the model's output is
-turned into a score, by averaging surprisal over every token, including the cheap profile
-tokens. Removing the profile tokens from the score exposes the behavioral signal the model
-already has.
+Two things are established. The features that most distinguish malicious days activate almost
+only on session tokens. And on users held out from feature selection, the choice between a benign
+and a malicious donor matters more when the selected features are edited than when the control
+features are, by a small margin. Three things are not established: what information the features
+represent; which token predictions their edit changes, since the edit is measured here on the
+full score only and an experiment that splits the same edits by token class is in progress; and
+whether the profile shortcut of \chref{ch:lm} arises mainly from averaging surprisal over every
+token, since the score decomposition shows that the shortcut is removable at scoring time but not
+where it arises inside the model.
 
 The effect is small in absolute terms ($0.00076$ nats against day scores near 1), and it is
 about half the size of the estimate obtained before the held-out split. The claim is about the
@@ -1790,9 +1842,14 @@ direction of the effect and where the features fire, not about its size.
 \item The dictionary's layer, size and sparsity (layer 26, $m = 8{,}192$, $k = 4$) were chosen
 among twelve candidate settings using runs that included all 60 malicious users. The
 features were re-selected on held-out users, but this setting was not.
-\item All results come from a single fine-tuned model. In a companion dataset, a result of this
-kind reversed direction when the whole pipeline was retrained with a different random seed, so
-these findings should be replicated before being generalized.
+\item All results come from a single fine-tuned model, and their stability across training
+seeds is untested. A companion-dataset result once cited here as a seed reversal selected its
+features from an undefined ranking and has been withdrawn.
+\item Step 5 keeps the best of many candidates. That favours whichever set's candidate scores vary
+more, and there can be fewer malicious than benign donors, so $\tau$ can be positive without a
+donor-specific effect. The planned analysis averages over all candidates instead.
+\item The controls pass an activity threshold but are not activity-matched to the selected
+features.
 \item One benchmark release was used, CERT release 4.2. It is synthetic, and it was evaluated
 many times during development.
 \item The user-level AUC ranks users; it does not show that the model identifies the specific

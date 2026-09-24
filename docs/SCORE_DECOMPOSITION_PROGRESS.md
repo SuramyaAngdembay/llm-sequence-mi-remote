@@ -649,7 +649,11 @@ same pool to every printed digit (DAY 0.11416, PSY 0.07871, SESCOUNT 0.03080,
 SES 0.77633), so both adapters were scored on identical token classes. The
 tokenizer digests differ (`cd33debe…` vs `22576a18…`); the digest hashes file
 names and sizes of the adapter's tokenizer files, and identical class counts
-over 159,064 examples show the token sequences match. Both evaluations drop the
+over 159,064 examples show the token sequences match. *(Correction
+2026-09-24: withdrawn. Identical class counts are consistent with identical
+token sequences but do not show them. The external review compared both saved
+tokenizers on 256 real records: 0 token-ID mismatches, with differing
+serialized backend digests. That supports agreement on those records only.)* Both evaluations drop the
 same 16,992 duplicate rows and have identical folds (rows, positives, users and
 fold ids checked per fold). Outputs copied to
 `results/score_decomposition/3b_targetmask/`.
@@ -732,3 +736,46 @@ collaborator scratch is byte-identical to the tested file (md5 6fe1d865…). A
 failure would stop the full run at its first batch, so the overlap risks minutes
 of GPU time, not a void result entering the record. A dependency was not added
 because it would stop the full run's age accrual.
+
+
+## 2026-09-24 — review findings verified; repairs; corrected runs queued
+
+Full record: `docs/REVIEW_2026-09-24_ISSUE_LEDGER.md`; plan:
+`docs/EXPERIMENT_PLAN_2026-09-24.md`.
+
+**V41 (verified) — the TWOS token-class runs used an undefined ranking.** Both
+runs read the benign-only frontiers `twos_work/v3_sae_s42|s43`, whose rankings
+were computed on benign rows only (0 finite gaps of 8,192), and patched
+`[0, 1, 2, 3, 4]` against the most active features. The original
+`v3_causal_s42` read the valid re-ranked frontier. The per-class results and
+the seed-reversal reading are withdrawn (READMEs and audits annotated).
+
+**V42 (verified) — LANL sampling and folds shared a hash.** The seen pool has
+988 negative-only users, all in fold 0; the unseen pool has 23 users, all
+attack users. The seen/unseen interpretation is withdrawn, the AUCs are kept as
+descriptions of those pools, and the paper's LANL claims are corrected.
+Descriptive: seen AUC with unseen-like composition 0.916; mean within-user AUC
+0.883 seen, 0.738 unseen.
+
+**V43 — repairs.** Ranking gates, benign-only frontiers without a ranking
+file, re-selection manifests, selection manifests and disjointness checks,
+independent salted LANL hashes with population checks. Tests: 39 ranking checks
+and 12 LANL checks pass; all 8 test files pass on CPU.
+
+**V44 — corrected TWOS run submitted.** The ranking was redone on 8 discovery
+users only, with confirmation users' rows excluded: top5
+`[6036, 7375, 1197, 7420, 3218]`, every gate passed. Tokenization matched on
+all 2,275 records across environments. Bounded held-out run with an α = 0
+reconstruction arm: job **20890658** (gpu-debug, cis260991-gpu). Plan committed
+before submission (`d6516b3`).
+
+**V45 — CERT package-4 analysis fixed before results.** Dated addendum to the
+pre-registration; `analyze_intervention_endpoints.py` and
+`compare_intervention_runs.py` (both self-tested). The environment gate
+compares collaborator smoke 20879548 with owner smoke 20840686.
+
+| date | what | status |
+|---|---|---|
+| 2026-09-24 | TWOS held-out bounded run (20890658) | queued, ≤ 0.5 SU |
+| 2026-09-24 | CERT package-4 smoke 20879548 / full 20879549 | queued; smoke must pass the environment gate before the full run is read |
+| 2026-09-24 | CERT α = 0 reconstruction run; LANL repair option A | planned (tier 2), not submitted |

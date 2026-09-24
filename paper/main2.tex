@@ -126,8 +126,9 @@ some intervention effects do not (Section~\ref{sec:robustness}).
 \item Two real-data tests and a cross-detector comparison: real users with
 real personality questionnaires (TWOS) give a behavioral counterpart with
 within-user AUC $0.78$; a raw enterprise authentication log with no profile
-(LANL) shows the same seen-versus-unseen gap, sensitive to the
-user-associated host field; classical one-class detectors given the same
+(LANL) shows a seen-versus-unseen gap that cannot yet be attributed,
+because its evaluation pools differ in user composition as well as training
+exposure; classical one-class detectors given the same
 r6.2 profile columns show little profile reliance
 (Sections~\ref{sec:realdata}--\ref{sec:classical}).
 \item A train-matched serialization experiment: removing profile content from
@@ -708,6 +709,19 @@ as shortcut-free or demonstrating generalization to a new enterprise.
 
 \subsection{Real logs with no profile at all (LANL)}
 \label{sec:lanl}
+
+\paragraph{Correction (2026-09-24).} The user sampling and the fold
+assignment described below shared one hash: an ordinary user was kept iff
+$\mathrm{md5}(u) \bmod 10 = 0$ and assigned fold $\mathrm{md5}(u) \bmod 5$,
+so every sampled ordinary user fell in a seen fold. The unseen pool therefore
+holds only the $23$ red-team users of fold $4$, and all of its negative
+windows come from those same users, while the seen pool holds $988$ users with
+no attack window. The seen-versus-unseen comparison thus changes training
+exposure and user composition at once. The numbers in this subsection describe
+those two populations as built; they do not establish unseen-user transfer
+failure or identity memorization. A corrected split with independent hashes is
+specified in the repository and its results are pending.
+
 
 TWOS contains genuine profile measurements. A separate test asks whether
 a related failure appears in enterprise telemetry without a profile

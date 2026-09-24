@@ -1,5 +1,30 @@
 # Which tokens does an SAE intervention actually repair?
 
+> ## ⛔ INVALID FEATURE SELECTION — correction of 2026-09-24. Read before anything below.
+>
+> This run patched `top5 = [0, 1, 2, 3, 4]` against `control5_active =
+> [505, 5342, 561, 4137, 3967]`. Its script (`lm/run_twos_pkg4.sh` on
+> Aquaman) pointed `--frontier-dir` at the **benign-only** frontier
+> `twos_work/v3_sae_s42`, which ranked features on benign rows only: all 8,192
+> gaps are NaN, so sorting returned ids in order, and the "low-gap" controls
+> were simply the five most active features (active on 2.0% to 2.2% of rows,
+> against 0.0% to 1.0% for the "selected" set; feature 0 never fires in the
+> benign rows it was ranked on). The
+> published TWOS intervention (`twos_work/v3_causal_s42`) read the re-ranked
+> frontier instead (`top5 = [6036, 7375, 3218, 417, 22]`). So the claim below
+> that "every parameter except `--token-class-schema`" matched it is false: the
+> frontier, the batch sizes and `--exclude-same-user-donors` all differ.
+>
+> Consequences: the per-class numbers are arithmetic on an arbitrary pair of
+> feature sets. They say nothing about attack-associated features, and the
+> seed-42/seed-43 difference is a measured difference between two runs with
+> invalid selection, not evidence that correctly selected features are
+> unstable across seeds. The `delta`, `repair` and summary columns also use
+> the cached base (8,162 repair signs disagree with `delta_recomputed`).
+> Root cause, fix and the corrected held-out rerun:
+> `docs/REVIEW_2026-09-24_ISSUE_LEDGER.md`, `docs/TWOS_CORRECTED_INTERVENTION_PLAN.md`.
+
+
 > ## ⚠ THE DIRECTIONAL CONCLUSION BELOW DOES NOT REPLICATE. READ THIS FIRST.
 >
 > An independent replication on **seed 43** — a different adapter, a different

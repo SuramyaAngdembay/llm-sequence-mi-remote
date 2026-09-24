@@ -70,9 +70,9 @@ content from both adaptation and scoring restores it to about $0.90$ (a
 descriptive user-level bootstrap interval excluding zero); the same removal
 has a much smaller, non-significant effect in the audited Qwen2.5-3B run, a
 model-dependent difference the design does not attribute to capacity alone.
-On raw enterprise authentication logs with no injected profile (LANL), the
-unseen-user collapse recurs and host identity, a user-associated field,
-carries the shortcut. The score-level
+On raw enterprise authentication logs with no injected profile (LANL), a
+seen-versus-unseen gap appears but cannot yet be attributed: its evaluation
+pools differ in user composition as well as training exposure. The score-level
 consequence is stark: compared only against benign users unseen during
 adaptation, day-level ROC-AUC falls from $0.95$ to $0.55$ (\rsix{}) and
 from $0.96$ to $0.67$ (\rfour{})---apparent strength is largely a
@@ -184,8 +184,9 @@ bootstrap interval excluding zero); the same removal is small and
 non-significant in the audited $3$B run, a model-dependent difference not
 isolated as capacity, and the psychometric line is the carrier. On raw
 enterprise authentication logs with no injected profile
-(Section~\ref{sec:lanl}) the unseen-user collapse recurs and host identity, a
-user-associated field, carries the shortcut. The resulting two-factor
+(Section~\ref{sec:lanl}) a seen-versus-unseen gap appears, but its pools
+differ in user composition as well as training exposure, so it does not yet
+test the account. The resulting two-factor
 account: population structure governs when an identity shortcut is
 available; objective and representation govern which detectors take it; and
 profile content in the serialization is causally responsible for the
@@ -1049,6 +1050,19 @@ per-user failure cases) are developed in companion work.
 \subsection{Real auth-log replication with no injected profile (LANL)}
 \label{sec:lanl}
 
+\paragraph{Correction (2026-09-24).} The user sampling and the fold
+assignment described below shared one hash: an ordinary user was kept iff
+$\mathrm{md5}(u) \bmod 10 = 0$ and assigned fold $\mathrm{md5}(u) \bmod 5$,
+so every sampled ordinary user fell in a seen fold. The unseen pool therefore
+holds only the $23$ red-team users of fold $4$, and all of its negative
+windows come from those same users, while the seen pool holds $988$ users with
+no attack window. The seen-versus-unseen comparison thus changes training
+exposure and user composition at once. The numbers in this subsection describe
+those two populations as built; they do not establish unseen-user transfer
+failure or identity memorization. A corrected split with independent hashes is
+specified in the repository and its results are pending.
+
+
 CERT's profile block is injected by the benchmark, so a natural objection is
 that the shortcut is an artifact of injection. The two-factor account makes a
 sharper prediction: wherever the serialization carries a per-user-constant,
@@ -1326,9 +1340,10 @@ malicious minority makes identity cheap (\rsix{}), and cleanly behavioral
 selection where half the population is malicious and identity separates
 nothing (TWOS, on real users with real psychometrics;
 Section~\ref{sec:twos}). A third setting, raw enterprise authentication logs
-with no injected profile (LANL; Section~\ref{sec:lanl}), shows the shortcut is
-not tied to profile injection: the unseen-user collapse recurs and the identity
-signal relocates to the user-associated host field. The cross-architecture
+with no injected profile (LANL; Section~\ref{sec:lanl}), was meant to test
+whether the shortcut is tied to profile injection, but its seen and unseen pools
+differ in user composition as well as training exposure, so it does not yet
+answer that question. The cross-architecture
 probe adds the second
 factor: classical one-class detectors on the same \rsix{} features do not
 take the shortcut, so ``cheap'' is relative to the learner. The account in

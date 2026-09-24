@@ -55,6 +55,21 @@ Mean-of-user-means CIs additionally exclude zero for dept
 
 ## Read
 
+> **Correction (2026-09-24).** Three statements below overreach and are
+> withdrawn: "on users never seen by feature selection or configuration
+> search" (the configuration was chosen with all 60 malicious users; see the
+> correction at the top), "these are the honest effect sizes" (they remain
+> conditional on that configuration choice), and "upgrades from candidate to
+> confirmed" (held out for feature selection only). The estimate is also not
+> "top features lower the score more than controls": it is the best-candidate
+> donor difference-in-differences
+> `(δ_top,anom − δ_top,benign) − (δ_ctrl,anom − δ_ctrl,benign)` over receivers
+> with complete support, where each δ is the most negative delta over 16
+> candidate donors and four alphas. Its benign-donor-only analogue in the dept
+> summary, `δ_ctrl,benign − δ_top,benign`, is 0.002758 and has no interval of
+> its own. The controls pass a 0.2% activity threshold; they fire about twice as
+> often as the selected features, so they are not activity-matched.
+
 - **Direction confirms**: all four causal contexts are positive on users never
   seen by feature selection or configuration search.
 - **Magnitude is roughly half** the exploratory full-population estimates

@@ -37,4 +37,17 @@ it was written:
 | feature and control selection rules | `scripts/sae_core.py` (`row_gap`, `_choose_active_low_gap_ids`) |
 | worked-example arithmetic, LoRA parameter counts | computed exactly, not by hand |
 | counts 80 / 15 / 5 after `n_logon=` in Section 4.5 | illustrative, not data; labelled as such in the text |
+| τ = 0.00076 [0.00035, 0.00121], 605 complete days, 21 of 29 users (dept) | `results/qwen3_8b_r42_token_causal/confirmation/RESULTS.md` (cluster interval) |
+| donor advantages 0.00063 and −0.00012; benign-only contrast 0.0028 | `.../confirmation/token_delta_sae_causal_summary.csv`, dept row, recomputed 2026-09-24 |
+| control activity 0.36% versus selected 0.18% | the staged discovery-split ranking, `pkg4_share/frontier/layer_26/m02_k04/delta_sae_top_features.csv` on Anvil |
+| feature 3673's strongest activations on `_dur` | `results/feature_attribution/feature_attribution_r42/FEATURE_TOKEN_ATTRIBUTION.md` |
 | example user-day and its token counts (213 tokens; 54 profile, 158 behavior scored) | r4.2 `eval.jsonl` record `AAF0535:7`, tokenized with the adapter's tokenizer and labelled by `scripts/token_class_decomposition.py` |
+
+**Corrections of 2026-09-24** (see `docs/REVIEW_2026-09-24_ISSUE_LEDGER.md`,
+entries H1 and H2): the causal-test section now defines the published
+difference-in-differences endpoint, with its best-candidate step, and the
+interval is attached only to it. Where features activate, what they represent
+and which predictions their edit changes are kept apart. The controls are
+described as threshold-selected, not activity-matched. The withdrawn TWOS seed
+reversal is no longer cited, and the abstract no longer anticipates the pending
+per-class result.

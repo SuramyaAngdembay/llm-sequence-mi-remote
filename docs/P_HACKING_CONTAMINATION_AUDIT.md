@@ -14,6 +14,14 @@ file is not a clearance. It is a ledger.
 > See `results/twos_token_class_causal/README.md`. This is the strongest
 > evidence in the project that these exposures are not theoretical.
 
+> **Correction (2026-09-24).** The paragraph above is withdrawn. Both TWOS
+> token-class runs selected `top5 = [0, 1, 2, 3, 4]` from an undefined ranking
+> (a benign-only frontier with all gaps NaN), so the "replication" compared two
+> runs with arbitrary feature selection. It neither confirms this audit's
+> prediction nor shows that correctly selected features are seed-unstable. "Every
+> sign reverses" was also literally false (the behaviour contrast is negative at
+> both seeds). See `docs/REVIEW_2026-09-24_ISSUE_LEDGER.md`.
+
 ## Standard applied
 
 From the primary literature rather than from intuition:
@@ -39,12 +47,12 @@ only if it passes all four and nothing about it is unverifiable.**
 | result family | arithmetic | selection on outcome | multiplicity | test-set reuse | verdict |
 |---|---|---|---|---|---|
 | History-prefix probe (pkg 3) | **verified** | none in-run | 72 uncorrected intervals | inherits project-wide reuse | **QUALIFIED** |
-| TWOS token-class causal (pkg 4) | **verified** | none in-run (config matched) | 24 uncorrected intervals | TWOS reused separately | **CLAIM WITHDRAWN — failed replication** |
+| TWOS token-class causal (pkg 4) | **verified** arithmetic | ~~none in-run (config matched)~~ config did **not** match: benign-only frontier, all-NaN ranking | 24 uncorrected intervals | TWOS reused separately | ~~CLAIM WITHDRAWN — failed replication~~ **INVALID: arbitrary feature selection (2026-09-24)** |
 | Time-series probe (pkg 2) | **verified** | none found | 12 uncorrected, 4 clusters | new data build | **QUALIFIED** |
 | r4.2 SAE causal headline | not yet recomputed | **YES — documented** | 12 configs compared | 40+ evaluations | **CONTAMINATED (selection)** |
 | r6.2 SAE causal headline | not yet recomputed | likely same rule | 12 configs | 40+ evaluations | **UNVERIFIED** |
 | r4.2 scoring-mitigation (pkg 1) | **raw scores recomputed at batch 1; headline reproduces** (0.6525 → 0.8633) | n/a | 60 folds | inherits project-wide reuse | **QUALIFIED** |
-| LANL replication | **recomputed at batch 1; reproduces cache to 3.4e-04** | none in-run | 4 views × 2 pools | one seed, 23 unseen users | **QUALIFIED** |
+| LANL replication | **recomputed at batch 1; reproduces cache to 3.4e-04** | none in-run | 4 views × 2 pools | one seed, 23 unseen users; **sampling/fold coupling (2026-09-24)** | ~~QUALIFIED~~ **seen/unseen interpretation WITHDRAWN; AUCs describe the original pools only** |
 
 **No family is marked CLEAN.** See "Why nothing is clean" below.
 
@@ -144,6 +152,15 @@ strength no longer counts as evidence of a real causal handle here.** It was the
 strongest argument offered for seed 42. Seed 43 produces an equally clean
 dose-response the other way.
 
+**Correction (2026-09-24).** This section is superseded. Neither run selected
+features by attack association: both patched ids `[0, 1, 2, 3, 4]` from an
+all-NaN ranking, against the most active features as "controls", and the
+"identical configuration" also differed in frontier, batch sizes and same-user
+donor exclusion. The table is a measured difference under invalid selection.
+The general point that a monotone dose-response does not rule out confounding
+still holds, but these runs are not evidence for it. A held-out rerun with a
+valid ranking is specified in `docs/TWOS_CORRECTED_INTERVENTION_PLAN.md`.
+
 ## Selection surface, enumerated
 
 A full inventory of the project's reported tables gives the size of the garden.
@@ -195,6 +212,10 @@ measurements are unstable.
   each use one adapter seed per condition. Given that a seed change reversed the
   TWOS result, these are now priority candidates for replication, not
   afterthoughts.
+  *(Correction 2026-09-24: the "reversed TWOS result" came from two runs with
+  arbitrary feature selection, so it is not evidence of seed instability. The
+  LANL replication also has a sampling/fold coupling that confounds its
+  seen/unseen comparison; see the issue ledger.)*
 
 ## Checked and found NOT contaminated
 

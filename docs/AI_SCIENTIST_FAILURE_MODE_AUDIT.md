@@ -44,6 +44,10 @@ Mitigation still owed: the CERT run itself.
 Within TWOS, seed 42 was used because `twos_work/v3_causal_s42` already existed
 to match parameters against. A seed-43 replication was launched for exactly this
 reason and is running.
+*(Correction 2026-09-24: the seed-42 token-class run did not match
+`v3_causal_s42` — it read the benign-only frontier, whose all-NaN ranking made
+it patch features `[0, 1, 2, 3, 4]` — and the seed-43 run repeated the defect.
+See `docs/REVIEW_2026-09-24_ISSUE_LEDGER.md`.)*
 
 **Clean, and checkable.** CERT r4.2 and r6.2 are the project's premise, fixed
 long before any of this work. The order of running was r6.2 **first**, r4.2 as

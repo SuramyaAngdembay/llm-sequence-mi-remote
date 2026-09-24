@@ -1,5 +1,23 @@
 # TWOS token-class causal — seed 43 (the replication that failed)
 
+> ## ⛔ INVALID FEATURE SELECTION — correction of 2026-09-24. Read before anything below.
+>
+> Like the seed-42 run, this run patched `top5 = [0, 1, 2, 3, 4]`, read from
+> the benign-only frontier `twos_work/v3_sae_s43`, whose gaps are all NaN.
+> The "control" set was the most active features. No `v3_causal_s43` run
+> exists for it to have matched. Three statements below are also wrong on
+> their own terms:
+> * "Every sign reverses" is false: the behaviour contrast is negative at
+>   both seeds (−0.00011 and −0.00243).
+> * "The selected features improve behaviour-token prediction" is false: at
+>   seed 43 both arms raise behaviour loss (selected +0.00176, control
+>   +0.00419); the selected patch worsens it less.
+> * "The sign of this measurement is not stable across the pipeline seed" is
+>   not established: both runs used invalid selection, so seed sensitivity
+>   cannot be separated from the selection defect.
+> See `docs/REVIEW_2026-09-24_ISSUE_LEDGER.md`.
+
+
 Run 2026-09-19 on Aquaman, zero cluster SU. This is the independent replication
 of `results/twos_token_class_causal/` (seed 42), launched specifically to test
 the "one seed" limitation that run declared.
