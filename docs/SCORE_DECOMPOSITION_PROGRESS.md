@@ -716,5 +716,19 @@ and 2026-10-20 on A100, against 2026-09-26 23:05 for the already-queued 20879549
 Priority here is almost entirely age (PriorityWeightAge 20000, fair-share weight
 0, no ACCRUE_ALWAYS), so the queued jobs were kept rather than moved, and no
 smoke→full dependency was added, since an unsatisfied dependency stops age from
-accruing. A new 30-minute `gpu-debug` job tested at 2026-09-24 02:44, so the
-queued smoke 20879548 may start well before its listed estimate.
+accruing. A new 30-minute `gpu-debug` job tested at 2026-09-24 02:44. **Correction
+(2026-09-24 01:31):** that estimate does not account for the jobs already
+waiting. The smoke is 9th by priority in `gpu-debug`, where nothing was running
+at either check, so no early start should be expected.
+
+**Queue state 2026-09-24 01:31 EDT.** Smoke 20879548 estimated 2026-09-26 17:20,
+full 20879549 17:25; the full run is 41st of 376 pending in `gpu`. The two may
+therefore overlap rather than run smoke-first (pre-registration rule 6). Accepted,
+because both pre-registered checks are unconditional in the full run too: the
+per-class reconstruction check (`eval_token_delta_sae_causal.py` line 833, raises
+above 1e-4) and the base/patched count equality (line 1250) run on every batch
+whenever `TOKEN_CLASS_SCHEMA` is set, which it is in both modes. The copy on the
+collaborator scratch is byte-identical to the tested file (md5 6fe1d865…). A
+failure would stop the full run at its first batch, so the overlap risks minutes
+of GPU time, not a void result entering the record. A dependency was not added
+because it would stop the full run's age accrual.
