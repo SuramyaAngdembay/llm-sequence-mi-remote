@@ -181,3 +181,15 @@ must not be described as independently confirmatory.
     difference-in-differences cancels a per-receiver constant base, but the
     absolute deltas and repair flags of those outputs are not comparable with
     fresh-base runs.
+
+**Gate result (item 9), recorded 2026-09-24 before the full run started:** environment gate PASSED on 2026-09-24. The collaborator smoke
+(job 20879548; transformers 5.16.1, PEFT 0.20.0) and the owner smoke (job
+20840686; transformers 4.51.3, PEFT 0.13.2) match on all 1,186 rows (same
+receivers, donors, arms and alpha; both torch 2.5.1 on A100-SXM4-40GB). The
+largest per-row difference in any view's delta is 9.5e-07 nats (tolerance
+1e-3), and every selected-minus-control contrast agrees within 6e-09
+(tolerance 1e-4). Report: `results/cert_package4_env_gate/GATE_REPORT.txt`.
+This verifies that the environment change does not move these smoke rows
+(team, alpha 1, 24 receivers). It is not a check of the other context modes
+or alphas, which only the full run contains. The smoke's own contrasts are a
+validation subset and are not read as results.

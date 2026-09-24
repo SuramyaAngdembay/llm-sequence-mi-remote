@@ -1,0 +1,25 @@
+# CERT package-4 environment gate, run 2026-09-24
+
+owner smoke : job 20840686, node g015 (NVIDIA A100-SXM4-40GB per the job GPU poll log, gpu-debug), env cert-qlora-qwen3: transformers 4.51.3, PEFT 0.13.2, torch 2.5.1+cu121
+collab smoke: job 20879548, node g013 (NVIDIA A100-SXM4-40GB per the job GPU poll log, gpu-debug), env cert-qlora:        transformers 5.16.1, PEFT 0.20.0, torch 2.5.1+cu121
+owner rows sha256 : 8e4c7801f6b07ddbad81ad0e8454d2e0f76fef0c1e3516947028b8c296b53b89
+collab rows sha256: 9903916cbef538e7dd2de8811f80cd00bcf5682376c1fdc22e3b44ac98664208
+tolerances declared in docs/PREREGISTRATION_CERT_PACKAGE4.md addendum item 9: per-row delta 1e-3, contrast 1e-4
+
+$ python3 scripts/compare_intervention_runs.py owner collab --views full,behavior_only,profile_only,behavior_ses_only,psy_only,day_only
+matched rows 1186  only in A 0  only in B 0
+  base_full              max |diff| 1.192e-07  mean |diff| 8.167e-09
+  patched_full           max |diff| 1.788e-07  mean |diff| 1.214e-08
+  delta_full             max |diff| 1.788e-07  mean |diff| 1.842e-08
+  delta_behavior_only    max |diff| 2.086e-07  mean |diff| 2.039e-08
+  delta_profile_only     max |diff| 3.576e-07  mean |diff| 8.192e-09
+  delta_behavior_ses_only max |diff| 2.384e-07  mean |diff| 2.010e-08
+  delta_psy_only         max |diff| 9.537e-07  mean |diff| 1.488e-08
+  delta_day_only         max |diff| 1.192e-07  mean |diff| 5.968e-09
+  contrast full           A +0.018447  B +0.018447  B-A -1.496e-10
+  contrast behavior_only  A +0.025498  B +0.025498  B-A -2.475e-09
+  contrast profile_only   A -0.001734  B -0.001734  B-A +5.005e-09
+  contrast behavior_ses_only A +0.027048  B +0.027048  B-A -1.906e-09
+  contrast psy_only       A -0.002553  B -0.002553  B-A +2.767e-09
+  contrast day_only       A -0.001123  B -0.001123  B-A +3.032e-09
+GATE PASS

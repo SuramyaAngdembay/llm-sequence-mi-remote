@@ -18,7 +18,7 @@ before its result is read.
 
 ## Tier 1 — CPU, cheap, before any new GPU run
 
-1. **Environment gate** as soon as smoke 20879548 finishes (CPU, minutes).
+1. ~~Environment gate~~ **Passed 2026-09-24**: 1,186/1,186 rows matched, max per-row delta difference 9.5e-07, contrasts within 6e-09 (`results/cert_package4_env_gate/GATE_REPORT.txt`).
 2. **Analyses** of 20879549 and 20890658 with the pre-specified analyzer (CPU).
 3. ~~Copy the raw LANL files from purgeable scratch~~ **Done 2026-09-24.**
    The files are in `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/data/lanl2015_raw/`

@@ -178,6 +178,18 @@ cancellation. Wherever that was argued, it is withdrawn. Two gates replace it.
 - *The TWOS extraction environment is now reconstructed.* `~/cert-venv` on Aquaman was created on 2026-07-22, and every relevant package was installed in the same minute: transformers 5.14.1, tokenizers 0.22.2, torch 2.5.1+cu121, PEFT 0.19.1, bitsandbytes 0.49.2, accelerate 1.14.0. None has been replaced since, and `run_v3_seed42.sh` activates this environment. Two artifacts corroborate it. The adapters written by the same script on 2026-08-25 record PEFT 0.19.1 in their own files. And the token rows saved at extraction match today's tokenizer count for all 2,275 examples, with positions contiguous from 0 to n−1. Counts are consistent with identical token IDs but do not prove them; the ID-level identity was shown between today's Aquaman environment and the run environment.
 - *Still open.* Numerical differences between Aquaman (RTX 3070, transformers 5.14.1) and Anvil (A100, 5.16.1). The TWOS run's α = 0 arm absorbs them together with reconstruction. A small δ-reproduction job would separate the two; it is proposed in the experiment plan, not run.
 
+**Gate result.** The CERT environment gate PASSED on 2026-09-24. The collaborator smoke
+(job 20879548; transformers 5.16.1, PEFT 0.20.0) and the owner smoke (job
+20840686; transformers 4.51.3, PEFT 0.13.2) match on all 1,186 rows (same
+receivers, donors, arms and alpha; both torch 2.5.1 on A100-SXM4-40GB). The
+largest per-row difference in any view's delta is 9.5e-07 nats (tolerance
+1e-3), and every selected-minus-control contrast agrees within 6e-09
+(tolerance 1e-4). Report: `results/cert_package4_env_gate/GATE_REPORT.txt`.
+This verifies that the environment change does not move these smoke rows
+(team, alpha 1, 24 receivers). It is not a check of the other context modes
+or alphas, which only the full run contains. The smoke's own contrasts are a
+validation subset and are not read as results.
+
 ## C5. Cached-baseline outputs
 
 - **Verified in code.** In runs made with `--token-class-schema` (`base_used`), `delta`, `repair`, `strong_repair`, the best rows and the summaries use the fresh base.

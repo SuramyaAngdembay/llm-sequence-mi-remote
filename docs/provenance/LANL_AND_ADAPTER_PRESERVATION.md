@@ -43,7 +43,7 @@ Copy 2, Aquaman: `/data/suramya/insider_mi/lanl2015_raw/` (`auth.txt.gz`,
 | file | status |
 |---|---|
 | `redteam.txt.gz` | copied |
-| `auth.txt.gz` | streaming at about 1 MB/s; to be checked against the sha256 above |
+| `auth.txt.gz` | The first stream (02:08 to 02:45 CDT) stopped at 3.06 GB when both relay connections dropped at once, which points to the relaying Mac sleeping or losing its network. It was resumed around 14:00 CDT with a resumable relay: 256 MiB chunks, retries, the Mac kept awake, and every chunk, including those already present, checked by sha256 on both ends. The whole file is then checked against the sha256 above. |
 
 ## Collaborator adapters
 
