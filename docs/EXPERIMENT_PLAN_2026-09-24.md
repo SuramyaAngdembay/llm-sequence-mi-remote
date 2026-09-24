@@ -20,18 +20,35 @@ before its result is read.
 
 1. **Environment gate** as soon as smoke 20879548 finishes (CPU, minutes).
 2. **Analyses** of 20879549 and 20890658 with the pre-specified analyzer (CPU).
-3. **Copy the raw LANL files** (`auth.txt.gz`, `redteam.txt.gz`) from purgeable
-   scratch to the project area before scratch purge (I/O only).
+3. ~~Copy the raw LANL files from purgeable scratch~~ **Done 2026-09-24.**
+   The files are in `/anvil/projects/x-cis230270/x-sangdembay/cert-qlora-MI/data/lanl2015_raw/`
+   with checksums verified against the source; a second copy to Aquaman is in progress. See
+   `docs/provenance/LANL_AND_ADAPTER_PRESERVATION.md`.
 4. **LANL option A extraction** of never-sampled ordinary users, chosen by a
    new salted hash (CPU job on `cis260991` or `tra250034` CPU hours, a few SU).
    Gate: every extracted user is absent from `train.jsonl` and `val.jsonl`, and
    the population report passes.
+
+## Scratch purge watch
+
+Anvil deletes scratch files not read for 30 days, without warning, and scratch
+is not backed up. Last reads, as of 2026-09-24:
+
+| on scratch | last read | at risk from | action |
+|---|---|---|---|
+| LANL raw `auth.txt.gz`, `redteam.txt.gz`, `windows_full.jsonl` | 2026-09-07 | ~10-07 | copied to project space, checksums verified; second copy to Aquaman in progress |
+| LANL adapters user_anon, host_anon, shuffle | 2026-09-11/12 | ~10-11 | copied to project space, checksums verified |
+| Phase C 3B `p1/adapter_full` | 2026-09-18 | ~10-18 | copied to project space, checksums verified |
+| LANL `adapter_full`, Phase C `adapter_targetmask` | 2026-09-21/23 | ~10-21 | copied to project space, checksums verified |
+| staged CERT inputs `pkg4_share` (274 GB, a copy of project-space originals) | 2026-09-21/23 | ~10-21 | the queued job reads them when it starts; re-stage from project space if it slips past mid-October |
+| LANL deltas and historical split files | recent | — | not copied: regenerable from `windows_full.jsonl` and the adapters |
 
 ## Tier 2 — bounded GPU runs that complete the current questions
 
 | run | question | gate | compute |
 |---|---|---|---|
 | CERT α = 0 reconstruction control, confirmation receivers | How much of each arm's absolute per-class effect is dictionary reconstruction? This is required before any mechanistic reading of absolute effects. α = 0 does not depend on the donor, so 1 candidate per donor type suffices. | Tier-0 CERT gates passed | ~1 SU |
+| TWOS δ-reproduction check (optional, gpu-debug) | Does the Anvil environment reproduce the TWOS deltas cached on Aquaman? It separates environment effects from reconstruction in the α = 0 arm | TWOS run 20890658 finished | ≤ 0.25 SU |
 | LANL option A scoring, existing adapter | With user composition matched and no retraining, is ranking worse for users absent from training? Pooled and within-user AUC | Tier-1 extraction gate | ~3–5 SU |
 
 ## Tier 3 — only if tiers 0 to 2 leave the question open

@@ -15,6 +15,16 @@
 # verified identical across the two (same vocab, same ids on a CERT sample). Base and patched scores are computed within one run, so the CONTRAST
 # is unaffected; absolute NLLs may differ from the published run.
 #
+# CORRECTION (2026-09-24): "the CONTRAST is unaffected" is withdrawn. Computing
+# base and patched scores in one run cancels batch-composition noise, not the
+# environment. The patches add token deltas and SAE reconstructions cached in
+# the owner environment (transformers 4.51.3) to hidden states computed in this
+# one (5.16), so an environment difference can interact with the edit and need
+# not be equal across arms, which patch different days and tokens. Before the
+# full run is read, its smoke output must match the owner-environment smoke
+# (job 20840686) row by row: docs/PREREGISTRATION_CERT_PACKAGE4.md, addendum
+# item 9, and scripts/compare_intervention_runs.py.
+#
 # Usage:
 #   bash scripts/submit_r42_token_class_causal_collab_anvil.sh smoke
 #   bash scripts/submit_r42_token_class_causal_collab_anvil.sh full
