@@ -38,12 +38,12 @@ python3 lanl_split.py windows_full.jsonl lanl_conditions
 ```
 
 Copy 2, Aquaman: `/data/suramya/insider_mi/lanl2015_raw/` (`auth.txt.gz`,
-`redteam.txt.gz`). Status: see the table below.
+`redteam.txt.gz`, `SHA256SUMS`). Both files are verified against the source.
 
 | file | status |
 |---|---|
-| `redteam.txt.gz` | copied |
-| `auth.txt.gz` | The first stream (02:08 to 02:45 CDT) stopped at 3.06 GB when both relay connections dropped at once, which points to the relaying Mac sleeping or losing its network. It was resumed around 14:00 CDT with a resumable relay: 256 MiB chunks, retries, the Mac kept awake, and every chunk, including those already present, checked by sha256 on both ends. The whole file is then checked against the sha256 above. |
+| `redteam.txt.gz` | Verified: sha256 `60663583…51669`, identical to the source. |
+| `auth.txt.gz` | Verified 2026-09-24 14:46 CDT: 7,626,505,158 bytes, sha256 `9c6b0cc2…bf672`, identical to the source. The first stream stopped at 3.06 GB when both relay connections dropped at once. The resumed relay checked the 11 chunks already present and sent the other 18, each verified by sha256 on both ends, with no retries needed. |
 
 ## Collaborator adapters
 
