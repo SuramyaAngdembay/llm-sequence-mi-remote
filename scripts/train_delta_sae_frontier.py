@@ -19,7 +19,40 @@ from sae_core import (
     support_overlap_stats_streaming,
     tensor_stats,
     train_sae,
+    validate_ranking,
+    validate_ranking_population,
 )
+
+BENIGN_ACTIVITY_FILE = "delta_sae_feature_activity_benign.csv"
+RANKING_MARKER_FILE = "RANKING_NOT_COMPUTED.json"
+
+
+def write_benign_only_outputs(cfg_dir: Path, feature_df: pd.DataFrame, eval_stats: Dict[str, float]) -> None:
+    """Write benign activity statistics, and deliberately no ranking file.
+
+    Consumers read `delta_sae_top_features.csv` to choose feature sets, so its
+    absence makes a mistaken --frontier-dir fail loudly instead of selecting
+    arbitrary features.
+    """
+    if int(eval_stats.get("n_pos_rows", 0)) != 0:
+        raise ValueError("benign-only outputs requested for a population that contains positive rows")
+    cols = ["feature_id", "row_mean_neg", "row_active_frac"]
+    feature_df[cols].sort_values("feature_id").to_csv(cfg_dir / BENIGN_ACTIVITY_FILE, index=False)
+    stale = cfg_dir / "delta_sae_top_features.csv"
+    if stale.exists():
+        stale.unlink()
+    marker = {
+        "ranking": "not_computed",
+        "reason": (
+            "SAE fitted on benign rows only; a malicious-minus-benign feature ranking is "
+            "undefined on that population. Rank on a discovery population containing both "
+            "classes with reselect_token_sae_features.py, and point eval scripts at its output."
+        ),
+        "n_pos_rows": int(eval_stats.get("n_pos_rows", 0)),
+        "n_neg_rows": int(eval_stats.get("n_neg_rows", 0)),
+        "activity_file": BENIGN_ACTIVITY_FILE,
+    }
+    (cfg_dir / RANKING_MARKER_FILE).write_text(json.dumps(marker, indent=2) + "\n")
 
 
 def load_layer_vectors(
@@ -268,6 +301,47 @@ def main() -> None:
                     device=device,
                     batch_size=args.batch_size,
                 )
+                cfg_dir = ensure_dir(out_dir / f"layer_{layer}" / f"m{latent_mult:02d}_k{k:02d}")
+                if args.benign_only:
+                    # The dictionary is fitted on benign rows only, which is
+                    # legitimate. A malicious-minus-benign ranking needs both
+                    # classes, which this population cannot have, so NO ranking
+                    # file is written here: an undefined ranking written as
+                    # `delta_sae_top_features.csv` was later consumed as if it
+                    # were real (TWOS token-class re-runs, 2026-09-19). Rank
+                    # with reselect_token_sae_features.py on a discovery
+                    # population instead.
+                    write_benign_only_outputs(cfg_dir, feature_df, eval_stats)
+                    torch.save(
+                        {
+                            "state_dict": model.state_dict(),
+                            "layer": layer,
+                            "unit": unit,
+                            "d_in": d_in,
+                            "d_latent": d_latent,
+                            "k": k,
+                            "x_mean": mean,
+                            "x_std": std,
+                        },
+                        cfg_dir / "delta_sae_model.pt",
+                    )
+                    rows.append(
+                        {
+                            "unit": unit,
+                            "layer": layer,
+                            "latent_mult": latent_mult,
+                            "k": k,
+                            "n_rows": int(len(x)),
+                            "d_in": d_in,
+                            "d_latent": d_latent,
+                            "ranking": "not_computed_benign_only",
+                            **train_stats,
+                            **eval_stats,
+                        }
+                    )
+                    continue
+                validate_ranking_population(y, context=f"layer {layer} m{latent_mult} k{k}: ")
+                validate_ranking(feature_df, context=f"layer {layer} m{latent_mult} k{k}: ")
                 feature_sets = choose_feature_sets(feature_df)
                 if (y > 0).any():
                     proxy = energy_selectivity_summary(
@@ -332,6 +406,9 @@ def main() -> None:
                 rows.append(row)
 
     summary_df = pd.DataFrame(rows)
+    for col in ["top5_minus_control3_advantage_proxy", "top10_row_gap_mean", "recon_mse"]:
+        if col not in summary_df.columns:
+            summary_df[col] = float("nan")
     if not summary_df.empty:
         summary_df = summary_df.sort_values(
             ["unit", "layer", "top5_minus_control3_advantage_proxy", "top10_row_gap_mean", "recon_mse"],

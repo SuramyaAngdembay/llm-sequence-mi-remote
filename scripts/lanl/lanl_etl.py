@@ -19,10 +19,19 @@ Design choices (documented so they are auditable):
   - label                = a session is positive iff it contains >=1 auth event
                            whose (time, src_user, src_comp, dst_comp) is in
                            redteam.txt.
-  - user subsample       = keep user iff (md5(user) % sample_mod == 0) OR user is
-                           a red-team user (red-team users are ALWAYS kept).
+  - user subsample       = keep user iff salted_sha256(user) % sample_mod == 0 OR
+                           user is a red-team user (red-team users are ALWAYS kept).
+                           Before 2026-09-24 the rule was md5(user) % sample_mod
+                           == 0, which coupled with the split's md5(user) % 5
+                           folds (every sampled ordinary user fell in seen fold 0);
+                           --legacy-md5-sample reproduces it for old artifacts only.
+                           Keeping every red-team user while sampling ordinary
+                           users at 1/sample_mod over-represents attack users by
+                           about sample_mod times relative to the full population.
 """
 import gzip, sys, argparse, hashlib, json, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from lanl_hashing import SAMPLE_SALT, keep_sampled_user  # noqa: E402
 from collections import Counter, defaultdict
 
 SECONDS_PER_DAY = 86400
@@ -71,7 +80,12 @@ def main():
     ap.add_argument('--window-events', type=int, default=32,
                     help='build-windows: events per window within a user-day')
     ap.add_argument('--limit', type=int, default=0, help='max auth lines to read (0=all)')
-    ap.add_argument('--sample-mod', type=int, default=1, help='keep user if md5%%mod==0 (1=all users)')
+    ap.add_argument('--sample-mod', type=int, default=1,
+                    help='keep an ordinary user if salted_sha256(user) %% mod == 0 (1 = all users)')
+    ap.add_argument('--sample-salt', default=SAMPLE_SALT,
+                    help='salt for the sampling hash; must differ from the split\'s fold salt')
+    ap.add_argument('--legacy-md5-sample', action='store_true',
+                    help='reproduce the pre-2026-09-24 md5 sampling (coupled with md5 folds); old artifacts only')
     ap.add_argument('--out', default='sessions.jsonl')
     ap.add_argument('--emit-ablations', action='store_true')
     args = ap.parse_args()
@@ -160,9 +174,7 @@ def main():
         u = uid(su_field)
         if u in red_user_ids:  # red-team users always kept
             return True
-        if args.sample_mod <= 1:
-            return True
-        return (int(hashlib.md5(u.encode()).hexdigest(), 16) % args.sample_mod) == 0
+        return keep_sampled_user(u, args.sample_mod, salt=args.sample_salt, legacy=args.legacy_md5_sample)
 
     example_serials = []
     with gzip.open(args.auth, 'rt') as f:

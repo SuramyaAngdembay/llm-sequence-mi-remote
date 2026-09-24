@@ -12,7 +12,7 @@ import torch
 import torch.nn.functional as F
 
 from remote_common import dump_json, ensure_dir, load_yaml, read_jsonl
-from sae_core import TopKSAE, choose_feature_sets
+from sae_core import TopKSAE, choose_feature_sets, load_ranking
 
 
 CONTEXT_MODE_COLS: Dict[str, List[str]] = {
@@ -438,7 +438,7 @@ def main() -> None:
 
     cfg_dir = args.frontier_dir / f"layer_{args.layer}" / f"m{args.latent_mult:02d}_k{args.k:02d}"
     model_bundle = torch.load(cfg_dir / "delta_sae_model.pt", map_location="cpu", weights_only=False)
-    feature_df = pd.read_csv(cfg_dir / "delta_sae_top_features.csv")
+    feature_df = load_ranking(cfg_dir)
     feature_sets = choose_feature_sets(feature_df)
     if control_set not in feature_sets:
         raise ValueError(f"Requested control set {control_set} missing from SAE feature sets")

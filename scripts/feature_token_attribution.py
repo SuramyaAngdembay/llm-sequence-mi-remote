@@ -28,7 +28,7 @@ import pandas as pd
 import torch
 from transformers import AutoTokenizer
 
-from sae_core import TopKSAE
+from sae_core import TopKSAE, load_ranking
 from eval_token_delta_sae_causal import _select_token_chunks, read_jsonl
 
 CLASSES = ["DAY", "PSY", "SESCOUNT", "SES"]
@@ -88,7 +88,7 @@ def main() -> None:
     x_mean = torch.from_numpy(np.asarray(bundle["x_mean"], dtype=np.float32)).to(device)
     x_std = torch.from_numpy(np.asarray(bundle["x_std"], dtype=np.float32)).to(device)
 
-    feats = pd.read_csv(cfg_dir / "delta_sae_top_features.csv")
+    feats = load_ranking(cfg_dir)
     top5 = [int(x) for x in feats.sort_values("row_gap", ascending=False).head(5)["feature_id"]]
 
     scores = pd.read_parquet(args.extract_dir / "example_scores.parquet")

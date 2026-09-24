@@ -5,7 +5,7 @@ import argparse
 import csv
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -19,7 +19,68 @@ from token_class_nll import (
     per_example_class_nll_from_hidden, views_from_class,
 )
 from remote_common import dump_json, ensure_dir, load_yaml, read_jsonl
-from sae_core import TopKSAE, add_active_control_feature_sets, choose_feature_sets
+from sae_core import (
+    TopKSAE,
+    add_active_control_feature_sets,
+    check_disjoint_users,
+    choose_feature_sets,
+    feature_set_criteria,
+    load_ranking,
+)
+
+
+def build_selection_manifest(
+    cfg_dir: Path,
+    feature_df: pd.DataFrame,
+    feature_sets: Dict[str, List[int]],
+    *,
+    top_sets: Sequence[str],
+    control_set: str,
+    min_active_frac: float,
+    receiver_user_file: Optional[Path],
+    receiver_users: Optional[set],
+) -> Dict[str, Any]:
+    """Record exactly which features were chosen, from which population, and
+    whether the evaluation users are disjoint from the selection users."""
+    import hashlib
+
+    ranking_path = cfg_dir / "delta_sae_top_features.csv"
+    manifest: Dict[str, Any] = {
+        "frontier_cfg_dir": str(cfg_dir),
+        "ranking_file": str(ranking_path),
+        "ranking_file_sha256": hashlib.sha256(ranking_path.read_bytes()).hexdigest(),
+        "top_sets": {name: [int(i) for i in feature_sets[name]] for name in top_sets},
+        "control_set": control_set,
+        "control_ids": [int(i) for i in feature_sets[control_set]],
+        "criteria": feature_set_criteria(
+            feature_df, feature_sets, top_set=list(top_sets)[0], control_sets=[control_set],
+            min_active_frac=float(min_active_frac),
+        ),
+        "receiver_user_file": str(receiver_user_file) if receiver_user_file else None,
+        "n_receiver_users": len(receiver_users) if receiver_users is not None else None,
+    }
+    summary_path = cfg_dir / "reselect_summary.json"
+    discovery_users: Optional[set] = None
+    if summary_path.exists():
+        summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        manifest["reselect_summary"] = {
+            k: summary.get(k) for k in ("discovery_user_file", "n_discovery_users", "row_stats", "benign_sample_prob")
+        }
+        if summary.get("discovery_users") is not None:
+            discovery_users = set(map(str, summary["discovery_users"]))
+        elif summary.get("discovery_user_file") and Path(summary["discovery_user_file"]).exists():
+            discovery_users = {
+                ln.strip() for ln in Path(summary["discovery_user_file"]).read_text().splitlines() if ln.strip()
+            }
+    if discovery_users is None:
+        manifest["held_out_from_selection"] = "unknown: no discovery-user record in the frontier"
+    elif receiver_users is None:
+        manifest["held_out_from_selection"] = False
+        manifest["note"] = "receivers are all positive examples; selection and evaluation share users (in-sample)"
+    else:
+        check_disjoint_users(discovery_users, receiver_users, context="--receiver-user-file: ")
+        manifest["held_out_from_selection"] = True
+    return manifest
 
 
 CONTEXT_MODE_COLS: Dict[str, List[str]] = {
@@ -1037,8 +1098,8 @@ def main() -> None:
     model_bundle = torch.load(cfg_dir / "delta_sae_model.pt", map_location="cpu", weights_only=False)
     if str(model_bundle.get("unit", "")) not in {"", "token"}:
         raise ValueError(f"Frontier model bundle unit is {model_bundle.get('unit')}, expected token")
-    feature_df = pd.read_csv(cfg_dir / "delta_sae_top_features.csv")
-    feature_sets = choose_feature_sets(feature_df)
+    feature_df = load_ranking(cfg_dir)
+    feature_sets = choose_feature_sets(feature_df)  # refuses an undefined ranking
     feature_sets = add_active_control_feature_sets(
         feature_sets,
         feature_df,
@@ -1056,6 +1117,16 @@ def main() -> None:
     for name in top_sets:
         if name not in feature_sets:
             raise ValueError(f"Requested top set {name} missing from token SAE feature sets")
+    selection_manifest = build_selection_manifest(
+        cfg_dir, feature_df, feature_sets, top_sets=top_sets, control_set=control_set,
+        min_active_frac=float(args.active_control_min_frac),
+        receiver_user_file=args.receiver_user_file, receiver_users=receiver_users,
+    )
+    (out_dir / "feature_selection_manifest.json").write_text(
+        json.dumps(selection_manifest, indent=2, default=str) + "\n", encoding="utf-8"
+    )
+    print(f"[selection] held_out_from_selection={selection_manifest['held_out_from_selection']} "
+          f"top={selection_manifest['top_sets']} control={selection_manifest['control_ids']}", flush=True)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     sae_model = TopKSAE(

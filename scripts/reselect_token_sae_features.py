@@ -15,8 +15,10 @@ the eval scripts.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import shutil
+from collections import Counter
 from pathlib import Path
 from typing import List
 
@@ -24,7 +26,20 @@ import numpy as np
 import pandas as pd
 import torch
 
-from sae_core import TopKSAE, evaluate_features, choose_feature_sets
+from sae_core import (
+    RankingUndefinedError,
+    TopKSAE,
+    add_active_control_feature_sets,
+    choose_feature_sets,
+    evaluate_features,
+    feature_set_criteria,
+    validate_ranking,
+    validate_ranking_population,
+)
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def load_rows_base(
@@ -67,16 +82,26 @@ def load_rows_base(
 
 
 def fold_view(
-    x: np.ndarray, y: np.ndarray, users: np.ndarray, keep_positive_users: set[str]
+    x: np.ndarray,
+    y: np.ndarray,
+    users: np.ndarray,
+    keep_positive_users: set[str],
+    exclude_benign_users: set[str] | None = None,
 ) -> tuple[np.ndarray, np.ndarray, dict]:
     pos_mask = y > 0
     pos_keep = pos_mask & np.isin(users, list(keep_positive_users))
-    keep = pos_keep | ~pos_mask
+    benign_keep = ~pos_mask
+    if exclude_benign_users:
+        # strict separation: held-out users contribute nothing to the ranking,
+        # not even their benign rows
+        benign_keep = benign_keep & ~np.isin(users, list(exclude_benign_users))
+    keep = pos_keep | benign_keep
     stats = {
         "n_rows": int(keep.sum()),
         "n_positive_rows_kept": int(pos_keep.sum()),
         "n_positive_rows_dropped_confirmation": int((pos_mask & ~pos_keep).sum()),
-        "n_benign_rows": int((~pos_mask).sum()),
+        "n_benign_rows": int(benign_keep.sum()),
+        "n_benign_rows_dropped_excluded_users": int((~pos_mask & ~benign_keep).sum()),
     }
     return x[keep], y[keep], stats
 
@@ -96,6 +121,13 @@ def main() -> None:
     ap.add_argument("--batch-size", type=int, default=8192)
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--exclude-benign-user-file", type=Path, default=None,
+                    help="users whose benign rows are also dropped from the ranking population "
+                         "(e.g. confirmation users); default keeps all benign rows, as before")
+    ap.add_argument("--min-positive-users", type=int, default=2,
+                    help="distinct discovery users that must contribute positive rows")
+    ap.add_argument("--active-control-min-frac", type=float, default=0.002,
+                    help="threshold used to record control{n}_active in the manifest")
     args = ap.parse_args()
 
     cfg_rel = Path(f"layer_{args.layer}") / f"m{args.latent_mult:02d}_k{args.k:02d}"
@@ -143,29 +175,76 @@ def main() -> None:
             dst_cfg = args.out_frontier_dir / cfg_rel
         dst_cfg.mkdir(parents=True, exist_ok=True)
 
-        x, y, stats = fold_view(x_all, y_all, users_all, discovery_users)
+        exclude_benign = None
+        if args.exclude_benign_user_file is not None:
+            exclude_benign = {
+                ln.strip() for ln in args.exclude_benign_user_file.read_text().splitlines() if ln.strip()
+            }
+            overlap = sorted(exclude_benign & discovery_users)
+            if overlap:
+                raise RankingUndefinedError(f"users both in discovery and excluded: {overlap[:5]}")
+        x, y, stats = fold_view(x_all, y_all, users_all, discovery_users, exclude_benign)
         total_pos = stats["n_positive_rows_kept"] + stats["n_positive_rows_dropped_confirmation"]
-        if total_pos and stats["n_positive_rows_kept"] < 0.05 * total_pos:
+        if total_pos == 0:
+            raise RankingUndefinedError(
+                f"{fold_file.name}: the extracted rows contain no positive rows at all, so no "
+                "malicious-minus-benign ranking can be computed"
+            )
+        if stats["n_positive_rows_kept"] == 0:
+            raise RankingUndefinedError(
+                f"{fold_file.name}: none of the {len(discovery_users)} discovery users contributes a "
+                f"positive row ({total_pos} positive rows exist in the extract)"
+            )
+        if stats["n_positive_rows_kept"] < 0.05 * total_pos:
             raise RuntimeError(
                 f"Implausible split for {fold_file.name}: kept "
                 f"{stats['n_positive_rows_kept']} of {total_pos} positive rows"
             )
+        pos_users_present = Counter(users_all[(y_all > 0) & np.isin(users_all, list(discovery_users))].tolist())
+        unknown_discovery = sorted(discovery_users - set(users_all.tolist()))
+        if len(pos_users_present) < int(args.min_positive_users):
+            raise RankingUndefinedError(
+                f"{fold_file.name}: only {len(pos_users_present)} discovery users contribute positive "
+                f"rows (need >= {args.min_positive_users}); unknown discovery ids: {unknown_discovery[:5]}"
+            )
+        validate_ranking_population(y, context=f"{fold_file.name}: ")
         x -= x_mean
         x /= x_std
         feature_df, eval_stats = evaluate_features(model, x, y, device=device, batch_size=args.batch_size)
+        validate_ranking(feature_df, context=f"{fold_file.name}: ")
         feature_sets = choose_feature_sets(feature_df)
+        feature_sets = add_active_control_feature_sets(
+            feature_sets, feature_df, min_active_frac=float(args.active_control_min_frac)
+        )
+        criteria = feature_set_criteria(
+            feature_df,
+            feature_sets,
+            control_sets=[n for n in ("control1", "control3", "control5_active") if n in feature_sets],
+            min_active_frac=float(args.active_control_min_frac),
+        )
         del x, y
 
         shutil.copy2(src_cfg / "delta_sae_model.pt", dst_cfg / "delta_sae_model.pt")
         feature_df.to_csv(dst_cfg / "delta_sae_top_features.csv", index=False)
         summary = {
             "source_frontier": str(src_cfg),
+            "source_model_sha256": _sha256(src_cfg / "delta_sae_model.pt"),
             "discovery_user_file": str(fold_file),
+            "discovery_user_file_sha256": _sha256(fold_file),
             "n_discovery_users": len(discovery_users),
+            "discovery_users": sorted(discovery_users),
+            "discovery_users_unknown_in_extract": unknown_discovery,
+            "n_discovery_users_with_positive_rows": len(pos_users_present),
+            "positive_rows_by_discovery_user": dict(sorted(pos_users_present.items())),
             "benign_sample_prob": args.benign_sample_prob,
+            "exclude_benign_user_file": str(args.exclude_benign_user_file) if args.exclude_benign_user_file else None,
+            "n_exclude_benign_users": len(exclude_benign) if exclude_benign else 0,
+            "seed": args.seed,
             "row_stats": stats,
             "eval_stats": {k: float(v) for k, v in eval_stats.items()},
+            "ranking_file_sha256": _sha256(dst_cfg / "delta_sae_top_features.csv"),
             "feature_sets": {k: [int(i) for i in v] for k, v in feature_sets.items()},
+            "feature_set_criteria": criteria,
         }
         (dst_cfg / "reselect_summary.json").write_text(json.dumps(summary, indent=2))
         print(f"[fold {fold_file.name}] top5={feature_sets['top5']}", flush=True)

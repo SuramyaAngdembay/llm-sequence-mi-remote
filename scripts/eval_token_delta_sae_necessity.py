@@ -25,7 +25,7 @@ from eval_token_delta_sae_causal import (
     table_text,
 )
 from remote_common import dump_json, ensure_dir, load_yaml
-from sae_core import TopKSAE, add_active_control_feature_sets, choose_feature_sets
+from sae_core import TopKSAE, add_active_control_feature_sets, choose_feature_sets, load_ranking
 
 
 def build_receiver_pairs(
@@ -337,7 +337,7 @@ def main() -> None:
     model_bundle = torch.load(cfg_dir / "delta_sae_model.pt", map_location="cpu", weights_only=False)
     if str(model_bundle.get("unit", "")) not in {"", "token"}:
         raise ValueError(f"Frontier model bundle unit is {model_bundle.get('unit')}, expected token")
-    feature_df = pd.read_csv(cfg_dir / "delta_sae_top_features.csv")
+    feature_df = load_ranking(cfg_dir)
     feature_sets = choose_feature_sets(feature_df)
     feature_sets = add_active_control_feature_sets(
         feature_sets,

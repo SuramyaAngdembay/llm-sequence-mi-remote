@@ -26,7 +26,7 @@ import pandas as pd
 import torch
 from transformers import AutoTokenizer
 
-from sae_core import TopKSAE
+from sae_core import RankingUndefinedError, TopKSAE
 from eval_token_delta_sae_causal import read_jsonl
 from feature_token_attribution import token_classes_for_text
 
@@ -130,7 +130,12 @@ def main() -> None:
             s = np.zeros(d_latent, dtype=np.float64); n = 0
             for u in chosen:
                 s += user_sum[u]; n += user_rows[u]
-            gap = s / max(n, 1) - ben_mean
+            if n == 0 or ben_rows == 0:
+                # s / max(n, 1) would silently rank by -ben_mean here
+                raise RankingUndefinedError(
+                    f"K={K} rep={rep}: {n} positive rows and {ben_rows} benign rows; the gap is undefined"
+                )
+            gap = s / n - ben_mean
             top5 = np.argsort(-gap)[:5]
             shares = profile_share[top5]
             out_rows.append({

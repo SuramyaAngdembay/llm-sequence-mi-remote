@@ -19,6 +19,8 @@ import numpy as np
 import pandas as pd
 import torch
 
+from sae_core import load_ranking
+
 
 def load_sae(cfg_dir: Path, destandardize: bool = True) -> tuple[np.ndarray, list[int]]:
     bundle = torch.load(cfg_dir / "delta_sae_model.pt", map_location="cpu", weights_only=False)
@@ -32,7 +34,7 @@ def load_sae(cfg_dir: Path, destandardize: bool = True) -> tuple[np.ndarray, lis
         x_std = np.asarray(bundle["x_std"], dtype=np.float32).reshape(-1)
         dec = dec * x_std[:, None]
     dec = dec / (np.linalg.norm(dec, axis=0, keepdims=True) + 1e-8)
-    feats = pd.read_csv(cfg_dir / "delta_sae_top_features.csv")
+    feats = load_ranking(cfg_dir)
     top5 = [int(x) for x in feats.sort_values("row_gap", ascending=False).head(5)["feature_id"]]
     return dec.astype(np.float32), top5
 

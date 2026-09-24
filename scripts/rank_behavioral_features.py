@@ -25,7 +25,7 @@ import pandas as pd
 import torch
 from transformers import AutoTokenizer
 
-from sae_core import TopKSAE, evaluate_features, choose_feature_sets
+from sae_core import TopKSAE, choose_feature_sets, evaluate_features, validate_ranking, validate_ranking_population
 from eval_token_delta_sae_causal import read_jsonl
 from feature_token_attribution import token_classes_for_text
 
@@ -132,7 +132,9 @@ def main() -> None:
         keep = ses_all & ((~pos_mask) | np.isin(users_all, list(discovery)))
         x = (x_all[keep] - x_mean) / x_std
         y = y_all[keep]
+        validate_ranking_population(y, context=f"{fold_file.name}: ")
         feature_df, eval_stats = evaluate_features(model, x, y, device=device, batch_size=args.batch_size)
+        validate_ranking(feature_df, context=f"{fold_file.name}: ")
         feature_df["profile_mass_share"] = profile_share[feature_df["feature_id"].astype(int).to_numpy()]
         behavioral = feature_df[feature_df["profile_mass_share"] <= args.profile_mass_max].copy()
         if args.louo_splits_dir is not None:

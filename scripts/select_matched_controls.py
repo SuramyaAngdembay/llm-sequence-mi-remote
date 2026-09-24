@@ -26,7 +26,7 @@ import numpy as np
 import pandas as pd
 import torch
 
-from sae_core import TopKSAE
+from sae_core import TopKSAE, load_ranking
 
 
 def main() -> None:
@@ -57,7 +57,7 @@ def main() -> None:
     x_std = np.asarray(bundle["x_std"], dtype=np.float32).reshape(1, -1)
     d_latent = int(bundle["d_latent"])
 
-    feature_df = pd.read_csv(cfg_dir / "delta_sae_top_features.csv")
+    feature_df = load_ranking(cfg_dir)
     gapcol = "row_gap" if "row_gap" in feature_df.columns else feature_df.columns[1]
     top5 = [int(x) for x in feature_df.head(5)["feature_id"]]
     gaps = feature_df.set_index("feature_id")[gapcol].astype(float)

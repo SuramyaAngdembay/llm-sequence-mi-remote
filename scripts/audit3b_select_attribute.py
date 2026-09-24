@@ -16,6 +16,9 @@ from pathlib import Path
 
 import pandas as pd
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from sae_core import load_ranking  # noqa: E402
+
 
 def main() -> None:
     ap = argparse.ArgumentParser()
@@ -50,8 +53,8 @@ def main() -> None:
                "--benign-sample-prob", str(args.benign_sample_prob), "--device", "cuda"]
         subprocess.run(cmd, check=True)
         cfg = out_frontier / f"layer_{layer}" / f"m{args.latent_mult:02d}_k{args.k:02d}"
-        feats = pd.read_csv(cfg / "delta_sae_top_features.csv")
-        gapcol = "row_gap" if "row_gap" in feats.columns else feats.columns[1]
+        feats = load_ranking(cfg)  # refuses a missing or undefined ranking
+        gapcol = "row_gap"
         gap = float(feats.head(5)[gapcol].mean())
         print(f"[driver] layer={layer} top5_gap={gap:.6f} ids={feats.head(5)['feature_id'].tolist()}", flush=True)
         if best is None or gap > best[1]:

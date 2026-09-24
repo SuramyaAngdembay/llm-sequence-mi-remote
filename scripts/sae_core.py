@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Dict, List, Sequence, Tuple
+from pathlib import Path
+from typing import Any, Dict, List, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -8,6 +9,87 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, TensorDataset
+
+
+class RankingUndefinedError(ValueError):
+    """A feature ranking is undefined, or was computed on an invalid population.
+
+    Raised instead of selecting features. Sorting a column of NaN gaps returns
+    features in id order, so an undefined malicious-minus-benign statistic
+    silently became "top5 = [0, 1, 2, 3, 4]" in the TWOS token-class re-runs
+    (2026-09-19). Missing gaps are never replaced by zero here.
+    """
+
+
+# Every ranking file must carry these, all finite, before anything is selected.
+RANKING_COLUMNS = ("row_gap", "row_mean_pos", "row_mean_neg", "row_active_frac")
+
+
+def validate_ranking_population(
+    row_y: Sequence[int] | np.ndarray,
+    *,
+    min_pos_rows: int = 1,
+    min_neg_rows: int = 1,
+    context: str = "",
+) -> Tuple[int, int]:
+    """Require both classes in the population a ranking is computed on.
+
+    Fitting an SAE on benign rows only is legitimate. Ranking its features by
+    malicious-minus-benign activation is not possible on that same population.
+    """
+    y = np.asarray(row_y)
+    n_pos = int(np.count_nonzero(y > 0))
+    n_neg = int(len(y) - n_pos)
+    if n_pos < int(min_pos_rows) or n_neg < int(min_neg_rows):
+        raise RankingUndefinedError(
+            f"{context}a malicious-minus-benign ranking needs both classes in its population; "
+            f"got {n_pos} positive rows (need >= {int(min_pos_rows)}) and {n_neg} benign rows "
+            f"(need >= {int(min_neg_rows)}). Rank features on a discovery population that "
+            "contains both classes (reselect_token_sae_features.py)."
+        )
+    return n_pos, n_neg
+
+
+def load_ranking(cfg_dir: Path, *, validate: bool = True) -> pd.DataFrame:
+    """Read a frontier config's feature ranking, refusing a benign-only frontier.
+
+    A benign-only frontier writes RANKING_NOT_COMPUTED.json and no ranking
+    file; pointing a consumer at it must fail, not select arbitrary features.
+    """
+    cfg_dir = Path(cfg_dir)
+    ranking_path = cfg_dir / "delta_sae_top_features.csv"
+    marker = cfg_dir / "RANKING_NOT_COMPUTED.json"
+    if marker.exists() or not ranking_path.exists():
+        detail = marker.read_text(encoding="utf-8").strip() if marker.exists() else "no ranking file"
+        raise RankingUndefinedError(
+            f"{cfg_dir} has no usable feature ranking ({detail}). Use a "
+            "reselect_token_sae_features.py output ranked on a discovery population."
+        )
+    feature_df = pd.read_csv(ranking_path)
+    if validate:
+        validate_ranking(feature_df, context=f"{ranking_path}: ")
+    return feature_df
+
+
+def validate_ranking(feature_df: pd.DataFrame, *, context: str = "") -> None:
+    """Refuse a ranking with missing columns, repeated ids or non-finite statistics."""
+    missing = [c for c in ("feature_id",) + RANKING_COLUMNS if c not in feature_df.columns]
+    if missing:
+        raise RankingUndefinedError(f"{context}ranking is missing columns {missing}")
+    if feature_df.empty:
+        raise RankingUndefinedError(f"{context}ranking has no rows")
+    if feature_df["feature_id"].duplicated().any():
+        raise RankingUndefinedError(f"{context}ranking repeats feature ids")
+    for col in RANKING_COLUMNS:
+        vals = pd.to_numeric(feature_df[col], errors="coerce").to_numpy(dtype=np.float64)
+        bad = int(np.count_nonzero(~np.isfinite(vals)))
+        if bad:
+            raise RankingUndefinedError(
+                f"{context}{col} is non-finite for {bad} of {len(vals)} features, so the ranking "
+                "is undefined. This happens when the ranking population lacks positive or "
+                "benign rows. Refusing to select features: sorting an undefined column "
+                "returns arbitrary ids."
+            )
 
 
 class TopKSAE(nn.Module):
@@ -144,6 +226,8 @@ def evaluate_features(
     )
     feature_df = feature_df.sort_values("row_gap", ascending=False).reset_index(drop=True)
     stats = {
+        "n_pos_rows": n_pos,
+        "n_neg_rows": n_neg,
         "recon_mse": mse,
         "active_frac": active_frac,
         "effective_l0": effective_l0,
@@ -160,6 +244,14 @@ def _choose_low_gap_ids(
     n: int,
     exclude: Sequence[int] = (),
 ) -> List[int]:
+    gaps = pd.to_numeric(feature_df["row_gap"], errors="coerce").to_numpy(dtype=np.float64)
+    if not np.all(np.isfinite(gaps)):
+        # With NaN gaps the |gap| key is undefined and the sort silently falls
+        # through to activity: "low gap" controls become "most active" controls.
+        raise RankingUndefinedError(
+            "control selection needs a finite row_gap for every candidate; "
+            f"{int(np.count_nonzero(~np.isfinite(gaps)))} of {len(gaps)} are non-finite"
+        )
     ranked = (
         feature_df.assign(abs_gap=feature_df["row_gap"].abs())
         .sort_values(["abs_gap", "row_active_frac", "feature_id"], ascending=[True, False, True])
@@ -192,6 +284,7 @@ def _choose_active_low_gap_ids(
 
 
 def choose_feature_sets(feature_df: pd.DataFrame) -> Dict[str, List[int]]:
+    validate_ranking(feature_df, context="choose_feature_sets: ")
     top = feature_df.sort_values("row_gap", ascending=False).reset_index(drop=True)
     active = top[top["row_active_frac"] > 0.02].copy()
     if active.empty:
@@ -228,6 +321,7 @@ def add_active_control_feature_sets(
     min_active_frac: float,
     sizes: Sequence[int] = (1, 3, 5),
 ) -> Dict[str, List[int]]:
+    validate_ranking(feature_df, context="add_active_control_feature_sets: ")
     out = {name: list(ids) for name, ids in feature_sets.items()}
     exclude = set(out.get("top5", []))
     for size in sizes:
@@ -240,6 +334,87 @@ def add_active_control_feature_sets(
         if len(ids) == int(size):
             out[f"control{int(size)}_active"] = ids
     return out
+
+
+def feature_set_criteria(
+    feature_df: pd.DataFrame,
+    feature_sets: Dict[str, List[int]],
+    *,
+    top_set: str = "top5",
+    control_sets: Sequence[str] = ("control5_active",),
+    min_active_frac: float = 0.002,
+) -> Dict[str, Any]:
+    """Check each set against its stated selection rule, for the run manifest.
+
+    `control{n}_active` is defined as the n lowest-|gap| features among those
+    active on >= min_active_frac of ranking rows, excluding the top set. That
+    rule is a threshold: it does not match the controls' activity to the
+    selected features, so the activity ratio is reported rather than assumed.
+    """
+    validate_ranking(feature_df, context="feature_set_criteria: ")
+    by_id = feature_df.set_index("feature_id")
+    abs_gap_all = np.abs(pd.to_numeric(feature_df["row_gap"]).to_numpy(dtype=np.float64))
+
+    def describe(ids: Sequence[int]) -> Dict[str, Any]:
+        ids = [int(i) for i in ids]
+        sub = by_id.loc[ids]
+        gaps = [float(v) for v in sub["row_gap"]]
+        act = [float(v) for v in sub["row_active_frac"]]
+        return {
+            "ids": ids,
+            "row_gap": gaps,
+            "row_active_frac": act,
+            "mean_row_gap": float(np.mean(gaps)) if gaps else float("nan"),
+            "mean_active_frac": float(np.mean(act)) if act else float("nan"),
+        }
+
+    if top_set not in feature_sets:
+        raise KeyError(f"top set {top_set} not in feature sets {sorted(feature_sets)}")
+    top = describe(feature_sets[top_set])
+    top["gap_rank_check"] = sorted(top["ids"]) == sorted(
+        int(x) for x in feature_df.sort_values("row_gap", ascending=False).head(len(top["ids"]))["feature_id"]
+    )
+    report: Dict[str, Any] = {
+        "n_features": int(len(feature_df)),
+        "min_active_frac": float(min_active_frac),
+        "sets": {top_set: top},
+    }
+    for name in control_sets:
+        if name not in feature_sets:
+            continue
+        d = describe(feature_sets[name])
+        max_abs = float(np.max(np.abs(d["row_gap"]))) if d["ids"] else float("nan")
+        d["max_abs_gap"] = max_abs
+        d["frac_features_with_abs_gap_at_most_max"] = float(np.mean(abs_gap_all <= max_abs)) if d["ids"] else float("nan")
+        d["meets_min_active"] = bool(all(a >= float(min_active_frac) for a in d["row_active_frac"]))
+        if name.endswith("_active"):
+            eligible = feature_df[
+                (feature_df["row_active_frac"] >= float(min_active_frac))
+                & (~feature_df["feature_id"].isin(feature_sets[top_set]))
+            ]
+            expected = _choose_low_gap_ids(eligible, n=len(d["ids"]))
+            d["matches_stated_rule"] = sorted(expected) == sorted(d["ids"])
+        d["activity_criterion"] = "threshold_only"
+        d["activity_ratio_to_top"] = (
+            d["mean_active_frac"] / top["mean_active_frac"] if top["mean_active_frac"] > 0 else float("nan")
+        )
+        report["sets"][name] = d
+    return report
+
+
+def check_disjoint_users(
+    discovery_users: Sequence[str],
+    evaluation_users: Sequence[str],
+    *,
+    context: str = "",
+) -> None:
+    """Raise if a claimed held-out evaluation shares users with feature discovery."""
+    overlap = sorted(set(map(str, discovery_users)) & set(map(str, evaluation_users)))
+    if overlap:
+        raise RankingUndefinedError(
+            f"{context}{len(overlap)} evaluation users were also used to select features "
+            f"(first: {overlap[:5]}); the evaluation is not held out from selection"
+        )
 
 
 def decoder_overlap_stats(model: TopKSAE, top_feature_ids: Sequence[int], *, block_size: int = 512) -> Dict[str, float]:
