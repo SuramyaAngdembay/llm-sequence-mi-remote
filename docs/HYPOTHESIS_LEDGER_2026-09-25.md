@@ -154,6 +154,17 @@ the SAE edit's size: median gain 1.2 (pcaGap5), 2.2 (pcaTop5), 5.0 (pcaCtrl5),
 therefore left unedited, so meanDiff edits slightly fewer tokens). Recorded as
 a known asymmetry of the one-dimensional baseline.
 
+**2026-09-25, Pilot 4 submission.** Protocol frozen at commit `b4d2732`
+(staged script md5-checked). gpu-debug's QOS allows 2 submitted and 1 running
+job per user, and Pilots 1 and 2 fill it (Pilot 1's estimate is now
+2026-09-26 16:39). A copy of Pilot 4 is queued on the `gpu` partition (job
+20908321, same account, own output directory `pilot4_gpu`, no submit cap,
+estimate 2026-10-20), and the gpu-debug copy will be submitted when Pilot 1
+finishes. Rule: whichever copy starts first runs; the other is cancelled
+before it starts, so the pilot is scored once (0.5 GPU-h). A first gpu
+submission (20908320) was cancelled unstarted because a shell expansion had
+emptied its output path.
+
 **2026-09-25, interpretation map (written while both jobs are queued; no
 pilot output exists).** What each outcome would and would not mean. All
 readings stay exploratory; the receivers were inspected in package 4.
