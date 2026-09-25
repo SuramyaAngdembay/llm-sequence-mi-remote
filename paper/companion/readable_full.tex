@@ -351,7 +351,12 @@ estimand is the doubly differenced quantity
 Each bar averages the same receivers with all four required outcomes.
 This paired construction avoids subtracting means over different subsets
 when donors are missing. It controls some generic effects of editing,
-but unequal edit sizes and nonlinear responses need not cancel.
+but unequal edit sizes and nonlinear responses need not cancel. Because each
+receiver keeps its best candidate, $\tau$ describes the best of the searched
+edits, not a typical edit: on r4.2's held-out users the same contrast averaged
+over donors has the opposite sign (Section~\ref{sec:robustness}). Each edit is
+also joint: every selected coefficient is written at the union of the set's
+active positions, including coefficients that were zero there.
 The operation also replaces the original delta with its sparse
 reconstruction at every token in both arms. That shared replacement
 is not a guarantee of exact cancellation; the equations and sensitivity
@@ -362,8 +367,9 @@ coefficients toward zero, on malicious days and on matched benign days,
 and ask whether removal disrupts the score more on the malicious side
 and more for $S$ than for $C$. The corresponding double difference is
 denoted $\nu$; its signed definition is in Appendix~\ref{app:intervention}.
-Repair establishes the usefulness of an edit given the rest of the
-network, and ablation establishes dependence under that edit. Neither
+A positive repair contrast shows that some searched edit of the set is
+useful given the rest of the network, and ablation establishes dependence
+under that edit. Neither
 proves that a feature set is sufficient by itself or strictly necessary
 in a network with redundant pathways \citep{heimersheim2024use,zhang2023best}.
 
@@ -382,10 +388,12 @@ are reported as descriptive.
 One further check matters because the selected features are, by
 construction, strongly activated: their edits are physically larger
 than edits of the control features. We therefore repeated the headline
-comparisons with \emph{dose-matched} controls, chosen to match the
+comparisons with \emph{proxy-matched} controls, chosen to match the
 selected features on activation frequency, activation magnitude, and
-dictionary-direction norm, which closes the edit-size gap to a factor
-of $1.3$ to $1.8$. The contrasts survive: on r4.2 the repair contrast
+standardized dictionary-direction norm, which narrows the edit-size gap to a
+factor of $1.3$ to $1.8$. The proxies do not use the realized coefficient
+changes, the standardization factor of the actual patch, or the edited
+positions, so this is not an equal-perturbation test. The contrasts survive: on r4.2 the repair contrast
 remains clearly positive ($+0.0017$ with interval $[0.0011, 0.0023]$)
 and on r6.2 the ablation contrast remains clearly positive ($+0.061$
 with interval $[0.007, 0.084]$); the remaining two contrasts stay
@@ -456,7 +464,18 @@ On r4.2, four of the five selected features concentrate on the
 behavioral session lines (the fifth responds to the organizational
 header). The contrasts are again positive (repair $\tau = 0.0014$ with
 interval $[0.0010, 0.0019]$; ablation $\nu = 0.0029$ with interval
-$[0.0009, 0.0050]$). The selected set therefore concentrates on the session portion of the input. Figure~\ref{fig:attribution} shows the contrast, together with
+$[0.0009, 0.0050]$). The selected set therefore concentrates on the session portion of the input.
+Splitting the loss change of the held-out r4.2 edits by the class of the
+predicted token (Appendix~\ref{app:pkg4}) shows that, at the larger
+strengths, the selected edits raise behavior-token loss more than control
+edits do ($+0.016$ to $+0.018$ nats per token with benign donors at full
+strength, every interval excluding zero). Their differential effect on
+profile-token loss is uncertain, and the preregistered direct comparison of
+the two classes is inconclusive. This is evidence about a joint edit under
+the SAE replacement procedure. It does not show that the features represent
+malicious behavior, that the effect exceeds an equally large perturbation at
+the same positions, or that it is specific to anomalous days, since every
+receiver was a malicious day. Figure~\ref{fig:attribution} shows the contrast, together with
 the real-data result of Section~\ref{sec:twos}.
 
 \begin{figure}[t]
@@ -547,7 +566,12 @@ Appendix~\ref{app:robustness} gives the supporting numbers.
 thirty malicious users were evaluated on the other thirty. Four of five
 features reappear. Held-out repair effects are positive but about half
 as large as the exploratory effects; only the department context has a
-user-bootstrap interval excluding zero. Held-out ablation is positive
+user-bootstrap interval excluding zero. A rescoring of the same held-out days
+reproduces this best-candidate value exactly, but the mean over donors at
+full strength is negative in every context (department $-0.0028$, interval
+$[-0.0045, -0.0012]$; the others include zero). The held-out result therefore
+describes the best searched edits, not a typical one
+(Appendix~\ref{app:pkg4}). Held-out ablation is positive
 in some contexts, while team is a null. On r6.2, leaving one malicious
 user out of selection shows that repair concentrates on the user who
 contributes $46$ of the $70$ positive days. Held-out ablation of the
@@ -890,8 +914,14 @@ one-layer edits, and the matched session domain. The headline dictionaries
 and configuration search use evaluation data; held-out feature selection
 is therefore conditional on them. The repaired 3B reruns and benign-only
 dictionaries provide additional checks, not independent replication of
-every 8B effect. TWOS is small and staged; LANL uses staged credential
-misuse and one held-out fold. No result establishes deployment readiness,
+every 8B effect. Repair is a best-candidate search, and on r4.2's held-out
+users the donor-averaged effect has the opposite sign. Every edit is a joint
+edit applied after replacing the delta with its reconstruction at every
+token; that replacement cancels additively between arms but can interact with
+the edits, and a residual-preserving edit has not been applied to the
+reported estimands. Receivers are malicious days only, so no effect is shown
+to be specific to anomalies. TWOS is small and staged; LANL uses staged
+credential misuse and one held-out fold. No result establishes deployment readiness,
 a complete neural circuit, or a general effect of model size. The appendix
 records the protocols, quantitative controls, and artifact paths supporting
 these boundaries. Code and the reported result artifacts are available in

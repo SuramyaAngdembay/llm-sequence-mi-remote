@@ -195,7 +195,12 @@ Other coefficients are unchanged. At every token, the patched delta is
 $\delta'_t=\sigma\odot Dz'_t+\mu$; a forward hook adds
 $\delta'_t-\delta_t$ to the adapted residual state. Thus both arms
 substitute a sparse reconstruction even away from edited positions.
-That shared baseline need not cancel after nonlinear downstream layers.
+That shared baseline need not cancel after nonlinear downstream layers:
+with $h$ the hidden state, $R$ the replacement and $E_S,E_C$ the edits, the
+contrast is $L(h{+}R{+}E_S)-L(h{+}R{+}E_C)$, not $L(h{+}E_S)-L(h{+}E_C)$.
+Every coefficient of $F$ is written at every position in $T_F$, including
+coefficients that were zero there, so each arm is a joint edit at the union
+of its active positions.
 
 For receiver $r$ and donor class $b\in\{\mathrm{ben},\mathrm{anom}\}$,
 the recorded outcome is
@@ -246,9 +251,12 @@ the contrast but do not eliminate magnitude-related confounding.
 The reconstruction component has mean per-token norm approximately
 $7$ and $37$, respectively.
 
-Controls additionally matched on activation frequency, magnitude, and
-decoder norm reduce the selected/control norm ratio to $1.33$ on r6.2
-and $1.79$ on r4.2. The rerun results are:
+Controls additionally matched on the proxies activation frequency,
+magnitude, and standardized decoder norm reduce the selected/control norm
+ratio to $1.33$ on r6.2 and $1.79$ on r4.2. The match does not use the
+realized donor-minus-receiver coefficient changes, the inverse-standardization
+factor $\sigma$ of the actual patch, the cross terms of joint directions, or
+the edited positions and their token classes. The rerun results are:
 \begin{center}\small
 \begin{tabular}{lcc}
 \toprule
@@ -264,7 +272,9 @@ above zero. This is partial calibration, not exact equal-dose testing.
 
 Replacing best-donor search with the median of each donor's best-strength
 outcome yields positive headline repair contrasts of $0.0005$ (r6.2)
-and $0.0006$ (r4.2). Dividing each best-row score change by its edit
+and $0.0006$ (r4.2). That estimand still selects each donor's best strength.
+Without any search (the mean over donors at $\alpha=1$), the r4.2 held-out
+contrast is negative in every context (Appendix~\ref{app:pkg4}). Dividing each best-row score change by its edit
 norm gives r4.2 positive point estimates in three of four contexts
 (team $+0.0008$ per norm unit), but all context intervals include zero.
 r6.2 repair does not survive this rescaling (three usable user clusters).
@@ -278,6 +288,72 @@ Selected features have fewer active tokens on benign matches
 r4.2). The receiver-class contrast is therefore partly a comparison
 between small and large edits. The matched-control and replication
 checks are material qualifications to its interpretation.
+
+\subsection{Package 4: token-class rescoring of the r4.2 held-out receivers}
+\label{app:pkg4}
+The $638$ held-out receiver days ($30$ confirmation users) were rescored
+with the published interventions (all $530{,}792$ candidate keys match the
+published run) while recording each edit's loss change by the class of the
+predicted token (\texttt{DAY} and \texttt{PSY}: profile; \texttt{SESCOUNT}
+and \texttt{SES}: behavior). A reconstruction-only run ($\alpha{=}0$) covered
+the same receivers. The analysis rules were declared before either run
+produced rows. A receiver's value is the mean over all candidate donors at
+the given strength. The aggregate is the mean of receiver-user means with a
+user-clustered percentile bootstrap. Table~\ref{tab:pkg4} gives the primary
+comparison.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Package 4, benign donors, $\alpha{=}1$: selected minus control
+loss change (nats per token), mean of user means with $95\%$ user-clustered
+intervals. The four contexts share users and are not independent
+replications. The direct comparison (last column) is the preregistered
+primary quantity.}
+\label{tab:pkg4}
+\begin{tabular}{lccc}
+\toprule
+Context & Behavior tokens & Profile tokens & Profile $-$ behavior \\
+\midrule
+department & $+0.0172$ $[0.0107, 0.0238]$ & $+0.0069$ $[-0.0064, 0.0290]$ & $-0.0104$ $[-0.0267, 0.0144]$ \\
+dept.$\times$role & $+0.0158$ $[0.0088, 0.0231]$ & $+0.0086$ $[-0.0058, 0.0333]$ & $-0.0073$ $[-0.0251, 0.0202]$ \\
+role & $+0.0156$ $[0.0086, 0.0227]$ & $+0.0082$ $[-0.0057, 0.0317]$ & $-0.0073$ $[-0.0249, 0.0188]$ \\
+team & $+0.0179$ $[0.0110, 0.0249]$ & $+0.0065$ $[-0.0056, 0.0266]$ & $-0.0114$ $[-0.0270, 0.0115]$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Every receiver has active features of both sets, so both arms replace the
+same days with their reconstruction. The reconstruction-only effect agrees
+across arms to within $2\times10^{-7}$ nats per receiver, and the
+selected-minus-control differences are the same raw and net of
+reconstruction. That cancellation is additive only (see the repair definition above). The
+separate $\alpha{=}0$ run was scored in differently composed batches, and its
+unpatched scores differ from the main run's by about $0.007$ nats on profile
+tokens and $0.0005$ on behavior tokens (user means), so absolute
+$\alpha{=}1$ minus $\alpha{=}0$ effects are not read as isolated feature
+edits. No view's $90\%$ interval lies inside the declared equivalence margin
+($\pm0.0002$ nats), so no effect is called negligible. At strengths $0.25$ and
+$0.5$ the behavior difference is slightly negative ($-0.0005$ to $-0.0011$);
+at $0.75$ it is $+0.005$ to $+0.006$. Anomalous donors give the same pattern.
+
+The published best-candidate difference-in-differences is reproduced to six
+decimals when the best candidate is chosen against one base per receiver
+(department $0.000758$, dept.$\times$role $0.000446$, role $0.000340$, team
+$0.000398$). The mean over donors at $\alpha{=}1$ is negative in every
+context. Receiver-weighted values are $-0.0045$, $-0.0017$, $-0.0016$ and
+$-0.0020$. On user means, the department value is $-0.0028$
+$[-0.0045, -0.0012]$ and the other intervals include zero. Equalizing the
+benign and anomalous candidate counts leaves the best-candidate value almost
+unchanged, so the sign difference reflects best-candidate selection, not
+unequal pool sizes.
+
+The preregistration declared $5{,}000$ bootstrap draws, and the analysis code
+used $10{,}000$. With $5{,}000$ draws, interval bounds move by at most
+$0.0063$ nats, on the widest intervals. $17$ of $2{,}160$ intervals change
+whether they exclude zero. Each has a bound within $0.0006$ of zero, and all
+are absolute single-arm effects, secondary views, or behavior differences at
+$\alpha{=}0.5$. No primary quantity changes.
 
 \subsection{Uncertainty and selection}
 
@@ -340,7 +416,10 @@ r4.2 discovery/confirmation splits $60$ malicious users into $30/30$
 ($671/638$ positive days). Four of five selected features agree with
 full-population selection. Held-out repair is $0.00034$--$0.00076$;
 only department has a primary interval above zero ($0.00076$,
-$[0.00035,0.00121]$, $21/29$ contributing users positive).
+$[0.00035,0.00121]$, $21/29$ contributing users positive). These are
+best-candidate values; rescoring the same days reproduces them exactly, and
+the mean over donors at $\alpha=1$ is negative in every context
+(Appendix~\ref{app:pkg4}).
 Held-out ablation is directionally positive for role and
 department$\times$role; team does not replicate a positive effect.
 

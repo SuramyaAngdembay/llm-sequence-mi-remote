@@ -1,0 +1,369 @@
+top=top5 control=control5_active alphas present=[0.25, 0.5, 0.75, 1.0] primary alpha=0.25
+
+=== dept | anomalous donors ===
+  full               base 0.51123 | selected +0.020178 [-0.003468, +0.043206] users=29 recv=605
+                     | control  +0.020334 [-0.002883, +0.043450] users=29 recv=605
+                     | sel-ctrl -0.000156 [-0.001040, +0.000965] users=29 recv=605
+                     | TOST within ±0.0002: False
+  profile_only       base 1.63803 | selected -0.072187 [-0.159603, +0.021294] users=29 recv=605
+                     | control  -0.073330 [-0.159168, +0.020502] users=29 recv=605
+                     | sel-ctrl +0.001143 [-0.001830, +0.005467] users=29 recv=605
+                     | TOST within ±0.0002: False
+  behavior_only      base 0.20255 | selected +0.043915 [+0.029877, +0.060018] users=29 recv=605
+                     | control  +0.044523 [+0.030646, +0.060634] users=29 recv=605
+                     | sel-ctrl -0.000608 [-0.001215, -0.000078] users=29 recv=605
+                     | TOST within ±0.0002: False
+  behavior_ses_only  base 0.20731 | selected +0.046084 [+0.031679, +0.062463] users=29 recv=605
+                     | control  +0.046716 [+0.032431, +0.063063] users=29 recv=605
+                     | sel-ctrl -0.000632 [-0.001280, -0.000070] users=29 recv=605
+                     | TOST within ±0.0002: False
+  psy_only           base 3.51644 | selected -0.183014 [-0.383615, +0.033783] users=29 recv=605
+                     | control  -0.185831 [-0.384874, +0.030251] users=29 recv=605
+                     | sel-ctrl +0.002816 [-0.004285, +0.013185] users=29 recv=605
+                     | TOST within ±0.0002: False
+  day_only           base 0.27335 | selected +0.009555 [+0.000010, +0.021681] users=29 recv=605
+                     | control  +0.009604 [+0.000205, +0.021609] users=29 recv=605
+                     | sel-ctrl -0.000049 [-0.000363, +0.000271] users=29 recv=605
+                     | TOST within ±0.0002: False
+  [net of alpha=0] full           sel +0.002330 [-0.000160, +0.004890] users=29 recv=605
+                                ctrl +0.002486 [+0.000287, +0.004739] users=29 recv=605
+                                diff -0.000156 [-0.001040, +0.000965] users=29 recv=605
+  [net of alpha=0] profile_only   sel +0.009823 [-0.003547, +0.023755] users=29 recv=605
+                                ctrl +0.008680 [-0.004362, +0.022276] users=29 recv=605
+                                diff +0.001143 [-0.001830, +0.005467] users=29 recv=605
+  [net of alpha=0] behavior_only  sel +0.000598 [-0.000469, +0.001876] users=29 recv=605
+                                ctrl +0.001207 [+0.000313, +0.002319] users=29 recv=605
+                                diff -0.000608 [-0.001215, -0.000078] users=29 recv=605
+  [net of alpha=0] behavior_ses_only sel +0.000633 [-0.000482, +0.001974] users=29 recv=605
+                                ctrl +0.001265 [+0.000350, +0.002402] users=29 recv=605
+                                diff -0.000632 [-0.001280, -0.000070] users=29 recv=605
+  [net of alpha=0] psy_only       sel +0.023726 [-0.007884, +0.057316] users=29 recv=605
+                                ctrl +0.020910 [-0.009921, +0.053040] users=29 recv=605
+                                diff +0.002816 [-0.004285, +0.013185] users=29 recv=605
+  [net of alpha=0] day_only       sel -0.000206 [-0.001829, +0.001728] users=29 recv=605
+                                ctrl -0.000157 [-0.001869, +0.001788] users=29 recv=605
+                                diff -0.000049 [-0.000363, +0.000271] users=29 recv=605
+  profile-minus-behaviour of (sel-ctrl): +0.001752 [-0.001223, +0.006077] users=29 recv=605
+
+=== dept | benign donors ===
+  full               base 0.51124 | selected +0.020599 [-0.002922, +0.043552] users=29 recv=605
+                     | control  +0.020202 [-0.003021, +0.043255] users=29 recv=605
+                     | sel-ctrl +0.000397 [-0.001041, +0.002712] users=29 recv=605
+                     | TOST within ±0.0002: False
+  profile_only       base 1.63804 | selected -0.069827 [-0.158149, +0.024539] users=29 recv=605
+                     | control  -0.073902 [-0.160134, +0.020254] users=29 recv=605
+                     | sel-ctrl +0.004075 [-0.000823, +0.012743] users=29 recv=605
+                     | TOST within ±0.0002: False
+  behavior_only      base 0.20256 | selected +0.043829 [+0.029789, +0.060019] users=29 recv=605
+                     | control  +0.044522 [+0.030621, +0.060656] users=29 recv=605
+                     | sel-ctrl -0.000693 [-0.001459, -0.000007] users=29 recv=605
+                     | TOST within ±0.0002: False
+  behavior_ses_only  base 0.20732 | selected +0.045990 [+0.031543, +0.062392] users=29 recv=605
+                     | control  +0.046707 [+0.032398, +0.063134] users=29 recv=605
+                     | sel-ctrl -0.000717 [-0.001531, +0.000012] users=29 recv=605
+                     | TOST within ±0.0002: False
+  psy_only           base 3.51647 | selected -0.177209 [-0.380918, +0.043025] users=29 recv=605
+                     | control  -0.187047 [-0.386205, +0.029434] users=29 recv=605
+                     | sel-ctrl +0.009839 [-0.001933, +0.030648] users=29 recv=605
+                     | TOST within ±0.0002: False
+  day_only           base 0.27335 | selected +0.009426 [-0.000115, +0.021524] users=29 recv=605
+                     | control  +0.009499 [+0.000054, +0.021492] users=29 recv=605
+                     | sel-ctrl -0.000073 [-0.000344, +0.000210] users=29 recv=605
+                     | TOST within ±0.0002: False
+  [net of alpha=0] full           sel +0.002751 [-0.000269, +0.006089] users=29 recv=605
+                                ctrl +0.002354 [+0.000138, +0.004614] users=29 recv=605
+                                diff +0.000397 [-0.001041, +0.002712] users=29 recv=605
+  [net of alpha=0] profile_only   sel +0.012182 [-0.002556, +0.028297] users=29 recv=605
+                                ctrl +0.008107 [-0.004728, +0.021461] users=29 recv=605
+                                diff +0.004075 [-0.000823, +0.012743] users=29 recv=605
+  [net of alpha=0] behavior_only  sel +0.000513 [-0.000684, +0.001852] users=29 recv=605
+                                ctrl +0.001205 [+0.000325, +0.002286] users=29 recv=605
+                                diff -0.000693 [-0.001459, -0.000007] users=29 recv=605
+  [net of alpha=0] behavior_ses_only sel +0.000539 [-0.000721, +0.001953] users=29 recv=605
+                                ctrl +0.001256 [+0.000363, +0.002374] users=29 recv=605
+                                diff -0.000717 [-0.001531, +0.000012] users=29 recv=605
+  [net of alpha=0] psy_only       sel +0.029532 [-0.005719, +0.068029] users=29 recv=605
+                                ctrl +0.019693 [-0.011181, +0.051245] users=29 recv=605
+                                diff +0.009839 [-0.001933, +0.030648] users=29 recv=605
+  [net of alpha=0] day_only       sel -0.000335 [-0.002034, +0.001682] users=29 recv=605
+                                ctrl -0.000262 [-0.001982, +0.001721] users=29 recv=605
+                                diff -0.000073 [-0.000344, +0.000210] users=29 recv=605
+  profile-minus-behaviour of (sel-ctrl): +0.004767 [-0.000279, +0.013469] users=29 recv=605
+
+=== dept_role | anomalous donors ===
+  full               base 0.50870 | selected +0.020734 [-0.005491, +0.045166] users=27 recv=528
+                     | control  +0.020955 [-0.004907, +0.045144] users=27 recv=528
+                     | sel-ctrl -0.000221 [-0.001153, +0.000852] users=27 recv=528
+                     | TOST within ±0.0002: False
+  profile_only       base 1.64691 | selected -0.078733 [-0.173955, +0.022562] users=27 recv=528
+                     | control  -0.080302 [-0.173858, +0.020798] users=27 recv=528
+                     | sel-ctrl +0.001569 [-0.001395, +0.005593] users=27 recv=528
+                     | TOST within ±0.0002: False
+  behavior_only      base 0.20238 | selected +0.045992 [+0.031359, +0.063422] users=27 recv=528
+                     | control  +0.046651 [+0.032232, +0.063924] users=27 recv=528
+                     | sel-ctrl -0.000659 [-0.001345, -0.000077] users=27 recv=528
+                     | TOST within ±0.0002: False
+  behavior_ses_only  base 0.20665 | selected +0.048280 [+0.033304, +0.066027] users=27 recv=528
+                     | control  +0.048968 [+0.034150, +0.066665] users=27 recv=528
+                     | sel-ctrl -0.000688 [-0.001417, -0.000080] users=27 recv=528
+                     | TOST within ±0.0002: False
+  psy_only           base 3.53984 | selected -0.195336 [-0.416387, +0.041482] users=27 recv=528
+                     | control  -0.198739 [-0.419347, +0.034539] users=27 recv=528
+                     | sel-ctrl +0.003403 [-0.003573, +0.013171] users=27 recv=528
+                     | TOST within ±0.0002: False
+  day_only           base 0.27075 | selected +0.007320 [-0.000290, +0.017521] users=27 recv=528
+                     | control  +0.007082 [-0.000371, +0.016872] users=27 recv=528
+                     | sel-ctrl +0.000238 [-0.000118, +0.000708] users=27 recv=528
+                     | TOST within ±0.0002: False
+  [net of alpha=0] full           sel +0.001513 [-0.000932, +0.004225] users=27 recv=528
+                                ctrl +0.001734 [-0.000475, +0.004124] users=27 recv=528
+                                diff -0.000221 [-0.001153, +0.000852] users=27 recv=528
+  [net of alpha=0] profile_only   sel +0.006039 [-0.007139, +0.019885] users=27 recv=528
+                                ctrl +0.004470 [-0.007919, +0.017263] users=27 recv=528
+                                diff +0.001569 [-0.001395, +0.005593] users=27 recv=528
+  [net of alpha=0] behavior_only  sel +0.000551 [-0.000611, +0.001873] users=27 recv=528
+                                ctrl +0.001210 [+0.000326, +0.002384] users=27 recv=528
+                                diff -0.000659 [-0.001345, -0.000077] users=27 recv=528
+  [net of alpha=0] behavior_ses_only sel +0.000558 [-0.000669, +0.001957] users=27 recv=528
+                                ctrl +0.001246 [+0.000336, +0.002453] users=27 recv=528
+                                diff -0.000688 [-0.001417, -0.000080] users=27 recv=528
+  [net of alpha=0] psy_only       sel +0.014299 [-0.016849, +0.046823] users=27 recv=528
+                                ctrl +0.010896 [-0.018921, +0.041298] users=27 recv=528
+                                diff +0.003403 [-0.003573, +0.013171] users=27 recv=528
+  [net of alpha=0] day_only       sel +0.000070 [-0.001177, +0.001518] users=27 recv=528
+                                ctrl -0.000168 [-0.001690, +0.001397] users=27 recv=528
+                                diff +0.000238 [-0.000118, +0.000708] users=27 recv=528
+  profile-minus-behaviour of (sel-ctrl): +0.002228 [-0.000776, +0.006300] users=27 recv=528
+
+=== dept_role | benign donors ===
+  full               base 0.50811 | selected +0.022426 [-0.003938, +0.047263] users=27 recv=528
+                     | control  +0.021804 [-0.003946, +0.045814] users=27 recv=528
+                     | sel-ctrl +0.000621 [-0.001209, +0.003548] users=27 recv=528
+                     | TOST within ±0.0002: False
+  profile_only       base 1.64380 | selected -0.071051 [-0.167208, +0.031414] users=27 recv=528
+                     | control  -0.075850 [-0.169055, +0.024890] users=27 recv=528
+                     | sel-ctrl +0.004799 [-0.001469, +0.015597] users=27 recv=528
+                     | TOST within ±0.0002: False
+  behavior_only      base 0.20242 | selected +0.046093 [+0.031547, +0.063518] users=27 recv=528
+                     | control  +0.046694 [+0.032272, +0.063966] users=27 recv=528
+                     | sel-ctrl -0.000601 [-0.001451, +0.000127] users=27 recv=528
+                     | TOST within ±0.0002: False
+  behavior_ses_only  base 0.20666 | selected +0.048409 [+0.033496, +0.066260] users=27 recv=528
+                     | control  +0.049031 [+0.034241, +0.066637] users=27 recv=528
+                     | sel-ctrl -0.000622 [-0.001522, +0.000146] users=27 recv=528
+                     | TOST within ±0.0002: False
+  psy_only           base 3.53230 | selected -0.176593 [-0.400893, +0.060724] users=27 recv=528
+                     | control  -0.188005 [-0.405194, +0.045831] users=27 recv=528
+                     | sel-ctrl +0.011412 [-0.003615, +0.037357] users=27 recv=528
+                     | TOST within ±0.0002: False
+  day_only           base 0.27080 | selected +0.007045 [-0.000815, +0.017248] users=27 recv=528
+                     | control  +0.006989 [-0.000786, +0.017140] users=27 recv=528
+                     | sel-ctrl +0.000057 [-0.000204, +0.000321] users=27 recv=528
+                     | TOST within ±0.0002: False
+  [net of alpha=0] full           sel +0.003205 [-0.000103, +0.007174] users=27 recv=528
+                                ctrl +0.002584 [+0.000171, +0.005036] users=27 recv=528
+                                diff +0.000621 [-0.001209, +0.003548] users=27 recv=528
+  [net of alpha=0] profile_only   sel +0.013722 [-0.002372, +0.031674] users=27 recv=528
+                                ctrl +0.008922 [-0.004944, +0.023104] users=27 recv=528
+                                diff +0.004799 [-0.001469, +0.015597] users=27 recv=528
+  [net of alpha=0] behavior_only  sel +0.000652 [-0.000625, +0.002029] users=27 recv=528
+                                ctrl +0.001253 [+0.000396, +0.002380] users=27 recv=528
+                                diff -0.000601 [-0.001451, +0.000127] users=27 recv=528
+  [net of alpha=0] behavior_ses_only sel +0.000686 [-0.000671, +0.002123] users=27 recv=528
+                                ctrl +0.001309 [+0.000417, +0.002480] users=27 recv=528
+                                diff -0.000622 [-0.001522, +0.000146] users=27 recv=528
+  [net of alpha=0] psy_only       sel +0.033042 [-0.005726, +0.075727] users=27 recv=528
+                                ctrl +0.021630 [-0.011503, +0.055443] users=27 recv=528
+                                diff +0.011412 [-0.003615, +0.037357] users=27 recv=528
+  [net of alpha=0] day_only       sel -0.000205 [-0.001939, +0.001909] users=27 recv=528
+                                ctrl -0.000262 [-0.002073, +0.001859] users=27 recv=528
+                                diff +0.000057 [-0.000204, +0.000321] users=27 recv=528
+  profile-minus-behaviour of (sel-ctrl): +0.005401 [-0.000894, +0.016021] users=27 recv=528
+
+=== role | anomalous donors ===
+  full               base 0.50870 | selected +0.020712 [-0.005495, +0.045052] users=27 recv=528
+                     | control  +0.021007 [-0.004846, +0.045119] users=27 recv=528
+                     | sel-ctrl -0.000295 [-0.001220, +0.000801] users=27 recv=528
+                     | TOST within ±0.0002: False
+  profile_only       base 1.64691 | selected -0.078866 [-0.174219, +0.022535] users=27 recv=528
+                     | control  -0.080154 [-0.173864, +0.020248] users=27 recv=528
+                     | sel-ctrl +0.001288 [-0.002093, +0.005886] users=27 recv=528
+                     | TOST within ±0.0002: False
+  behavior_only      base 0.20238 | selected +0.045994 [+0.031441, +0.063438] users=27 recv=528
+                     | control  +0.046694 [+0.032225, +0.064009] users=27 recv=528
+                     | sel-ctrl -0.000700 [-0.001365, -0.000149] users=27 recv=528
+                     | TOST within ±0.0002: False
+  behavior_ses_only  base 0.20665 | selected +0.048279 [+0.033330, +0.066023] users=27 recv=528
+                     | control  +0.049003 [+0.034135, +0.066744] users=27 recv=528
+                     | sel-ctrl -0.000724 [-0.001428, -0.000151] users=27 recv=528
+                     | TOST within ±0.0002: False
+  psy_only           base 3.53984 | selected -0.195572 [-0.417737, +0.040969] users=27 recv=528
+                     | control  -0.198456 [-0.417978, +0.034723] users=27 recv=528
+                     | sel-ctrl +0.002884 [-0.005023, +0.013990] users=27 recv=528
+                     | TOST within ±0.0002: False
+  day_only           base 0.27075 | selected +0.007268 [-0.000392, +0.017479] users=27 recv=528
+                     | control  +0.007140 [-0.000370, +0.017061] users=27 recv=528
+                     | sel-ctrl +0.000128 [-0.000200, +0.000481] users=27 recv=528
+                     | TOST within ±0.0002: False
+  [net of alpha=0] full           sel +0.001491 [-0.000965, +0.004189] users=27 recv=528
+                                ctrl +0.001786 [-0.000459, +0.004242] users=27 recv=528
+                                diff -0.000295 [-0.001220, +0.000801] users=27 recv=528
+  [net of alpha=0] profile_only   sel +0.005907 [-0.007421, +0.019715] users=27 recv=528
+                                ctrl +0.004619 [-0.007912, +0.017661] users=27 recv=528
+                                diff +0.001288 [-0.002093, +0.005886] users=27 recv=528
+  [net of alpha=0] behavior_only  sel +0.000553 [-0.000588, +0.001845] users=27 recv=528
+                                ctrl +0.001253 [+0.000376, +0.002419] users=27 recv=528
+                                diff -0.000700 [-0.001365, -0.000149] users=27 recv=528
+  [net of alpha=0] behavior_ses_only sel +0.000556 [-0.000637, +0.001912] users=27 recv=528
+                                ctrl +0.001281 [+0.000378, +0.002488] users=27 recv=528
+                                diff -0.000724 [-0.001428, -0.000151] users=27 recv=528
+  [net of alpha=0] psy_only       sel +0.014063 [-0.017309, +0.047022] users=27 recv=528
+                                ctrl +0.011180 [-0.018456, +0.042125] users=27 recv=528
+                                diff +0.002884 [-0.005023, +0.013990] users=27 recv=528
+  [net of alpha=0] day_only       sel +0.000018 [-0.001260, +0.001520] users=27 recv=528
+                                ctrl -0.000110 [-0.001510, +0.001389] users=27 recv=528
+                                diff +0.000128 [-0.000200, +0.000481] users=27 recv=528
+  profile-minus-behaviour of (sel-ctrl): +0.001988 [-0.001447, +0.006719] users=27 recv=528
+
+=== role | benign donors ===
+  full               base 0.50811 | selected +0.022416 [-0.004003, +0.047126] users=27 recv=528
+                     | control  +0.021992 [-0.003737, +0.045989] users=27 recv=528
+                     | sel-ctrl +0.000424 [-0.001311, +0.003131] users=27 recv=528
+                     | TOST within ±0.0002: False
+  profile_only       base 1.64380 | selected -0.071264 [-0.167281, +0.030806] users=27 recv=528
+                     | control  -0.075136 [-0.168584, +0.025693] users=27 recv=528
+                     | sel-ctrl +0.003872 [-0.002089, +0.014130] users=27 recv=528
+                     | TOST within ±0.0002: False
+  behavior_only      base 0.20242 | selected +0.046091 [+0.031511, +0.063580] users=27 recv=528
+                     | control  +0.046772 [+0.032303, +0.064071] users=27 recv=528
+                     | sel-ctrl -0.000681 [-0.001531, +0.000025] users=27 recv=528
+                     | TOST within ±0.0002: False
+  behavior_ses_only  base 0.20666 | selected +0.048406 [+0.033452, +0.066254] users=27 recv=528
+                     | control  +0.049109 [+0.034306, +0.066758] users=27 recv=528
+                     | sel-ctrl -0.000702 [-0.001599, +0.000044] users=27 recv=528
+                     | TOST within ±0.0002: False
+  psy_only           base 3.53230 | selected -0.177211 [-0.400300, +0.059245] users=27 recv=528
+                     | control  -0.186345 [-0.404651, +0.048061] users=27 recv=528
+                     | sel-ctrl +0.009134 [-0.005068, +0.033504] users=27 recv=528
+                     | TOST within ±0.0002: False
+  day_only           base 0.27080 | selected +0.007119 [-0.000802, +0.017424] users=27 recv=528
+                     | control  +0.007024 [-0.000708, +0.017109] users=27 recv=528
+                     | sel-ctrl +0.000094 [-0.000242, +0.000491] users=27 recv=528
+                     | TOST within ±0.0002: False
+  [net of alpha=0] full           sel +0.003195 [+0.000012, +0.006948] users=27 recv=528
+                                ctrl +0.002771 [+0.000363, +0.005222] users=27 recv=528
+                                diff +0.000424 [-0.001311, +0.003131] users=27 recv=528
+  [net of alpha=0] profile_only   sel +0.013508 [-0.002116, +0.030856] users=27 recv=528
+                                ctrl +0.009636 [-0.004107, +0.023789] users=27 recv=528
+                                diff +0.003872 [-0.002089, +0.014130] users=27 recv=528
+  [net of alpha=0] behavior_only  sel +0.000650 [-0.000645, +0.002049] users=27 recv=528
+                                ctrl +0.001331 [+0.000452, +0.002495] users=27 recv=528
+                                diff -0.000681 [-0.001531, +0.000025] users=27 recv=528
+  [net of alpha=0] behavior_ses_only sel +0.000684 [-0.000703, +0.002135] users=27 recv=528
+                                ctrl +0.001386 [+0.000464, +0.002586] users=27 recv=528
+                                diff -0.000702 [-0.001599, +0.000044] users=27 recv=528
+  [net of alpha=0] psy_only       sel +0.032424 [-0.005156, +0.073757] users=27 recv=528
+                                ctrl +0.023290 [-0.009259, +0.057609] users=27 recv=528
+                                diff +0.009134 [-0.005068, +0.033504] users=27 recv=528
+  [net of alpha=0] day_only       sel -0.000131 [-0.001874, +0.002017] users=27 recv=528
+                                ctrl -0.000226 [-0.002133, +0.002040] users=27 recv=528
+                                diff +0.000094 [-0.000242, +0.000491] users=27 recv=528
+  profile-minus-behaviour of (sel-ctrl): +0.004553 [-0.001515, +0.014780] users=27 recv=528
+
+=== team | anomalous donors ===
+  full               base 0.51377 | selected +0.015826 [-0.009806, +0.041477] users=26 recv=516
+                     | control  +0.015375 [-0.009958, +0.040847] users=26 recv=516
+                     | sel-ctrl +0.000450 [-0.000450, +0.001513] users=26 recv=516
+                     | TOST within ±0.0002: False
+  profile_only       base 1.66186 | selected -0.094548 [-0.197330, +0.013144] users=26 recv=516
+                     | control  -0.098112 [-0.199872, +0.009494] users=26 recv=516
+                     | sel-ctrl +0.003564 [+0.000579, +0.007724] users=26 recv=516
+                     | TOST within ±0.0002: False
+  behavior_only      base 0.20585 | selected +0.044635 [+0.030047, +0.062461] users=26 recv=516
+                     | control  +0.045078 [+0.030433, +0.062836] users=26 recv=516
+                     | sel-ctrl -0.000443 [-0.001245, +0.000287] users=26 recv=516
+                     | TOST within ±0.0002: False
+  behavior_ses_only  base 0.21004 | selected +0.046967 [+0.031972, +0.065189] users=26 recv=516
+                     | control  +0.047417 [+0.032492, +0.065583] users=26 recv=516
+                     | sel-ctrl -0.000449 [-0.001297, +0.000315] users=26 recv=516
+                     | TOST within ±0.0002: False
+  psy_only           base 3.52531 | selected -0.218891 [-0.452192, +0.027067] users=26 recv=516
+                     | control  -0.226847 [-0.458296, +0.018202] users=26 recv=516
+                     | sel-ctrl +0.007956 [+0.000927, +0.017928] users=26 recv=516
+                     | TOST within ±0.0002: False
+  day_only           base 0.30896 | selected -0.003045 [-0.024191, +0.012937] users=26 recv=516
+                     | control  -0.003413 [-0.024500, +0.012534] users=26 recv=516
+                     | sel-ctrl +0.000369 [+0.000045, +0.000692] users=26 recv=516
+                     | TOST within ±0.0002: False
+  [net of alpha=0] full           sel +0.000802 [-0.000930, +0.002714] users=26 recv=516
+                                ctrl +0.000352 [-0.001199, +0.001963] users=26 recv=516
+                                diff +0.000450 [-0.000450, +0.001513] users=26 recv=516
+  [net of alpha=0] profile_only   sel +0.003085 [-0.004932, +0.011768] users=26 recv=516
+                                ctrl -0.000479 [-0.008234, +0.007539] users=26 recv=516
+                                diff +0.003564 [+0.000579, +0.007724] users=26 recv=516
+  [net of alpha=0] behavior_only  sel +0.000225 [-0.000764, +0.001131] users=26 recv=516
+                                ctrl +0.000668 [+0.000107, +0.001320] users=26 recv=516
+                                diff -0.000443 [-0.001245, +0.000287] users=26 recv=516
+  [net of alpha=0] behavior_ses_only sel +0.000271 [-0.000766, +0.001201] users=26 recv=516
+                                ctrl +0.000720 [+0.000174, +0.001365] users=26 recv=516
+                                diff -0.000449 [-0.001297, +0.000315] users=26 recv=516
+  [net of alpha=0] psy_only       sel +0.007088 [-0.012259, +0.027799] users=26 recv=516
+                                ctrl -0.000868 [-0.019536, +0.018629] users=26 recv=516
+                                diff +0.007956 [+0.000927, +0.017928] users=26 recv=516
+  [net of alpha=0] day_only       sel +0.000275 [-0.000717, +0.001216] users=26 recv=516
+                                ctrl -0.000094 [-0.001031, +0.000804] users=26 recv=516
+                                diff +0.000369 [+0.000045, +0.000692] users=26 recv=516
+  profile-minus-behaviour of (sel-ctrl): +0.004007 [+0.000796, +0.008327] users=26 recv=516
+
+=== team | benign donors ===
+  full               base 0.51079 | selected +0.018878 [-0.004587, +0.042395] users=30 recv=638
+                     | control  +0.018272 [-0.004821, +0.041270] users=30 recv=638
+                     | sel-ctrl +0.000606 [-0.000757, +0.002767] users=30 recv=638
+                     | TOST within ±0.0002: False
+  profile_only       base 1.64743 | selected -0.084619 [-0.176761, +0.009328] users=30 recv=638
+                     | control  -0.088960 [-0.178445, +0.004369] users=30 recv=638
+                     | sel-ctrl +0.004341 [-0.000006, +0.012070] users=30 recv=638
+                     | TOST within ±0.0002: False
+  behavior_only      base 0.20311 | selected +0.044457 [+0.030705, +0.060145] users=30 recv=638
+                     | control  +0.044971 [+0.031332, +0.060552] users=30 recv=638
+                     | sel-ctrl -0.000513 [-0.001304, +0.000154] users=30 recv=638
+                     | TOST within ±0.0002: False
+  behavior_ses_only  base 0.20787 | selected +0.046613 [+0.032837, +0.062624] users=30 recv=638
+                     | control  +0.047147 [+0.033325, +0.063254] users=30 recv=638
+                     | sel-ctrl -0.000534 [-0.001379, +0.000171] users=30 recv=638
+                     | TOST within ±0.0002: False
+  psy_only           base 3.49519 | selected -0.202578 [-0.410972, +0.014664] users=30 recv=638
+                     | control  -0.212798 [-0.416049, +0.001990] users=30 recv=638
+                     | sel-ctrl +0.010220 [-0.000227, +0.028863] users=30 recv=638
+                     | TOST within ±0.0002: False
+  day_only           base 0.30526 | selected +0.002167 [-0.016775, +0.017761] users=30 recv=638
+                     | control  +0.002063 [-0.016913, +0.017706] users=30 recv=638
+                     | sel-ctrl +0.000104 [-0.000132, +0.000337] users=30 recv=638
+                     | TOST within ±0.0002: False
+  [net of alpha=0] full           sel +0.002852 [+0.000019, +0.006121] users=30 recv=638
+                                ctrl +0.002245 [+0.000064, +0.004507] users=30 recv=638
+                                diff +0.000606 [-0.000757, +0.002767] users=30 recv=638
+  [net of alpha=0] profile_only   sel +0.012073 [-0.001754, +0.027161] users=30 recv=638
+                                ctrl +0.007732 [-0.004975, +0.020675] users=30 recv=638
+                                diff +0.004341 [-0.000006, +0.012070] users=30 recv=638
+  [net of alpha=0] behavior_only  sel +0.000632 [-0.000554, +0.001942] users=30 recv=638
+                                ctrl +0.001145 [+0.000304, +0.002222] users=30 recv=638
+                                diff -0.000513 [-0.001304, +0.000154] users=30 recv=638
+  [net of alpha=0] behavior_ses_only sel +0.000667 [-0.000578, +0.002062] users=30 recv=638
+                                ctrl +0.001201 [+0.000314, +0.002315] users=30 recv=638
+                                diff -0.000534 [-0.001379, +0.000171] users=30 recv=638
+  [net of alpha=0] psy_only       sel +0.028575 [-0.004499, +0.064366] users=30 recv=638
+                                ctrl +0.018355 [-0.011734, +0.049507] users=30 recv=638
+                                diff +0.010220 [-0.000227, +0.028863] users=30 recv=638
+  [net of alpha=0] day_only       sel +0.000166 [-0.001686, +0.002247] users=30 recv=638
+                                ctrl +0.000062 [-0.001694, +0.002012] users=30 recv=638
+                                diff +0.000104 [-0.000132, +0.000337] users=30 recv=638
+  profile-minus-behaviour of (sel-ctrl): +0.004855 [+0.000317, +0.012725] users=30 recv=638
+
+[historical endpoint, continuity only] dept: best-candidate donor DiD (full) +0.001322 [+0.000605, +0.002205] users=29 recv=605
+
+[historical endpoint, continuity only] dept_role: best-candidate donor DiD (full) +0.000967 [+0.000049, +0.001987] users=27 recv=528
+
+[historical endpoint, continuity only] role: best-candidate donor DiD (full) +0.001017 [+0.000044, +0.002264] users=27 recv=528
+
+[historical endpoint, continuity only] team: best-candidate donor DiD (full) +0.001145 [+0.000245, +0.002190] users=26 recv=516

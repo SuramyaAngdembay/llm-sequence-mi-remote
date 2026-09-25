@@ -9,8 +9,11 @@ Claim & Status \\
 \midrule
 Benign-only QLoRA training is valid one-class training & Supported \\
 Fold-aligned detector strength reflects behavioral discrimination & Rejected (seen-vs-unseen-user effect) \\
-r6.2 contains a profile-bound sparse feature family with causal relevance under the audited estimands & Supported descriptively; held-out replication concentrates on the dominant user; necessity significant under dose-matched controls (App.~A.5) \\
-r4.2 contains a behavior-associated sparse feature family supported by patching and ablation & Supported; causal contrast significant under dose-matched controls; ablation replication persists under a benign-only dictionary and across 3B adapter seeds, patch-repair replication does not \\
+r6.2 contains a sparse feature family active on profile tokens whose edits pass the audited estimands & Supported descriptively (best-candidate patching and necessity); held-out replication concentrates on the dominant user; necessity significant against proxy-matched controls (methods appendix) \\
+r4.2 contains a sparse feature family active mainly on behavior tokens whose edits pass patching and ablation & Partly: the best-candidate patch contrast is positive (significant against proxy-matched controls), but on held-out users the mean over donors is negative; ablation replication persists under a benign-only dictionary and across 3B adapter seeds, patch-repair replication does not \\
+Editing the selected r4.2 features changes behavior-token predictions more than editing controls & Supported for the joint edit under the SAE replacement procedure at strengths 0.75--1 on held-out users; not shown to exceed an equal-size perturbation at the same positions, or to be specific to anomalous days \\
+The selected r4.2 edits act on behavior but not profile predictions & Not established: the profile effect is uncertain and the preregistered direct comparison is inconclusive \\
+Editing features toward a benign colleague repairs malicious days & Not established: only the searched best candidate is positive; the mean over donors has the opposite sign \\
 Configuration-independent r4.2 confirmation & Not established \\
 Literal feature transfer across benchmarks succeeds & Rejected \\
 Transfer failure is explained by SAE seed non-identifiability & Rejected (alignment controls) \\

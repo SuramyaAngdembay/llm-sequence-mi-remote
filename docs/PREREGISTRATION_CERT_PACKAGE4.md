@@ -236,3 +236,22 @@ passed every gate. Full record: `results/cert_package4_token_class/README.md`.
   0.000758) when chosen with a constant base. Averaged over candidate donors
   at alpha 1 it becomes negative in all four modes (secondary analysis,
   motivated by ledger C6 before results).
+
+**Correction, 2026-09-25 (after external review of this result).** (1) The
+direct profile-minus-behaviour contrast is the declared primary quantity, and
+it is inconclusive in every context; a detectable behaviour contrast beside an
+uncertain profile contrast does not show that the two differ, and no profile
+effect is shown to be absent. (2) Reconstruction cancels *additively* between
+arms (identical alpha-0 effects); reconstruction-edit interactions inside the
+network are not removed. The separate alpha-0 run was also scored in different
+batches (unpatched scores differ by about 0.007 profile and 0.0005 behaviour
+nats), so absolute alpha-1-minus-alpha-0 values are not isolated edits. (3)
+The patch edits every selected coordinate at the union of active positions, so
+a profile effect cannot be assigned to feature 2302. (4) Receivers are
+malicious days only; nothing here is shown to be anomaly-specific. (5) The
+declared 5,000-draw bootstrap is now reported beside the 10,000-draw one
+(`results/cert_package4_token_class/bootstrap_5000/`): no primary quantity
+changes. (6) `select_matched_controls.py` matches proxies and cannot serve as
+this experiment's balance check; the planned follow-up is the residual-
+preserving, norm- and position-matched Pilot 1 of
+`docs/HYPOTHESIS_LEDGER_2026-09-25.md`.

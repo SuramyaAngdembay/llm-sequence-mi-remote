@@ -7,16 +7,22 @@ under four ways of collapsing candidates:
   best      : min over donors and alphas   (the published endpoint)
   best@1    : min over donors at alpha 1
   mean@1    : mean over donors at alpha 1  (average edit)
+  mean@all  : mean over donors and all four alphas (exploratory, added
+              2026-09-25 after the external review raised it)
   equalized : best over donors and alphas, benign candidates subsampled to the
               receiver's anomalous candidate count (200 draws, averaged)
 View: full score. Aggregates: receiver-weighted mean (the published statistic)
-and mean of user means with a 10,000-draw cluster bootstrap over users.
+and mean of user means with a cluster bootstrap over users (10,000 draws, or
+the count given as the second argument; the pre-registration declared 5,000).
+
+  python3 scripts/did_estimands.py ROWS.csv [DRAWS]
 """
 import csv, random, statistics as st, sys
 from collections import defaultdict
 import numpy as np
 
 path = sys.argv[1]
+DRAWS = int(sys.argv[2]) if len(sys.argv) > 2 else 10000
 data = defaultdict(lambda: defaultdict(list))   # (mode, recv) -> (set, dtype, alpha) -> [(donor, delta)]
 for r in csv.DictReader(open(path)):
     data[(r["context_mode"], r["receiver_example_id"])][(r["feature_set"], r["donor_type"], float(r["alpha"]))].append(
@@ -60,7 +66,9 @@ for mode in modes:
                 return min(cd[d][1.0] for d in ds if 1.0 in cd[d])
             if how == "mean@1":
                 return st.fmean(cd[d][1.0] for d in ds if 1.0 in cd[d])
-        for how in ("best", "best@1", "mean@1"):
+            if how == "mean@all":
+                return st.fmean(v for d in ds for v in cd[d].values())
+        for how in ("best", "best@1", "mean@1", "mean@all"):
             est[how][recv] = ((val("top5", "anomalous", how) - val("top5", "benign", how))
                               - (val("control5_active", "anomalous", how) - val("control5_active", "benign", how)))
         # equalized candidate counts: subsample the larger donor pool to the smaller one
@@ -77,12 +85,12 @@ for mode in modes:
     nb = np.array([x for x, _ in counts]); na = np.array([y for _, y in counts])
     print(f"\n=== {mode}: {len(counts)} complete receivers | benign candidates median {np.median(nb):.0f} (range {nb.min()}-{nb.max()}), "
           f"anomalous median {np.median(na):.0f} (range {na.min()}-{na.max()}); receivers with fewer anomalous than benign: {(na < nb).sum()}")
-    for how in ("best", "best@1", "mean@1", "equalized"):
+    for how in ("best", "best@1", "mean@1", "mean@all", "equalized"):
         per = est[how]
         byu = defaultdict(list)
         for rid, v in per.items():
             byu[rid.split(":")[0]].append(v)
         um = {u: st.fmean(v) for u, v in byu.items()}
-        lo, hi = boot(um)
+        lo, hi = boot(um, draws=DRAWS)
         print(f"  {how:<10} receiver-weighted {st.fmean(per.values()):+.6f} | mean of user means {st.fmean(um.values()):+.6f} "
               f"[{lo:+.6f}, {hi:+.6f}] users +{sum(v > 0 for v in um.values())}/-{sum(v < 0 for v in um.values())}")

@@ -19,10 +19,11 @@ Components to Interpretable Sparse Features*. Search the source for `NEW`,
 The removed CTMC chapter and its data-preparation section are preserved verbatim
 in `ctmc_chapter_removed.tex`.
 
-Compiles cleanly with TeX Live 2020 (70 pages, two passes, no errors, no
-undefined references). It needs the seven PCA figure files alongside it. The one
+Compiles cleanly with TeX Live 2020 (74 pages as of 2026-09-25, two passes, no
+errors, no undefined references). It needs the seven PCA figure files alongside it. The one
 overfull line left is in the original PCA chapter. `thesis_mechinterp_preview.pdf`
-was built with placeholder grey boxes in place of those figures.
+is built in graphicx draft mode, with placeholder frames in place of those
+figures (rebuilt 2026-09-25 after the Chapter V corrections).
 
 Every number in Chapters IV and V was checked against its source file before
 it was written:

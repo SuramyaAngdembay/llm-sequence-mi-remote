@@ -55,8 +55,12 @@ def user_of(example_id: str) -> str:
     return example_id.split(":")[0]
 
 
-def cluster_boot(by_user: Dict[str, float], draws: int = 10000, seed: int = 42,
+DRAWS = 10000  # set by --draws; the package-4 pre-registration declared 5,000
+
+
+def cluster_boot(by_user: Dict[str, float], draws: Optional[int] = None, seed: int = 42,
                  level: float = 0.95) -> Tuple[float, float]:
+    draws = DRAWS if draws is None else draws
     users = sorted(by_user)
     if len(users) < 2:
         return float("nan"), float("nan")
@@ -336,8 +340,11 @@ def main() -> int:
     ap.add_argument("--json", type=Path, default=None)
     ap.add_argument("--recon-run", type=Path, default=None,
                     help="a separate run with alpha 0 only, used as the reconstruction-only control")
+    ap.add_argument("--draws", type=int, default=10000, help="cluster bootstrap draws (default 10,000)")
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args()
+    global DRAWS
+    DRAWS = args.draws
     if args.self_test:
         return self_test()
     if args.run_dir is None:

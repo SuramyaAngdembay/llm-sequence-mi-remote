@@ -1,0 +1,28 @@
+
+=== dept: 605 complete receivers | benign candidates median 16 (range 16-16), anomalous median 16 (range 12-16); receivers with fewer anomalous than benign: 40
+  best       receiver-weighted +0.000770 | mean of user means +0.001322 [+0.000599, +0.002197] users +21/-8
+  best@1     receiver-weighted +0.000894 | mean of user means +0.002307 [+0.000355, +0.005033] users +22/-7
+  mean@1     receiver-weighted -0.004492 | mean of user means -0.002766 [-0.004470, -0.001200] users +11/-18
+  mean@all   receiver-weighted -0.002133 | mean of user means -0.001652 [-0.003245, -0.000530] users +11/-18
+  equalized  receiver-weighted +0.000769 | mean of user means +0.001321 [+0.000597, +0.002196] users +21/-8
+
+=== dept_role: 528 complete receivers | benign candidates median 16 (range 16-16), anomalous median 16 (range 1-16); receivers with fewer anomalous than benign: 155
+  best       receiver-weighted +0.000461 | mean of user means +0.000967 [+0.000036, +0.002005] users +17/-10
+  best@1     receiver-weighted +0.002272 | mean of user means +0.002565 [+0.000038, +0.005842] users +19/-8
+  mean@1     receiver-weighted -0.001655 | mean of user means -0.001547 [-0.004528, +0.001094] users +11/-16
+  mean@all   receiver-weighted -0.000893 | mean of user means -0.001308 [-0.003939, +0.000480] users +11/-16
+  equalized  receiver-weighted +0.000284 | mean of user means +0.000877 [-0.000045, +0.001929] users +16/-11
+
+=== role: 528 complete receivers | benign candidates median 16 (range 16-16), anomalous median 16 (range 1-16); receivers with fewer anomalous than benign: 155
+  best       receiver-weighted +0.000347 | mean of user means +0.001017 [+0.000040, +0.002313] users +16/-11
+  best@1     receiver-weighted +0.002135 | mean of user means +0.003266 [+0.000208, +0.007365] users +20/-7
+  mean@1     receiver-weighted -0.001598 | mean of user means -0.001308 [-0.003833, +0.001207] users +10/-17
+  mean@all   receiver-weighted -0.000917 | mean of user means -0.001088 [-0.003337, +0.000558] users +13/-14
+  equalized  receiver-weighted +0.000210 | mean of user means +0.000947 [-0.000036, +0.002229] users +15/-12
+
+=== team: 516 complete receivers | benign candidates median 16 (range 16-16), anomalous median 16 (range 2-16); receivers with fewer anomalous than benign: 216
+  best       receiver-weighted +0.000577 | mean of user means +0.001145 [+0.000247, +0.002088] users +17/-9
+  best@1     receiver-weighted +0.002340 | mean of user means +0.003311 [+0.000382, +0.006815] users +19/-7
+  mean@1     receiver-weighted -0.002004 | mean of user means -0.001556 [-0.004200, +0.000784] users +12/-14
+  mean@all   receiver-weighted -0.000957 | mean of user means -0.001178 [-0.003308, +0.000375] users +13/-13
+  equalized  receiver-weighted +0.000449 | mean of user means +0.001030 [+0.000157, +0.001934] users +17/-9

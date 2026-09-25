@@ -827,3 +827,16 @@ predictions, where the features fire. Whether that reflects anomaly-specific
 content or just larger edits needs a dose-matched control. The published
 "benign donor lowers the score more" reading holds only for the best of up to
 64 candidate edits per day, not for the average edit.
+
+**V49 — correction to V48 (2026-09-25, after external review).** V48's
+headline overstated the result. What it supports: the *joint* edit of the
+selected set, under the SAE replacement procedure, raises behaviour-token loss
+more than the control edit at alphas 0.75 and 1. The profile effect is
+uncertain and the pre-registered direct comparison is inconclusive, so "acts
+on behaviour, not profile" is not established. Reconstruction cancels only
+additively. The edit writes every selected coordinate at the union of active
+positions, so no profile effect can be assigned to 2302. All receivers are
+malicious. The proxy "dose-matched" control is not a balance check; the
+follow-up is Pilot 1 of `docs/HYPOTHESIS_LEDGER_2026-09-25.md`. Details:
+`docs/PREREGISTRATION_CERT_PACKAGE4.md` (correction note) and
+`results/cert_package4_token_class/README.md`.

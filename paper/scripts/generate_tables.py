@@ -101,8 +101,11 @@ def write_claims_table() -> None:
     rows = [
         ["Benign-only QLoRA training is valid one-class training", "Supported"],
         ["Fold-aligned detector strength reflects behavioral discrimination", "Rejected (seen-vs-unseen-user effect)"],
-        ["r6.2 contains a profile-bound sparse feature family with causal relevance under the audited estimands", "Supported descriptively; held-out replication concentrates on the dominant user; necessity significant under dose-matched controls (App.~A.5)"],
-        ["r4.2 contains a behavior-associated sparse feature family supported by patching and ablation", "Supported; causal contrast significant under dose-matched controls; ablation replication persists under a benign-only dictionary and across 3B adapter seeds, patch-repair replication does not"],
+        ["r6.2 contains a sparse feature family active on profile tokens whose edits pass the audited estimands", "Supported descriptively (best-candidate patching and necessity); held-out replication concentrates on the dominant user; necessity significant against proxy-matched controls (methods appendix)"],
+        ["r4.2 contains a sparse feature family active mainly on behavior tokens whose edits pass patching and ablation", "Partly: the best-candidate patch contrast is positive (significant against proxy-matched controls), but on held-out users the mean over donors is negative; ablation replication persists under a benign-only dictionary and across 3B adapter seeds, patch-repair replication does not"],
+        ["Editing the selected r4.2 features changes behavior-token predictions more than editing controls", "Supported for the joint edit under the SAE replacement procedure at strengths 0.75--1 on held-out users; not shown to exceed an equal-size perturbation at the same positions, or to be specific to anomalous days"],
+        ["The selected r4.2 edits act on behavior but not profile predictions", "Not established: the profile effect is uncertain and the preregistered direct comparison is inconclusive"],
+        ["Editing features toward a benign colleague repairs malicious days", "Not established: only the searched best candidate is positive; the mean over donors has the opposite sign"],
         ["Configuration-independent r4.2 confirmation", "Not established"],
         ["Literal feature transfer across benchmarks succeeds", "Rejected"],
         ["Transfer failure is explained by SAE seed non-identifiability", "Rejected (alignment controls)"],
@@ -111,7 +114,7 @@ def write_claims_table() -> None:
         ["The dissociation is particular to the 8B run, the serializer defect, or one adapter seed", "Rejected: 3B repaired-serializer rerun reproduces attribution across two adapter seeds per benchmark, and r4.2 ablation dependence replicates across 3B seeds"],
         ["The behavioral pole is an artifact of synthetic data or simulated psychometrics", "Rejected: TWOS (real users, real Big-Five) yields ~100\\% behavioral attribution across two adapter seeds at 50\\% malicious prevalence, as the population account predicts"],
         ["Profile capture is a generic dataset property that any detector class inherits", "Rejected at attribution level: classical one-class detectors on the same r6.2 features place 4--7\\% importance on profile, select no profile feature in any top-5, and lose nothing when profile is removed"],
-        ["The shortcut is an artifact of CERT's injected profile", "Rejected: on raw LANL authentication logs with no profile the unseen-user collapse recurs (AUC $0.95\\to0.50$); anonymizing the user-associated host field trades seen-user ranking for unseen-user ranking ($0.95\\to0.88$; $0.50\\to0.63$) while unseen average precision stays at the base rate; user-token ablation moves unseen AUC by $\\leq0.02$"],
+        ["The shortcut is an artifact of CERT's injected profile", "Not tested cleanly (corrected 2026-09-24): on LANL, user sampling and fold assignment shared a hash, so the unseen pool is 23 red-team users with no negative-only user and the seen pool adds 988 negative-only users; the AUCs ($0.95$ seen, $0.50$ unseen; host-anonymized $0.88$, $0.63$) describe those pools only; a corrected split is pending"],
         ["Profile content is merely correlated with the unseen-user collapse", "Rejected in the audited 8B run: removing profile content from adaptation and scoring restores fold-aligned unseen-user ROC $0.53\\to0.90$ (descriptive paired bootstrap interval excluding zero); small and non-significant in the audited 3B run (one adapter seed per arm)"],
     ]
     write_table(
@@ -134,7 +137,7 @@ def write_dictionary_robustness_table() -> None:
     ]
     write_table(
         TABLES / "dictionary_robustness.tex",
-        "Dictionary-independence summary. Attribution (what the selected features encode) reproduces exactly under SAE dictionaries retrained on benign rows only, while held-out replication of the intervention estimands is estimand- and dictionary-dependent.",
+        "Dictionary-independence summary. Attribution (where the selected features are active) reproduces under SAE dictionaries retrained on benign rows only, while held-out replication of the intervention estimands is estimand- and dictionary-dependent.",
         "tab:dict_robustness",
         "llp{3.4cm}p{3.6cm}p{3.6cm}",
         ["Dataset", "Dictionary", "Attribution", "Held-out patching", "Held-out ablation"],
@@ -159,7 +162,7 @@ def write_attribution_table() -> None:
     ]
     write_table(
         TABLES / "attribution.tex",
-        "Token attribution of the top-5 causal features (positive examples). "
+        "Token attribution of the top-5 selected features (positive examples). "
         "Columns are activation-mass fractions by serialization line class; PSY enrich "
         "is mass fraction over token share for the psychometric line. r6.2 features are "
         "profile-bound; four of five r4.2 features are behavioral (SES enrichment 1.33x "

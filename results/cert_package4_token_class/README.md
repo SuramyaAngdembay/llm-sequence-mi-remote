@@ -33,7 +33,7 @@ more anomalous.
 | role | **+0.0156** [+0.0086, +0.0227], 20/27 + | +0.0082 [−0.0057, +0.0317] | −0.0073 [−0.0249, +0.0188] |
 | team | **+0.0179** [+0.0110, +0.0249], 25/30 + | +0.0065 [−0.0056, +0.0266] | −0.0114 [−0.0270, +0.0115] |
 
-- **Reconstruction cancels here.** Every receiver day has an active feature of both arms, so both arms reconstruct the same days and the reconstruction-only (alpha 0) effect is identical: behaviour +0.0438, profile −0.0967, full +0.0160 (team receivers). The selected-minus-control differences are therefore the same raw and net of reconstruction. Absolute arm effects are dominated by reconstruction and are not read mechanistically.
+- **Reconstruction cancels additively here, and only additively.** Every receiver day has an active feature of both arms, so both arms reconstruct the same days and the reconstruction-only (alpha 0) effect is identical: behaviour +0.0438, profile −0.0967, full +0.0160 (team receivers). The selected-minus-control differences are therefore the same raw and net of reconstruction. This removes differential reconstruction coverage as an explanation. It does not remove reconstruction–edit interactions: the contrast is L(h+R+E_sel) − L(h+R+E_ctrl), not L(h+E_sel) − L(h+E_ctrl). *(Corrected 2026-09-25.)* Absolute arm effects are dominated by reconstruction and are not read mechanistically. The alpha-0 run was also scored in differently composed batches: its unpatched scores differ from the full run's by about 0.007 nats on profile tokens and 0.0005 on behaviour tokens (user means), so absolute alpha-1-minus-alpha-0 values are not isolated feature edits.
 - **Net of reconstruction**, the selected edit raises behaviour loss by +0.017 to +0.019 and the control edit by about +0.001.
 - **No negligible claims.** No view's 90% interval lies within the declared ±0.0002 margin.
 - **Anomalous donors** give the same pattern: behaviour +0.0137 to +0.0151, every interval excluding zero; profile +0.0056 to +0.0073, every interval including zero.
@@ -47,12 +47,20 @@ more anomalous.
 | 0.75 | +0.0047 to +0.0059, all exclude zero | +0.0068 to +0.0089, all include zero |
 | 1.0 | +0.0156 to +0.0179, all exclude zero | +0.0065 to +0.0086, all include zero |
 
+**The primary quantity is inconclusive.** The pre-registered primary quantity is the
+direct comparison (last column): its interval includes zero in every context.
+A detectable behaviour contrast beside an uncertain profile contrast does not
+show that the two differ. *(Added 2026-09-25 after external review; the
+original text led with the behaviour column.)*
+
 **Against the pre-registered prediction**, which was a negative profile contrast
 excluding zero, a behaviour contrast an order of magnitude smaller, and a
 monotone profile dose-response: **contradicted.** The profile contrast is
 positive and never distinguishable from zero. The behaviour contrast is large
 at full strength and sign-changing across alphas. As the pre-registration
-requires, this is reported as-is. Its motivation, the TWOS result, was already
+requires, this is reported as-is. The uncertain profile component alone does
+not refute a positive profile effect, and no profile effect is shown to be
+absent. Its motivation, the TWOS result, was already
 void (invalid selection).
 
 ## Historical endpoint: exact reproduction
@@ -102,19 +110,38 @@ negative with intervals that include zero.
 only; one adapter).**
 - At strengths 0.75 and 1, edits of the selected features raise **behaviour-token** loss more than edits of the control features, by about 0.005 and 0.017 nats per token beyond reconstruction with benign donors, and about 0.003 and 0.015 with anomalous donors. Every one of these intervals excludes zero, in every context mode. Four of the five selected features activate on session tokens.
 - At strengths 0.25 and 0.5 the difference is small and slightly negative, meaning selected edits lower behaviour loss a little relative to controls. It is mostly within noise.
-- No profile-token difference is detectable at any strength.
+- The profile-token difference is uncertain at every strength (every interval includes zero), and the direct profile-versus-behaviour comparison is inconclusive. Neither a profile effect nor its absence is established.
 
 **Not established.**
-- *That the features carry anomaly-specific information.* Their edits are larger than control edits: the project's earlier measurements found selected-feature edits several times larger in residual-stream norm. So the behaviour effect may partly be edit size. A dose-matched control (`scripts/select_matched_controls.py`) is the test.
+- *That the features carry anomaly-specific information.* Their edits are larger than control edits: the project's earlier measurements found selected-feature edits several times larger in residual-stream norm. So the behaviour effect may partly be edit size. Every receiver is a malicious day, so the effect is also not shown to be specific to anomalies. *(Corrected 2026-09-25.)* `scripts/select_matched_controls.py` matches proxies (activation frequency, mean coefficient, decoder norm without `x_std`) and its existing report concerns a different top-5 set, so it is not a balance check for this experiment. The test is a residual-preserving edit against norm- and position-matched random directions with matched benign receivers, with measured edit sizes (exploration pilot 1, `docs/HYPOTHESIS_LEDGER_2026-09-25.md`).
 - *That editing toward benign values "repairs" malicious days.* Only the best-of-64 estimand says so; the average edit says the opposite.
 - *Where the profile shortcut arises inside the model.*
 
-**Structural note.** This was raised before these results in the session
-record, and is not part of the pre-registration. The model predicts each token
-from earlier tokens only, and profile lines precede session lines. So once
-reconstruction is removed, profile-token effects can come only from edits on
-the organisation or personality lines, which in this set means feature 2302.
-The profile-versus-behaviour comparison is asymmetric by construction.
+**Structural note** (raised before these results in the session record; not
+part of the pre-registration; **corrected 2026-09-25**). The model predicts each
+token from earlier tokens only, and profile lines precede session lines. So
+once reconstruction is removed, profile-token effects can come only from edits
+at organisation or personality positions. The earlier version of this note said
+that in this set this means feature 2302. That was wrong. The patch edits
+*every* selected coordinate at the union of the set's active positions, including
+coordinates that were zero there. At the organisation tokens where 2302 fires,
+all five coordinates are written with donor values, so a profile effect cannot
+be assigned to 2302 from this joint intervention. The profile-versus-behaviour
+comparison remains asymmetric by construction.
+
+**Bootstrap draws.** The pre-registration declared 5,000 draws and the
+analyzer used 10,000 (reported above). The 5,000-draw outputs are in
+`bootstrap_5000/`, with the interval-by-interval comparison in
+`bootstrap_5000/SENSITIVITY.txt` (`scripts/compare_bootstrap_draws.py`).
+Bounds move by at most 0.0063 nats. 17 of 2,160 intervals change whether they
+exclude zero, each with a bound within 0.0006 of zero; all are absolute
+single-arm effects, secondary views, or behaviour differences at alpha 0.5
+(for example, anomalous-donor behaviour at alpha 0.5 in dept_role and role just
+excludes zero with 10,000 draws and just includes it with 5,000). No primary
+quantity changes. `did_estimands.txt` also gains a `mean@all` row (mean over
+donors and all four alphas, exploratory, added 2026-09-25): negative in every
+context, department user-mean −0.0017 [−0.0033, −0.0005], the others
+including zero.
 
 ## Files
 

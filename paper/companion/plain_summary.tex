@@ -238,15 +238,19 @@ g_f \;=\; \mathbb{E}\bigl[z_{t,f} \mid \text{malicious day}\bigr] -
 \mathbb{E}\bigl[z_{t,f} \mid \text{benign day}\bigr],
 \end{equation}
 and take the five features with the largest $g_f$ as the candidate
-mechanism. The full paper verifies, through intervention experiments,
-that these selected features genuinely influence the anomaly score: if
-one edits the coefficients $z_{t,f}$ of the selected features and
-propagates the edited internal state through the rest of the network,
-the score changes, and it changes more than when the same edit is
-applied to matched control features. We omit the details of those
-experiments here and take away only their conclusion: the selected
-features are causally connected to the score, not merely correlated
-with it. Figure~\ref{fig:effects} summarizes those measurements.
+mechanism. The full paper tests, through intervention experiments,
+whether editing these selected features changes the anomaly score: one
+edits the coefficients $z_{t,f}$ of the selected features, propagates the
+edited internal state through the rest of the network, and compares the
+score change with the change from editing active control features. The
+selected edits pass these tests, with two qualifications that limit the
+conclusion. The ``repair'' result keeps the best of many searched edits;
+averaged over the donor days instead, the corresponding r4.2 effect on
+held-out users has the opposite sign. And the selected edits are larger
+than the control edits and change all selected features together. The
+experiments therefore show that editing the selected set can change the
+score. They do not show what the features represent, or that any single
+feature matters. Figure~\ref{fig:effects} summarizes those measurements.
 
 \begin{figure}[t]
 \centering
@@ -256,9 +260,10 @@ matched control features, on the anomaly score (one panel per benchmark
 and per type of edit; units are thousandths of the score). Each point is
 the average effect for one organizational matching context, and each
 horizontal bar is a $95$ percent confidence interval computed with the
-malicious users as the resampling unit. Positive values mean that the
-selected features influence the score more strongly than the control
-features do. Open circles mark intervals that include zero.}
+malicious users as the resampling unit. Positive values favor the
+selected set over the active control in the stated contrast; the patch
+(``repair'') contrast keeps each day's best searched edit. Open circles
+mark intervals that include zero.}
 \label{fig:effects}
 \end{figure}
 
@@ -568,13 +573,13 @@ model with the profile removed repairs its ranking of unseen users from
 chance to about $0.90$.
 
 Third, the question ``what does this detector actually detect?'' can be
-answered, not merely asked. The chain presented here, namely
+investigated, not merely asked. The chain presented here, namely
 differences of internal states, a sparse dictionary approximation,
-selection of score-relevant directions, and attribution of those
-directions to input content, turns the question into a measurable
-quantity. In the full paper this chain is supported by causal
-intervention experiments and an extensive robustness program, and it is
-that combination, rather than any single number, that justifies the
-conclusions summarized here.
+selection of score-relevant directions, and the location of those
+directions in the input, turns the question into measurable quantities.
+In the full paper this chain is tested by intervention experiments and an
+extensive robustness program, and it is that combination, within the
+limits the full paper states, rather than any single number, that
+supports the conclusions summarized here.
 
 \end{document}
