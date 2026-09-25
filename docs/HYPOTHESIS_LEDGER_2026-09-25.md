@@ -118,3 +118,17 @@ A login-node process-listing mistake caused a second, 12-pair dry run to
 write into the same directory as the still-running full dry run. The full
 run's files are the later ones (04:02 EDT, 394 receivers); the small run
 completed first and changed nothing that is reported.
+
+**2026-09-25, submitted.** Pilot 1 = job 20907022, Pilot 2 = job 20907024
+(gpu-debug, `cis260991-gpu`, 1 A100, 30 min each; code at commit `e77b1d6`,
+md5-checked on the cluster). Queue estimate at submission: a week, against
+8–24 h observed for recent gpu-debug jobs; the H100 partition estimate was
+later still and its balance is reserved for Phase C, so the jobs were left in
+place.
+
+**2026-09-25, while queued (no output exists).** Pilot 2 now also saves the
+token ids of the original inputs in `pilot2_orig_tokens.npz`. Reason: the H4
+analysis must compare feature activity with next-token loss *within the same
+predicted field*, and without token ids it cannot separate a surprise-tracking
+feature from one that fires on intrinsically hard fields. Nothing else in the
+job changed.

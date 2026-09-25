@@ -192,7 +192,8 @@ def main() -> None:
             n = int(tok["attention_mask"][b].sum())
             logp = F.log_softmax(o.logits[b, : n - 1].float(), dim=-1)
             nll = -logp.gather(1, tok["input_ids"][b, 1:n].unsqueeze(1)).squeeze(1)
-            res.append({"nll": nll.cpu().numpy(), "h": captured["h"][b, :n].float(), "offsets": offsets[b, :n].tolist()})
+            res.append({"nll": nll.cpu().numpy(), "h": captured["h"][b, :n].float(), "offsets": offsets[b, :n].tolist(),
+                        "ids": tok["input_ids"][b, :n].cpu().numpy().astype(np.int32)})
         del o
         return res
 
@@ -253,7 +254,7 @@ def main() -> None:
                 rec[f"frac_active_{f}"] = float((col > 0).mean())
             records.append(rec)
             if variant == "orig":
-                per_token[str(i)] = {"classes": np.asarray(cls), "act": z.astype(np.float32),
+                per_token[str(i)] = {"classes": np.asarray(cls), "act": z.astype(np.float32), "ids": a["ids"],
                                      "nll_adapted": a["nll"].astype(np.float32), "nll_base": b["nll"].astype(np.float32)}
         if (s0 // args.batch_size) % 20 == 0:
             print(f"[pilot2] {s0 + len(batch)}/{len(items)} ({time.time() - t0:.0f}s)", flush=True)
