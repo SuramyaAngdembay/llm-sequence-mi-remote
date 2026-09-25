@@ -132,3 +132,38 @@ analysis must compare feature activity with next-token loss *within the same
 predicted field*, and without token ids it cannot separate a surprise-tracking
 feature from one that fires on intrinsically hard fields. Nothing else in the
 job changed.
+
+**2026-09-25, interpretation map (written while both jobs are queued; no
+pilot output exists).** What each outcome would and would not mean. All
+readings stay exploratory; the receivers were inspected in package 4.
+
+*H2 sharpened (from the dry-run balance, before results).* Under union
+support, every day's organisation-line token carries feature 2302, so every
+session token where another selected feature fires also receives 2302's
+department prototype (17–27, about ten times the other prototypes). And
+because the package-4 prototype averages each feature over tokens where *any*
+set feature fires, the session features' prototypes are diluted by those
+organisation tokens, so their "move toward a benign colleague" edits are mostly
+reductions. Alternative explanation of the package-4 behaviour effect: it is
+driven by injecting an organisation-line direction into session positions
+(a dormant-direction write in the sense of Makelov et al. 2023), not by
+editing the session features. Predictions if true: E5 (rpU_S − rpO_S) carries
+most of rpU_S's behaviour effect; rpO_S and the single session-feature edits
+are small; single_2302 (own support: organisation tokens only) has a
+behaviour effect no larger than its random-direction equivalent.
+`coefficient_changes.json` shows the sign and size of the coefficient changes.
+
+| outcome | reading | not licensed |
+|---|---|---|
+| E1a and E1b > 0, intervals exclude 0, beyond 20% of rpU_S | the selected joint edit changes behaviour loss more than equally large random and other-dictionary perturbations at the same positions | feature semantics; anomaly specificity (needs E6); a circuit |
+| E1a > 0 but E1b ≈ 0 | an on-dictionary direction effect, not specific to these features | "these features matter" |
+| E1a and E1b within ±20% and covering 0 | generic disruption explains the effect; stop the feature-specific branch (declared rule) | anything feature-specific |
+| E4 ≠ 0 | reconstruction interacts with the edit, so package-4 contrasts contain an interaction term | a sign for the interaction elsewhere |
+| E5 large, rpO_S small | the package-4 effect is mainly an implementation effect of union support (H2 sharpened) | a model mechanism |
+| E6 ≈ 0 with E1 > 0 | the direction effect is not specific to malicious days | anomaly specificity |
+| E7 ≠ 0 | the downstream response to the summed single edits is non-additive (the hidden-state edits themselves add exactly) | which features interact, without further decomposition |
+| F1 > 0 (adapted − base) | adaptation increased how much behaviour predictions depend on the profile lines | where in the network this happens (H6) |
+| F1 ≈ 0 with both Δ > 0 | the base model already conditions on the profile; adaptation did not change the dependence | "the adapter introduced identity use" |
+| F4 > 0 (adapted − base) | a familiar training profile changes behaviour predictions more than an unfamiliar same-department one: evidence of identity-keyed prediction | memorisation of specific sessions |
+| F3 selected > control | the selected features' activity on session tokens depends on the preceding profile (represented context) | that this dependence causes the behaviour-loss change (needs mediation, H6) |
+| H4: within-field association with adapted loss > base loss and > controls | the features co-occur with the adapted model's own surprise beyond field difficulty | causation in either direction |
