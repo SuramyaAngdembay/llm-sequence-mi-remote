@@ -1,0 +1,3 @@
+full run candidate rows sha256: 2387be9480f11dc1980768b74f96b619ebf6ee2e041b9502dc5537ec189d9b4f
+alpha-0 run candidate rows sha256: 65abe8e9316ffbaf96fe8cc2fe3138c6198aa38674c55ac2ad6e0bb34cf127bf
+published run (job 19379904) and new run share all 530,792 candidate keys (mode, set, donor type, receiver, donor, alpha)

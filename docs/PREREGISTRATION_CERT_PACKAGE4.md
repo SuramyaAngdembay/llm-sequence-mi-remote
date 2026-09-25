@@ -216,3 +216,23 @@ Reading rule: the per-class selected-minus-control differences of the full run
 are interpreted **net of reconstruction** (the edit effect, alpha 1 minus alpha
 0, per arm). The raw alpha-1 difference is reported beside it and labelled as
 including reconstruction coverage.
+
+## Result
+
+Recorded 2026-09-25, after jobs 20879549 and 20898582 completed and
+passed every gate. Full record: `results/cert_package4_token_class/README.md`.
+- **Primary comparison** (benign donors, alpha 1, per receiver user,
+  net of reconstruction): behaviour selected − control is +0.0156 to +0.0179
+  across the four context modes, every interval excluding zero. Profile is
+  +0.0065 to +0.0086, every interval including zero. The direct
+  profile-minus-behaviour contrast is −0.0073 to −0.0114, every interval
+  including zero. No view falls within the ±0.0002 margin.
+- **Reconstruction** is identical in both arms here, because every receiver
+  day is patched by both arms, so it cancels in every difference.
+- **All alphas.** The behaviour difference is slightly negative at 0.25 and
+  0.5 (mostly within noise) and positive at 0.75 and 1.
+- **The prediction is contradicted** on every count and is reported as-is.
+- **The historical best-candidate endpoint** is reproduced exactly (dept
+  0.000758) when chosen with a constant base. Averaged over candidate donors
+  at alpha 1 it becomes negative in all four modes (secondary analysis,
+  motivated by ledger C6 before results).

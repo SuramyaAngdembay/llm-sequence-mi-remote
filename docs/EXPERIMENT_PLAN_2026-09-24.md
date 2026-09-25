@@ -13,7 +13,7 @@ before its result is read.
 | run | question | gate before reading | compute |
 |---|---|---|---|
 | CERT package-4 smoke **20879548** (gpu-debug) | Do the per-class assertions hold in the collaborator environment? Does that environment reproduce the owner environment's intervention deltas? | In-run assertions pass. `compare_intervention_runs.py` against owner smoke 20840686 gives contrast Δ ≤ 1e-4 and per-row Δ ≤ 1e-3 | ≤ 0.5 SU |
-| CERT package-4 full **20879549** (gpu) | Which token classes' losses does the published intervention change? | Smoke gate passed; addendum rules (`PREREGISTRATION_CERT_PACKAGE4.md`); `analyze_intervention_endpoints.py` | ~24 SU (committed) |
+| ~~CERT package-4 full 20879549~~ **done 2026-09-25; see results/cert_package4_token_class** (gpu) | Which token classes' losses does the published intervention change? | Smoke gate passed; addendum rules (`PREREGISTRATION_CERT_PACKAGE4.md`); `analyze_intervention_endpoints.py` | ~24 SU (committed) |
 | ~~TWOS held-out bounded 20890658~~ **done: inconclusive; see results/twos_corrected_bounded** (gpu-debug) | Do discovery-selected features act on held-out confirmation users differently from controls, beyond reconstruction? | Gates in `TWOS_CORRECTED_INTERVENTION_PLAN.md` | ≤ 0.5 SU |
 
 ## Tier 1 — CPU, cheap, before any new GPU run
@@ -47,9 +47,10 @@ is not backed up. Last reads, as of 2026-09-24:
 
 | run | question | gate | compute |
 |---|---|---|---|
-| CERT α = 0 reconstruction control, confirmation receivers — **submitted early (2026-09-24): the TWOS result showed reconstruction can drive the difference itself** | How much of each arm's absolute per-class effect is dictionary reconstruction? This is required before any mechanistic reading of absolute effects. α = 0 does not depend on the donor, so 1 candidate per donor type suffices. | Tier-0 CERT gates passed | ~1 SU |
+| ~~CERT α = 0 reconstruction control~~ **done (job 20898582): reconstruction is identical in both arms on CERT and cancels** | How much of each arm's absolute per-class effect is dictionary reconstruction? This is required before any mechanistic reading of absolute effects. α = 0 does not depend on the donor, so 1 candidate per donor type suffices. | Tier-0 CERT gates passed | ~1 SU |
 | TWOS δ-reproduction check (optional, gpu-debug) | Does the Anvil environment reproduce the TWOS deltas cached on Aquaman? It separates environment effects from reconstruction in the α = 0 arm | TWOS run 20890658 finished | ≤ 0.25 SU |
 | LANL option A scoring, existing adapter | With user composition matched and no retraining, is ranking worse for users absent from training? Pooled and within-user AUC | Tier-1 extraction gate | ~3–5 SU |
+| **Dose-matched CERT control (new, after the package-4 result)** | Do the selected features change behaviour-token loss more than controls **for the same edit size**? Controls from `select_matched_controls.py` (activity, activation size, decoder norm), same receivers, alphas 0.5 and 1 | Package-4 result recorded | ~2–4 SU |
 
 ## Tier 3 — only if tiers 0 to 2 leave the question open
 

@@ -803,3 +803,27 @@ profile difference is −0.0021 [−0.0194, +0.0111]. Seed 43 not triggered. Det
 `results/twos_corrected_bounded/README.md`. Consequence for CERT: the
 reconstruction-only control is run before the per-class differences are read
 (addendum, item 8 implementation).
+
+**V48 — CERT package-4 result.** After jobs 20879549 and 20898582 completed and
+passed every gate. Full record: `results/cert_package4_token_class/README.md`.
+- **Primary comparison** (benign donors, alpha 1, per receiver user,
+  net of reconstruction): behaviour selected − control is +0.0156 to +0.0179
+  across the four context modes, every interval excluding zero. Profile is
+  +0.0065 to +0.0086, every interval including zero. The direct
+  profile-minus-behaviour contrast is −0.0073 to −0.0114, every interval
+  including zero. No view falls within the ±0.0002 margin.
+- **Reconstruction** is identical in both arms here, because every receiver
+  day is patched by both arms, so it cancels in every difference.
+- **All alphas.** The behaviour difference is slightly negative at 0.25 and
+  0.5 (mostly within noise) and positive at 0.75 and 1.
+- **The prediction is contradicted** on every count and is reported as-is.
+- **The historical best-candidate endpoint** is reproduced exactly (dept
+  0.000758) when chosen with a constant base. Averaged over candidate donors
+  at alpha 1 it becomes negative in all four modes (secondary analysis,
+  motivated by ledger C6 before results).
+
+**What this means.** The selected features' edits act on behaviour-token
+predictions, where the features fire. Whether that reflects anomaly-specific
+content or just larger edits needs a dose-matched control. The published
+"benign donor lowers the score more" reading holds only for the best of up to
+64 candidate edits per day, not for the average edit.

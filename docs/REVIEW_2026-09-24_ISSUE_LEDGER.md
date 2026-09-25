@@ -213,6 +213,15 @@ each arm's donor difference, because both donors patch the same tokens. The
 new analyses average over all candidates. The published 0.000758 is unchanged
 and is labelled with this caveat.
 
+**C6 resolved (2026-09-25).** The new run reproduces the published endpoint
+exactly (dept 0.000758) when the best candidate is chosen with a constant base,
+and shares all 530,792 candidate keys with job 19379904. Equalising candidate
+counts barely changes it. Averaging over candidate donors at alpha 1 reverses
+its sign in every context mode: dept −0.0045 receiver-weighted, −0.0028
+[−0.0045, −0.0012] per user. The positive published value is a property of
+best-of-64 selection, not of the average edit.
+`results/cert_package4_token_class/README.md`.
+
 ## H1. Thesis endpoint mismatch
 
 **Verified.** In the dept summary (605 complete receivers), the benign-only
