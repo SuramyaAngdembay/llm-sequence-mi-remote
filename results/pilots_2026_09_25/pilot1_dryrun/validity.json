@@ -1,0 +1,7 @@
+{
+ "token_rows_equal_tokenizer_length": true,
+ "misaligned": [],
+ "n_receivers": 394,
+ "tokenizer_padding_side": "right",
+ "orig_equals_residual_plus_reconstruction_max_abs": 9.5367431640625e-07
+}

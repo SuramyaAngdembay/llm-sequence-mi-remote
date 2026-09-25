@@ -1,0 +1,252 @@
+{
+ "extract_dir": "/anvil/scratch/x-sangdembay/pkg4_share/token_deltas",
+ "layer": 26,
+ "n_examples": 460,
+ "n_rows": 137068,
+ "d_model": 4096,
+ "dtype": "float16 (as extracted)",
+ "populations_sha256": "e75204b0a3bf941ab5bf02b31c732147dfa6a29373f5a9256d702267650bad4b",
+ "out_sha256": "9bdb5447f20056098b027433b42baa8276a788f35e0095f4bb5d6621e4344c9c",
+ "source_chunks": [
+  {
+   "chunk": "chunk_00000.pt",
+   "bytes": 999100720
+  },
+  {
+   "chunk": "chunk_00001.pt",
+   "bytes": 1036543792
+  },
+  {
+   "chunk": "chunk_00002.pt",
+   "bytes": 1055117680
+  },
+  {
+   "chunk": "chunk_00003.pt",
+   "bytes": 1071254896
+  },
+  {
+   "chunk": "chunk_00004.pt",
+   "bytes": 1170876080
+  },
+  {
+   "chunk": "chunk_00005.pt",
+   "bytes": 1847509168
+  },
+  {
+   "chunk": "chunk_00007.pt",
+   "bytes": 1250979952
+  },
+  {
+   "chunk": "chunk_00008.pt",
+   "bytes": 1840404528
+  },
+  {
+   "chunk": "chunk_00009.pt",
+   "bytes": 1168595376
+  },
+  {
+   "chunk": "chunk_00011.pt",
+   "bytes": 1454193008
+  },
+  {
+   "chunk": "chunk_00013.pt",
+   "bytes": 878354288
+  },
+  {
+   "chunk": "chunk_00014.pt",
+   "bytes": 884884656
+  },
+  {
+   "chunk": "chunk_00016.pt",
+   "bytes": 874801968
+  },
+  {
+   "chunk": "chunk_00017.pt",
+   "bytes": 1640801200
+  },
+  {
+   "chunk": "chunk_00018.pt",
+   "bytes": 979312688
+  },
+  {
+   "chunk": "chunk_00019.pt",
+   "bytes": 867344496
+  },
+  {
+   "chunk": "chunk_00020.pt",
+   "bytes": 908725488
+  },
+  {
+   "chunk": "chunk_00021.pt",
+   "bytes": 1041220080
+  },
+  {
+   "chunk": "chunk_00022.pt",
+   "bytes": 1301935024
+  },
+  {
+   "chunk": "chunk_00025.pt",
+   "bytes": 898659184
+  },
+  {
+   "chunk": "chunk_00026.pt",
+   "bytes": 1093733872
+  },
+  {
+   "chunk": "chunk_00027.pt",
+   "bytes": 1461281264
+  },
+  {
+   "chunk": "chunk_00029.pt",
+   "bytes": 926470704
+  },
+  {
+   "chunk": "chunk_00030.pt",
+   "bytes": 1371504944
+  },
+  {
+   "chunk": "chunk_00032.pt",
+   "bytes": 878075312
+  },
+  {
+   "chunk": "chunk_00033.pt",
+   "bytes": 1249265328
+  },
+  {
+   "chunk": "chunk_00034.pt",
+   "bytes": 1316948336
+  },
+  {
+   "chunk": "chunk_00035.pt",
+   "bytes": 900250736
+  },
+  {
+   "chunk": "chunk_00036.pt",
+   "bytes": 881783536
+  },
+  {
+   "chunk": "chunk_00038.pt",
+   "bytes": 1497493744
+  },
+  {
+   "chunk": "chunk_00040.pt",
+   "bytes": 1135730160
+  },
+  {
+   "chunk": "chunk_00041.pt",
+   "bytes": 1868429424
+  },
+  {
+   "chunk": "chunk_00043.pt",
+   "bytes": 1572068080
+  },
+  {
+   "chunk": "chunk_00044.pt",
+   "bytes": 1212388336
+  },
+  {
+   "chunk": "chunk_00045.pt",
+   "bytes": 1385304048
+  },
+  {
+   "chunk": "chunk_00046.pt",
+   "bytes": 957473648
+  },
+  {
+   "chunk": "chunk_00047.pt",
+   "bytes": 883908400
+  },
+  {
+   "chunk": "chunk_00048.pt",
+   "bytes": 887575536
+  },
+  {
+   "chunk": "chunk_00049.pt",
+   "bytes": 1187743536
+  },
+  {
+   "chunk": "chunk_00050.pt",
+   "bytes": 1039390576
+  },
+  {
+   "chunk": "chunk_00051.pt",
+   "bytes": 877377968
+  },
+  {
+   "chunk": "chunk_00052.pt",
+   "bytes": 1009093232
+  },
+  {
+   "chunk": "chunk_00054.pt",
+   "bytes": 883850928
+  },
+  {
+   "chunk": "chunk_00055.pt",
+   "bytes": 937521520
+  },
+  {
+   "chunk": "chunk_00056.pt",
+   "bytes": 1675791280
+  },
+  {
+   "chunk": "chunk_00057.pt",
+   "bytes": 2730481136
+  },
+  {
+   "chunk": "chunk_00059.pt",
+   "bytes": 919169200
+  },
+  {
+   "chunk": "chunk_00062.pt",
+   "bytes": 895197104
+  },
+  {
+   "chunk": "chunk_00063.pt",
+   "bytes": 956964976
+  },
+  {
+   "chunk": "chunk_00064.pt",
+   "bytes": 1270891056
+  },
+  {
+   "chunk": "chunk_00065.pt",
+   "bytes": 866524080
+  },
+  {
+   "chunk": "chunk_00067.pt",
+   "bytes": 1089943664
+  },
+  {
+   "chunk": "chunk_00068.pt",
+   "bytes": 1055938032
+  },
+  {
+   "chunk": "chunk_00070.pt",
+   "bytes": 1440533360
+  },
+  {
+   "chunk": "chunk_00071.pt",
+   "bytes": 1075570224
+  },
+  {
+   "chunk": "chunk_00072.pt",
+   "bytes": 1204463280
+  },
+  {
+   "chunk": "chunk_00073.pt",
+   "bytes": 886886448
+  },
+  {
+   "chunk": "chunk_00076.pt",
+   "bytes": 1430844464
+  },
+  {
+   "chunk": "chunk_00077.pt",
+   "bytes": 1391891824
+  },
+  {
+   "chunk": "chunk_00080.pt",
+   "bytes": 2025404720
+  }
+ ]
+}
