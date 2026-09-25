@@ -250,12 +250,27 @@ are always measured against matched active controls rather than in isolation
 \citep{zhang2023best}, and we treat cross-dataset transfer of a mechanism as an
 empirical claim to be tested rather than assumed, connecting to the question
 of universality of learned structure \citep{olah2020zoom,chughtai2023toy}.
-Like recent work analyzing LoRA-induced \emph{delta activations} with sparse
-autoencoders \citep{prasanth2026lora}, our decomposition targets what
-fine-tuning adds to the residual stream rather than raw activations; our
-contribution is not the delta-SAE construction itself but its combination
-with intervention-based validation under matched controls, user-disjoint
-security evaluation, and semantic attribution into an end-to-end audit.
+Decomposing what fine-tuning changes is the concern of \emph{model diffing}:
+sparse crosscoders fit one dictionary across a base model and its fine-tuned
+version \citep{lindsey2024crosscoders}, stage-wise diffing adapts a
+dictionary to the fine-tuning data or the fine-tuned model
+\citep{bricken2024stagewise}, and recent work analyzes LoRA-induced
+\emph{delta activations} with sparse autoencoders \citep{prasanth2026lora}.
+Our delta-SAE is a single-layer, subtractive form of this idea: it
+decomposes the difference $h^{\mathrm{ada}}_t - h^{\mathrm{base}}_t$
+directly, which is cheaper than a crosscoder, is blind to cross-layer
+structure, and describes the adapter's effect rather than features shared
+with the base model. Our contribution is not the delta-SAE construction
+itself but its combination with intervention-based validation under matched
+controls, user-disjoint security evaluation, and token attribution into an
+end-to-end audit. That validity program addresses several problems a recent
+survey lists as open for sparse dictionary methods \citep{sharkey2025open}:
+reconstruction error (the $\alpha{=}0$ control of Appendix~\ref{app:pkg4}
+and the limits of its additive cancellation), dependence of the dictionary on
+its training data (benign-only retraining, Section~\ref{sec:cross}), seed
+dependence (Section~\ref{sec:seeds}), and the gap between where a latent is
+active and what its edits cause (Sections~\ref{sec:attribution}
+and~\ref{sec:r42}).
 
 \paragraph{Shortcut learning and evaluation pitfalls.}
 Our central finding is an instance of shortcut learning: models satisfying a

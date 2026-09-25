@@ -645,7 +645,18 @@ the intended generalization and alerting task.
 
 Sparse dictionaries, activation interventions, and analyses of LoRA delta
 geometry have prior precedents
-\citep{gao2024scaling,zhang2023best,prasanth2026lora}.
+\citep{gao2024scaling,zhang2023best,prasanth2026lora}. Decomposing what
+fine-tuning changes is the concern of model diffing: crosscoders fit one
+dictionary across a base model and its fine-tuned version
+\citep{lindsey2024crosscoders}, and stage-wise diffing adapts a dictionary to
+the fine-tuning data or model \citep{bricken2024stagewise}. Our delta
+dictionary is a single-layer, subtractive form of that idea: cheaper than a
+crosscoder, blind to cross-layer structure, and a description of the
+adapter's effect rather than of features shared with the base model. A recent
+survey lists reconstruction error, dependence on the dictionary's training
+data, and seed dependence among the open problems of sparse dictionary
+methods \citep{sharkey2025open}; the checks of Sections~\ref{sec:robustness}
+and Appendix~\ref{app:pkg4} test each of them for this dictionary.
 Our contribution combines these tools with user-exposure controls and
 input-location attribution for a benign-adapted anomaly score.
 One-layer edits do not recover a complete circuit or fully test a

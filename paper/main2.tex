@@ -166,11 +166,21 @@ activation patching and ablation supply causal tests
 \citep{vig2020investigating,meng2022locating,zhang2023best,heimersheim2024use},
 with causal scrubbing as the formal standard \citep{chan2022causal}. Feature
 identity can split or be absorbed across dictionaries
-\citep{chanin2024absorption}, and LoRA delta activations have been analyzed
-with sparse autoencoders \citep{prasanth2026lora}. We follow the
-recommendation to measure effects against matched controls
-\citep{zhang2023best} and treat cross-dataset transfer as an empirical claim
-\citep{olah2020zoom,chughtai2023toy}.
+\citep{chanin2024absorption}. Decomposing what fine-tuning changes is the
+concern of model diffing: crosscoders fit one dictionary across a base model
+and its fine-tuned version \citep{lindsey2024crosscoders}, stage-wise diffing
+adapts a dictionary to the fine-tuning data or model
+\citep{bricken2024stagewise}, and LoRA delta activations have been analyzed
+with sparse autoencoders \citep{prasanth2026lora}. Our delta dictionary is a
+single-layer, subtractive form of this idea: cheaper than a crosscoder, blind
+to cross-layer structure, and a description of the adapter's effect rather
+than of features shared with the base model. We follow the recommendation to
+measure effects against matched controls \citep{zhang2023best}, treat
+cross-dataset transfer as an empirical claim \citep{olah2020zoom,chughtai2023toy},
+and test three problems a recent survey lists as open for sparse dictionary
+methods \citep{sharkey2025open}: reconstruction error, dependence of the
+dictionary on its training data, and seed dependence
+(Appendix~\ref{app:pkg4}, Section~\ref{sec:robustness}).
 \emph{Shortcuts and evaluation pitfalls.} Our finding is an instance of
 shortcut learning
 \citep{geirhos2020shortcut,lapuschkin2019unmasking,damour2020underspecification},
