@@ -146,6 +146,56 @@ def pilot1(rows: List[dict]) -> Tuple[dict, List[str]]:
     return res, lines
 
 
+# ------------------------------------------------------------------ Pilot 4 (H8)
+def pilot4(rows: List[dict]) -> Tuple[dict, List[str]]:
+    views = ("behavior_only", "behavior_ses_only", "profile_only", "full")
+    delta, meta = {}, {}
+    for r in rows:
+        delta[(r["condition"], r["receiver_idx"])] = {v: float(r[f"delta_{v}"]) for v in views}
+        meta[r["receiver_idx"]] = (r["user"], r["kind"])
+    conds = sorted({c for c, _ in delta})
+    baselines = [c for c in conds if c not in ("zero", "rpU_S", "randI_S", "randD_S")]
+
+    def per_receiver(fn, kind, view):
+        out = {}
+        for rid, (u, k) in meta.items():
+            if k == kind:
+                try:
+                    out[(u, rid)] = fn(rid, view)
+                except KeyError:
+                    pass
+        return out
+
+    d = lambda c: (lambda rid, view: delta[(c, rid)][view])
+    minus = lambda a, b: (lambda rid, view: delta[(a, rid)][view] - delta[(b, rid)][view])
+    res: dict = {"endpoints": {}, "paired": {}}
+    lines = ["PILOT 4 / H8 (exploratory). Same tokens and per-token edit sizes as the SAE edit (rpU_S); only the",
+             "direction differs. Mean of user means, 95% user-clustered bootstrap (10k; 5k in brackets).", ""]
+    for view in views:
+        lines.append(f"== view {view}")
+        for kind in ("malicious", "benign"):
+            for c in ("rpU_S", "randI_S", "randD_S") + tuple(baselines):
+                s = summary(user_means(per_receiver(d(c), kind, view)))
+                res["endpoints"][f"{view}|{kind}|{c} (edit alone)"] = s
+                lines.append(f"  {kind:<9} {c + ' (edit alone)':<40} {fmt(s)}")
+            for c in baselines:
+                for ref, tag in (("rpU_S", "E8a"), ("randI_S", "E8b"), ("randD_S", "E8b'")):
+                    s = summary(user_means(per_receiver(minus(c, ref), kind, view)))
+                    res["endpoints"][f"{view}|{kind}|{tag} {c} - {ref}"] = s
+                    lines.append(f"  {kind:<9} {tag + ' ' + c + ' - ' + ref:<40} {fmt(s)}")
+            s = summary(user_means(per_receiver(minus("rpU_S", "randI_S"), kind, view)))
+            res["endpoints"][f"{view}|{kind}|rpU_S - randI_S"] = s
+            lines.append(f"  {kind:<9} {'rpU_S - randI_S':<40} {fmt(s)}")
+        for c in baselines + ["rpU_S"]:
+            mal = user_means(per_receiver(minus(c, "randI_S"), "malicious", view))
+            ben = user_means(per_receiver(minus(c, "randI_S"), "benign", view))
+            s = summary({u: mal[u] - ben[u] for u in mal if u in ben})
+            res["paired"][f"{view}|E8c [{c} - randI_S] malicious minus benign"] = s
+            lines.append(f"  paired    {'E8c [' + c + ' - randI_S] mal - ben':<40} {fmt(s)}")
+        lines.append("")
+    return res, lines
+
+
 # ------------------------------------------------------------------ Pilot 2
 def pilot2(rows: List[dict]) -> Tuple[dict, List[str]]:
     views = ("behavior_only", "behavior_ses_only", "full")
@@ -329,6 +379,8 @@ def main() -> int:
         res, lines = pilot2(read_csv(out / "pilot2_rows.csv"))
     elif which == "pilot3":
         res, lines = pilot3(dict(np.load(out / "pilot2_orig_tokens.npz")), read_csv(out / "pilot2_rows.csv"))
+    elif which == "pilot4":
+        res, lines = pilot4(read_csv(out / "pilot4_rows.csv"))
     else:
         raise SystemExit(__doc__)
     (out / f"analysis_{which}.json").write_text(json.dumps(res, indent=1) + "\n")

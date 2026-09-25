@@ -27,7 +27,7 @@ patching techniques are not counted as new methods.
 | H4 | Do the high-gap features track the adapted model's own surprise rather than malicious content? (unconventional) | They encode session content that happens to be rarer on malicious days. | Pilot 3 (CPU, on Pilot 2's saved per-token data). Within-day association between a feature's activation at t and the adapted model's loss at t+1, on benign and malicious days separately, against controls; base-model loss as an intrinsic-difficulty alternative. | Per-user association, controls, base-model loss | 0 GPU | Stolfo et al. 2024 (confidence-regulation neurons); Gurnee et al. 2024 (universal/entropy neurons) | If association with adapted loss is no stronger than with base loss, or no stronger than for controls: no surprise-tracking claim. | E | selected, run |
 | H5 | Do other SAE seeds find functionally equivalent directions, beyond decoder alignment? | Similar directions but different causal roles (same location, different function). | Repeat Pilot 1's residual-preserving edits with seed-43/44 dictionaries' best-matching features. | Decoder-alignment baseline (already 0.88–0.96 against 0.64 chance) | ~0.5 GPU-h | Paulo & Belrose 2025 (different features across seeds); Lan et al. 2024 | Not run in round 1: a functional comparison is moot unless H1 finds direction-specific effects. | V | proposed, deferred |
 | H7 | *(added 2026-09-25 before any scoring; see attempt log)* Does the adapter key its behaviour predictions on identities it was trained on? | Profile text changes predictions only through generic attribute values (department, role, scores), identically for familiar and unfamiliar people. | Inside Pilot 2: also swap in the DAY/PSY lines of a same-department **training** user (familiar to the adapter) and compare with the same-department eval user (unfamiliar). Contrast: [swap_train − swap_same] behaviour loss, adapted minus base. | Base model (never saw either user); same department for both partners; malicious and matched benign days | inside Pilot 2 | Carlini et al. 2021 and Tirumala et al. 2022 (memorization in LMs); Geva et al. 2021 (feed-forward layers as key-value memories) | If the adapted-minus-base contrast has an interval covering 0: no evidence of identity-keyed prediction at the level of behaviour-token loss. | E | selected, run |
-| H8 | *(proposed 2026-09-25 after reading Sharkey et al. 2025, §2.1.4b; not run in this round)* Is the sparse dictionary necessary, or does a simpler decomposition of the same deltas give the same intervention answers? | The top principal directions of δ, or the malicious-minus-benign mean direction of δ, patched with the same residual-preserving procedure and matched norms, change behaviour loss as much as the selected SAE directions. | Same receivers, donors, views and random baselines as Pilot 1; replace the SAE directions by (a) PCA directions of δ on the same rows, (b) the mean-difference direction; compare E1-style contrasts. | Norm- and position-matched random directions; matched benign receivers | ~0.5 GPU-h | Sharkey et al. 2025 (validation against baselines); Marks & Tegmark 2024; Hollinsworth et al. 2024 (PCA/SVD of activations) | If the PCA or mean-difference edit matches the SAE edit within its interval, the SAE adds nothing the paper can claim; report it as such. | V | proposed, not run |
+| H8 | *(proposed 2026-09-25 after reading Sharkey et al. 2025, §2.1.4b; not run in this round)* Is the sparse dictionary necessary, or does a simpler decomposition of the same deltas give the same intervention answers? | The top principal directions of δ, or the malicious-minus-benign mean direction of δ, patched with the same residual-preserving procedure and matched norms, change behaviour loss as much as the selected SAE directions. | Same receivers, donors, views and random baselines as Pilot 1; replace the SAE directions by (a) PCA directions of δ on the same rows, (b) the mean-difference direction; compare E1-style contrasts. | Norm- and position-matched random directions; matched benign receivers | ~0.5 GPU-h | Sharkey et al. 2025 (validation against baselines); Marks & Tegmark 2024; Hollinsworth et al. 2024 (PCA/SVD of activations) | If the PCA or mean-difference edit matches the SAE edit within its interval, the SAE adds nothing the paper can claim; report it as such. | V | **selected, run as Pilot 4** (user's decision, 2026-09-25: a fourth pilot beyond the specification's three, within the GPU cap) |
 | H6 | Through which layers does profile information reach session positions? | Direct attention from session tokens at the patched layer, or early mixing. | Path patching of profile-position residuals from swapped runs into original runs, across a small layer set. | As H3 | ~0.5 GPU-h | Goldowsky-Dill et al. 2023 (path patching); Geva et al. 2023 (attention knockout); Wang et al. 2022 | Run only if H3 finds an adaptation-specific profile dependence. | E | proposed, conditional |
 
 Not proposed in this round: detector comparisons (tabular models), PCA baselines and new
@@ -39,8 +39,9 @@ training runs. None distinguishes the mechanistic hypotheses above.
 |---|---|---|---|
 | Pilot 1 (validity phase + main) | gpu-debug, 1 A100 | 30 min | 0.5 GPU-h |
 | Pilot 2 (validity phase + main) | gpu-debug, 1 A100 | 30 min | 0.5 GPU-h |
+| Pilot 4 (H8 baselines; added 2026-09-25 at the user's direction) | gpu-debug, 1 A100 | 30 min | 0.5 GPU-h |
 | Reruns if a job fails or times out | gpu-debug | 30 min each | ≤ 2 GPU-h |
-| **Round total planned** | | | **≤ 3 GPU-h** |
+| **Round total planned** | | | **≤ 3.5 GPU-h** |
 
 ## Attempt log
 
@@ -133,6 +134,25 @@ analysis must compare feature activity with next-token loss *within the same
 predicted field*, and without token ids it cannot separate a surprise-tracking
 feature from one that fires on intrinsically hard fields. Nothing else in the
 job changed.
+
+**2026-09-25, Pilot 4 (H8) directions fitted and dry-run, before any scoring.**
+`scripts/pilot_fit_baseline_directions.py` streamed all 83 layer-26 chunks
+once (578 s, CPU): PCA on a stride-4 sample of every eval row (2,965,169 rows,
+149 users, the SAE's own training exposure); the mean-difference direction on
+the ranking population (158,065 positive rows of the 30 discovery users, the
+same count the SAE ranking kept; 9,702,550 benign rows of 119 non-confirmation
+users; no confirmation user in either). The leading principal direction
+explains 3.6% of standardized-delta variance; the largest gaps among the
+leading 64 are on directions 4, 2, 10, 6 and 14 (`pcaGap5`); the smallest on
+56, 37, 51, 34 and 59 (`pcaCtrl5`). Provenance:
+`manifests/pilots_2026_09_25/baseline_directions.json` (npz sha256
+`bdc489ab…`). Dry run (12 pairs): per-token norms equal rpU_S's to 2e-7; edit
+directions differ from the SAE edit (mean cosine 0.29 pcaTop5, 0.16 pcaGap5,
+0.12 pcaCtrl5, 0.04 meanDiff). Rescaling from the natural projection edit to
+the SAE edit's size: median gain 1.2 (pcaGap5), 2.2 (pcaTop5), 5.0 (pcaCtrl5),
+13.4 (meanDiff; p95 63, 3.6% of tokens above the declared cap of 100 and
+therefore left unedited, so meanDiff edits slightly fewer tokens). Recorded as
+a known asymmetry of the one-dimensional baseline.
 
 **2026-09-25, interpretation map (written while both jobs are queued; no
 pilot output exists).** What each outcome would and would not mean. All

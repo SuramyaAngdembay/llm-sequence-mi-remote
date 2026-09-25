@@ -97,5 +97,26 @@ with tempfile.TemporaryDirectory() as tmp:
     check("delta cache: filters examples, keeps order and values", ids.tolist() == [3, 3, 3, 11]
           and xs.dtype == np.float32 and xs[-1].tolist() == [10.0, 11.0])
 
+from pilot_baseline_directions import shift_projection  # noqa: E402
+Uo = np.linalg.qr(rng.standard_normal((D, 2)).astype(np.float32))[0][:, :2].astype(np.float32)
+xr = rng.standard_normal((3, D)).astype(np.float32)
+pr = np.array([0.5, -1.5], dtype=np.float32)
+refn = np.array([2.0, 0.0, 7.5], dtype=np.float32)
+sp = shift_projection(xr, Uo, pr, x_mean, x_std, refn)
+check("projection edit: per-row norms equal the reference norms", np.allclose(np.linalg.norm(sp, axis=1), refn, atol=1e-5))
+st_edit = sp / x_std
+check("projection edit: lies in span(U) in standardized coordinates", np.allclose(st_edit - (st_edit @ Uo) @ Uo.T, 0, atol=1e-5))
+unscaled = ((pr[None, :] - ((xr - x_mean) / x_std) @ Uo) @ Uo.T) * x_std
+check("projection edit: the unscaled edit moves the projection exactly to the prototype",
+      np.allclose((((xr + unscaled) - x_mean) / x_std) @ Uo, pr, atol=1e-4))
+check("projection edit: rescaling keeps the direction", all(float(np.dot(sp[r], unscaled[r])) > 0 for r in (0, 2)))
+at_proto = xr[:1] + unscaled[:1]                                        # a row already at the prototype
+check("projection edit: a row already at the prototype gets a zero edit, not an inflated one",
+      not shift_projection(at_proto, Uo, pr, x_mean, x_std, np.array([3.0], dtype=np.float32)).any())
+tiny = xr[:1] + unscaled[:1] * (1 - 1e-4)                               # natural edit 10,000x smaller than the reference
+check("projection edit: amplification is capped (tiny natural edits are not rescaled)",
+      not shift_projection(tiny, Uo, pr, x_mean, x_std, np.array([float(np.linalg.norm(unscaled[0]))], dtype=np.float32)).any()
+      and shift_projection(tiny, Uo, pr, x_mean, x_std, np.array([float(np.linalg.norm(unscaled[0])) * 1e-5], dtype=np.float32)).any())
+
 print(f"{len(failures)} failure(s)")
 sys.exit(1 if failures else 0)
