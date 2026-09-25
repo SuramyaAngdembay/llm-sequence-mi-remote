@@ -167,3 +167,33 @@ behaviour effect no larger than its random-direction equivalent.
 | F4 > 0 (adapted − base) | a familiar training profile changes behaviour predictions more than an unfamiliar same-department one: evidence of identity-keyed prediction | memorisation of specific sessions |
 | F3 selected > control | the selected features' activity on session tokens depends on the preceding profile (represented context) | that this dependence causes the behaviour-loss change (needs mediation, H6) |
 | H4: within-field association with adapted loss > base loss and > controls | the features co-occur with the adapted model's own surprise beyond field difficulty | causation in either direction |
+
+**2026-09-25, coefficient changes (second CPU dry run with the submitted code;
+edit balance byte-identical to the first; no model outputs involved).**
+`results/pilots_2026_09_25/pilot1_dryrun/coefficient_changes.json`, alpha 1,
+all 394 receivers:
+
+| feature | days active | receiver mean where active | donor prototype (mean over depts) | change at own positions | mean change over union positions |
+|---|---|---|---|---|---|
+| 4596 | 227 | 24.2 | 1.65 | −22.4 (96% of positions reduced) | −3.6 |
+| 3673 | 309 | 19.1 | 1.16 | −17.9 | −3.2 |
+| 3455 | 270 | 16.4 | 0.77 | −15.7 | −2.5 |
+| 2302 | 394 | 27.9 | 20.8 | −6.2 | **+11.6** |
+| 7693 | 2 | 2.0 | 0.00 | −2.0 | ≈0 |
+| controls 6596, 8017, 6608, 2765, 886 | 188–393 | 0.6–5.3 | 0.19–1.35 | −0.4 to −3.7 | −0.17 to +0.27 |
+
+So, with the package-4 prototype, "moving the selected features toward a
+benign colleague" removes about 93–95% of the three session features'
+activation where they fire, and writes about 21 units of 2302 into session
+positions where it was zero. The control edit removes most of five weak
+features. The published selected-versus-control contrast therefore compares
+two different operations: a near-ablation of strong session features plus an
+organisation-direction injection, against a near-ablation of weak features.
+This also means that the donor edit and the package-3 necessity ablation
+(scaling toward zero) are nearly the same operation for the session features.
+It sharpens two competing readings of the package-4 behaviour effect, both
+testable in Pilot 1 without changing it: (a) ablating session features that
+the adapted model uses to predict session tokens raises behaviour loss
+(ordinary predictive use; rpO_S and the single session-feature edits carry the
+effect, beyond matched random directions); (b) the organisation-direction
+injection carries it (E5 large, rpO_S small).

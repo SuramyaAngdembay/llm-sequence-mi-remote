@@ -1,0 +1,112 @@
+[
+ {
+  "arm": "S",
+  "feature": 4596,
+  "receivers_active": 227,
+  "prototype_mean_over_depts": 1.651828646659851,
+  "receiver_own_active_mean": 24.193290420996597,
+  "dz_own_support_mean": -22.415800651693655,
+  "dz_own_support_frac_negative": 0.9640522875816994,
+  "dz_union_support_mean": -3.6320462207227178,
+  "decoder_col_norm_residual_units": 4.8226752281188965
+ },
+ {
+  "arm": "S",
+  "feature": 7693,
+  "receivers_active": 2,
+  "prototype_mean_over_depts": 0.0,
+  "receiver_own_active_mean": 2.038000464439392,
+  "dz_own_support_mean": -2.038000464439392,
+  "dz_own_support_frac_negative": 1.0,
+  "dz_union_support_mean": -0.002919771439024917,
+  "decoder_col_norm_residual_units": 3.9196078777313232
+ },
+ {
+  "arm": "S",
+  "feature": 2302,
+  "receivers_active": 394,
+  "prototype_mean_over_depts": 20.84132957458496,
+  "receiver_own_active_mean": 27.85940776134343,
+  "dz_own_support_mean": -6.242067187254282,
+  "dz_own_support_frac_negative": 0.7833001988071571,
+  "dz_union_support_mean": 11.631026767386407,
+  "decoder_col_norm_residual_units": 4.292223930358887
+ },
+ {
+  "arm": "S",
+  "feature": 3673,
+  "receivers_active": 309,
+  "prototype_mean_over_depts": 1.1559628248214722,
+  "receiver_own_active_mean": 19.077884098020988,
+  "dz_own_support_mean": -17.861753383193154,
+  "dz_own_support_frac_negative": 0.9169329073482428,
+  "dz_union_support_mean": -3.202468531606532,
+  "decoder_col_norm_residual_units": 4.454748153686523
+ },
+ {
+  "arm": "S",
+  "feature": 3455,
+  "receivers_active": 270,
+  "prototype_mean_over_depts": 0.7731291651725769,
+  "receiver_own_active_mean": 16.42969402366311,
+  "dz_own_support_mean": -15.681101825985595,
+  "dz_own_support_frac_negative": 1.0,
+  "dz_union_support_mean": -2.5171462642642695,
+  "decoder_col_norm_residual_units": 6.106075286865234
+ },
+ {
+  "arm": "C",
+  "feature": 6596,
+  "receivers_active": 287,
+  "prototype_mean_over_depts": 0.5029319524765015,
+  "receiver_own_active_mean": 4.1907586530110565,
+  "dz_own_support_mean": -3.7123189119927145,
+  "dz_own_support_frac_negative": 1.0,
+  "dz_union_support_mean": -0.1697750687599182,
+  "decoder_col_norm_residual_units": 6.4541168212890625
+ },
+ {
+  "arm": "C",
+  "feature": 8017,
+  "receivers_active": 330,
+  "prototype_mean_over_depts": 0.5022283792495728,
+  "receiver_own_active_mean": 3.681124615525191,
+  "dz_own_support_mean": -3.104052332232726,
+  "dz_own_support_frac_negative": 1.0,
+  "dz_union_support_mean": -0.10203883409531427,
+  "decoder_col_norm_residual_units": 11.888640403747559
+ },
+ {
+  "arm": "C",
+  "feature": 6608,
+  "receivers_active": 274,
+  "prototype_mean_over_depts": 1.3488935232162476,
+  "receiver_own_active_mean": 5.306048764239301,
+  "dz_own_support_mean": -3.145295235088893,
+  "dz_own_support_frac_negative": 0.756043956043956,
+  "dz_union_support_mean": 0.270278820517559,
+  "decoder_col_norm_residual_units": 3.2342920303344727
+ },
+ {
+  "arm": "C",
+  "feature": 2765,
+  "receivers_active": 393,
+  "prototype_mean_over_depts": 0.2498611956834793,
+  "receiver_own_active_mean": 0.6297205290554658,
+  "dz_own_support_mean": -0.38595501371267915,
+  "dz_own_support_frac_negative": 0.7463768115942029,
+  "dz_union_support_mean": 0.041917001511588566,
+  "decoder_col_norm_residual_units": 3.4516372680664062
+ },
+ {
+  "arm": "C",
+  "feature": 886,
+  "receivers_active": 188,
+  "prototype_mean_over_depts": 0.18856386840343475,
+  "receiver_own_active_mean": 1.1995691405509108,
+  "dz_own_support_mean": -0.9838463257611012,
+  "dz_own_support_frac_negative": 1.0,
+  "dz_union_support_mean": -0.015521747337951631,
+  "decoder_col_norm_residual_units": 3.830111026763916
+ }
+]
