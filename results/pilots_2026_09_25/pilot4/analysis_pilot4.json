@@ -1,0 +1,3966 @@
+{
+ "endpoints": {
+  "behavior_only|malicious|rpU_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0213316486784439,
+    "ci95": [
+     0.013543108409142187,
+     0.029671824528974874
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.0213316486784439,
+    "ci95": [
+     0.013552584330626258,
+     0.02954120832741602
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 27,
+   "users_negative": 2
+  },
+  "behavior_only|malicious|randI_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0008184901342309755,
+    "ci95": [
+     -0.000706218339973825,
+     0.002433926106869489
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0008184901342309755,
+    "ci95": [
+     -0.0007044162509170757,
+     0.002413488939704223
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 19,
+   "users_negative": 10
+  },
+  "behavior_only|malicious|randD_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.00413571758859459,
+    "ci95": [
+     0.0015951393180708776,
+     0.006968057684643172
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.00413571758859459,
+    "ci95": [
+     0.0016148851141761773,
+     0.007011877578822359
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 22,
+   "users_negative": 7
+  },
+  "behavior_only|malicious|meanDiff (edit alone)": {
+   "draws_10000": {
+    "estimate": -0.0022364759111198887,
+    "ci95": [
+     -0.004663352976585256,
+     -2.640148967333239e-05
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.0022364759111198887,
+    "ci95": [
+     -0.004710741548253031,
+     -8.4015423025223e-07
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 14,
+   "users_negative": 14
+  },
+  "behavior_only|malicious|pcaCtrl5 (edit alone)": {
+   "draws_10000": {
+    "estimate": -0.001258686116372032,
+    "ci95": [
+     -0.0026478032395243645,
+     -9.197350805518305e-06
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.001258686116372032,
+    "ci95": [
+     -0.0026661677217517774,
+     6.482546999194117e-06
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 13,
+   "users_negative": 16
+  },
+  "behavior_only|malicious|pcaGap5 (edit alone)": {
+   "draws_10000": {
+    "estimate": -0.0011198395627668532,
+    "ci95": [
+     -0.0026384663935108436,
+     0.00020389045963342136
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0011198395627668532,
+    "ci95": [
+     -0.0026793155354586824,
+     0.0002232161127887237
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 14,
+   "users_negative": 15
+  },
+  "behavior_only|malicious|pcaTop5 (edit alone)": {
+   "draws_10000": {
+    "estimate": -1.75246133886534e-05,
+    "ci95": [
+     -0.00230267335478773,
+     0.002179641098469153
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -1.75246133886534e-05,
+    "ci95": [
+     -0.002287434526323073,
+     0.002163984863537138
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 17,
+   "users_negative": 12
+  },
+  "behavior_only|malicious|E8a meanDiff - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.02356812458956378,
+    "ci95": [
+     -0.0329452087683068,
+     -0.014994542763579167
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.02356812458956378,
+    "ci95": [
+     -0.032942034143140946,
+     -0.015024756794773985
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 1,
+   "users_negative": 28
+  },
+  "behavior_only|malicious|E8b meanDiff - randI_S": {
+   "draws_10000": {
+    "estimate": -0.0030549660453508642,
+    "ci95": [
+     -0.0053174067166601785,
+     -0.0009588072300171373
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.0030549660453508642,
+    "ci95": [
+     -0.005342094575258336,
+     -0.0009571462576331086
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 10,
+   "users_negative": 19
+  },
+  "behavior_only|malicious|E8b' meanDiff - randD_S": {
+   "draws_10000": {
+    "estimate": -0.006372193499714479,
+    "ci95": [
+     -0.009873483976263597,
+     -0.003202874581168952
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.006372193499714479,
+    "ci95": [
+     -0.009869007198461172,
+     -0.0031729395650113125
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 6,
+   "users_negative": 23
+  },
+  "behavior_only|malicious|E8a pcaCtrl5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.022590334794815932,
+    "ci95": [
+     -0.03159958917776059,
+     -0.014328565641424096
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.022590334794815932,
+    "ci95": [
+     -0.03153540897343693,
+     -0.014481649365297517
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 4,
+   "users_negative": 25
+  },
+  "behavior_only|malicious|E8b pcaCtrl5 - randI_S": {
+   "draws_10000": {
+    "estimate": -0.0020771762506030076,
+    "ci95": [
+     -0.00405202889729334,
+     -0.00038982637162352456
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.0020771762506030076,
+    "ci95": [
+     -0.0040307373776175505,
+     -0.0003953161092753385
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 11,
+   "users_negative": 18
+  },
+  "behavior_only|malicious|E8b' pcaCtrl5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.005394403704966623,
+    "ci95": [
+     -0.008716419139213262,
+     -0.002434696928308957
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.005394403704966623,
+    "ci95": [
+     -0.008713406451774397,
+     -0.0024300811281320702
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 8,
+   "users_negative": 21
+  },
+  "behavior_only|malicious|E8a pcaGap5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.022451488241210748,
+    "ci95": [
+     -0.031058224990492916,
+     -0.014434224241894895
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.022451488241210748,
+    "ci95": [
+     -0.031010538408875295,
+     -0.014517875565322995
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 1,
+   "users_negative": 28
+  },
+  "behavior_only|malicious|E8b pcaGap5 - randI_S": {
+   "draws_10000": {
+    "estimate": -0.0019383296969978292,
+    "ci95": [
+     -0.0035053365041726623,
+     -0.000411325188717623
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.0019383296969978292,
+    "ci95": [
+     -0.0034866967157128896,
+     -0.0003853443956495017
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 8,
+   "users_negative": 21
+  },
+  "behavior_only|malicious|E8b' pcaGap5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.005255557151361444,
+    "ci95": [
+     -0.007994239902145218,
+     -0.0028314286986387332
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.005255557151361444,
+    "ci95": [
+     -0.00802651829460914,
+     -0.0028156737475816557
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 8,
+   "users_negative": 21
+  },
+  "behavior_only|malicious|E8a pcaTop5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.02134917329183255,
+    "ci95": [
+     -0.02939418845157,
+     -0.013766866655185306
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.02134917329183255,
+    "ci95": [
+     -0.029340002610851294,
+     -0.013802193371129458
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 2,
+   "users_negative": 27
+  },
+  "behavior_only|malicious|E8b pcaTop5 - randI_S": {
+   "draws_10000": {
+    "estimate": -0.0008360147476196289,
+    "ci95": [
+     -0.0025024859880193556,
+     0.0007002230127738125
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0008360147476196289,
+    "ci95": [
+     -0.0025111725034684626,
+     0.0006824722740499438
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 11,
+   "users_negative": 18
+  },
+  "behavior_only|malicious|E8b' pcaTop5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.004153242201983243,
+    "ci95": [
+     -0.00662181446103957,
+     -0.0019628268923481992
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.004153242201983243,
+    "ci95": [
+     -0.006573892653031254,
+     -0.0019621662847997476
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 8,
+   "users_negative": 21
+  },
+  "behavior_only|malicious|rpU_S - randI_S": {
+   "draws_10000": {
+    "estimate": 0.020513158544212925,
+    "ci95": [
+     0.013087498474138218,
+     0.02843018585987303
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.020513158544212925,
+    "ci95": [
+     0.013123803866020908,
+     0.02841979738335585
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 26,
+   "users_negative": 3
+  },
+  "behavior_only|benign|rpU_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.023201871723279182,
+    "ci95": [
+     0.013578322591345714,
+     0.03328242589591135
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.023201871723279182,
+    "ci95": [
+     0.013623316237681557,
+     0.03329625557562142
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 22,
+   "users_negative": 7
+  },
+  "behavior_only|benign|randI_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0033197590160643914,
+    "ci95": [
+     0.0016636724405033492,
+     0.005073273015347704
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.0033197590160643914,
+    "ci95": [
+     0.001653146579347808,
+     0.00505555167387443
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 21,
+   "users_negative": 8
+  },
+  "behavior_only|benign|randD_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.00694643913757527,
+    "ci95": [
+     0.0032088221445808122,
+     0.01127723374093572
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.00694643913757527,
+    "ci95": [
+     0.003211962711494202,
+     0.011300756447338333
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 22,
+   "users_negative": 7
+  },
+  "behavior_only|benign|meanDiff (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.004471266706442011,
+    "ci95": [
+     0.002273870546199467,
+     0.0068139971105446095
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.004471266706442011,
+    "ci95": [
+     0.0022978122087045647,
+     0.006797164825016055
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 17,
+   "users_negative": 12
+  },
+  "behavior_only|benign|pcaCtrl5 (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0034655879583509477,
+    "ci95": [
+     0.001321479776317532,
+     0.00589775109117658
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.0034655879583509477,
+    "ci95": [
+     0.0013489532882840127,
+     0.00589775109117658
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 20,
+   "users_negative": 9
+  },
+  "behavior_only|benign|pcaGap5 (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0013978811387700596,
+    "ci95": [
+     0.0003297482251093305,
+     0.0026007272723805284
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.0013978811387700596,
+    "ci95": [
+     0.0003164177520693033,
+     0.0026354175361793953
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 17,
+   "users_negative": 12
+  },
+  "behavior_only|benign|pcaTop5 (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.004623709790322972,
+    "ci95": [
+     0.0023611507554078233,
+     0.007195444800195166
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.004623709790322972,
+    "ci95": [
+     0.0023408752988124722,
+     0.007152362633924716
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 22,
+   "users_negative": 7
+  },
+  "behavior_only|benign|E8a meanDiff - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.01873060501683717,
+    "ci95": [
+     -0.02716426373405874,
+     -0.010668610204653492
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.01873060501683717,
+    "ci95": [
+     -0.027185832251655467,
+     -0.010727753932855428
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 6,
+   "users_negative": 23
+  },
+  "behavior_only|benign|E8b meanDiff - randI_S": {
+   "draws_10000": {
+    "estimate": 0.0011515076903776192,
+    "ci95": [
+     8.15281130630393e-06,
+     0.0023773624712665527
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.0011515076903776192,
+    "ci95": [
+     1.4133353599871729e-05,
+     0.002404872628314227
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 18,
+   "users_negative": 11
+  },
+  "behavior_only|benign|E8b' meanDiff - randD_S": {
+   "draws_10000": {
+    "estimate": -0.002475172431133259,
+    "ci95": [
+     -0.005794430858851677,
+     0.0003231145713435508
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.002475172431133259,
+    "ci95": [
+     -0.0058036894381217575,
+     0.00031780013900207263
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 12,
+   "users_negative": 17
+  },
+  "behavior_only|benign|E8a pcaCtrl5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.01973628376492824,
+    "ci95": [
+     -0.028135116259599555,
+     -0.011815426630749441
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.01973628376492824,
+    "ci95": [
+     -0.02810453729072436,
+     -0.011828291636902369
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 7,
+   "users_negative": 22
+  },
+  "behavior_only|benign|E8b pcaCtrl5 - randI_S": {
+   "draws_10000": {
+    "estimate": 0.00014582894228655716,
+    "ci95": [
+     -0.0013010584303959345,
+     0.0017252668751210998
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.00014582894228655716,
+    "ci95": [
+     -0.001331447558691618,
+     0.0017272482817757052
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 14,
+   "users_negative": 15
+  },
+  "behavior_only|benign|E8b' pcaCtrl5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.0034808511792243212,
+    "ci95": [
+     -0.00675403804550397,
+     -0.0009155353882360734
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.0034808511792243212,
+    "ci95": [
+     -0.0067599943740528886,
+     -0.0009024208697394053
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 11,
+   "users_negative": 18
+  },
+  "behavior_only|benign|E8a pcaGap5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.021803990584509124,
+    "ci95": [
+     -0.03121601852513422,
+     -0.012839233127647436
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.021803990584509124,
+    "ci95": [
+     -0.031183705656179065,
+     -0.012860217455175078
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 6,
+   "users_negative": 23
+  },
+  "behavior_only|benign|E8b pcaGap5 - randI_S": {
+   "draws_10000": {
+    "estimate": -0.0019218778772943322,
+    "ci95": [
+     -0.0032599651344634335,
+     -0.0006353055714661711
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.0019218778772943322,
+    "ci95": [
+     -0.0032675423730036306,
+     -0.0006315810067429287
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 9,
+   "users_negative": 20
+  },
+  "behavior_only|benign|E8b' pcaGap5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.005548557998805211,
+    "ci95": [
+     -0.009366827652329343,
+     -0.0024087543402338232
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.005548557998805211,
+    "ci95": [
+     -0.009401604268357325,
+     -0.0024371648003914588
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 9,
+   "users_negative": 20
+  },
+  "behavior_only|benign|E8a pcaTop5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.01857816193295621,
+    "ci95": [
+     -0.027173420320768124,
+     -0.010349225600667557
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.01857816193295621,
+    "ci95": [
+     -0.027253964177985816,
+     -0.010349174605511217
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 9,
+   "users_negative": 20
+  },
+  "behavior_only|benign|E8b pcaTop5 - randI_S": {
+   "draws_10000": {
+    "estimate": 0.0013039507742585805,
+    "ci95": [
+     -0.0002375265693655987,
+     0.0031744821748599925
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0013039507742585805,
+    "ci95": [
+     -0.0002195753904337855,
+     0.0031721479961669984
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 15,
+   "users_negative": 14
+  },
+  "behavior_only|benign|E8b' pcaTop5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.0023227293472522976,
+    "ci95": [
+     -0.005251039548766339,
+     0.0003137155523759193
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0023227293472522976,
+    "ci95": [
+     -0.005283486585443218,
+     0.0003242816962301725
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 15,
+   "users_negative": 14
+  },
+  "behavior_only|benign|rpU_S - randI_S": {
+   "draws_10000": {
+    "estimate": 0.0198821127072148,
+    "ci95": [
+     0.011433714868115454,
+     0.028603099838498684
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.0198821127072148,
+    "ci95": [
+     0.011474985947896695,
+     0.028603099838498684
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 20,
+   "users_negative": 9
+  },
+  "behavior_ses_only|malicious|rpU_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.022588463988283587,
+    "ci95": [
+     0.014304436747969568,
+     0.03145536680352585
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.022588463988283587,
+    "ci95": [
+     0.014304849544176082,
+     0.03134613715112207
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 26,
+   "users_negative": 3
+  },
+  "behavior_ses_only|malicious|randI_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0007912851613143395,
+    "ci95": [
+     -0.0008521334064760426,
+     0.002534030634353216
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0007912851613143395,
+    "ci95": [
+     -0.0008407665337382376,
+     0.002495895776383835
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 18,
+   "users_negative": 11
+  },
+  "behavior_ses_only|malicious|randD_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.004390748603076771,
+    "ci95": [
+     0.0017094490758475217,
+     0.007382512511150247
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.004390748603076771,
+    "ci95": [
+     0.0017294054664671423,
+     0.0074222752780535774
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 22,
+   "users_negative": 7
+  },
+  "behavior_ses_only|malicious|meanDiff (edit alone)": {
+   "draws_10000": {
+    "estimate": -0.0023222383582729034,
+    "ci95": [
+     -0.004895411101758651,
+     2.3466955827570388e-05
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0023222383582729034,
+    "ci95": [
+     -0.004943879737101238,
+     4.726614096555202e-05
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 14,
+   "users_negative": 14
+  },
+  "behavior_ses_only|malicious|pcaCtrl5 (edit alone)": {
+   "draws_10000": {
+    "estimate": -0.0012951418500522086,
+    "ci95": [
+     -0.002756185769692235,
+     5.843164720411471e-06
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0012951418500522086,
+    "ci95": [
+     -0.002768788470019554,
+     1.9935336092422716e-05
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 13,
+   "users_negative": 16
+  },
+  "behavior_ses_only|malicious|pcaGap5 (edit alone)": {
+   "draws_10000": {
+    "estimate": -0.0011671080328952304,
+    "ci95": [
+     -0.0027850240464696936,
+     0.00023925562731750327
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0011671080328952304,
+    "ci95": [
+     -0.002835968912568414,
+     0.0002536726342621205
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 13,
+   "users_negative": 16
+  },
+  "behavior_ses_only|malicious|pcaTop5 (edit alone)": {
+   "draws_10000": {
+    "estimate": 5.8148698560122734e-06,
+    "ci95": [
+     -0.0023576016968180394,
+     0.002298485488984091
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 5.8148698560122734e-06,
+    "ci95": [
+     -0.0023494475915086,
+     0.002280494543541778
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 15,
+   "users_negative": 14
+  },
+  "behavior_ses_only|malicious|E8a meanDiff - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.024910702346556488,
+    "ci95": [
+     -0.03490242389822914,
+     -0.01579148806299715
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.024910702346556488,
+    "ci95": [
+     -0.034899655150078326,
+     -0.015811362022790928
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 2,
+   "users_negative": 27
+  },
+  "behavior_ses_only|malicious|E8b meanDiff - randI_S": {
+   "draws_10000": {
+    "estimate": -0.003113523519587243,
+    "ci95": [
+     -0.005545573174396808,
+     -0.0008527550254359681
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.003113523519587243,
+    "ci95": [
+     -0.005556071315752879,
+     -0.0008548113225220613
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 9,
+   "users_negative": 20
+  },
+  "behavior_ses_only|malicious|E8b' meanDiff - randD_S": {
+   "draws_10000": {
+    "estimate": -0.006712986961349672,
+    "ci95": [
+     -0.010426939721915057,
+     -0.003342518048874777
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.006712986961349672,
+    "ci95": [
+     -0.01041659931031366,
+     -0.003318665191830918
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 6,
+   "users_negative": 23
+  },
+  "behavior_ses_only|malicious|E8a pcaCtrl5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.023883605838335792,
+    "ci95": [
+     -0.033425289766391975,
+     -0.015124016509701809
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.023883605838335792,
+    "ci95": [
+     -0.03338188115400315,
+     -0.015247558697993904
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 3,
+   "users_negative": 26
+  },
+  "behavior_ses_only|malicious|E8b pcaCtrl5 - randI_S": {
+   "draws_10000": {
+    "estimate": -0.002086427011366548,
+    "ci95": [
+     -0.004196546521123456,
+     -0.0002960972027617625
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.002086427011366548,
+    "ci95": [
+     -0.0041767330551198845,
+     -0.0002956860244873624
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 12,
+   "users_negative": 17
+  },
+  "behavior_ses_only|malicious|E8b' pcaCtrl5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.00568589045312898,
+    "ci95": [
+     -0.009219587221634627,
+     -0.0025417268981664685
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.00568589045312898,
+    "ci95": [
+     -0.009219997883613766,
+     -0.0025566844308170795
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 8,
+   "users_negative": 21
+  },
+  "behavior_ses_only|malicious|E8a pcaGap5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.023755572021178815,
+    "ci95": [
+     -0.03292008194676333,
+     -0.015217784387541228
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.023755572021178815,
+    "ci95": [
+     -0.032876212349611106,
+     -0.015269577904957638
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 1,
+   "users_negative": 28
+  },
+  "behavior_ses_only|malicious|E8b pcaGap5 - randI_S": {
+   "draws_10000": {
+    "estimate": -0.00195839319420957,
+    "ci95": [
+     -0.0036563631725208515,
+     -0.0002825391432805651
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.00195839319420957,
+    "ci95": [
+     -0.0036363255760322004,
+     -0.0002592242295029525
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 8,
+   "users_negative": 21
+  },
+  "behavior_ses_only|malicious|E8b' pcaGap5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.005557856635972001,
+    "ci95": [
+     -0.008459261788440675,
+     -0.002996515202839142
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.005557856635972001,
+    "ci95": [
+     -0.008493307322563455,
+     -0.0029862535495482306
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 8,
+   "users_negative": 21
+  },
+  "behavior_ses_only|malicious|E8a pcaTop5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.022582649118427577,
+    "ci95": [
+     -0.03115469060463553,
+     -0.014527803955535436
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.022582649118427577,
+    "ci95": [
+     -0.031043197075868473,
+     -0.014523071981538302
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 2,
+   "users_negative": 27
+  },
+  "behavior_ses_only|malicious|E8b pcaTop5 - randI_S": {
+   "draws_10000": {
+    "estimate": -0.0007854702914583271,
+    "ci95": [
+     -0.002484125192223609,
+     0.0008243592160529104
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0007854702914583271,
+    "ci95": [
+     -0.002502061760845198,
+     0.0007956494572947068
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 11,
+   "users_negative": 18
+  },
+  "behavior_ses_only|malicious|E8b' pcaTop5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.004384933733220757,
+    "ci95": [
+     -0.006975416739139405,
+     -0.0020976950074064324
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.004384933733220757,
+    "ci95": [
+     -0.006952334275554823,
+     -0.002090402095760594
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 8,
+   "users_negative": 21
+  },
+  "behavior_ses_only|malicious|rpU_S - randI_S": {
+   "draws_10000": {
+    "estimate": 0.02179717882696925,
+    "ci95": [
+     0.01389925328468711,
+     0.03019038494130404
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.02179717882696925,
+    "ci95": [
+     0.013925496279101434,
+     0.030171459364736895
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 26,
+   "users_negative": 3
+  },
+  "behavior_ses_only|benign|rpU_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.02462138885567928,
+    "ci95": [
+     0.01436685020906915,
+     0.03531765232751168
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.02462138885567928,
+    "ci95": [
+     0.014439942623627766,
+     0.03530314908502087
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 22,
+   "users_negative": 7
+  },
+  "behavior_ses_only|benign|randI_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.003519277411630783,
+    "ci95": [
+     0.001762445736676455,
+     0.005380206964053642
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.003519277411630783,
+    "ci95": [
+     0.0017698340477614565,
+     0.005378463560736727
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 20,
+   "users_negative": 9
+  },
+  "behavior_ses_only|benign|randD_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0073709786623373805,
+    "ci95": [
+     0.0034411307143839606,
+     0.011951394242652015
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.0073709786623373805,
+    "ci95": [
+     0.0034425945241732163,
+     0.012002765136481871
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 21,
+   "users_negative": 8
+  },
+  "behavior_ses_only|benign|meanDiff (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.00480351621049574,
+    "ci95": [
+     0.002521018641733233,
+     0.0072668442268181465
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.00480351621049574,
+    "ci95": [
+     0.002526314283303659,
+     0.007253747898335942
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 18,
+   "users_negative": 11
+  },
+  "behavior_ses_only|benign|pcaCtrl5 (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0037423126271058783,
+    "ci95": [
+     0.001530107675312922,
+     0.0062783420396347826
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.0037423126271058783,
+    "ci95": [
+     0.0015375810513679668,
+     0.006282105163681781
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 21,
+   "users_negative": 8
+  },
+  "behavior_ses_only|benign|pcaGap5 (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0015605798569218868,
+    "ci95": [
+     0.0004529146208888156,
+     0.002833512979827221
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.0015605798569218868,
+    "ci95": [
+     0.0004410721523280459,
+     0.0028542098681303267
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 18,
+   "users_negative": 11
+  },
+  "behavior_ses_only|benign|pcaTop5 (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.004913950951277524,
+    "ci95": [
+     0.0025370180310317495,
+     0.007583557336923034
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.004913950951277524,
+    "ci95": [
+     0.0025361036772614926,
+     0.007529116220258427
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 22,
+   "users_negative": 7
+  },
+  "behavior_ses_only|benign|E8a meanDiff - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.01981787264518354,
+    "ci95": [
+     -0.028778292320497414,
+     -0.01125086138752857
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.01981787264518354,
+    "ci95": [
+     -0.028793753376765843,
+     -0.011279433859704896
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 7,
+   "users_negative": 22
+  },
+  "behavior_ses_only|benign|E8b meanDiff - randI_S": {
+   "draws_10000": {
+    "estimate": 0.0012842387988649562,
+    "ci95": [
+     6.380021422245039e-05,
+     0.002579814964455777
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.0012842387988649562,
+    "ci95": [
+     6.322772231423998e-05,
+     0.0026116133133356253
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 15,
+   "users_negative": 14
+  },
+  "behavior_ses_only|benign|E8b' meanDiff - randD_S": {
+   "draws_10000": {
+    "estimate": -0.002567462451841639,
+    "ci95": [
+     -0.0060945643109922435,
+     0.00039248996253671314
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.002567462451841639,
+    "ci95": [
+     -0.006117865911031934,
+     0.0003796475950157495
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 13,
+   "users_negative": 16
+  },
+  "behavior_ses_only|benign|E8a pcaCtrl5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.020879076228573403,
+    "ci95": [
+     -0.029820797848354643,
+     -0.012474936977799599
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.020879076228573403,
+    "ci95": [
+     -0.029816023991817885,
+     -0.012476780681667488
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 5,
+   "users_negative": 24
+  },
+  "behavior_ses_only|benign|E8b pcaCtrl5 - randI_S": {
+   "draws_10000": {
+    "estimate": 0.00022303521547509332,
+    "ci95": [
+     -0.001284806835839803,
+     0.001880215115459828
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.00022303521547509332,
+    "ci95": [
+     -0.0013182783336646259,
+     0.0018745044385479095
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 12,
+   "users_negative": 17
+  },
+  "behavior_ses_only|benign|E8b' pcaCtrl5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.0036286660352315026,
+    "ci95": [
+     -0.0071039577714841935,
+     -0.0009250916851063569
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.0036286660352315026,
+    "ci95": [
+     -0.0071039577714841935,
+     -0.0009299325575816564
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 9,
+   "users_negative": 20
+  },
+  "behavior_ses_only|benign|E8a pcaGap5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.023060808998757395,
+    "ci95": [
+     -0.033064255059707434,
+     -0.013539141161774088
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.023060808998757395,
+    "ci95": [
+     -0.03300799482277241,
+     -0.013554423759402386
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 6,
+   "users_negative": 23
+  },
+  "behavior_ses_only|benign|E8b pcaGap5 - randI_S": {
+   "draws_10000": {
+    "estimate": -0.0019586975547088974,
+    "ci95": [
+     -0.0033994839266584865,
+     -0.0005764764634057368
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.0019586975547088974,
+    "ci95": [
+     -0.0034020425059201054,
+     -0.0005919804884356331
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 8,
+   "users_negative": 21
+  },
+  "behavior_ses_only|benign|E8b' pcaGap5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.0058103988054154935,
+    "ci95": [
+     -0.009881799003944314,
+     -0.0024465278486838975
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.0058103988054154935,
+    "ci95": [
+     -0.009910728456238391,
+     -0.0024823078216620943
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 9,
+   "users_negative": 20
+  },
+  "behavior_ses_only|benign|E8a pcaTop5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.019707437904401756,
+    "ci95": [
+     -0.02883419780242632,
+     -0.01098379127488568
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.019707437904401756,
+    "ci95": [
+     -0.028910493386438346,
+     -0.010978019170077714
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 10,
+   "users_negative": 19
+  },
+  "behavior_ses_only|benign|E8b pcaTop5 - randI_S": {
+   "draws_10000": {
+    "estimate": 0.0013946735396467408,
+    "ci95": [
+     -0.00022007474119122003,
+     0.003326867907468615
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0013946735396467408,
+    "ci95": [
+     -0.00020174450776272123,
+     0.0033040475059600304
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 14,
+   "users_negative": 15
+  },
+  "behavior_ses_only|benign|E8b' pcaTop5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.002457027711059855,
+    "ci95": [
+     -0.005558622252067614,
+     0.0002883982152046482
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.002457027711059855,
+    "ci95": [
+     -0.005577823457404457,
+     0.00028844548110989207
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 16,
+   "users_negative": 13
+  },
+  "behavior_ses_only|benign|rpU_S - randI_S": {
+   "draws_10000": {
+    "estimate": 0.0211021114440485,
+    "ci95": [
+     0.012121366986619501,
+     0.030381764938155642
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.0211021114440485,
+    "ci95": [
+     0.012176296239526105,
+     0.0303818409738998
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 19,
+   "users_negative": 10
+  },
+  "profile_only|malicious|rpU_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0030830853286830857,
+    "ci95": [
+     -0.0058612460274805964,
+     0.015785835255151495
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0030830853286830857,
+    "ci95": [
+     -0.00585490889590362,
+     0.015711139628941977
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 15,
+   "users_negative": 14
+  },
+  "profile_only|malicious|randI_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0044571426408044216,
+    "ci95": [
+     -0.0035043074481788715,
+     0.017272357815641088
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0044571426408044216,
+    "ci95": [
+     -0.0035512392616820062,
+     0.01711372826633782
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 14,
+   "users_negative": 15
+  },
+  "profile_only|malicious|randD_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0036377663584961297,
+    "ci95": [
+     -0.003435202761628162,
+     0.015285431026727303
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0036377663584961297,
+    "ci95": [
+     -0.003495853668314287,
+     0.015176526761945608
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 14,
+   "users_negative": 15
+  },
+  "profile_only|malicious|meanDiff (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.003995976913934467,
+    "ci95": [
+     -0.007958777457818216,
+     0.021159480664579323
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.003995976913934467,
+    "ci95": [
+     -0.008053442460709603,
+     0.021009209128631922
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 15,
+   "users_negative": 13
+  },
+  "profile_only|malicious|pcaCtrl5 (edit alone)": {
+   "draws_10000": {
+    "estimate": -0.0001431149312819554,
+    "ci95": [
+     -0.004671394266616338,
+     0.003838384399811426
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0001431149312819554,
+    "ci95": [
+     -0.004584785343586711,
+     0.003792838188766058
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 18,
+   "users_negative": 11
+  },
+  "profile_only|malicious|pcaGap5 (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.00577006230409118,
+    "ci95": [
+     -0.00718171862350113,
+     0.025666967233022038
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.00577006230409118,
+    "ci95": [
+     -0.007181760593392383,
+     0.025651944803780517
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 15,
+   "users_negative": 14
+  },
+  "profile_only|malicious|pcaTop5 (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0033837452017027756,
+    "ci95": [
+     -0.00732770365202564,
+     0.020027314402248662
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0033837452017027756,
+    "ci95": [
+     -0.007382659667182242,
+     0.020042669440823033
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 11,
+   "users_negative": 18
+  },
+  "profile_only|malicious|E8a meanDiff - rpU_S": {
+   "draws_10000": {
+    "estimate": 0.0009128915852513808,
+    "ci95": [
+     -0.008996922185366178,
+     0.009352280168697746
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0009128915852513808,
+    "ci95": [
+     -0.009088759883039298,
+     0.009387361280534457
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 12,
+   "users_negative": 17
+  },
+  "profile_only|malicious|E8b meanDiff - randI_S": {
+   "draws_10000": {
+    "estimate": -0.0004611657268699561,
+    "ci95": [
+     -0.0072910353832546316,
+     0.005436713633866142
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0004611657268699561,
+    "ci95": [
+     -0.0072915991592681275,
+     0.005445854466879503
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 14,
+   "users_negative": 15
+  },
+  "profile_only|malicious|E8b' meanDiff - randD_S": {
+   "draws_10000": {
+    "estimate": 0.0003582105554383373,
+    "ci95": [
+     -0.008227897901302095,
+     0.007545540831212339
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0003582105554383373,
+    "ci95": [
+     -0.008222714345688109,
+     0.007525809092083194
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 18,
+   "users_negative": 11
+  },
+  "profile_only|malicious|E8a pcaCtrl5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.003226200259965043,
+    "ci95": [
+     -0.018102902071229346,
+     0.006218729173314977
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.003226200259965043,
+    "ci95": [
+     -0.018102902071229346,
+     0.006350382926135225
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 17,
+   "users_negative": 12
+  },
+  "profile_only|malicious|E8b pcaCtrl5 - randI_S": {
+   "draws_10000": {
+    "estimate": -0.004600257572086377,
+    "ci95": [
+     -0.019816817476831634,
+     0.004528356626115996
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.004600257572086377,
+    "ci95": [
+     -0.01975281227422856,
+     0.00457786752060912
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 16,
+   "users_negative": 13
+  },
+  "profile_only|malicious|E8b' pcaCtrl5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.0037808812897780846,
+    "ci95": [
+     -0.017744357801716903,
+     0.004678167639107538
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0037808812897780846,
+    "ci95": [
+     -0.017616944801190804,
+     0.004650827759298775
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 15,
+   "users_negative": 14
+  },
+  "profile_only|malicious|E8a pcaGap5 - rpU_S": {
+   "draws_10000": {
+    "estimate": 0.0026869769754080943,
+    "ci95": [
+     -0.007362823712414709,
+     0.013088879773671597
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0026869769754080943,
+    "ci95": [
+     -0.007363281030764525,
+     0.01302239059716804
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 15,
+   "users_negative": 14
+  },
+  "profile_only|malicious|E8b pcaGap5 - randI_S": {
+   "draws_10000": {
+    "estimate": 0.0013129196632867572,
+    "ci95": [
+     -0.005607918206302599,
+     0.009452562100928404
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0013129196632867572,
+    "ci95": [
+     -0.005639935788409462,
+     0.009338125850277377
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 15,
+   "users_negative": 14
+  },
+  "profile_only|malicious|E8b' pcaGap5 - randD_S": {
+   "draws_10000": {
+    "estimate": 0.0021322959455950512,
+    "ci95": [
+     -0.0068052053057599355,
+     0.012223727339985727
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0021322959455950512,
+    "ci95": [
+     -0.00680544033475306,
+     0.012227000809949004
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 16,
+   "users_negative": 13
+  },
+  "profile_only|malicious|E8a pcaTop5 - rpU_S": {
+   "draws_10000": {
+    "estimate": 0.00030065987301968974,
+    "ci95": [
+     -0.007819129506061817,
+     0.007695283864078848
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.00030065987301968974,
+    "ci95": [
+     -0.00791309640325349,
+     0.007618574104432397
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 15,
+   "users_negative": 14
+  },
+  "profile_only|malicious|E8b pcaTop5 - randI_S": {
+   "draws_10000": {
+    "estimate": -0.001073397439101647,
+    "ci95": [
+     -0.006222306017217965,
+     0.004002217602455752
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.001073397439101647,
+    "ci95": [
+     -0.006304880589589305,
+     0.003940254727314257
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 15,
+   "users_negative": 14
+  },
+  "profile_only|malicious|E8b' pcaTop5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.00025402115679335315,
+    "ci95": [
+     -0.007136609968782841,
+     0.006453766983815991
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.00025402115679335315,
+    "ci95": [
+     -0.007142768700917561,
+     0.0064434077068306886
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 15,
+   "users_negative": 14
+  },
+  "profile_only|malicious|rpU_S - randI_S": {
+   "draws_10000": {
+    "estimate": -0.0013740573121213365,
+    "ci95": [
+     -0.005241403439264188,
+     0.002711927387221105
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0013740573121213365,
+    "ci95": [
+     -0.005329301456610363,
+     0.002720542872089078
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 14,
+   "users_negative": 15
+  },
+  "profile_only|benign|rpU_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.005484173147157692,
+    "ci95": [
+     -0.002827676454152184,
+     0.015400413843407026
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.005484173147157692,
+    "ci95": [
+     -0.0030099346154722675,
+     0.015176652957653174
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 16,
+   "users_negative": 13
+  },
+  "profile_only|benign|randI_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0015897247298010465,
+    "ci95": [
+     -0.005727463542729959,
+     0.011763744439886897
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0015897247298010465,
+    "ci95": [
+     -0.0056764989012274255,
+     0.011671345651834857
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 12,
+   "users_negative": 17
+  },
+  "profile_only|benign|randD_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0055209972392553566,
+    "ci95": [
+     -0.002409911229350101,
+     0.015726483429985484
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0055209972392553566,
+    "ci95": [
+     -0.002470848971399768,
+     0.015688683382053484
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 16,
+   "users_negative": 13
+  },
+  "profile_only|benign|meanDiff (edit alone)": {
+   "draws_10000": {
+    "estimate": -0.0034498457250923932,
+    "ci95": [
+     -0.016789805471212015,
+     0.011726680132506901
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0034498457250923932,
+    "ci95": [
+     -0.016789805471212015,
+     0.011738231062203983
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 11,
+   "users_negative": 17
+  },
+  "profile_only|benign|pcaCtrl5 (edit alone)": {
+   "draws_10000": {
+    "estimate": -0.008557870538755393,
+    "ci95": [
+     -0.02205497048709584,
+     0.0005947514220900913
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.008557870538755393,
+    "ci95": [
+     -0.02205541935289043,
+     0.0006129750403864606
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 15,
+   "users_negative": 14
+  },
+  "profile_only|benign|pcaGap5 (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.005464989426492275,
+    "ci95": [
+     -0.005791534236792859,
+     0.021437323970356203
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.005464989426492275,
+    "ci95": [
+     -0.00581782079633625,
+     0.021495164033325236
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 16,
+   "users_negative": 13
+  },
+  "profile_only|benign|pcaTop5 (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.001725135178401553,
+    "ci95": [
+     -0.007735757274531772,
+     0.01474384712076735
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.001725135178401553,
+    "ci95": [
+     -0.007729831747282511,
+     0.014304876733442811
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 14,
+   "users_negative": 15
+  },
+  "profile_only|benign|E8a meanDiff - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.008934018872250087,
+    "ci95": [
+     -0.02496635593045717,
+     0.0039349722690965915
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.008934018872250087,
+    "ci95": [
+     -0.024988112179027206,
+     0.003938980030602414
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 12,
+   "users_negative": 17
+  },
+  "profile_only|benign|E8b meanDiff - randI_S": {
+   "draws_10000": {
+    "estimate": -0.005039570454893442,
+    "ci95": [
+     -0.016526025907061568,
+     0.004458057024013034
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.005039570454893442,
+    "ci95": [
+     -0.016576763310994228,
+     0.004439543924112425
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 12,
+   "users_negative": 17
+  },
+  "profile_only|benign|E8b' meanDiff - randD_S": {
+   "draws_10000": {
+    "estimate": -0.008970842964347752,
+    "ci95": [
+     -0.023492313304851797,
+     0.0022014367066580673
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.008970842964347752,
+    "ci95": [
+     -0.02326854532477499,
+     0.002038210472841371
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 13,
+   "users_negative": 16
+  },
+  "profile_only|benign|E8a pcaCtrl5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.014042043685913087,
+    "ci95": [
+     -0.03419056000894514,
+     0.0005027752395333919
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.014042043685913087,
+    "ci95": [
+     -0.03384556999836845,
+     0.0004361386597156515
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 13,
+   "users_negative": 16
+  },
+  "profile_only|benign|E8b pcaCtrl5 - randI_S": {
+   "draws_10000": {
+    "estimate": -0.01014759526855644,
+    "ci95": [
+     -0.028074103977488378,
+     0.003740711075136031
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.01014759526855644,
+    "ci95": [
+     -0.028005527900210745,
+     0.003595284240684291
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 14,
+   "users_negative": 15
+  },
+  "profile_only|benign|E8b' pcaCtrl5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.014078867778010751,
+    "ci95": [
+     -0.03300216552169843,
+     0.0004471897565085231
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.014078867778010751,
+    "ci95": [
+     -0.03293732283101685,
+     0.0002401980312391232
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 12,
+   "users_negative": 17
+  },
+  "profile_only|benign|E8a pcaGap5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -1.918372066541514e-05,
+    "ci95": [
+     -0.012438449266998244,
+     0.011761563606988424
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -1.918372066541514e-05,
+    "ci95": [
+     -0.012336388168663814,
+     0.012115572526537135
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 15,
+   "users_negative": 14
+  },
+  "profile_only|benign|E8b pcaGap5 - randI_S": {
+   "draws_10000": {
+    "estimate": 0.0038752646966912284,
+    "ci95": [
+     -0.005285824614352193,
+     0.01366768407581866
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0038752646966912284,
+    "ci95": [
+     -0.005116092894954243,
+     0.013758771842581102
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 16,
+   "users_negative": 13
+  },
+  "profile_only|benign|E8b' pcaGap5 - randD_S": {
+   "draws_10000": {
+    "estimate": -5.600781276308314e-05,
+    "ci95": [
+     -0.011311608523815528,
+     0.010225184611205394
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -5.600781276308314e-05,
+    "ci95": [
+     -0.011131509050898169,
+     0.010254082828760135
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 18,
+   "users_negative": 11
+  },
+  "profile_only|benign|E8a pcaTop5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.00375903796875614,
+    "ci95": [
+     -0.015234119499894392,
+     0.006115276844337057
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.00375903796875614,
+    "ci95": [
+     -0.015182865566905889,
+     0.005959907482410298
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 14,
+   "users_negative": 15
+  },
+  "profile_only|benign|E8b pcaTop5 - randI_S": {
+   "draws_10000": {
+    "estimate": 0.00013541044860050633,
+    "ci95": [
+     -0.007094540878616532,
+     0.0070159360800666325
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.00013541044860050633,
+    "ci95": [
+     -0.006952429562807085,
+     0.006973666070864111
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 16,
+   "users_negative": 13
+  },
+  "profile_only|benign|E8b' pcaTop5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.0037958620608538056,
+    "ci95": [
+     -0.014285264782521918,
+     0.00511552985029659
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0037958620608538056,
+    "ci95": [
+     -0.014287813353812557,
+     0.004956533925971764
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 16,
+   "users_negative": 13
+  },
+  "profile_only|benign|rpU_S - randI_S": {
+   "draws_10000": {
+    "estimate": 0.003894448417356644,
+    "ci95": [
+     -0.002290350578982254,
+     0.010547204373896809
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.003894448417356644,
+    "ci95": [
+     -0.0023197550198127484,
+     0.01046867589498388
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 18,
+   "users_negative": 11
+  },
+  "full|malicious|rpU_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.016925594553180122,
+    "ci95": [
+     0.010706888568298573,
+     0.023274956183700724
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.016925594553180122,
+    "ci95": [
+     0.010747329846195792,
+     0.023214415723736257
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 26,
+   "users_negative": 3
+  },
+  "full|malicious|randI_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0017823360260875746,
+    "ci95": [
+     -0.00039267057617162844,
+     0.004769415195132122
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0017823360260875746,
+    "ci95": [
+     -0.00043266032533398997,
+     0.00475152837176775
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 16,
+   "users_negative": 13
+  },
+  "full|malicious|randD_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.004295383924725412,
+    "ci95": [
+     0.0013796330012124157,
+     0.007777329279088426
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.004295383924725412,
+    "ci95": [
+     0.0013689983687524138,
+     0.0076792080409225335
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 20,
+   "users_negative": 9
+  },
+  "full|malicious|meanDiff (edit alone)": {
+   "draws_10000": {
+    "estimate": -0.0007437515190277976,
+    "ci95": [
+     -0.004088246598839759,
+     0.0037533514527068727
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0007437515190277976,
+    "ci95": [
+     -0.00411007823358322,
+     0.0037108481761025268
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 13,
+   "users_negative": 15
+  },
+  "full|malicious|pcaCtrl5 (edit alone)": {
+   "draws_10000": {
+    "estimate": -0.0009088589199658095,
+    "ci95": [
+     -0.0023695926265469907,
+     0.0004576500436697879
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0009088589199658095,
+    "ci95": [
+     -0.002338185655488365,
+     0.00048016202090115176
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 16,
+   "users_negative": 13
+  },
+  "full|malicious|pcaGap5 (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.000648806989192963,
+    "ci95": [
+     -0.002751636375384084,
+     0.005735912981560857
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.000648806989192963,
+    "ci95": [
+     -0.0027570949212230487,
+     0.005730020418848791
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 12,
+   "users_negative": 17
+  },
+  "full|malicious|pcaTop5 (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0009831955035527547,
+    "ci95": [
+     -0.0021270483423923626,
+     0.005314716355896543
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0009831955035527547,
+    "ci95": [
+     -0.0020991213516942386,
+     0.00516589936168714
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 14,
+   "users_negative": 15
+  },
+  "full|malicious|E8a meanDiff - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.017669346072207923,
+    "ci95": [
+     -0.025287331691247295,
+     -0.01053986104740494
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.017669346072207923,
+    "ci95": [
+     -0.025245425184310853,
+     -0.010625659314722855
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 6,
+   "users_negative": 23
+  },
+  "full|malicious|E8b meanDiff - randI_S": {
+   "draws_10000": {
+    "estimate": -0.0025260875451153723,
+    "ci95": [
+     -0.004849181586298449,
+     -0.00019563740226386666
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.0025260875451153723,
+    "ci95": [
+     -0.004823284990999889,
+     -0.00020109912059430588
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 12,
+   "users_negative": 17
+  },
+  "full|malicious|E8b' meanDiff - randD_S": {
+   "draws_10000": {
+    "estimate": -0.00503913544375321,
+    "ci95": [
+     -0.008236637414786323,
+     -0.002041886275869678
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.00503913544375321,
+    "ci95": [
+     -0.008168657625029826,
+     -0.002024390548467638
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 8,
+   "users_negative": 21
+  },
+  "full|malicious|E8a pcaCtrl5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.017834453473145932,
+    "ci95": [
+     -0.02467720196250526,
+     -0.01105595714145008
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.017834453473145932,
+    "ci95": [
+     -0.024556482123403712,
+     -0.011140028651932199
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 7,
+   "users_negative": 22
+  },
+  "full|malicious|E8b pcaCtrl5 - randI_S": {
+   "draws_10000": {
+    "estimate": -0.002691194946053385,
+    "ci95": [
+     -0.006620862347384295,
+     -2.2608462678289915e-05
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.002691194946053385,
+    "ci95": [
+     -0.006600478777083859,
+     -7.508864262324089e-06
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 11,
+   "users_negative": 18
+  },
+  "full|malicious|E8b' pcaCtrl5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.005204242844691221,
+    "ci95": [
+     -0.009642525754612068,
+     -0.0016301026794759714
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.005204242844691221,
+    "ci95": [
+     -0.009568465138817659,
+     -0.0015664527762210257
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 9,
+   "users_negative": 20
+  },
+  "full|malicious|E8a pcaGap5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.01627678756398716,
+    "ci95": [
+     -0.02352674952954397,
+     -0.009387044109746641
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.01627678756398716,
+    "ci95": [
+     -0.02351067200945369,
+     -0.00941323281533417
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 4,
+   "users_negative": 25
+  },
+  "full|malicious|E8b pcaGap5 - randI_S": {
+   "draws_10000": {
+    "estimate": -0.0011335290368946116,
+    "ci95": [
+     -0.0034074019546481383,
+     0.0014384589858096209
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0011335290368946116,
+    "ci95": [
+     -0.0034214710761075735,
+     0.0014422421936673652
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 8,
+   "users_negative": 21
+  },
+  "full|malicious|E8b' pcaGap5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.0036465769355324496,
+    "ci95": [
+     -0.006618927213224186,
+     -0.0006563240872032346
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.0036465769355324496,
+    "ci95": [
+     -0.006598187877700248,
+     -0.0005987994000315714
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 8,
+   "users_negative": 21
+  },
+  "full|malicious|E8a pcaTop5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.015942399049627368,
+    "ci95": [
+     -0.022387465564855213,
+     -0.009842515880691592
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.015942399049627368,
+    "ci95": [
+     -0.02232397059428281,
+     -0.00986562524890078
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 3,
+   "users_negative": 26
+  },
+  "full|malicious|E8b pcaTop5 - randI_S": {
+   "draws_10000": {
+    "estimate": -0.00079914052253482,
+    "ci95": [
+     -0.002547923180049863,
+     0.0010529448314644824
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.00079914052253482,
+    "ci95": [
+     -0.0025514787795214815,
+     0.00102105519209785
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 11,
+   "users_negative": 18
+  },
+  "full|malicious|E8b' pcaTop5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.003312188421172657,
+    "ci95": [
+     -0.0055398051629121274,
+     -0.0012506106101918498
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.003312188421172657,
+    "ci95": [
+     -0.0055323765007243755,
+     -0.0012326794194764163
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 9,
+   "users_negative": 20
+  },
+  "full|malicious|rpU_S - randI_S": {
+   "draws_10000": {
+    "estimate": 0.015143258527092552,
+    "ci95": [
+     0.009449942655775742,
+     0.021187126477216853
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.015143258527092552,
+    "ci95": [
+     0.009451870229737511,
+     0.02120918912663199
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 24,
+   "users_negative": 5
+  },
+  "full|benign|rpU_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.018983157561428248,
+    "ci95": [
+     0.011265105363623847,
+     0.02682940056783029
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.018983157561428248,
+    "ci95": [
+     0.011265105363623847,
+     0.026767412107651937
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 23,
+   "users_negative": 6
+  },
+  "full|benign|randI_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0030164337877569523,
+    "ci95": [
+     0.000979556787716246,
+     0.005520538570380757
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.0030164337877569523,
+    "ci95": [
+     0.0009600862702247741,
+     0.005494364757818733
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 20,
+   "users_negative": 9
+  },
+  "full|benign|randD_S (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.006597961451130351,
+    "ci95": [
+     0.003179475194078753,
+     0.01034511163231285
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.006597961451130351,
+    "ci95": [
+     0.0031512945295236582,
+     0.01020031012980074
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 22,
+   "users_negative": 7
+  },
+  "full|benign|meanDiff (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0026411125714751503,
+    "ci95": [
+     -0.0012530149074121452,
+     0.0066994292691521275
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0026411125714751503,
+    "ci95": [
+     -0.0011697235181071296,
+     0.0067418520203952085
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 18,
+   "users_negative": 11
+  },
+  "full|benign|pcaCtrl5 (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.0005677192375577729,
+    "ci95": [
+     -0.003099211457817035,
+     0.0033440545209865455
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0005677192375577729,
+    "ci95": [
+     -0.003052328564654822,
+     0.003320219851602083
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 22,
+   "users_negative": 7
+  },
+  "full|benign|pcaGap5 (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.002436879345740394,
+    "ci95": [
+     -0.0006723797030147464,
+     0.006623740601299823
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.002436879345740394,
+    "ci95": [
+     -0.0006788576488522276,
+     0.006590459516336175
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 15,
+   "users_negative": 14
+  },
+  "full|benign|pcaTop5 (edit alone)": {
+   "draws_10000": {
+    "estimate": 0.004185465166623565,
+    "ci95": [
+     0.0011589655087425792,
+     0.00772518093301647
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.004185465166623565,
+    "ci95": [
+     0.001164865265546859,
+     0.00769622163825679
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 20,
+   "users_negative": 9
+  },
+  "full|benign|E8a meanDiff - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.016342044989953092,
+    "ci95": [
+     -0.02493222907956304,
+     -0.008419239238846578
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.016342044989953092,
+    "ci95": [
+     -0.024735629835604935,
+     -0.00848372458726511
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 8,
+   "users_negative": 21
+  },
+  "full|benign|E8b meanDiff - randI_S": {
+   "draws_10000": {
+    "estimate": -0.00037532121628180287,
+    "ci95": [
+     -0.0033948148966863236,
+     0.002225477363614515
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.00037532121628180287,
+    "ci95": [
+     -0.003391351224961637,
+     0.002226595739009737
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 17,
+   "users_negative": 12
+  },
+  "full|benign|E8b' meanDiff - randD_S": {
+   "draws_10000": {
+    "estimate": -0.003956848879655202,
+    "ci95": [
+     -0.008810618628544369,
+     -1.6433547796877324e-05
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.003956848879655202,
+    "ci95": [
+     -0.008787356155185864,
+     -3.754963563091565e-05
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 12,
+   "users_negative": 17
+  },
+  "full|benign|E8a pcaCtrl5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.01841543832387047,
+    "ci95": [
+     -0.027025224441426927,
+     -0.010609422517062607
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.01841543832387047,
+    "ci95": [
+     -0.026799923318555987,
+     -0.010473811962566859
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 7,
+   "users_negative": 22
+  },
+  "full|benign|E8b pcaCtrl5 - randI_S": {
+   "draws_10000": {
+    "estimate": -0.00244871455019918,
+    "ci95": [
+     -0.007091755511174942,
+     0.0010906227155663502
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.00244871455019918,
+    "ci95": [
+     -0.006923348162879888,
+     0.0010699168267263757
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 14,
+   "users_negative": 15
+  },
+  "full|benign|E8b' pcaCtrl5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.006030242213572579,
+    "ci95": [
+     -0.011609847579022935,
+     -0.0016615846577560786
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.006030242213572579,
+    "ci95": [
+     -0.011358663600323528,
+     -0.0016049831047996734
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 9,
+   "users_negative": 20
+  },
+  "full|benign|E8a pcaGap5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.01654627821568785,
+    "ci95": [
+     -0.025064434180485796,
+     -0.008422143256355978
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.01654627821568785,
+    "ci95": [
+     -0.025017700339185784,
+     -0.008489790106641837
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 8,
+   "users_negative": 21
+  },
+  "full|benign|E8b pcaGap5 - randI_S": {
+   "draws_10000": {
+    "estimate": -0.0005795544420165578,
+    "ci95": [
+     -0.003080264272532244,
+     0.0020435359097760297
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0005795544420165578,
+    "ci95": [
+     -0.0030500485345549967,
+     0.0020537942742136703
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 11,
+   "users_negative": 18
+  },
+  "full|benign|E8b' pcaGap5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.004161082105389956,
+    "ci95": [
+     -0.008506125123079482,
+     -0.00036710879369371296
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.004161082105389956,
+    "ci95": [
+     -0.008455257751904,
+     -0.00036702278830196846
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 11,
+   "users_negative": 18
+  },
+  "full|benign|E8a pcaTop5 - rpU_S": {
+   "draws_10000": {
+    "estimate": -0.014797692394804678,
+    "ci95": [
+     -0.022685235706211507,
+     -0.007500531214407124
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.014797692394804678,
+    "ci95": [
+     -0.022620942385374813,
+     -0.007440617861247612
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 10,
+   "users_negative": 19
+  },
+  "full|benign|E8b pcaTop5 - randI_S": {
+   "draws_10000": {
+    "estimate": 0.0011690313788666124,
+    "ci95": [
+     -0.0011495885372846976,
+     0.00352765755663658
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0011690313788666124,
+    "ci95": [
+     -0.0011296178057961077,
+     0.0035280839465130324
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 16,
+   "users_negative": 13
+  },
+  "full|benign|E8b' pcaTop5 - randD_S": {
+   "draws_10000": {
+    "estimate": -0.002412496284506787,
+    "ci95": [
+     -0.006303351359634563,
+     0.0009660248407002142
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.002412496284506787,
+    "ci95": [
+     -0.006279161330098394,
+     0.0009947352479586632
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 15,
+   "users_negative": 14
+  },
+  "full|benign|rpU_S - randI_S": {
+   "draws_10000": {
+    "estimate": 0.015966723773671292,
+    "ci95": [
+     0.009104495134161807,
+     0.02311661347575571
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": 0.015966723773671292,
+    "ci95": [
+     0.009079260386783503,
+     0.02312923280158262
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 21,
+   "users_negative": 8
+  }
+ },
+ "paired": {
+  "behavior_only|E8c [meanDiff - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": -0.004206473735728482,
+    "ci95": [
+     -0.006560877111001776,
+     -0.0019333654771633876
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.004206473735728482,
+    "ci95": [
+     -0.0065652956767542955,
+     -0.0019251406292334736
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 9,
+   "users_negative": 20
+  },
+  "behavior_only|E8c [pcaCtrl5 - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": -0.0022230051928895647,
+    "ci95": [
+     -0.004680422075820724,
+     -8.302546224032337e-05
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.0022230051928895647,
+    "ci95": [
+     -0.004674888563652833,
+     -7.646029247720382e-05
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 11,
+   "users_negative": 18
+  },
+  "behavior_only|E8c [pcaGap5 - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": -1.645181970349665e-05,
+    "ci95": [
+     -0.0018787082032054323,
+     0.001715523824738017
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -1.645181970349665e-05,
+    "ci95": [
+     -0.0018889435571243713,
+     0.0017159471469235452
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 12,
+   "users_negative": 17
+  },
+  "behavior_only|E8c [pcaTop5 - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": -0.0021399655218782092,
+    "ci95": [
+     -0.004393686406400012,
+     -5.795640892338483e-05
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.0021399655218782092,
+    "ci95": [
+     -0.004398638673512072,
+     -0.00011177989675653283
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 14,
+   "users_negative": 15
+  },
+  "behavior_only|E8c [rpU_S - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": 0.0006310458369981284,
+    "ci95": [
+     -0.0023454030547505134,
+     0.0033529589350881203
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0006310458369981284,
+    "ci95": [
+     -0.002320725188494243,
+     0.00344544544901656
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 19,
+   "users_negative": 10
+  },
+  "behavior_ses_only|E8c [meanDiff - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": -0.0043977623184522,
+    "ci95": [
+     -0.006925709062395083,
+     -0.001976586780243222
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.0043977623184522,
+    "ci95": [
+     -0.006916269206110087,
+     -0.0019507946821207978
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 9,
+   "users_negative": 20
+  },
+  "behavior_ses_only|E8c [pcaCtrl5 - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": -0.002309462226841642,
+    "ci95": [
+     -0.004912759537498157,
+     -6.620683439675469e-05
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.002309462226841642,
+    "ci95": [
+     -0.004912759537498157,
+     -5.721225392544682e-05
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 12,
+   "users_negative": 17
+  },
+  "behavior_ses_only|E8c [pcaGap5 - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": 3.043604993273311e-07,
+    "ci95": [
+     -0.001985643735455199,
+     0.0018344676744021563
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 3.043604993273311e-07,
+    "ci95": [
+     -0.0020248517885418796,
+     0.0018349901156435742
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 12,
+   "users_negative": 17
+  },
+  "behavior_ses_only|E8c [pcaTop5 - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": -0.002180143831105068,
+    "ci95": [
+     -0.004550768024577149,
+     -3.7896915756431567e-06
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "draws_5000": {
+    "estimate": -0.002180143831105068,
+    "ci95": [
+     -0.004564330133598769,
+     -4.289492504436012e-05
+    ],
+    "n_users": 29,
+    "excludes_zero": true
+   },
+   "users_positive": 14,
+   "users_negative": 15
+  },
+  "behavior_ses_only|E8c [rpU_S - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": 0.0006950673829207476,
+    "ci95": [
+     -0.002476010736634677,
+     0.0036375202056577135
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.0006950673829207476,
+    "ci95": [
+     -0.002463298580855475,
+     0.003728353216837362
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 18,
+   "users_negative": 11
+  },
+  "profile_only|E8c [meanDiff - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": 0.004578404728023485,
+    "ci95": [
+     -0.0029094771903821794,
+     0.01425638828811974
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.004578404728023485,
+    "ci95": [
+     -0.0028920680455777853,
+     0.014377003726602968
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 17,
+   "users_negative": 12
+  },
+  "profile_only|E8c [pcaCtrl5 - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": 0.005547337696470063,
+    "ci95": [
+     -0.004837312843950315,
+     0.020470972924396907
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": 0.005547337696470063,
+    "ci95": [
+     -0.004724416400509318,
+     0.020505123011682204
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 14,
+   "users_negative": 15
+  },
+  "profile_only|E8c [pcaGap5 - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": -0.0025623450334044716,
+    "ci95": [
+     -0.00995948959356067,
+     0.004067490380043269
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0025623450334044716,
+    "ci95": [
+     -0.010050535875147787,
+     0.004069210576942588
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 15,
+   "users_negative": 14
+  },
+  "profile_only|E8c [pcaTop5 - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": -0.0012088078877021528,
+    "ci95": [
+     -0.0071542576709012875,
+     0.0049245763150439865
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0012088078877021528,
+    "ci95": [
+     -0.007193928121150225,
+     0.004986300410210394
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 12,
+   "users_negative": 17
+  },
+  "profile_only|E8c [rpU_S - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": -0.005268505729477982,
+    "ci95": [
+     -0.011477437195764191,
+     0.0007212793056307128
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.005268505729477982,
+    "ci95": [
+     -0.0113699277224897,
+     0.0008756611915840463
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 11,
+   "users_negative": 18
+  },
+  "full|E8c [meanDiff - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": -0.002150766328833569,
+    "ci95": [
+     -0.004720678168466722,
+     0.0006400725519520099
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.002150766328833569,
+    "ci95": [
+     -0.004693750281786098,
+     0.0006219758187559783
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 11,
+   "users_negative": 18
+  },
+  "full|E8c [pcaCtrl5 - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": -0.00024248039585420485,
+    "ci95": [
+     -0.002813204120973061,
+     0.002890351440372137
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.00024248039585420485,
+    "ci95": [
+     -0.002813337524046843,
+     0.002846732461589503
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 13,
+   "users_negative": 16
+  },
+  "full|E8c [pcaGap5 - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": -0.0005539745948780542,
+    "ci95": [
+     -0.0023538969534224476,
+     0.0011695034112567187
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0005539745948780542,
+    "ci95": [
+     -0.002376716459362671,
+     0.0011458167622144177
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 12,
+   "users_negative": 17
+  },
+  "full|E8c [pcaTop5 - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": -0.001968171901401432,
+    "ci95": [
+     -0.004277311909472805,
+     0.00013914653239236428
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.001968171901401432,
+    "ci95": [
+     -0.0042992016351942365,
+     8.544597817563239e-05
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 11,
+   "users_negative": 18
+  },
+  "full|E8c [rpU_S - randI_S] malicious minus benign": {
+   "draws_10000": {
+    "estimate": -0.0008234652465787426,
+    "ci95": [
+     -0.0034068952800556146,
+     0.0016546559941837146
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "draws_5000": {
+    "estimate": -0.0008234652465787426,
+    "ci95": [
+     -0.003440025289510858,
+     0.0017005916269517466
+    ],
+    "n_users": 29,
+    "excludes_zero": false
+   },
+   "users_positive": 17,
+   "users_negative": 12
+  }
+ }
+}

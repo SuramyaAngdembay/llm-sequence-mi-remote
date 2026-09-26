@@ -1,0 +1,16 @@
+NVIDIA A100-SXM4-40GB, 40960 MiB
+e75204b0a3bf941ab5bf02b31c732147dfa6a29373f5a9256d702267650bad4b  /anvil/scratch/x-bbhusal1/pilots_2026_09_25/prep/pilot_populations.json
+9bdb5447f20056098b027433b42baa8276a788f35e0095f4bb5d6621e4344c9c  /anvil/scratch/x-bbhusal1/pilots_2026_09_25/prep/pilot_deltas_l26.npz
+bdc489ab48ba33cb486ff372bf4c1d2d1b12b9d8dfc3e722cba075e739dfea8e  /anvil/scratch/x-bbhusal1/pilots_2026_09_25/prep/baseline_directions.npz
+[pilot4] 197 pairs, 29 users; PC sets {'pcaTop5': [0, 1, 2, 3, 4], 'pcaGap5': [3, 1, 9, 5, 13], 'pcaCtrl5': [55, 36, 50, 33, 58]}
+[pilot4] balance written (36s); validity {"token_rows_equal_tokenizer_length": true, "n_receivers": 394, "max_relative_norm_deviation_from_rpU_S": 2.384185791015625e-07, "rescaling_gain_reference_over_natural_edit": {"pcaTop5": {"median": 1.808185875415802, "p95": 3.9455679655075073, "max": 9.13439655303955, "share_above_max_gain": 0.0, "n_tokens": 1396}, "pcaGap5": {"median": 1.2498607635498047, "p95": 2.519469738006592, "max": 6.278932094573975, "share_above_max_gain": 0.0, "n_tokens": 1396}, "pcaCtrl5": {"median": 4.450809955596924, "p95": 8.417067527770996, "max": 15.620734214782715, "share_above_max_gain": 0.0, "n_tokens": 1396}
+[pilot4] zero done (123s)
+[pilot4] rpU_S done (155s)
+[pilot4] randI_S done (187s)
+[pilot4] randD_S done (219s)
+[pilot4] pcaTop5 done (247s)
+[pilot4] pcaGap5 done (274s)
+[pilot4] pcaCtrl5 done (302s)
+[pilot4] meanDiff done (330s)
+PILOT4_DONE
+PILOT4_DONE

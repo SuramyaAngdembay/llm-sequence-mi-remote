@@ -193,6 +193,31 @@ as job 20916308. Pilot 4's gpu-debug copy was submitted in the freed slot
 (job 20916290); its gpu-partition copy 20908321 stays queued under the
 cancel-the-duplicate rule.
 
+**2026-09-26, Pilot 4 ran (job 20908321, `gpu` partition, 5 min 49 s, 0.10
+GPU-h; duplicate 20916290 cancelled before starting).** All validity checks
+passed; the conditions shared with Pilot 1 reproduce its per-receiver losses
+to 3.6e-7 across nodes. Results in `results/pilots_2026_09_25/pilot4/README.md`.
+Behaviour tokens, malicious days, at the SAE edit's tokens and sizes: SAE
++0.0213; pcaTop5 −0.0000, pcaGap5 −0.0011, pcaCtrl5 −0.0013, meanDiff −0.0022,
+isotropic random +0.0008. E8a (baseline − SAE) −0.021 to −0.024, every
+interval excluding zero: the SAE directions are far more potent for the
+adapted model's session predictions (H8 answered: the dictionary is not
+redundant for this purpose). E8c (baseline − random, malicious minus benign):
+meanDiff −0.0042 [−0.0066, −0.0019], pcaTop5 −0.0021 [−0.0044, −0.0001],
+pcaCtrl5 −0.0022 [−0.0047, −0.0001], pcaGap5 −0.0000, SAE +0.0006
+[−0.0024, +0.0034]: the only attack-day-specific response of the round comes
+from the mean-difference direction, not the SAE. Post-hoc diagnostic (dated,
+after results): the meanDiff edit has the same sign and size profile in both
+groups, so E8c is not a construction artifact, but the edit is amplified
+about 13-fold and overshoots the donor value.
+
+**2026-09-26, Pilot 2 duplicate.** A copy of Pilot 2 was queued on the `gpu`
+partition (job 20921140, output `pilot2_gpu`) under the same rule. An attempt
+to enforce one-run-only with a Slurm `singleton` dependency was undone within
+a minute: Slurm cleared it on the older job and made the newer copy wait for
+the older one, which would have defeated the duplicate. A 5-minute watcher
+cancels whichever copy is still pending when the other starts.
+
 **2026-09-25, interpretation map (written while both jobs are queued; no
 pilot output exists).** What each outcome would and would not mean. All
 readings stay exploratory; the receivers were inspected in package 4.

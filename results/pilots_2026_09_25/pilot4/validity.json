@@ -1,0 +1,66 @@
+{
+ "token_rows_equal_tokenizer_length": true,
+ "n_receivers": 394,
+ "max_relative_norm_deviation_from_rpU_S": 2.384185791015625e-07,
+ "rescaling_gain_reference_over_natural_edit": {
+  "pcaTop5": {
+   "median": 1.808185875415802,
+   "p95": 3.9455679655075073,
+   "max": 9.13439655303955,
+   "share_above_max_gain": 0.0,
+   "n_tokens": 1396
+  },
+  "pcaGap5": {
+   "median": 1.2498607635498047,
+   "p95": 2.519469738006592,
+   "max": 6.278932094573975,
+   "share_above_max_gain": 0.0,
+   "n_tokens": 1396
+  },
+  "pcaCtrl5": {
+   "median": 4.450809955596924,
+   "p95": 8.417067527770996,
+   "max": 15.620734214782715,
+   "share_above_max_gain": 0.0,
+   "n_tokens": 1396
+  },
+  "meanDiff": {
+   "median": 13.212835311889648,
+   "p95": 76.32463073730469,
+   "max": 1330.967529296875,
+   "share_above_max_gain": 0.03151862464183381,
+   "n_tokens": 1396
+  }
+ },
+ "max_gain": 100.0,
+ "zero_norm_fallbacks_over_balance_and_cosine_builds": {
+  "pcaTop5": 0,
+  "pcaGap5": 0,
+  "pcaCtrl5": 0,
+  "meanDiff": 54
+ },
+ "cosine_with_rpU_S_edit_first_60_receivers": {
+  "pcaTop5": {
+   "mean": 0.2838094779265357,
+   "abs_mean": 0.2839198007552142,
+   "n_tokens": 187
+  },
+  "pcaGap5": {
+   "mean": 0.16072002280364062,
+   "abs_mean": 0.16072002280364062,
+   "n_tokens": 187
+  },
+  "pcaCtrl5": {
+   "mean": 0.10902076548234345,
+   "abs_mean": 0.10902076548234345,
+   "n_tokens": 187
+  },
+  "meanDiff": {
+   "mean": 0.022156344909086464,
+   "abs_mean": 0.04329700084380746,
+   "n_tokens": 187
+  }
+ },
+ "fit_users_disjoint_from_receivers_for_positive_rows": true,
+ "zero_edit_vs_unhooked_max_abs": 0.0
+}
