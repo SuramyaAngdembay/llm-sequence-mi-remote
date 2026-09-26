@@ -165,6 +165,34 @@ before it starts, so the pilot is scored once (0.5 GPU-h). A first gpu
 submission (20908320) was cancelled unstarted because a shell expansion had
 emptied its output path.
 
+**2026-09-26, Pilot 1 ran (job 20907022, 10 min 28 s, 0.17 GPU-h).** All
+validity checks passed (zero edit reproduces the unhooked model exactly).
+Results in `results/pilots_2026_09_25/pilot1/README.md`. Behaviour tokens,
+malicious days: rpU_S +0.0213 [+0.0135, +0.0297]; matched isotropic random
++0.0008; matched dictionary random +0.0041; E1a +0.0205 [+0.0131, +0.0284],
+E1b +0.0172 [+0.0108, +0.0239] (H1 stopping rule not triggered); E5 (union
+minus own support) +0.0122 [+0.0077, +0.0170], i.e. 57% of the effect is
+writing into zero coordinates (H2 sharpened, reading (b) mostly right); own
+support +0.0091 is almost entirely feature 3673 (+0.0097; 3455 −0.0029; 4596
++0.0014; 2302 +0.0002; 7693 0); E7 +0.0007 (nearly additive); E4 −0.0012
+[−0.0034, +0.0009]; benign days respond the same (rpU_S +0.0232; E6 −0.0020
+[−0.0058, +0.0014]): not anomaly-specific. Profile tokens: every interval
+includes zero. H5 (seed function) remains deferred: a functional comparison
+is now motivated, since E1 shows a direction-specific effect, but is outside
+this round.
+
+**2026-09-26, Pilot 2 failed and was resubmitted (bug, not design).** Job
+20907024 failed after 73 s: the SAE encode in the scoring loop ran outside
+`no_grad`, so `.numpy()` refused a tensor carrying gradient. Its validity
+check had passed first (16 receivers, 3,280 tokens: on-the-fly delta within
+3.3% of the cache at the median, 4.6% at the 95th percentile; active-set
+Jaccard median 1.0, mean 0.91). The fix detaches the tensor under `no_grad`;
+nothing else changed (`pilot2_failed_20907024/` keeps the manifest and
+validity of the failed run). Cost of the failed run: 0.02 GPU-h. Resubmitted
+as job 20916308. Pilot 4's gpu-debug copy was submitted in the freed slot
+(job 20916290); its gpu-partition copy 20908321 stays queued under the
+cancel-the-duplicate rule.
+
 **2026-09-25, interpretation map (written while both jobs are queued; no
 pilot output exists).** What each outcome would and would not mean. All
 readings stay exploratory; the receivers were inspected in package 4.

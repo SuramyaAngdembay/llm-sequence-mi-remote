@@ -1,0 +1,26 @@
+NVIDIA A100-SXM4-40GB, 40960 MiB
+e75204b0a3bf941ab5bf02b31c732147dfa6a29373f5a9256d702267650bad4b  /anvil/scratch/x-bbhusal1/pilots_2026_09_25/prep/pilot_populations.json
+9bdb5447f20056098b027433b42baa8276a788f35e0095f4bb5d6621e4344c9c  /anvil/scratch/x-bbhusal1/pilots_2026_09_25/prep/pilot_deltas_l26.npz
+[pilot1] 197 pairs, 29 users, depts ['10', '11', '12', '14', '15', '21']
+[pilot1] balance written (50s)
+[pilot1] validity {"token_rows_equal_tokenizer_length": true, "misaligned": [], "n_receivers": 394, "tokenizer_padding_side": "right", "orig_equals_residual_plus_reconstruction_max_abs": 7.62939453125e-06, "zero_edit_vs_unhooked_max_abs": 0.0}
+[pilot1] zero done (119s)
+[pilot1] rpU_S done (148s)
+[pilot1] randI_S done (178s)
+[pilot1] randD_S done (207s)
+[pilot1] rpU_C done (235s)
+[pilot1] randI_C done (265s)
+[pilot1] randD_C done (294s)
+[pilot1] recon_S done (323s)
+[pilot1] recon_C done (353s)
+[pilot1] orig_S done (383s)
+[pilot1] orig_C done (413s)
+[pilot1] rpO_S done (441s)
+[pilot1] rpO_C done (470s)
+[pilot1] single_4596 done (498s)
+[pilot1] single_7693 done (527s)
+[pilot1] single_2302 done (555s)
+[pilot1] single_3673 done (584s)
+[pilot1] single_3455 done (612s)
+PILOT1_DONE
+PILOT1_DONE

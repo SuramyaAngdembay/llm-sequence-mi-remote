@@ -1,0 +1,242 @@
+{
+ "exploratory": true,
+ "written_before_scoring": true,
+ "adapter_dir": "/anvil/scratch/x-sangdembay/pkg4_share/adapter",
+ "adapter_sha256": "e0bf51124174de5ee0209d621aade81e3fe0256246ef3b58a39657ee52756d49",
+ "sae": "/anvil/scratch/x-sangdembay/pkg4_share/frontier/layer_26/m02_k04/delta_sae_model.pt",
+ "sae_sha256": "189840ce191e2b256b9f249b60ff2d2fad332796eff75f66133536b2c6975305",
+ "ranking_sha256": "c2a07cb1ce6e3800b1ddb5428e016d8aad23f742d9795c6f783dad53898774c2",
+ "populations_sha256": "e75204b0a3bf941ab5bf02b31c732147dfa6a29373f5a9256d702267650bad4b",
+ "layer": 26,
+ "selected": [
+  4596,
+  7693,
+  2302,
+  3673,
+  3455
+ ],
+ "control": [
+  6596,
+  8017,
+  6608,
+  2765,
+  886
+ ],
+ "alpha": 1.0,
+ "excluded_users": [
+  "JJM0203"
+ ],
+ "n_pairs": 197,
+ "n_users": 29,
+ "donor_policy": {
+  "10": {
+   "donor_idx": [
+    15333,
+    27130,
+    31826,
+    23848,
+    9146,
+    36573,
+    28046,
+    17020
+   ]
+  },
+  "11": {
+   "donor_idx": [
+    15803,
+    2559,
+    17321,
+    32819,
+    23264,
+    1227
+   ]
+  },
+  "12": {
+   "donor_idx": [
+    10512,
+    13742,
+    9467,
+    3827,
+    897,
+    37725,
+    32560,
+    4757
+   ]
+  },
+  "14": {
+   "donor_idx": [
+    9851,
+    30499,
+    18472,
+    37017,
+    16602,
+    17541,
+    18032,
+    8249
+   ]
+  },
+  "15": {
+   "donor_idx": [
+    36318,
+    37219,
+    24491,
+    22669,
+    26288,
+    25609,
+    2009,
+    39740
+   ]
+  },
+  "21": {
+   "donor_idx": [
+    14277,
+    22438,
+    2920,
+    21406,
+    29586,
+    19554,
+    29257,
+    6935
+   ]
+  }
+ },
+ "random_dictionary_pool_size": 469,
+ "views": [
+  "full",
+  "profile_only",
+  "behavior_only",
+  "behavior_ses_only",
+  "psy_only",
+  "day_only"
+ ],
+ "conditions": [
+  "zero",
+  "rpU_S",
+  "randI_S",
+  "randD_S",
+  "rpU_C",
+  "randI_C",
+  "randD_C",
+  "recon_S",
+  "recon_C",
+  "orig_S",
+  "orig_C",
+  "rpO_S",
+  "rpO_C",
+  "single_4596",
+  "single_7693",
+  "single_2302",
+  "single_3673",
+  "single_3455"
+ ],
+ "donor_prototype_rule": "per department, mean over the fixed donors of the package-4 prototype (mean over donor tokens where any feature of the set is active); the same prototype for every support",
+ "aggregation": "per receiver: mean patched-minus-zero loss over the view's target tokens; receivers whose edit is zero contribute 0 (the policy edits only where features are active) and the share edited is reported; per user: mean over receivers; estimate: mean of user means; 95% interval: user-clustered percentile bootstrap, 10,000 and 5,000 draws",
+ "endpoints_declared": {
+  "E1": "malicious receivers, behavior_only delta: rpU_S minus randI_S (and randD_S), mean of user means, user-clustered bootstrap",
+  "E2": "same for the control set: rpU_C minus randI_C (and randD_C)",
+  "E3": "rpU_S minus rpU_C (selected versus control without reconstruction)",
+  "E4": "orig_X minus rpU_X minus recon_X, X in {S, C} (reconstruction-edit interaction)",
+  "E5": "rpU_S minus rpO_S (writing into zero coordinates)",
+  "E6": "[rpU_S minus rpU_C](malicious) minus [same](matched benign), per user",
+  "E7": "rpO_S minus the sum of single-feature effects (interaction)"
+ },
+ "seed": 20260925,
+ "donor_prototypes": {
+  "10": {
+   "S": [
+    1.0346851348876953,
+    0.0,
+    24.23674774169922,
+    0.4520692825317383,
+    0.27981066703796387
+   ],
+   "C": [
+    0.3350963592529297,
+    0.48349204659461975,
+    3.0213520526885986,
+    0.13564623892307281,
+    0.015222489833831787
+   ]
+  },
+  "11": {
+   "S": [
+    3.130186080932617,
+    0.0,
+    19.755800247192383,
+    1.7149338722229004,
+    1.1285959482192993
+   ],
+   "C": [
+    0.3513919413089752,
+    0.4790903627872467,
+    1.1331371068954468,
+    0.16078348457813263,
+    0.11607059836387634
+   ]
+  },
+  "12": {
+   "S": [
+    0.5365867018699646,
+    0.0,
+    17.040664672851562,
+    2.1226611137390137,
+    1.4667162895202637
+   ],
+   "C": [
+    0.7577170729637146,
+    0.21571412682533264,
+    0.6286887526512146,
+    0.23412327468395233,
+    0.19722378253936768
+   ]
+  },
+  "14": {
+   "S": [
+    2.4362270832061768,
+    0.0,
+    27.489761352539062,
+    0.5770357847213745,
+    0.34168872237205505
+   ],
+   "C": [
+    0.25280675292015076,
+    1.209443211555481,
+    1.2910324335098267,
+    0.16009211540222168,
+    0.16923262178897858
+   ]
+  },
+  "15": {
+   "S": [
+    1.3484761714935303,
+    0.0,
+    17.554893493652344,
+    0.979433536529541,
+    0.569417417049408
+   ],
+   "C": [
+    0.6072063446044922,
+    0.2435399442911148,
+    0.39998653531074524,
+    0.7094288468360901,
+    0.30914556980133057
+   ]
+  },
+  "21": {
+   "S": [
+    1.4248099327087402,
+    0.0,
+    18.97012710571289,
+    1.0896432399749756,
+    0.8525446653366089
+   ],
+   "C": [
+    0.7133707404136658,
+    0.38209080696105957,
+    1.6191625595092773,
+    0.0990896001458168,
+    0.3244878351688385
+   ]
+  }
+ }
+}

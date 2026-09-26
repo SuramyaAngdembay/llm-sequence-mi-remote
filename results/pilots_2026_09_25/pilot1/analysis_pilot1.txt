@@ -1,0 +1,127 @@
+PILOT 1 (exploratory). Mean of user means, 95% user-clustered bootstrap (10k; 5k in brackets).
+
+== view behavior_only
+  malicious rpU_S (selected edit alone)                                    +0.02133 [+0.01354, +0.02967] (5k: [+0.01355, +0.02954]) users 29 +27/-2
+  malicious E1a rpU_S - randI_S                                            +0.02051 [+0.01309, +0.02843] (5k: [+0.01312, +0.02842]) users 29 +26/-3
+  malicious E1b rpU_S - randD_S                                            +0.01720 [+0.01079, +0.02392] (5k: [+0.01086, +0.02390]) users 29 +25/-4
+  malicious E2a rpU_C - randI_C                                            +0.00026 [-0.00012, +0.00060] (5k: [-0.00013, +0.00060]) users 29 +16/-13
+  malicious E2b rpU_C - randD_C                                            +0.00003 [-0.00027, +0.00032] (5k: [-0.00027, +0.00032]) users 29 +14/-15
+  malicious E3 rpU_S - rpU_C                                               +0.02139 [+0.01360, +0.02969] (5k: [+0.01364, +0.02961]) users 29 +26/-3
+  malicious E4S orig_S - rpU_S - recon_S                                   -0.00121 [-0.00335, +0.00085] (5k: [-0.00334, +0.00085]) users 29 +14/-15
+  malicious E4C orig_C - rpU_C - recon_C                                   +0.00003 [-0.00052, +0.00059] (5k: [-0.00052, +0.00059]) users 29 +15/-14
+  malicious E5 rpU_S - rpO_S                                               +0.01222 [+0.00767, +0.01703] (5k: [+0.00773, +0.01698]) users 29 +24/-5
+  malicious E7 rpO_S - sum(singles)                                        +0.00070 [+0.00025, +0.00125] (5k: [+0.00024, +0.00124]) users 29 +20/-8
+  malicious orig_S - orig_C (published procedure, mean-prototype policy)   +0.02016 [+0.01238, +0.02818] (5k: [+0.01248, +0.02812]) users 29 +24/-5
+  benign    rpU_S (selected edit alone)                                    +0.02320 [+0.01358, +0.03328] (5k: [+0.01362, +0.03330]) users 29 +22/-7
+  benign    E1a rpU_S - randI_S                                            +0.01988 [+0.01143, +0.02860] (5k: [+0.01147, +0.02860]) users 29 +20/-9
+  benign    E1b rpU_S - randD_S                                            +0.01626 [+0.00970, +0.02320] (5k: [+0.00976, +0.02323]) users 29 +22/-7
+  benign    E2a rpU_C - randI_C                                            -0.00020 [-0.00046, +0.00007] (5k: [-0.00046, +0.00008]) users 29 +12/-17
+  benign    E2b rpU_C - randD_C                                            -0.00016 [-0.00050, +0.00017] (5k: [-0.00050, +0.00017]) users 29 +12/-17
+  benign    E3 rpU_S - rpU_C                                               +0.02340 [+0.01378, +0.03342] (5k: [+0.01384, +0.03340]) users 29 +23/-6
+  benign    E4S orig_S - rpU_S - recon_S                                   -0.00306 [-0.00492, -0.00136] (5k: [-0.00493, -0.00135]) users 29 +8/-21
+  benign    E4C orig_C - rpU_C - recon_C                                   +0.00012 [-0.00033, +0.00057] (5k: [-0.00033, +0.00057]) users 29 +14/-15
+  benign    E5 rpU_S - rpO_S                                               +0.01091 [+0.00656, +0.01560] (5k: [+0.00656, +0.01557]) users 29 +24/-5
+  benign    E7 rpO_S - sum(singles)                                        -0.00031 [-0.00053, -0.00011] (5k: [-0.00054, -0.00011]) users 29 +7/-20
+  benign    orig_S - orig_C (published procedure, mean-prototype policy)   +0.02022 [+0.01149, +0.02934] (5k: [+0.01154, +0.02944]) users 29 +21/-8
+  paired    E6 [rpU_S - rpU_C] malicious minus benign                      -0.00201 [-0.00582, +0.00137] (5k: [-0.00584, +0.00136]) users 29 +16/-13
+  paired    E6b [rpU_S - randI_S] malicious minus benign                   +0.00063 [-0.00235, +0.00335] (5k: [-0.00232, +0.00345]) users 29 +19/-10
+
+== view behavior_ses_only
+  malicious rpU_S (selected edit alone)                                    +0.02259 [+0.01430, +0.03146] (5k: [+0.01430, +0.03135]) users 29 +26/-3
+  malicious E1a rpU_S - randI_S                                            +0.02180 [+0.01390, +0.03019] (5k: [+0.01393, +0.03017]) users 29 +26/-3
+  malicious E1b rpU_S - randD_S                                            +0.01820 [+0.01138, +0.02537] (5k: [+0.01146, +0.02536]) users 29 +24/-5
+  malicious E2a rpU_C - randI_C                                            +0.00031 [-0.00003, +0.00063] (5k: [-0.00004, +0.00063]) users 29 +17/-12
+  malicious E2b rpU_C - randD_C                                            +0.00006 [-0.00019, +0.00033] (5k: [-0.00019, +0.00033]) users 29 +16/-13
+  malicious E3 rpU_S - rpU_C                                               +0.02259 [+0.01432, +0.03144] (5k: [+0.01435, +0.03134]) users 29 +25/-4
+  malicious E4S orig_S - rpU_S - recon_S                                   -0.00122 [-0.00347, +0.00095] (5k: [-0.00346, +0.00097]) users 29 +15/-14
+  malicious E4C orig_C - rpU_C - recon_C                                   -0.00003 [-0.00062, +0.00055] (5k: [-0.00061, +0.00055]) users 29 +15/-14
+  malicious E5 rpU_S - rpO_S                                               +0.01293 [+0.00808, +0.01804] (5k: [+0.00814, +0.01797]) users 29 +24/-5
+  malicious E7 rpO_S - sum(singles)                                        +0.00072 [+0.00026, +0.00130] (5k: [+0.00025, +0.00129]) users 29 +20/-8
+  malicious orig_S - orig_C (published procedure, mean-prototype policy)   +0.02140 [+0.01320, +0.02989] (5k: [+0.01331, +0.02982]) users 29 +24/-5
+  benign    rpU_S (selected edit alone)                                    +0.02462 [+0.01437, +0.03532] (5k: [+0.01444, +0.03530]) users 29 +22/-7
+  benign    E1a rpU_S - randI_S                                            +0.02110 [+0.01212, +0.03038] (5k: [+0.01218, +0.03038]) users 29 +19/-10
+  benign    E1b rpU_S - randD_S                                            +0.01725 [+0.01030, +0.02463] (5k: [+0.01036, +0.02467]) users 29 +22/-7
+  benign    E2a rpU_C - randI_C                                            -0.00026 [-0.00051, +0.00003] (5k: [-0.00051, +0.00003]) users 29 +10/-19
+  benign    E2b rpU_C - randD_C                                            -0.00023 [-0.00056, +0.00010] (5k: [-0.00056, +0.00010]) users 29 +12/-17
+  benign    E3 rpU_S - rpU_C                                               +0.02486 [+0.01464, +0.03548] (5k: [+0.01470, +0.03546]) users 29 +23/-6
+  benign    E4S orig_S - rpU_S - recon_S                                   -0.00315 [-0.00512, -0.00135] (5k: [-0.00512, -0.00136]) users 29 +8/-21
+  benign    E4C orig_C - rpU_C - recon_C                                   +0.00012 [-0.00038, +0.00062] (5k: [-0.00038, +0.00063]) users 29 +15/-14
+  benign    E5 rpU_S - rpO_S                                               +0.01150 [+0.00687, +0.01647] (5k: [+0.00688, +0.01647]) users 29 +23/-6
+  benign    E7 rpO_S - sum(singles)                                        -0.00033 [-0.00057, -0.00012] (5k: [-0.00057, -0.00011]) users 29 +7/-21
+  benign    orig_S - orig_C (published procedure, mean-prototype policy)   +0.02159 [+0.01238, +0.03124] (5k: [+0.01243, +0.03135]) users 29 +22/-7
+  paired    E6 [rpU_S - rpU_C] malicious minus benign                      -0.00227 [-0.00632, +0.00128] (5k: [-0.00634, +0.00129]) users 29 +16/-13
+  paired    E6b [rpU_S - randI_S] malicious minus benign                   +0.00070 [-0.00248, +0.00364] (5k: [-0.00246, +0.00373]) users 29 +18/-11
+
+== view profile_only
+  malicious rpU_S (selected edit alone)                                    +0.00308 [-0.00586, +0.01579] (5k: [-0.00585, +0.01571]) users 29 +15/-14
+  malicious E1a rpU_S - randI_S                                            -0.00137 [-0.00524, +0.00271] (5k: [-0.00533, +0.00272]) users 29 +14/-15
+  malicious E1b rpU_S - randD_S                                            -0.00055 [-0.00476, +0.00324] (5k: [-0.00481, +0.00330]) users 29 +17/-12
+  malicious E2a rpU_C - randI_C                                            +0.00346 [-0.00158, +0.00969] (5k: [-0.00166, +0.00976]) users 29 +15/-14
+  malicious E2b rpU_C - randD_C                                            +0.00101 [-0.00432, +0.00575] (5k: [-0.00442, +0.00594]) users 29 +18/-11
+  malicious E3 rpU_S - rpU_C                                               +0.00157 [-0.00812, +0.01393] (5k: [-0.00823, +0.01383]) users 29 +14/-15
+  malicious E4S orig_S - rpU_S - recon_S                                   +0.01215 [-0.00064, +0.03281] (5k: [-0.00064, +0.03276]) users 29 +16/-13
+  malicious E4C orig_C - rpU_C - recon_C                                   +0.00026 [-0.00650, +0.00634] (5k: [-0.00662, +0.00633]) users 29 +16/-13
+  malicious E5 rpU_S - rpO_S                                               +0.00447 [-0.00263, +0.01546] (5k: [-0.00262, +0.01507]) users 29 +15/-14
+  malicious E7 rpO_S - sum(singles)                                        -0.00073 [-0.00237, +0.00017] (5k: [-0.00235, +0.00017]) users 29 +8/-8
+  malicious orig_S - orig_C (published procedure, mean-prototype policy)   +0.01346 [-0.00437, +0.04435] (5k: [-0.00438, +0.04421]) users 29 +10/-19
+  benign    rpU_S (selected edit alone)                                    +0.00548 [-0.00283, +0.01540] (5k: [-0.00301, +0.01518]) users 29 +16/-13
+  benign    E1a rpU_S - randI_S                                            +0.00389 [-0.00229, +0.01055] (5k: [-0.00232, +0.01047]) users 29 +18/-11
+  benign    E1b rpU_S - randD_S                                            -0.00004 [-0.00460, +0.00480] (5k: [-0.00458, +0.00473]) users 29 +16/-13
+  benign    E2a rpU_C - randI_C                                            +0.00255 [-0.00323, +0.00834] (5k: [-0.00330, +0.00840]) users 29 +13/-16
+  benign    E2b rpU_C - randD_C                                            +0.00178 [-0.00269, +0.00588] (5k: [-0.00273, +0.00592]) users 29 +17/-12
+  benign    E3 rpU_S - rpU_C                                               +0.00417 [-0.00519, +0.01564] (5k: [-0.00531, +0.01532]) users 29 +14/-15
+  benign    E4S orig_S - rpU_S - recon_S                                   +0.00667 [-0.00609, +0.02432] (5k: [-0.00600, +0.02429]) users 29 +16/-13
+  benign    E4C orig_C - rpU_C - recon_C                                   +0.00329 [-0.00452, +0.01182] (5k: [-0.00479, +0.01182]) users 29 +15/-14
+  benign    E5 rpU_S - rpO_S                                               +0.00196 [-0.00416, +0.01037] (5k: [-0.00410, +0.01021]) users 29 +14/-15
+  benign    E7 rpO_S - sum(singles)                                        +0.00045 [-0.00013, +0.00137] (5k: [-0.00013, +0.00137]) users 29 +12/-5
+  benign    orig_S - orig_C (published procedure, mean-prototype policy)   +0.00756 [-0.00638, +0.03002] (5k: [-0.00628, +0.02992]) users 29 +12/-17
+  paired    E6 [rpU_S - rpU_C] malicious minus benign                      -0.00260 [-0.00919, +0.00351] (5k: [-0.00920, +0.00354]) users 29 +15/-13
+  paired    E6b [rpU_S - randI_S] malicious minus benign                   -0.00527 [-0.01148, +0.00072] (5k: [-0.01137, +0.00088]) users 29 +11/-18
+
+== view full
+  malicious rpU_S (selected edit alone)                                    +0.01693 [+0.01071, +0.02327] (5k: [+0.01075, +0.02321]) users 29 +26/-3
+  malicious E1a rpU_S - randI_S                                            +0.01514 [+0.00945, +0.02119] (5k: [+0.00945, +0.02121]) users 29 +24/-5
+  malicious E1b rpU_S - randD_S                                            +0.01263 [+0.00780, +0.01763] (5k: [+0.00780, +0.01762]) users 29 +25/-4
+  malicious E2a rpU_C - randI_C                                            +0.00077 [-0.00020, +0.00193] (5k: [-0.00020, +0.00193]) users 29 +16/-13
+  malicious E2b rpU_C - randD_C                                            +0.00002 [-0.00132, +0.00112] (5k: [-0.00132, +0.00115]) users 29 +18/-11
+  malicious E3 rpU_S - rpU_C                                               +0.01667 [+0.01066, +0.02282] (5k: [+0.01063, +0.02276]) users 29 +23/-6
+  malicious E4S orig_S - rpU_S - recon_S                                   +0.00172 [-0.00206, +0.00742] (5k: [-0.00202, +0.00737]) users 29 +15/-14
+  malicious E4C orig_C - rpU_C - recon_C                                   +0.00026 [-0.00100, +0.00142] (5k: [-0.00102, +0.00143]) users 29 +16/-13
+  malicious E5 rpU_S - rpO_S                                               +0.01029 [+0.00631, +0.01444] (5k: [+0.00635, +0.01435]) users 29 +23/-6
+  malicious E7 rpO_S - sum(singles)                                        +0.00040 [+0.00003, +0.00085] (5k: [+0.00003, +0.00085]) users 29 +19/-8
+  malicious orig_S - orig_C (published procedure, mean-prototype policy)   +0.01813 [+0.01052, +0.02734] (5k: [+0.01053, +0.02718]) users 29 +23/-6
+  benign    rpU_S (selected edit alone)                                    +0.01898 [+0.01127, +0.02683] (5k: [+0.01127, +0.02677]) users 29 +23/-6
+  benign    E1a rpU_S - randI_S                                            +0.01597 [+0.00910, +0.02312] (5k: [+0.00908, +0.02313]) users 29 +21/-8
+  benign    E1b rpU_S - randD_S                                            +0.01239 [+0.00712, +0.01789] (5k: [+0.00717, +0.01782]) users 29 +20/-9
+  benign    E2a rpU_C - randI_C                                            +0.00045 [-0.00075, +0.00172] (5k: [-0.00075, +0.00173]) users 29 +13/-16
+  benign    E2b rpU_C - randD_C                                            +0.00015 [-0.00085, +0.00108] (5k: [-0.00086, +0.00108]) users 29 +16/-13
+  benign    E3 rpU_S - rpU_C                                               +0.01886 [+0.01115, +0.02662] (5k: [+0.01116, +0.02658]) users 29 +22/-7
+  benign    E4S orig_S - rpU_S - recon_S                                   -0.00067 [-0.00419, +0.00398] (5k: [-0.00420, +0.00399]) users 29 +11/-18
+  benign    E4C orig_C - rpU_C - recon_C                                   +0.00088 [-0.00112, +0.00313] (5k: [-0.00118, +0.00315]) users 29 +15/-14
+  benign    E5 rpU_S - rpO_S                                               +0.00896 [+0.00538, +0.01270] (5k: [+0.00541, +0.01268]) users 29 +23/-6
+  benign    E7 rpO_S - sum(singles)                                        -0.00015 [-0.00037, +0.00007] (5k: [-0.00037, +0.00007]) users 29 +9/-18
+  benign    orig_S - orig_C (published procedure, mean-prototype policy)   +0.01731 [+0.00981, +0.02533] (5k: [+0.00983, +0.02523]) users 29 +22/-7
+  paired    E6 [rpU_S - rpU_C] malicious minus benign                      -0.00218 [-0.00513, +0.00058] (5k: [-0.00512, +0.00055]) users 29 +12/-17
+  paired    E6b [rpU_S - randI_S] malicious minus benign                   -0.00082 [-0.00341, +0.00165] (5k: [-0.00344, +0.00170]) users 29 +17/-12
+
+All conditions, patched minus unedited (behavior_only | profile_only), malicious days:
+  orig_C         beh +0.04404 [+0.03019, +0.05981]   prof -0.07089 [-0.15994, +0.02059]
+  orig_S         beh +0.06419 [+0.05106, +0.07858]   prof -0.05744 [-0.15308, +0.04360]
+  randD_C        beh -0.00009 [-0.00040, +0.00022]   prof +0.00050 [-0.00351, +0.00456]
+  randD_S        beh +0.00414 [+0.00160, +0.00697]   prof +0.00364 [-0.00344, +0.01529]
+  randI_C        beh -0.00032 [-0.00064, -0.00000]   prof -0.00195 [-0.00639, +0.00182]
+  randI_S        beh +0.00082 [-0.00071, +0.00243]   prof +0.00446 [-0.00350, +0.01727]
+  recon_C        beh +0.04407 [+0.03016, +0.05998]   prof -0.07267 [-0.16213, +0.01952]
+  recon_S        beh +0.04407 [+0.03016, +0.05998]   prof -0.07267 [-0.16213, +0.01952]
+  rpO_C          beh +0.00012 [-0.00017, +0.00039]   prof +0.00362 [-0.00036, +0.00738]
+  rpO_S          beh +0.00911 [+0.00543, +0.01300]   prof -0.00139 [-0.00590, +0.00320]
+  rpU_C          beh -0.00006 [-0.00030, +0.00019]   prof +0.00151 [-0.00286, +0.00581]
+  rpU_S          beh +0.02133 [+0.01354, +0.02967]   prof +0.00308 [-0.00586, +0.01579]
+  single_2302    beh +0.00023 [-0.00013, +0.00064]   prof -0.00156 [-0.00608, +0.00302]
+  single_3455    beh -0.00288 [-0.00495, -0.00110]   prof +0.00000 [-0.00000, +0.00000]
+  single_3673    beh +0.00970 [+0.00585, +0.01385]   prof -0.00000 [-0.00000, +0.00000]
+  single_4596    beh +0.00136 [+0.00026, +0.00276]   prof +0.00091 [-0.00000, +0.00272]
+  single_7693    beh -0.00000 [-0.00001, -0.00000]   prof -0.00000 [-0.00000, +0.00000]
+  zero           beh +0.00000 [+0.00000, +0.00000]   prof +0.00000 [+0.00000, +0.00000]
+
+H1 stopping rule (selected effect +0.02133): {"E1a rpU_S - randI_S": {"within_20pct_of_selected_effect": false, "interval_covers_zero": false, "stop_feature_specific_branch": false}, "E1b rpU_S - randD_S": {"within_20pct_of_selected_effect": false, "interval_covers_zero": false, "stop_feature_specific_branch": false}}

@@ -240,7 +240,8 @@ def main() -> None:
             cls, _ = tcd.classify_tokens([tuple(o) for o in a["offsets"]], tcd.cert_class_spans(text))
             tgt = np.asarray(cls[1:])                      # class of each predicted token
             delta = (a["h"] - b["h"])
-            z = sae.encode_sparse((delta - x_mean) / x_std)[:, feats].cpu().numpy()
+            with torch.no_grad():
+                z = sae.encode_sparse((delta - x_mean) / x_std)[:, feats].detach().cpu().numpy()
             ses = np.asarray(cls) == "SES"
             rec = {"receiver_idx": int(i), "receiver_id": meta.loc[i, "example_id"], "user": meta.loc[i, "user_id"],
                    "kind": kind[i], "variant": variant, "n_tokens": int(len(cls)), "n_ses_tokens": int(ses.sum())}
