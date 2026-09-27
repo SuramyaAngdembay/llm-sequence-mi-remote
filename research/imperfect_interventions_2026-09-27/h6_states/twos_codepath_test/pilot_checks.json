@@ -1,0 +1,21 @@
+{
+ "state_bitwise_mismatch_tokens": 0,
+ "state_tokens_checked": 64,
+ "zero_R_max_abs": 0.0,
+ "zero_O_max_abs": 0.0,
+ "dec_vs_h6_sel_sess_max_abs": 0.0,
+ "R_vs_h6_R_on_max_abs": 0.0,
+ "O_vs_h6_O_on_max_abs": 0.0,
+ "gpu": "NVIDIA GeForce RTX 3070",
+ "wall_s": 20.917157649993896,
+ "cpu_s": 37.570944378,
+ "patched_tokens": {
+  "I2_sel": 47,
+  "I1_sel": 47,
+  "I2_ctl": 17,
+  "rand_I2": 47,
+  "noise_I2": 47,
+  "rand_noise": 47
+ },
+ "seed": 20260927
+}

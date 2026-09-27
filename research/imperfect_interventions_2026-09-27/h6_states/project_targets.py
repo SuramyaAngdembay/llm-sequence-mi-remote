@@ -239,7 +239,8 @@ def main():
                 continue
             fixed, refill, dropped, kind = declared_target(z_ctx, z_src, feats, p_ctx, k)
             x_dec = ctx.astype(np.float64) + sae.sd.astype(np.float64) * (sae.D[:, feats].astype(np.float64) @ req)
-            r = {"kind": kind, "dropped": dropped, "refill": refill, "req_sq": float((req ** 2).sum()),
+            r = {"kind": kind, "dropped": dropped, "refill": refill, "fixed": {str(f): v for f, v in fixed.items()},
+                 "context_code": {str(f): v for f, v in z_ctx.items()}, "req_sq": float((req ** 2).sum()),
                  "decoder_edit_norm": float(np.linalg.norm(x_dec - ctx))}
             anchors = {"I2_decoder": x_dec} if name != "restore_sel" else {"I2_decoder": x_dec, "I1_min_change": ctx.astype(np.float64)}
             for an, y in anchors.items():
