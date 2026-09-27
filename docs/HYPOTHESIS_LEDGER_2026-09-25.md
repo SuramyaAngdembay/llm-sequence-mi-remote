@@ -310,6 +310,25 @@ CPU dry run: 120 discovery receivers, no session-alignment failures.
   cancelled. Every condition is scored within one job, so no comparison
   mixes hardware.
 
+**2026-09-27, H6: all three copies ran; primary copy declared before any
+output was read.**
+
+- The watcher missed the start because the workstation was offline. The two
+  A100 copies started in the same second (11:20:41 EDT) and ran 9 min 25 s
+  (gpu-debug 20927962) and 9 min 17 s (gpu 20927963). The H100 copy (ai
+  20928056) started at 11:37:49, after both had ended, so its sibling check
+  found nothing running, and it ran 5 min 17 s.
+- The copies total 24.0 GPU-minutes (0.40 GPU-h). Together with 0.06 GPU-h of
+  earlier follow-up work, that is 0.46 of the 1 GPU-h cap. About 15 minutes of
+  it duplicates the primary run.
+- **Primary: 20927962 (gpu-debug, `out/`).** It is the original submission
+  named in the protocol entry and has the lowest job id. The rule "the first
+  copy to start runs" did not decide between the A100 copies, since both
+  started at once.
+- The other two copies are used only as reproducibility checks: per-receiver
+  loss agreement and the implementation checks. No endpoint is taken from
+  them, and no copy is chosen by its results.
+
 **2026-09-25, interpretation map (written while both jobs are queued; no
 pilot output exists).** What each outcome would and would not mean. All
 readings stay exploratory; the receivers were inspected in package 4.
