@@ -218,6 +218,24 @@ a minute: Slurm cleared it on the older job and made the newer copy wait for
 the older one, which would have defeated the duplicate. A 5-minute watcher
 cancels whichever copy is still pending when the other starts.
 
+**2026-09-26, Pilot 2 ran (job 20916308, gpu-debug, 3 min 48 s, 0.06 GPU-h;
+duplicate 20921140 cancelled before starting).** Results in
+`results/pilots_2026_09_25/pilot2/README.md`. H3: supported as input
+sensitivity created by adaptation (F1 +0.11 to +0.18, base about 0.005, on
+attack and benign days alike). H7: null (F4 −0.004 [−0.031, +0.022]). F3: the
+selected features' session activity barely responds to the profile. H4 (Pilot
+3, CPU): rejected as surprise tracking; the selected features mark positions
+of adapter-learned predictive gains (4596: adapted loss 0.83 nats lower,
+12/12 users). H6 (path patching) remains unrun, since the swap effect does not
+pass through the selected features. **Round GPU total: 0.39 of 8 GPU-hours**
+(Pilot 1 0.17, Pilot 2 0.08 including the failed attempt, Pilot 4 0.10, TWOS
+feasibility pilot on Aquaman 0.03).
+
+**2026-09-26, TWOS feasibility pilot** (separate specification;
+`results/twos_feasibility_2026_09_26/README.md`). Direction A (encoder-realizable
+constrained edits): no-go as a main contribution. Direction B (donor-policy
+LP): go as a robustness appendix.
+
 **2026-09-25, interpretation map (written while both jobs are queued; no
 pilot output exists).** What each outcome would and would not mean. All
 readings stay exploratory; the receivers were inspected in package 4.

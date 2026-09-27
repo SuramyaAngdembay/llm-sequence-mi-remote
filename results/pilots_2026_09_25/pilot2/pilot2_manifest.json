@@ -1,0 +1,40 @@
+{
+ "exploratory": true,
+ "written_before_scoring": true,
+ "layer": 26,
+ "selected": [
+  4596,
+  7693,
+  2302,
+  3673,
+  3455
+ ],
+ "control": [
+  6596,
+  8017,
+  6608,
+  2765,
+  886
+ ],
+ "n_pairs": 207,
+ "n_items": 1636,
+ "variants": [
+  "orig",
+  "swap_same",
+  "swap_other",
+  "swap_train"
+ ],
+ "populations_sha256": "e75204b0a3bf941ab5bf02b31c732147dfa6a29373f5a9256d702267650bad4b",
+ "models": [
+  "adapted",
+  "base (adapter disabled)"
+ ],
+ "endpoints_declared": {
+  "F1": "behavior_only loss change under swap_other (and swap_same), adapted minus base, per user; malicious and benign reported separately",
+  "F2": "adapted swap sensitivity on malicious minus matched benign days, per user",
+  "F3": "mean selected-feature activation change on SES tokens under swap, minus the same for control features",
+  "F4": "identity familiarity: [swap_train minus swap_same] behavior_only loss, adapted minus base, per user (both partners share the receiver's department; only the training user is familiar to the adapter)",
+  "aggregation": "per receiver: mean loss over the view's target tokens; per user: mean over receivers; estimate: mean of user means; 95% interval: user-clustered percentile bootstrap",
+  "H4 data": "orig inputs: per-token adapted and base target NLL and S/C activations, saved for Pilot 3"
+ }
+}

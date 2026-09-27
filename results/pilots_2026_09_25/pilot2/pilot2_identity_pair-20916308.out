@@ -1,0 +1,18 @@
+NVIDIA A100-SXM4-40GB, 40960 MiB
+e75204b0a3bf941ab5bf02b31c732147dfa6a29373f5a9256d702267650bad4b  /anvil/scratch/x-bbhusal1/pilots_2026_09_25/prep/pilot_populations.json
+9bdb5447f20056098b027433b42baa8276a788f35e0095f4bb5d6621e4344c9c  /anvil/scratch/x-bbhusal1/pilots_2026_09_25/prep/pilot_deltas_l26.npz
+[pilot2] 207 pairs, 1636 inputs
+[pilot2] validity {"n_examples_checked": 16, "shape_mismatches": 0, "n_tokens_checked": 3280, "delta_rel_error_median": 0.03318263404071331, "delta_rel_error_p95": 0.04588712230324744, "active_set_jaccard_median": 1.0, "active_set_jaccard_mean": 0.9052090646381058, "abort_rule": "shape mismatch, or median relative error > 0.5 (a wrong layer or misalignment, not bf16 noise)"}
+[pilot2] 8/1636 (64s)
+[pilot2] 168/1636 (76s)
+[pilot2] 328/1636 (90s)
+[pilot2] 488/1636 (101s)
+[pilot2] 648/1636 (111s)
+[pilot2] 808/1636 (123s)
+[pilot2] 968/1636 (137s)
+[pilot2] 1128/1636 (147s)
+[pilot2] 1288/1636 (175s)
+[pilot2] 1448/1636 (186s)
+[pilot2] 1608/1636 (203s)
+PILOT2_DONE
+PILOT2_DONE

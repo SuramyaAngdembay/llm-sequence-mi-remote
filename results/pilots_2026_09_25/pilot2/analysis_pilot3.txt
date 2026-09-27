@@ -1,0 +1,74 @@
+PILOT 3 / H4 (exploratory, CPU). Session positions predicting a session token. For each feature:
+next-token loss when the feature is active minus when inactive, within the same next-token id,
+per user and kind; mean of user means, 95% user bootstrap. 'gap' = adapted loss - base loss.
+
+  malicious 2302|adapted           +nan [+nan, +nan] (5k: [+nan, +nan]) users 0 +0/-0
+  malicious 2302|base              +nan [+nan, +nan] (5k: [+nan, +nan]) users 0 +0/-0
+  malicious 2302|gap               +nan [+nan, +nan] (5k: [+nan, +nan]) users 0 +0/-0
+  malicious 2765|adapted           +0.06918 [-0.00703, +0.19317] (5k: [-0.00711, +0.19320]) users 7 +4/-3
+  malicious 2765|base              -0.55257 [-0.91214, -0.27810] (5k: [-0.92011, -0.27781]) users 7 +0/-7
+  malicious 2765|gap               +0.62175 [+0.31329, +0.98660] (5k: [+0.31327, +0.99007]) users 7 +7/-0
+  malicious 3455|adapted           +2.33376 [+1.55180, +3.16257] (5k: [+1.55973, +3.16515]) users 15 +14/-1
+  malicious 3455|base              +0.26699 [+0.15142, +0.37841] (5k: [+0.14975, +0.37776]) users 15 +13/-2
+  malicious 3455|gap               +2.06677 [+1.27245, +2.91745] (5k: [+1.27245, +2.91304]) users 15 +14/-1
+  malicious 3673|adapted           -0.00022 [-0.00065, +0.00000] (5k: [-0.00065, +0.00000]) users 8 +3/-5
+  malicious 3673|base              +2.66965 [+0.39241, +5.70512] (5k: [+0.39296, +5.70579]) users 8 +3/-5
+  malicious 3673|gap               -2.66987 [-5.70557, -0.39241] (5k: [-5.70645, -0.39296]) users 8 +5/-3
+  malicious 4596|adapted           -0.82646 [-1.16797, -0.53187] (5k: [-1.16876, -0.53257]) users 12 +0/-12
+  malicious 4596|base              +0.21758 [+0.02805, +0.42348] (5k: [+0.02817, +0.42077]) users 12 +8/-4
+  malicious 4596|gap               -1.04404 [-1.30753, -0.77787] (5k: [-1.30685, -0.77207]) users 12 +0/-12
+  malicious 6596|adapted           -0.00000 [-0.00001, -0.00000] (5k: [-0.00001, -0.00000]) users 17 +0/-17
+  malicious 6596|base              -7.60611 [-9.54383, -5.63271] (5k: [-9.56253, -5.69138]) users 17 +0/-17
+  malicious 6596|gap               +7.60611 [+5.63271, +9.54383] (5k: [+5.69137, +9.56252]) users 17 +17/-0
+  malicious 6608|adapted           -0.00000 [-0.00001, +0.00000] (5k: [-0.00001, +0.00000]) users 15 +8/-7
+  malicious 6608|base              -1.43326 [-2.97636, +0.11197] (5k: [-2.99248, +0.11197]) users 15 +6/-9
+  malicious 6608|gap               +1.43326 [-0.11197, +2.97635] (5k: [-0.11197, +2.99248]) users 15 +9/-6
+  malicious 7693|adapted           +nan [+nan, +nan] (5k: [+nan, +nan]) users 0 +0/-0
+  malicious 7693|base              +nan [+nan, +nan] (5k: [+nan, +nan]) users 0 +0/-0
+  malicious 7693|gap               +nan [+nan, +nan] (5k: [+nan, +nan]) users 0 +0/-0
+  malicious 8017|adapted           +nan [+nan, +nan] (5k: [+nan, +nan]) users 0 +0/-0
+  malicious 8017|base              +nan [+nan, +nan] (5k: [+nan, +nan]) users 0 +0/-0
+  malicious 8017|gap               +nan [+nan, +nan] (5k: [+nan, +nan]) users 0 +0/-0
+  malicious 886|adapted            -0.05027 [-0.10764, -0.00949] (5k: [-0.11028, -0.00920]) users 9 +0/-9
+  malicious 886|base               +0.34901 [-0.48229, +1.37563] (5k: [-0.47359, +1.37858]) users 9 +3/-6
+  malicious 886|gap                -0.39928 [-1.42491, +0.41994] (5k: [-1.43219, +0.41240]) users 9 +6/-3
+  malicious sel-ctrl|adapted       +0.85621 [+0.40925, +1.35897] (5k: [+0.40954, +1.36374]) users 16 +13/-3
+  malicious sel-ctrl|base          +4.39823 [+2.84643, +5.99230] (5k: [+2.82962, +5.98383]) users 16 +15/-1
+  malicious sel-ctrl|gap           -3.54202 [-5.20969, -1.84298] (5k: [-5.20178, -1.81722]) users 16 +3/-13
+  malicious sel|adapted-base       +0.20142 [-0.70927, +1.02019] (5k: [-0.72235, +1.02019]) users 16 +12/-4
+
+  benign    2302|adapted           +nan [+nan, +nan] (5k: [+nan, +nan]) users 0 +0/-0
+  benign    2302|base              +nan [+nan, +nan] (5k: [+nan, +nan]) users 0 +0/-0
+  benign    2302|gap               +nan [+nan, +nan] (5k: [+nan, +nan]) users 0 +0/-0
+  benign    2765|adapted           +0.08921 [-0.05513, +0.26619] (5k: [-0.05792, +0.26687]) users 7 +4/-3
+  benign    2765|base              -0.52868 [-0.92746, -0.16947] (5k: [-0.92800, -0.16893]) users 7 +1/-6
+  benign    2765|gap               +0.61789 [+0.17406, +1.08782] (5k: [+0.16474, +1.08782]) users 7 +6/-1
+  benign    3455|adapted           +0.44487 [+0.16595, +0.71591] (5k: [+0.17071, +0.71956]) users 15 +12/-3
+  benign    3455|base              +0.24346 [+0.13703, +0.36880] (5k: [+0.13539, +0.36857]) users 15 +14/-1
+  benign    3455|gap               +0.20141 [-0.13276, +0.51798] (5k: [-0.13145, +0.51669]) users 15 +10/-5
+  benign    3673|adapted           +0.11014 [-0.00001, +0.33040] (5k: [-0.00001, +0.33040]) users 7 +5/-2
+  benign    3673|base              +1.90343 [+0.11555, +4.07207] (5k: [+0.11554, +4.14713]) users 7 +4/-3
+  benign    3673|gap               -1.79329 [-3.73826, -0.11553] (5k: [-3.73935, -0.11552]) users 7 +3/-4
+  benign    4596|adapted           -0.76283 [-1.02323, -0.52122] (5k: [-1.03093, -0.52662]) users 12 +0/-12
+  benign    4596|base              -0.04984 [-0.27535, +0.19572] (5k: [-0.27549, +0.19237]) users 12 +5/-7
+  benign    4596|gap               -0.71300 [-1.03376, -0.39681] (5k: [-1.04303, -0.39148]) users 12 +2/-10
+  benign    6596|adapted           -0.00000 [-0.00001, -0.00000] (5k: [-0.00001, -0.00000]) users 17 +0/-17
+  benign    6596|base              -8.03040 [-10.01106, -5.94187] (5k: [-10.01746, -5.97075]) users 17 +0/-17
+  benign    6596|gap               +8.03039 [+5.94187, +10.01106] (5k: [+5.97075, +10.01746]) users 17 +17/-0
+  benign    6608|adapted           -0.00062 [-0.00186, +0.00000] (5k: [-0.00186, +0.00000]) users 17 +10/-7
+  benign    6608|base              -1.72832 [-3.39932, +0.00333] (5k: [-3.37573, +0.00220]) users 17 +6/-11
+  benign    6608|gap               +1.72770 [-0.00339, +3.39751] (5k: [-0.00343, +3.37451]) users 17 +11/-6
+  benign    7693|adapted           +nan [+nan, +nan] (5k: [+nan, +nan]) users 0 +0/-0
+  benign    7693|base              +nan [+nan, +nan] (5k: [+nan, +nan]) users 0 +0/-0
+  benign    7693|gap               +nan [+nan, +nan] (5k: [+nan, +nan]) users 0 +0/-0
+  benign    8017|adapted           +nan [+nan, +nan] (5k: [+nan, +nan]) users 0 +0/-0
+  benign    8017|base              +nan [+nan, +nan] (5k: [+nan, +nan]) users 0 +0/-0
+  benign    8017|gap               +nan [+nan, +nan] (5k: [+nan, +nan]) users 0 +0/-0
+  benign    886|adapted            -0.04441 [-0.12890, +0.03608] (5k: [-0.12729, +0.03561]) users 10 +2/-8
+  benign    886|base               +0.58132 [-0.21957, +1.61228] (5k: [-0.22405, +1.59891]) users 10 +5/-5
+  benign    886|gap                -0.62573 [-1.66549, +0.19631] (5k: [-1.65592, +0.20485]) users 10 +5/-5
+  benign    sel-ctrl|adapted       -0.07242 [-0.22285, +0.05726] (5k: [-0.22286, +0.05807]) users 16 +8/-8
+  benign    sel-ctrl|base          +3.54297 [+1.72946, +5.22750] (5k: [+1.74634, +5.22005]) users 16 +15/-1
+  benign    sel-ctrl|gap           -3.61539 [-5.23522, -1.88751] (5k: [-5.23249, -1.92906]) users 16 +1/-15
+  benign    sel|adapted-base       -0.46411 [-0.93113, -0.09192] (5k: [-0.92401, -0.09803]) users 16 +4/-12
+

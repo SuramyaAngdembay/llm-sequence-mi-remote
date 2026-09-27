@@ -1,0 +1,10 @@
+{
+ "n_examples_checked": 16,
+ "shape_mismatches": 0,
+ "n_tokens_checked": 3280,
+ "delta_rel_error_median": 0.03318263404071331,
+ "delta_rel_error_p95": 0.04588712230324744,
+ "active_set_jaccard_median": 1.0,
+ "active_set_jaccard_mean": 0.9052090646381058,
+ "abort_rule": "shape mismatch, or median relative error > 0.5 (a wrong layer or misalignment, not bf16 noise)"
+}
