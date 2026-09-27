@@ -226,8 +226,11 @@ attack and benign days alike). H7: null (F4 −0.004 [−0.031, +0.022]). F3: th
 selected features' session activity barely responds to the profile. H4 (Pilot
 3, CPU): rejected as surprise tracking; the selected features mark positions
 of adapter-learned predictive gains (4596: adapted loss 0.83 nats lower,
-12/12 users). H6 (path patching) remains unrun, since the swap effect does not
-pass through the selected features. **Round GPU total: 0.39 of 8 GPU-hours**
+12/12 users). H6 (path patching): its declared trigger, an adaptation-specific profile
+dependence, is met. It was not run in this round, which already has four pilots,
+one beyond the specification's three, added at the user's direction. It is the
+recommended next experiment. The finding that the swap effect does not pass
+through the selected features makes it more relevant, not less. **Round GPU total: 0.39 of 8 GPU-hours**
 (Pilot 1 0.17, Pilot 2 0.08 including the failed attempt, Pilot 4 0.10, TWOS
 feasibility pilot on Aquaman 0.03).
 
