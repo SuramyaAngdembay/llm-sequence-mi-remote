@@ -181,17 +181,18 @@ nothing". Each went beyond what restoration patching identifies.*
    30% of edited tokens request changes smaller than 5% of a typical
    activation, and on those the per-token error ratio mostly measures
    arithmetic noise.
-   - **Most of the requested change had no realizable target** (added
-     2026-09-27; CPU check in
-     `research/imperfect_interventions_2026-09-27/`). Every swapped code has
-     exactly k = 4 actives. So a target that restores an inactive selected
-     feature while holding the four winners asks for five nonzeros, which no
-     state produces. This holds for 173 of 369 edited tokens, and they carry
-     95% of the requested squared change, almost all of it feature 7693. The
-     0.3% therefore describes the applied decoder edit, not a restoration of
-     those coefficients. Simulated bf16 subtraction rounding changes codes by
-     about 0.03% at the median, far too little to explain the realization
-     errors.
+   - **Most of the requested change may have had no realizable target**
+     (added 2026-09-27, made conditional after review). 173 of 369 edited
+     tokens (46.9%, 23 receivers), carrying 95.3% of the requested squared
+     coefficient change, raise the selected support by one. *If* their swapped
+     codes have four actives, the full-code target has five nonzeros and cannot
+     be realized. The supporting check used cached original-input tokens, not
+     these swapped states. The premise, the arithmetic paths and the vector
+     execution error are tested on the actual states in
+     `research/imperfect_interventions_2026-09-27/h6_states/`. A
+     random-perturbation bf16 simulation does not settle the arithmetic
+     question. Infeasibility, if confirmed, would not explain the behavioural
+     null, and it would not make 7693 causally important.
    - **Arithmetic.** The intended codes subtract bf16 states before the float32
      cast, and the verification casts before subtracting. A zero-edit code
      comparison under identical arithmetic has not been run.

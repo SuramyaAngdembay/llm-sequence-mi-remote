@@ -1,5 +1,8 @@
 # Estimand and derivations
 
+*Corrected 2026-09-27 after `latest-mathematical-results-review.md`. The corrected points are
+marked "(corrected)".*
+
 **Status: exploratory research, kept separate from the paper's claims.** The mathematics below is
 elementary or established, and each result carries its proof status. Two questions are kept
 apart throughout:
@@ -64,7 +67,7 @@ code to τ" does not define a state. An ideal intervention needs a declared **se
 | I2, decoder-anchored | x*₂ = Π_P(x_dec), with x_dec = x_R + σ ⊙ D_S(τ_S − c(x_R)_S) the declared decoder edit | What does writing the features along their decoder directions do once the write is minimally corrected so the SAE reads exactly τ? | It inherits the decoder's directions, including any component the encoder cannot see. |
 | I1, minimum change | x*₁ = Π_P(x_R) | What does the smallest raw-norm change that makes the SAE read τ do? | It moves along encoder-row directions scaled by the metric, which may not be how the model represents the feature. It depends on the metric (see counterexample E). |
 | nearest to applied (A) | Π_P(x̂) | What is the nearest code-exact correction of what was actually applied? | The target moves with the implementation error, so two implementations of the same declared edit have different estimands. It is not a property of the component. |
-| fibre-wide | all x ∈ P, or P ∩ ball(x_R, r) | Could *any* state with this code change behaviour by more than τ? | The fibre is unbounded (dimension at least d − k per token). Without a radius, the range is unbounded. With a radius, an upper bound needs certified sensitivity over a large set. |
+| fibre-wide | all x ∈ P, or P ∩ ball(x_R, r) | Could *any* state with this code change behaviour by more than τ? | (corrected) A fibre need not be unbounded. With k = 1, preactivations (x₁, x₂, −x₂), target (1, 0, 0) and margin 0.1, it is the segment x₁ = 1, \|x₂\| ≤ 0.9. An overcomplete encoder, such as H6's 8,192 rows in 4,096 dimensions, can bound it, while TopK still makes codes locally many-to-one. An unbounded fibre also need not give unbounded behaviour. The synthetic worlds' fibres are unbounded only because they have encoder-invisible directions by construction. Either way, a useful upper bound needs certified sensitivity over the whole set. |
 
 **Recommendation.**
 
@@ -77,8 +80,10 @@ code to τ" does not define a state. An ideal intervention needs a declared **se
 **Three kinds of error.** Execution and specification error are distinct, and the selection gap
 is the quantity a bound must control.
 
-- **Execution error** is ‖x̂ − x_dec‖: the applied state against the declared edit. H6's check
-  of applied norm over intended norm (median 1.001) measures this.
+- **Execution error** is ‖x̂ − x_dec‖: the applied state against the declared edit, as a
+  *vector* difference. (corrected) H6's applied-to-intended norm ratio (median 1.001) does
+  **not** measure this, because equal-length edits can point in different directions. The
+  vector error on the actual states is measured in `h6_states/`.
 - **Specification or realization error** is x_dec ∉ P: the declared edit does not produce
   code τ. H6's normalized target error (q90 1.0) measures this. It is not an execution failure.
 - **Selection gap** is ‖x̂ − x*‖, for whichever ideal was declared.
@@ -97,6 +102,11 @@ P(τ) = { x : R_{S_τ} x = τ_{S_τ} − g_{S_τ},  R_l x + g_l ≤ θ for all l
 Every x ∈ P(τ) satisfies c(x) = τ. Every x with c(x) = τ and margin at least m lies in P(τ). If
 |S_τ| > k, no x has c(x) = τ.
 
+(corrected) P(τ) describes *margin-qualified* realizations. If P(τ) is empty for some m > 0, the
+target may still be realizable with a smaller margin, or exactly at a tie. Infeasibility at a
+positive margin is therefore not a proof of zero-margin impossibility. The over-k statement is
+stronger and does not depend on the margin: a TopK code never has more than k nonzeros.
+
 *Proof.* On S_τ the code equals the preactivation. Outside it, TopK keeps a feature at zero exactly
 when its preactivation is at most the smallest winner's value (with |S_τ| = k), or at most zero
 (with |S_τ| < k). The margin makes the ordering strict, so ties cannot occur. A TopK code has at
@@ -104,14 +114,23 @@ most k nonzeros. The TopK cells themselves are SplInterp's Theorem B.1 polyhedra
 
 *Status:* proved, elementary. The test suite checks that projected states carry the target code.
 
-*Corollary (H6).* Every one of 20,000 sampled layer-26 tokens had at least k = 4 positive
-preactivations (median 571), so every swapped code has exactly four actives. A target that
-restores a selected feature inactive in R, while holding the four winners, has five nonzeros, so
-P(τ) is empty. That applies to 173 of the 369 edited tokens, on 23 receivers, which carry 95.3%
-of the requested squared change (`results/h6_realizability_*.json`). **For those tokens, H6's
-declared restoration had no ideal state at all.** The q90 normalized error of exactly 1.0 is
-consistent with rejected insertions, where the requested coordinate stays at zero. Per-token
-realized codes were not saved, so this reading is not verified token by token.
+*Corollary (H6), conditional* (corrected). For the full-code target,
+
+```
+|supp(τ)| = |supp(z_R)| − |supp(z_R,S)| + |supp(z_O,S)|.
+```
+
+173 of the 369 edited tokens (46.9%, on 23 receivers) raise the selected support by one. They
+carry 95.3% of the requested *squared coefficient change*; that is not a share of tokens, loss or
+behaviour. If those tokens' swapped codes each have four actives, their targets have five
+nonzeros and cannot be realized.
+
+The earlier check used 20,000 cached **original-input** tokens, which is not the swapped H6
+states. The saved H6 arrays hold only 10 of 8,192 coefficients, and they alone prove no target
+over-k. The premise is tested on the actual swapped states in `h6_states/`. Even if confirmed,
+it would concern the full-code target only; a selected-only restoration that lets another winner
+drop is a different intervention. It would not explain the behavioural null, and it would not make
+feature 7693 causally important.
 
 **Proposition 2 (distance to a set is not distance to a declared ideal).**
 
@@ -131,8 +150,8 @@ Proposition 5).
 
 **Proposition 3 (the exact projection beats the Hoffman constant).**
 
-Eliminate the equalities (x = x₀ + N z, with N a basis of null(B) and x₀ the equality projection
-of y). Then
+Eliminate the equalities (x = x₀ + N z, with N an **orthonormal** basis of null(B) and x₀ the
+equality projection of y). The code takes N from the SVD, so it is orthonormal. Then
 
 ```
 dist(y, P)² = ‖B⁺(d − B y)‖² + ‖z*‖²,
@@ -147,16 +166,24 @@ dist(y, P) = ‖B⁺ r_eq‖ ≤ ‖r_eq‖ / σ_min(B),
 
 which is the equality-subsystem Hoffman bound. For the full system, H is uniform over right-hand
 sides and tight only in the worst case. Its computation is "a notoriously difficult and largely
-unexplored computational challenge" (Peña, Vera and Zuluaga, §1); their experiments stay at 100 or
-fewer rows, while our layer-26 cell has about 33,000 inequality rows in dimension 4,096. The exact
-distance for an observed point is a convex QP with a closed-form fast path.
+unexplored computational challenge" (Peña, Vera and Zuluaga, §1), and their experiments stay at 100
+or fewer rows.
+
+(corrected) For H6's full-code target the size is per token: the SAE has 8,192 features, so there
+are |S_τ| ≤ 4 equality rows and about 8,188 inactive-feature inequality rows in 4,096 raw
+dimensions. The winners' values are fixed by the equalities, so the pairwise winner-versus-loser
+ordering rows (k(L − k) of them in a general fixed cell) are not needed. Stacking tokens
+multiplies the variable dimension, but the constraints and the Euclidean metric separate by
+token. The exact distance for an observed point is a convex QP with a closed-form fast path.
 
 *Measured:* where the equality bound is valid, it is 1.10 to 1.42 times the exact distance
 (development worlds). It is unavailable wherever the inequalities bind, which covers the deletion
 and coherent cases.
 
-*Status:* proved, standard. Pointwise, the Hoffman route adds nothing over the projection except a
-uniform guarantee for points never observed.
+*Status:* proved, standard. Pointwise, the implemented Hoffman route added nothing over the
+projection, apart from a uniform guarantee for points never observed. (corrected) This shows the
+implemented equality bound is looser than exact projection where both exist. It does not show
+that useful Hoffman-type bounds are computationally impossible at model scale.
 
 **Proposition 4 (widened equivalence test).**
 
@@ -180,7 +207,8 @@ The argument is the intersection–union argument of two one-sided tests, applie
 of an identified interval (the same logic as partial-identification confidence intervals).
 
 *Status:* proved, elementary. The synthetic evaluation found no false negligible in any
-condition.
+condition. (corrected) That observation is not a finite-sample guarantee. The cluster-t
+intervals are approximate: evaluation coverage was 0.88 to 1.00 at nominal 0.90.
 
 **Proposition 5 (when the widened test can decide).**
 
@@ -197,7 +225,9 @@ distances were 5% under crosstalk and 30% under execution noise
 (`results/eval/bound_scale_check.json`). Proposition 4 is valid but almost never informative
 unless realization is exact.
 
-*Status:* immediate from Proposition 4, with measured scales.
+*Status:* immediate from Proposition 4, with measured scales. (corrected) The accuracy
+requirement applies to *near-zero equivalence* decisions in these measured regimes. A large
+non-negligible effect can be decided with a larger error, as condition C2b shows.
 
 ## 4. Counterexamples and failed approaches
 
@@ -226,12 +256,14 @@ unless realization is exact.
   while moving the selected feature needs a move of 7.5 to 13 raw units. The ideal rescue of an
   irrelevant feature then ranges from −1.23 to +0.36. The estimand is well defined but has little
   to do with the feature.
-- **Failed approach: uniform Hoffman constants.** They are not computable at layer-26 scale, and
-  where the equality version applies it is looser than the exact distance.
-- **Failed approach: a certified K for the transformer.** None is available for ten
-  transformer blocks followed by cross-entropy. Products of spectral norms are vacuous even for the
-  32-unit MLP in the synthetic worlds, where K rises about sixfold. Local verification tools do
-  not scale to an 8B model.
+- **Not pursued: uniform Hoffman constants.** None was computed for the full system. Where the
+  implemented equality version applies, it is looser than the exact distance. (corrected) Their
+  feasibility at model scale was not tested.
+- **Not established: a useful regional K for the Qwen suffix.** (corrected) Bounded-domain
+  Lipschitz bounds for self-attention exist, for example Castin et al., ICML 2024, and Yudin et
+  al., 2025 (arXiv 2507.07814). These are cited from the review and were not read in this study. This study has not established a sufficiently tight, tractable regional bound for the
+  actual Qwen suffix and loss used in H6. In the synthetic worlds, a product of spectral norms
+  raised K about sixfold for a 32-unit MLP.
 
 ## 5. Three sources of uncertainty, kept separate
 

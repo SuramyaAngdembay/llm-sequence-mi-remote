@@ -4,33 +4,74 @@
 inference. The review notes that prompted it are in `~/Documents/mi-paper-review-2026-09-27/`
 (`mathematical-directions-after-h6.md` and `h6-followup-review.md`).
 
-## Answer
+## Corrections (2026-09-27, after `latest-mathematical-results-review.md`)
 
-**An observed near-zero effect supports a negligible *ideal* effect only in three cases:**
+The frozen protocol, code and all 6,000 evaluation datasets are unchanged. An independent
+reproduction matched every row. The corrections are to claims:
 
-- the declared ideal state exists;
-- the ideal is executed directly, verified by re-encoding, and passes an equivalence test at a
-  pre-declared margin;
-- it passes a Lipschitz-widened test, which in practice decides only when realization is
-  essentially exact.
+- **Decisions are reported three ways.** The widened bound was never incorrect; it abstained.
+  The applied-effect test abstains less but made 903 incorrect decisions. A pooled
+  "wrong or inconclusive" rate hid that difference.
+- **The negative result is scoped to this implementation and benchmark.** The synthetic
+  encoders have 12 features in 20 dimensions, with deliberately invisible directions. The H6 SAE
+  has 8,192 features in 4,096 dimensions.
+- **Lipschitz claim narrowed.** "No certified Lipschitz constant exists for a transformer"
+  becomes: *this study has not established a sufficiently tight, tractable regional bound for the
+  Qwen suffix and loss used in H6.* Bounded-domain attention bounds do exist (Castin et al., ICML
+  2024; Yudin et al., 2025; cited from the review, not read here).
+- **H6 over-k finding made conditional.** It was conditional on an unverified premise, and is
+  now tested on the actual states in `h6_states/`.
+- **Arithmetic question reopened.** The bf16 random-perturbation simulation does not settle the
+  actual arithmetic discrepancy on H6 inputs.
+- **Derivation details corrected** in `ESTIMAND_AND_DERIVATIONS.md`.
 
-A generic implementation-error bound is valid but almost never decisive. In the frozen
-evaluation it was decisive in 1 of 14 conditions with inexact realization. Executing the ideal
-directly was right in 98% of datasets. The proposed method therefore fails its own success
-criteria. This is a negative result for the method.
+## Answer (scoped to this benchmark)
 
-Two further limits apply even with exact execution:
+**Observed.** In the frozen synthetic evaluation, over the 5,700 datasets whose primary ideal
+effect exists:
 
-- **The answer is specific to the lift.** States with the same code can behave differently, and
-  two reasonable lifts disagree in several worlds.
-- **The answer is specific to restoration.** A restoration null can coexist with necessity and a
+| procedure | correct | incorrect | inconclusive |
+|---|---|---|---|
+| P3, direct execution of the declared ideal | 97.98% | 0% | 2.02% |
+| P1, equivalence test on the applied effect | 81.18% | **15.84%** | 2.98% |
+| P2, realization gate (threshold 0.05) | 37.54% | 0% | 62.46% |
+| P4a, bound widened with a certified K | 31.49% | 0% | 68.51% |
+| P4b, bound widened with a sampled K (not a bound) | 41.47% | 0% | 58.53% |
+| P4c, Hoffman equality bound, certified K | 30.60% | 0% | 69.40% |
+
+P5 (two lifts) is scored against its own lift-aware truth and is reported per condition below.
+
+- The implemented widened bound failed by **abstaining, not by false confidence**.
+- It met the frozen informativeness threshold in 1 of the 14 inexact-realization conditions.
+- The applied-effect test is not preferable because it abstains less. It is wrong in 15.8% of
+  datasets, including every under-applied case and up to 60% of crosstalk cases.
+
+**Mathematical implication, within the stated assumptions.** A widened equivalence interval
+controls false-negligible declarations when three things hold:
+
+- the regional Lipschitz bound is valid;
+- the ideal state is precisely declared;
+- the confidence bounds are valid.
+
+Near-zero equivalence decisions need K × distance to be small against the margin. In these
+worlds that required the applied state to sit within 0.3% to 0.9% of the edit's length from the
+ideal. Large non-negligible effects can be decided with larger error; condition C2b shows this.
+
+**Hypothesis, not established.** Whether a direction-sensitive or structure-restricted bound
+would be informative on real SAE geometry is open. See `METHOD_STATUS.md`.
+
+**Beyond the bound.** Even with exact execution:
+
+- the answer is specific to the lift: states with the same code can behave differently;
+- the answer is specific to restoration: a restoration null can coexist with necessity and a
   large interaction.
 
-**For H6** (Proposition 1, corollary), 173 of the 369 edited session tokens asked for a TopK code
-with five nonzeros from an SAE that keeps exactly four. Those tokens carry 95% of the requested
-change. The declared "restore these five coefficients, hold the rest" state does not exist for
-them. H6's 0.3% therefore reports the decoder edit that was applied. It is not evidence about
-restoring those coefficients.
+**H6.** 173 of the 369 edited tokens (46.9%, on 23 receivers) increase the selected support by
+one. They carry 95.3% of the requested squared coefficient change. *If* their swapped codes
+each have four actives, the full-code target (selected from O, every other coefficient held) has
+five nonzeros and cannot be realized. That premise is checked on the actual states in
+`h6_states/README.md`. Impossibility would concern only the full-code target. It would not
+explain the behavioural null, and it would not make feature 7693 causally important.
 
 ## Documents
 
@@ -123,34 +164,32 @@ rate and FP the false-non-negligible rate. "neg/non-neg" means the six worlds st
 | C6b_deletion | non-neg | 1.00 | 0.00 | 1.00 | 0.00 | 0.00 | 1.00 |
 | C7_steep_exec_noise | non-neg | 0.91 | 0.00 | 0.85 | 0.00 | 0.00 | 0.85 |
 
-**Frozen criteria for P4a** (`results/eval/summary.json`):
+**Frozen criteria for P4a** (`results/eval/summary.json`). Criterion 3's pooled metric
+combined incorrect and inconclusive decisions. The three-way table above is the correct
+reading.
 
 | criterion | result |
 |---|---|
 | 1. Validity: false-negligible rate ≤ 0.05 in every condition | **passes** (0.00 everywhere) |
 | 2. Informativeness: correct and decisive in ≥ 50% of datasets in at least half of the 14 inexact conditions | **fails** (1 of 14) |
 | 3. Pooled wrong-or-inconclusive rate below P2's | **fails** |
-| 4. Value beyond direct execution | not demonstrable here; direct execution was always available when the bound was |
+| 4. Value beyond direct execution | **untested**: direct execution was available throughout, so this is a limitation of the benchmark, not evidence against the idea |
 
-Pooled wrong-or-inconclusive rates:
 
-| procedure | rate |
-|---|---|
-| P4a, certified bound | 0.69 |
-| P2, realization gate | 0.62 |
-| P1, applied effect | 0.19 |
-| P3, direct execution | 0.02 |
-
-Why the bound fails (Proposition 5): it can decide only if the applied state lies within about
-τ/K of the ideal. That is 0.3% to 0.9% of the edit's length, against measured distances of 5%
-under crosstalk and 30% under execution noise.
+Why the bound abstains (Proposition 5): a near-zero equivalence decision needs the applied
+state within about τ/K of the ideal. In these worlds that is 0.3% to 0.9% of the edit's length,
+against measured distances of 5% under crosstalk and 30% under execution noise.
 
 ## What each simple check gets wrong
 
 - **Applied-effect equivalence (P1)** falsely declares negligible in 100% of datasets when the
   edit is under-applied (C3a, C3b). It falsely declares non-negligible in 20% to 60% of datasets
-  when crosstalk moves a protected feature that the loss reads (C1b, C1c, C1f). The P0 rule, which
-  calls an effect negligible whenever its interval contains zero, does worse.
+  when crosstalk moves a protected feature that the loss reads (C1b, C1c, C1f).
+- **P0**, which calls an effect negligible whenever its interval contains zero, also fails.
+  - In the exact-zero worlds (C1a, C1h, C5), its "failures" are intervals about 10⁻¹⁷ wide that
+    miss zero by numerical residue. They are not a statistical phenomenon, and those rates should
+    not be quoted.
+  - Its failures elsewhere are substantive.
 - **Realization error alone (P2)** was never wrong on the evaluation worlds at the tuned
   threshold of 0.05. Any larger threshold was wrong on development worlds. At 0.05 it is
   inconclusive in 62% of evaluation datasets. It cannot tell which errors the loss reads
@@ -159,52 +198,48 @@ under crosstalk and 30% under execution noise.
   target as ill-posed. It is still specific to the lift (see P5 and counterexamples B and E) and to
   restoration (counterexample C).
 
-## Go / no-go for a small-model pilot
+## Go / no-go for a small-model pilot of the *bound*
 
-**No-go.** The frozen gate in the specification requires all of the following:
+**No-go for this generic bound, now.** The frozen gate asked for five things:
 
 - a coherent estimand: **yes**, with a declared lift and a full-code target;
-- a correct derivation: **yes**, elementary;
-- informative bounds on nontrivial known-answer cases: **no**;
-- better decisions than simpler checks: **no**;
-- a plausible contribution in the prior art: **only as a protocol**.
+- a correct derivation under stated assumptions: **yes**, elementary;
+- informative bounds on nontrivial known-answer cases: **no, in this benchmark**;
+- better informative decisions than simpler checks at comparable error control: **no**. Only
+  direct execution was both error-free and decisive;
+- a plausible contribution beyond established tools: **not yet**.
 
-No TWOS or transformer run was made.
+The method is **deferred, not abandoned**. `METHOD_STATUS.md` records what is valid, what is
+specific to this implementation or benchmark, what is unresolved, and two routes with reopening
+criteria.
 
-If the H6 feature question itself matters, the right experiment is a direct execution of a
-*feasible* declared intervention, not a bound. Three changes are needed:
-
-- choose a target that exists:
-  - "swap-in", where the weakest swapped winner may drop, which is a different and declared
-    estimand;
-  - or restrict the test to tokens whose target is not over-k;
-- execute the decoder-anchored exact projection on captured states, verify it by re-encoding
-  with identical arithmetic, and test at τ = 0.012 nats per token;
-- add a second lift, plus a noising patch for necessity.
-
-That is an application of established tools. It would be one short GPU job and needs your
-decision.
+The H6 feature question is handled separately as an intervention-validity check, in
+`h6_states/`. That work captures the actual states, tests feasibility and, if the precheck
+passes, directly executes a declared feasible intervention. It is an application of established
+tools, not a test of the bound.
 
 ## What could become a contribution
 
-- **Not a method.** The Lipschitz-widened interval is correct and nearly always inconclusive.
-  Hoffman constants add nothing over the exact projection. Certified regional sensitivity for
-  transformers is an open verification problem, far beyond a bounded project.
+- **Not a method at present.** In this benchmark the widened interval was never incorrect but
+  usually abstained. The implemented Hoffman equality bound was looser than the exact
+  projection wherever both were available. Whether a tighter, tractable regional bound can be
+  had for the Qwen suffix is unresolved. Bounded-domain attention bounds exist, and their
+  usefulness here is untested.
 - **Possibly a methods note or application section.** It would present a feasibility-first
   checklist for SAE feature interventions:
-  1. certify that the declared target code exists, with an over-k count;
-  2. execute declared lifts directly and verify them by re-encoding;
+  1. certify that the declared target code exists;
+  2. execute declared lifts directly and verify them by re-encoding with the evaluation
+     arithmetic;
   3. compare two lifts to check identification;
   4. test equivalence at a pre-declared margin;
   5. keep restoration, necessity and interaction as separate estimands.
 
-  The H6 over-k finding and counterexamples B to F would be its worked examples. Each step is
-  established, and the value would be in the protocol and its demonstrations.
+  Each step is established, and any value would lie in the protocol and its worked examples.
 - **The donor-policy LP** remains the existing paper's robustness contribution, unchanged.
 
 ## Compute
 
-This investigation used 0 GPU-hours, with no model inference. CPU time was measured with
+The synthetic study used 0 GPU-hours, with no model inference. The H6 state checks are accounted in `h6_states/README.md`. CPU time was measured with
 `/usr/bin/time` or `time.process_time`.
 
 | item | CPU (user) |

@@ -461,3 +461,30 @@ separate from the paper's claims.
   5. keep restoration, necessity and interaction separate.
 
   Every piece is established.
+
+**2026-09-27, corrections to the imperfect-intervention entry**
+(`~/Documents/mi-paper-review-2026-09-27/latest-mathematical-results-review.md`,
+checked against the artifacts; its pooled counts match a recount).
+
+- **Three-way decisions** (5,700 datasets with a defined ideal):
+
+  | procedure | correct | incorrect | inconclusive |
+  |---|---|---|---|
+  | widened bound | 31.5% | 0% | 68.5% |
+  | applied-effect test | 81.2% | 15.8% | 3.0% |
+  | direct execution | 98.0% | 0% | 2.0% |
+
+  The bound abstained; it was not falsely confident.
+- **Scope.** The negative result concerns this implementation and benchmark (12 features in 20
+  dimensions, with invisible directions). The H6 SAE has 8,192 features in 4,096 dimensions.
+  Criterion 4 (value where direct execution is unavailable) was untested.
+- **Lipschitz claim narrowed.** "No certified Lipschitz constant exists for a transformer"
+  becomes: no sufficiently tight, tractable regional bound was established for the Qwen suffix
+  and loss.
+- **H6 over-k finding is conditional.** The premise check used cached original-input tokens.
+  The bf16 perturbation simulation does not settle the arithmetic. Both are tested on the actual
+  states (`research/imperfect_interventions_2026-09-27/h6_states/`).
+- **Derivation fixes.** Fibres need not be unbounded. The norm ratio is not a vector execution
+  error. The null-space basis must be orthonormal. Positive-margin infeasibility is not
+  zero-margin impossibility. The full-code cell has about 8,188 inequality rows per token.
+- **Method status.** Deferred, not abandoned (`METHOD_STATUS.md`).

@@ -35,13 +35,17 @@ widen the applied-effect interval by K × (distance to the ideal) and apply an e
 
 - **Unclaimed in these sources?** Yes. No source combines TopK code feasibility,
   a distance to a declared ideal, a sensitivity bound and an equivalence decision.
-- **Open in the sense that matters?** No. Our own analysis and synthetic evaluation show three
-  things (`README.md`):
-  1. The widened interval is valid but decides only when realization is essentially exact, where
-     it adds nothing.
+- **Open in the sense that matters?** Undetermined. (corrected 2026-09-27) The benchmark shows
+  three things, and each is scoped to it:
+  1. The implemented widened interval was never incorrect, but it abstained in 68.5% of
+     datasets. It decided near-zero effects only when realization was essentially exact.
   2. When the ideal state can be computed, executing it directly is simpler, exact and decisive.
-  3. The hard remainder is certified regional sensitivity for a transformer, and upper bounds on
-     the fibre-wide effect range. Both are verification problems, not a bounded extension.
+  3. The implemented equality Hoffman bound is looser than exact projection.
+
+  The benchmark does not test real overcomplete SAE geometry or settings where direct execution
+  is unavailable. Bounded-domain Lipschitz bounds for attention exist (Castin et al., ICML 2024;
+  Yudin et al., 2025; cited from the review, not read here). Whether a tight, tractable regional
+  bound exists for the H6 suffix is unresolved. `METHOD_STATUS.md` records the reopening routes.
 - **What remains unclaimed but small.** A feasibility-first protocol for feature interventions:
   1. certify whether the declared target code exists, including an over-k count;
   2. execute declared ideal lifts directly, and verify them by re-encoding;
