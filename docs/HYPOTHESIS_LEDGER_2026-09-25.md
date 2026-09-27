@@ -286,6 +286,23 @@ RTX 3070).
 commit `ab7299f`) and submitted (jobs 20927962 and 20927963, duplicate rule).
 CPU dry run: 120 discovery receivers, no session-alignment failures.
 
+**2026-09-27, H6 code changes after the freeze and before the job started
+(no CERT output exists).**
+
+- The GPU code path was executed on TWOS (Aquaman, one RTX 3070, 72 s) as an
+  execution test only. It was run with the new parameters: SAE layer 24,
+  context field `team`, discovery-file name. The CERT defaults are unchanged.
+  Outputs are in `results/h6_2026_09_27/twos_codepath_test/`; they are not
+  results.
+- The test found that the realized-code verification counted tokens with a
+  zero intended edit. It now reports only nonzero-edit tokens and counts the
+  rest.
+- The analysis script now detects self-patch checks by name instead of
+  hard-coding layer 26.
+- The protocol's conditions, populations, endpoints and rules are unchanged.
+  The fixed scripts were synced to the queued job's directory before it
+  started.
+
 **2026-09-25, interpretation map (written while both jobs are queued; no
 pilot output exists).** What each outcome would and would not mean. All
 readings stay exploratory; the receivers were inspected in package 4.

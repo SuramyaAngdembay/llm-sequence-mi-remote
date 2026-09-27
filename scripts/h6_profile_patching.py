@@ -100,7 +100,19 @@ def main() -> None:
     ap.add_argument("--wall-budget-s", type=float, default=1500.0)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--seed", type=int, default=20260927)
+    # defaults are the CERT r4.2 settings of the protocol; overridable only to test the code path on another dataset
+    ap.add_argument("--sae-layer", type=int, default=26)
+    ap.add_argument("--sae-subdir", default="layer_26/m02_k04")
+    ap.add_argument("--selected", default="4596,7693,2302,3673,3455")
+    ap.add_argument("--control", default="6596,8017,6608,2765,886")
+    ap.add_argument("--context-field", default="dept")
+    ap.add_argument("--discovery-file", default="discovery_users.txt")
+    ap.add_argument("--layers", default="2,6,10,14,18,22,26,30,34")
     args = ap.parse_args()
+    global LAYERS, SAE_LAYER
+    LAYERS = tuple(int(v) for v in args.layers.split(",")); SAE_LAYER = args.sae_layer
+    if SAE_LAYER not in LAYERS:
+        raise SystemExit("the SAE layer must be one of the patched layers")
 
     import pandas as pd
     from remote_common import load_yaml
@@ -110,12 +122,12 @@ def main() -> None:
     t0 = time.time()
     out = args.out_dir; out.mkdir(parents=True, exist_ok=True)
     cfg = load_yaml(args.config)
-    S = [4596, 7693, 2302, 3673, 3455]; C = [6596, 8017, 6608, 2765, 886]
-    disc = (args.split_dir / "discovery_users.txt").read_text().split()
+    S = [int(v) for v in args.selected.split(",")]; C = [int(v) for v in args.control.split(",")]
+    disc = (args.split_dir / args.discovery_file).read_text().split()
     scores = pd.read_parquet(args.extract_dir / "example_scores.parquet").sort_values("example_idx").reset_index(drop=True)
     meta = load_eval_examples(args.data_dir, scores)
     user = meta["user_id"].astype(str).to_numpy(); y = meta["y"].astype(int).to_numpy(); day = meta["day_index"].astype(int).to_numpy()
-    dept = meta["text"].str.extract(r"dept=(\S+)")[0].to_numpy()
+    dept = meta["text"].str.extract(args.context_field + r"=(\S+)")[0].to_numpy()
     mal_users = set(user[y == 1])
     benign_users = sorted(set(user) - mal_users)
 
@@ -199,7 +211,7 @@ def main() -> None:
     model = PeftModel.from_pretrained(model, args.adapter_dir); model.config.use_cache = False; model.eval()
     dev = torch.device("cuda:0")
     blocks = {l: get_layer_module(model, l) for l in LAYERS}
-    cfg_dir = args.frontier_dir / "layer_26" / "m02_k04"
+    cfg_dir = args.frontier_dir / args.sae_subdir
     bundle = torch.load(cfg_dir / "delta_sae_model.pt", map_location="cpu", weights_only=False)
     sd = bundle["state_dict"]
     We = sd["encoder.weight"].float().to(dev); be = sd["encoder.bias"].float().to(dev); Dd = sd["decoder.weight"].float().to(dev)
@@ -279,16 +291,16 @@ def main() -> None:
         caps_mods = [(f"res{l}", blocks[l]) for l in LAYERS] + [(f"att{l}", blocks[l].self_attn) for l in LAYERS] + \
                     [(f"mlp{l}", blocks[l].mlp) for l in LAYERS]
         lb, ls, capO = run(texts["O"], cls["O"], True, captures=caps_mods); res["O_on"] = (lb, ls)
-        lb, ls, capOb = run(texts["O"], cls["O"], False, captures=[("res26", blocks[26])]); res["O_off"] = (lb, ls)
-        lb, ls, capR = run(texts["R"], cls["R"], True, captures=[(f"res{l}", blocks[l]) for l in (10, 26)]); res["R_on"] = (lb, ls)
-        lb, ls, capRb = run(texts["R"], cls["R"], False, captures=[("res26", blocks[26])]); res["R_off"] = (lb, ls)
+        lb, ls, capOb = run(texts["O"], cls["O"], False, captures=[(f"res{SAE_LAYER}", blocks[SAE_LAYER])]); res["O_off"] = (lb, ls)
+        lb, ls, capR = run(texts["R"], cls["R"], True, captures=[(f"res{l}", blocks[l]) for l in sorted({LAYERS[2], SAE_LAYER})]); res["R_on"] = (lb, ls)
+        lb, ls, capRb = run(texts["R"], cls["R"], False, captures=[(f"res{SAE_LAYER}", blocks[SAE_LAYER])]); res["R_off"] = (lb, ls)
         lb, ls, capT = run(texts["T"], cls["T"], True, captures=[(f"res{l}", blocks[l]) for l in LAYERS]); res["T_on"] = (lb, ls)
         res["T_off"] = run(texts["T"], cls["T"], False)[:2]
         for v in "DP":
             res[f"{v}_on"] = run(texts[v], cls[v], True)[:2]; res[f"{v}_off"] = run(texts[v], cls[v], False)[:2]
         # implementation checks
-        res["zero"] = run(texts["R"], cls["R"], True, patches=[(blocks[26], lambda o: o)])[:2]
-        for l, g in ((26, "sess"), (10, "prof")):
+        res["zero"] = run(texts["R"], cls["R"], True, patches=[(blocks[SAE_LAYER], lambda o: o)])[:2]
+        for l, g in ((SAE_LAYER, "sess"), (LAYERS[2], "prof")):
             idx = [pair_idx(r, "R", "R", g) for r in batch]
             res[f"self_{g}@{l}"] = run(texts["R"], cls["R"], True, patches=[(blocks[l], lambda o, idx=idx, l=l: put(
                 o, [d for _, d in idx], [capR[f"res{l}"][b, torch.as_tensor(s, device=dev)] for b, (s, _) in enumerate(idx)], None))])[:2]
@@ -305,8 +317,8 @@ def main() -> None:
                 res[f"{comp}_sess@{l}"] = run(texts["R"], cls["R"], True, patches=[(mod, lambda o, idx=idx, key=key: put(
                     o, [d for _, d in idx], [capO[key][b, torch.as_tensor(s, device=dev)] for b, (s, _) in enumerate(idx)], None))])[:2]
         # SAE mediation at layer 26 (codes from the same-input adapter-off states)
-        dO = [(capO["res26"][b] - capOb["res26"][b]).float() for b in range(len(batch))]
-        dR = [(capR["res26"][b] - capRb["res26"][b]).float() for b in range(len(batch))]
+        dO = [(capO[f"res{SAE_LAYER}"][b] - capOb[f"res{SAE_LAYER}"][b]).float() for b in range(len(batch))]
+        dR = [(capR[f"res{SAE_LAYER}"][b] - capRb[f"res{SAE_LAYER}"][b]).float() for b in range(len(batch))]
         edits = defaultdict(list)
         g_rng = torch.Generator(device="cpu").manual_seed(args.seed)
         for b, r in enumerate(batch):
@@ -333,20 +345,26 @@ def main() -> None:
                                     "O_prof": zO_all[torch.as_tensor(positions(r, "O", "prof"), device=dev)][:, S + C].cpu().numpy(),
                                     "R_prof": zR_all[torch.as_tensor(positions(r, "R", "prof"), device=dev)][:, S + C].cpu().numpy()}
         for name, lst in edits.items():
-            lb, ls, capP = run(texts["R"], cls["R"], True, patches=[(blocks[26], lambda o, lst=lst: put(
-                o, [x[0] for x in lst], [x[1] for x in lst], None, add=True))], captures=[("after", blocks[26])])
+            lb, ls, capP = run(texts["R"], cls["R"], True, patches=[(blocks[SAE_LAYER], lambda o, lst=lst: put(
+                o, [x[0] for x in lst], [x[1] for x in lst], None, add=True))], captures=[("after", blocks[SAE_LAYER])])
             res[name] = (lb, ls)
             # realized-code verification after the hook and bf16 conversion
             for b, (d_idx, e, zR_t, zO_t, feats) in enumerate(lst):
-                if not len(d_idx):
-                    verif[f"{name}|no_op"].append(1); continue
+                nzm = (e.norm(dim=1) > 0) if len(d_idx) else None
+                if not len(d_idx) or not bool(nzm.any()):
+                    verif[f"{name}|no_op_receivers"].append(1); continue
+                verif[f"{name}|zero_edit_tokens"].append(int((~nzm).sum()))
+                d_idx = [d for d, m in zip(d_idx, nzm.tolist()) if m]
+                e = e[nzm]
+                zR_t = zR_t[nzm] if zR_t is not None else None
+                zO_t = zO_t[nzm] if zO_t is not None else None
                 dI = torch.as_tensor(d_idx, device=dev)
-                applied = (capP["after"][b, dI].float() - capR["res26"][b, dI].float())
+                applied = (capP["after"][b, dI].float() - capR[f"res{SAE_LAYER}"][b, dI].float())
                 verif[f"{name}|applied_over_intended_norm"].extend((applied.norm(dim=1) / e.norm(dim=1).clamp_min(1e-12)).cpu().tolist())
                 verif[f"{name}|raw_edit_norm"].extend(e.norm(dim=1).cpu().tolist())
                 if feats is None:
                     continue
-                z_real = sae_code(capP["after"][b, dI].float() - capRb["res26"][b, dI].float())
+                z_real = sae_code(capP["after"][b, dI].float() - capRb[f"res{SAE_LAYER}"][b, dI].float())
                 fI = torch.as_tensor(feats, device=dev)
                 target = zR_t.clone(); target[:, fI] = zO_t[:, fI]
                 req = (zO_t[:, fI] - zR_t[:, fI]); err = (z_real[:, fI] - target[:, fI])
@@ -372,7 +390,7 @@ def main() -> None:
         do_batch(smoke[s0:s0 + 2], "smoke")
     per_rec = (time.time() - ts) / max(1, len(smoke))
     chk = {c: max(abs(a["behavior_only"] - b["behavior_only"]) for a, b in zip([x for x in rows if x["condition"] == c], [x for x in rows if x["condition"] == "R_on"]))
-           for c in ("zero", "self_sess@26", "self_prof@10")}
+           for c in ("zero", f"self_sess@{SAE_LAYER}", f"self_prof@{LAYERS[2]}")}
     smoke_info = {"receivers": len(smoke), "seconds_per_receiver_batch2": per_rec, "checks_max_abs_vs_R_on": chk,
                   "peak_gpu_mem_gib": round(torch.cuda.max_memory_allocated(0) / 2 ** 30, 2)}
     (out / "h6_smoke.json").write_text(json.dumps(smoke_info, indent=1) + "\n")
@@ -395,7 +413,7 @@ def main() -> None:
     with (out / "h6_rows.csv").open("w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
     vsum = {k: ({"n": len(v), "median": float(np.median(v)), "p90": float(np.quantile(v, 0.9)), "p99": float(np.quantile(v, 0.99)), "max": float(np.max(v))}
-                if not k.endswith(("no_op", "nonfinite")) else int(sum(v))) for k, v in verif.items()}
+                if not k.endswith(("no_op_receivers", "nonfinite", "zero_edit_tokens")) else int(sum(v))) for k, v in verif.items()}
     (out / "h6_verification.json").write_text(json.dumps(vsum, indent=1) + "\n")
     np.savez_compressed(out / "h6_token_codes.npz", feats=np.asarray(S + C), **{f"{k}__{n}": a for k, d in token_codes.items() for n, a in d.items()})
     print(f"[h6] peak GPU {torch.cuda.max_memory_allocated(0) / 2 ** 30:.2f} GiB; total {time.time() - t0:.0f}s", flush=True)

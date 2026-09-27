@@ -21,7 +21,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from analyze_pilots import fmt, summary, user_means  # noqa: E402
 
-LAYERS = (2, 6, 10, 14, 18, 22, 26, 30, 34)
+LAYERS = tuple(int(v) for v in __import__("os").environ.get("H6_LAYERS", "2,6,10,14,18,22,26,30,34").split(","))
 S = [4596, 7693, 2302, 3673, 3455]; C = [6596, 8017, 6608, 2765, 886]
 
 
@@ -54,7 +54,7 @@ def main():
         return um
 
     # implementation checks
-    chk = {c: max(abs(L[(c, rid)] - L[("R_on", rid)]) for rid in meta) for c in ("zero", "self_sess@26", "self_prof@10") if any(k[0] == c for k in L)}
+    chk = {c: max(abs(L[(c, rid)] - L[("R_on", rid)]) for rid in meta) for c in conds if c == "zero" or c.startswith("self_")}
     res["checks_max_abs_vs_R_on"] = chk
     lines.append(f"Implementation checks (max |loss - R_on|): {json.dumps(chk)}\n")
     lines.append("== input effects (variant minus original)")

@@ -1,0 +1,152 @@
+{
+ "exploratory": true,
+ "written_before_scoring": true,
+ "protocol": "docs/H6_PROFILE_PATCHING_PROTOCOL_2026-09-27.md",
+ "salt": "h6-2026-09-27",
+ "layers": [
+  2,
+  6,
+  10,
+  14,
+  18,
+  22,
+  24,
+  30,
+  34
+ ],
+ "sae_layer": 24,
+ "selected": [
+  6036,
+  7375,
+  1197,
+  7420,
+  3218
+ ],
+ "control": [
+  7962,
+  972,
+  8082,
+  7232,
+  3157
+ ],
+ "n_receivers": 16,
+ "n_users": 8,
+ "exclusions": [],
+ "session_alignment_failures": [],
+ "share_alignment_failures": 0.0,
+ "profile_token_alignment_coverage_median": 1.0,
+ "receivers": [
+  {
+   "id": "User1:2017-03-23:13:00",
+   "user": "User1",
+   "kind": "malicious",
+   "partner_R": "User22",
+   "partner_T": "User24"
+  },
+  {
+   "id": "User1:2017-03-23:00:50",
+   "user": "User1",
+   "kind": "benign",
+   "partner_R": "User22",
+   "partner_T": "User24"
+  },
+  {
+   "id": "User13:2017-03-23:16:40",
+   "user": "User13",
+   "kind": "malicious",
+   "partner_R": "User23",
+   "partner_T": "User19"
+  },
+  {
+   "id": "User13:2017-03-23:00:30",
+   "user": "User13",
+   "kind": "benign",
+   "partner_R": "User23",
+   "partner_T": "User19"
+  },
+  {
+   "id": "User17:2017-03-21:19:50",
+   "user": "User17",
+   "kind": "malicious",
+   "partner_R": "User10",
+   "partner_T": "User5"
+  },
+  {
+   "id": "User17:2017-03-21:00:50",
+   "user": "User17",
+   "kind": "benign",
+   "partner_R": "User10",
+   "partner_T": "User5"
+  },
+  {
+   "id": "User2:2017-03-21:19:30",
+   "user": "User2",
+   "kind": "malicious",
+   "partner_R": "User22",
+   "partner_T": "User10"
+  },
+  {
+   "id": "User2:2017-03-21:04:40",
+   "user": "User2",
+   "kind": "benign",
+   "partner_R": "User22",
+   "partner_T": "User10"
+  },
+  {
+   "id": "User20:2017-03-21:15:10",
+   "user": "User20",
+   "kind": "malicious",
+   "partner_R": "User19",
+   "partner_T": "User22"
+  },
+  {
+   "id": "User20:2017-03-21:01:10",
+   "user": "User20",
+   "kind": "benign",
+   "partner_R": "User19",
+   "partner_T": "User22"
+  },
+  {
+   "id": "User21:2017-03-23:13:30",
+   "user": "User21",
+   "kind": "malicious",
+   "partner_R": "User16",
+   "partner_T": "User5"
+  },
+  {
+   "id": "User21:2017-03-23:01:10",
+   "user": "User21",
+   "kind": "benign",
+   "partner_R": "User16",
+   "partner_T": "User5"
+  },
+  {
+   "id": "User3:2017-03-24:14:20",
+   "user": "User3",
+   "kind": "malicious",
+   "partner_R": "User23",
+   "partner_T": "User11"
+  },
+  {
+   "id": "User3:2017-03-24:01:30",
+   "user": "User3",
+   "kind": "benign",
+   "partner_R": "User23",
+   "partner_T": "User11"
+  },
+  {
+   "id": "User7:2017-03-23:19:10",
+   "user": "User7",
+   "kind": "malicious",
+   "partner_R": "User10",
+   "partner_T": "User24"
+  },
+  {
+   "id": "User7:2017-03-23:00:50",
+   "user": "User7",
+   "kind": "benign",
+   "partner_R": "User10",
+   "partner_T": "User24"
+  }
+ ]
+}
