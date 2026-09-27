@@ -85,10 +85,12 @@ endpoint includes zero.
    predicting session tokens. Feature 3455's removal *improves* prediction
    (−0.0029), 4596 contributes +0.0014, 2302 nothing at its own positions,
    and 7693 does not fire. The joint edit is nearly additive (E7 +0.0007).
-4. **Not specific to malicious days.** Benign days of the same users respond
-   the same way (rpU_S +0.0232 vs +0.0213; E6 −0.0020 [−0.0058, +0.0014]).
-   The directions carry information the adapted model uses to predict session
-   tokens on any day: ordinary behavioural prediction, not anomaly content.
+4. **No attack-specific differential detected.** Benign days of the same
+   users respond similarly (rpU_S +0.0232 vs +0.0213; E6 −0.0020
+   [−0.0058, +0.0014]; the interval crossing zero is not an equivalence
+   claim). The edits influence session-token prediction on both day types.
+   *(Wording corrected 2026-09-27: the earlier "ordinary behavioural
+   prediction, not anomaly content" went beyond what E6 tests.)*
 5. **Reconstruction interaction is small** (E4 −0.001 to −0.003): the
    published contrast is not an artifact of the reconstruction replacement,
    although absolute published effects are dominated by it (+0.044 of +0.064).

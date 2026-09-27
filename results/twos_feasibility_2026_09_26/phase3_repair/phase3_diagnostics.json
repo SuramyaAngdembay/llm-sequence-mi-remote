@@ -1,0 +1,22 @@
+{
+ "cached|union|realized_frac": 1.0307097094365045,
+ "cached|union|collateral_rel": 0.27404313056934326,
+ "cached|union|over_k": 1.0,
+ "cached|own|realized_frac": 1.0401018615591795,
+ "cached|own|collateral_rel": 0.2738856723443322,
+ "cached|own|over_k": 0.0,
+ "fresh recomputed request (not the applied edit)|fresh|union|realized_frac": 1.031825345035653,
+ "fresh recomputed request (not the applied edit)|fresh|union|collateral_rel": 0.2765755354951045,
+ "fresh recomputed request (not the applied edit)|fresh|union|over_k": 1.0,
+ "fresh recomputed request (not the applied edit)|fresh|own|realized_frac": 1.0394856107181965,
+ "fresh recomputed request (not the applied edit)|fresh|own|collateral_rel": 0.27506334937833665,
+ "fresh recomputed request (not the applied edit)|fresh|own|over_k": 0.0,
+ "cached|projection|realized_frac": 1.0,
+ "cached|projection|collateral_rel": 0.346532650294346,
+ "fresh recomputed request (not the applied edit)|fresh|projection|realized_frac": 1.0,
+ "fresh recomputed request (not the applied edit)|fresh|projection|collateral_rel": 0.3514087836214389,
+ "cached|union|no_edit_receivers": 27,
+ "cached|own|no_edit_receivers": 27,
+ "fresh recomputed request (not the applied edit)|fresh|union|no_edit_receivers": 27,
+ "fresh recomputed request (not the applied edit)|fresh|own|no_edit_receivers": 27
+}

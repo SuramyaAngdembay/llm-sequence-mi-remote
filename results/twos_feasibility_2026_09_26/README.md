@@ -198,10 +198,14 @@ cross-token inner product, so it preserves directional coherence.
 
 **Full run** (32 pairs, 8 users, batch 4): 704 forwards in 42 s, peak 2.8 GiB,
 78 s wall. A zero edit again equals the unhooked model exactly. At batch 4,
-fresh deltas differ from the cache by 4.3% (median). 22% of the non-selected
-SAE support changes (Jaccard median 0.78), while the selected-feature support
-is identical on every receiver. bf16 batch-shape noise alone therefore sets a
-floor for any support-change diagnostic.
+fresh deltas differ from the cache by 4.3% (median). The SAE support overlap
+between fresh and cached codes has Jaccard median 0.78 (|intersection| over
+|union| of the two 8-feature supports), which is 7/9: at the median **one of
+the 8 active features is replaced** (edited tokens: median 1, q99 2; see the
+repair section). The selected-feature support is identical on every receiver.
+bf16 batch-shape noise alone therefore sets a floor for any support-change
+diagnostic. *(Corrected 2026-09-27: this was previously misread as "22% of the
+non-selected support changes".)*
 
 Median edit sizes on active receivers: decoder union and own 45.8,
 projection 17.2, reconstruction 64.7.
@@ -216,7 +220,7 @@ all 64 receivers kept, no-ops included:
 | union decoder edit − isotropic random | +0.0030 [+0.0013, +0.0048], 7/8 | +0.0031 [−0.0010, +0.0092] |
 | **projection − isotropic random** | +0.0006 [−0.0017, +0.0029] | −0.0005 [−0.0020, +0.0008] |
 | **projection − coherent random** | −0.0005 [−0.0024, +0.0014] | −0.0003 [−0.0008, +0.0002] |
-| own decoder edit − projection (same realized target change) | +0.0021 [−0.0017, +0.0070] | +0.0054 [+0.0018, +0.0102] |
+| own decoder edit − projection (same requested target change) | +0.0021 [−0.0017, +0.0070] | +0.0054 [+0.0018, +0.0102] |
 | union − own | −0.0011 [−0.0025, +0.0000] | −0.0003 [−0.0010, +0.0000] |
 
 Attack-minus-benign differences all include zero. The active-only analysis (7
@@ -225,43 +229,120 @@ decoder − isotropic random +0.0086 [+0.0047, +0.0125]. Profile-token outcomes
 are degenerate: edits reach profile positions for at most 2 users. Per-user
 values are in `phase3/analysis_phase3.json`.
 
+**Reading (corrected 2026-09-27).**
+
+- **The direct decoder-versus-projection contrast is inconclusive on attack
+  windows** (+0.0021 [−0.0017, +0.0070]) and positive on benign windows
+  (+0.0054 [+0.0018, +0.0102]). That the decoder edit exceeds its random
+  control while the projection does not exceed its own does not by itself
+  establish a difference between the methods.
+- **The comparison tested an equality-only projection, not the
+  protected-feature, fixed-cell QP.** The projection is also 2.7× smaller than
+  the decoder edit, so direction and magnitude changed together. The
+  common-budget comparison in the repair section below separates them.
+- **"Same realized target change" was too strong.** A median realized
+  fraction near 1 does not certify exact realization, because errors
+  orthogonal to the request can remain. The Phase 2 target-error metric
+  (selected own-support decoder edit: q90 relative target error 3.9% with
+  benign donors, 9.0% with anomalous donors) and the applied-edit validation
+  below give the error distributions.
+- **Coherence matters.** Coherence-preserving random rotations perturb more
+  than independent random directions. Against them, the decoder edits' excess
+  on attack windows is inconclusive.
+- **No attack-specific effect is detected.**
+
+## Phase 3 repair (2026-09-27): validating the edit that was actually applied
+
+**The gap (from the 2026-09-27 review; confirmed in the code).** Scoring used
+shifts built from the *cached* deltas. The diagnostic labelled "fresh" rebuilt
+the request and the projection from *fresh* deltas, so it never checked the
+edit applied during scoring. It is now labelled "fresh recomputed request (not
+the applied edit)".
+
+**The fix** (`scripts/twos_edit_validation_gpu.py`; outputs in
+`phase3_repair/`; one RTX 3070, 90 s, same batch size 4):
+
+- A forward pre-hook on the next block (0-based index 24, whose input is hidden
+  state 24) captures the patched hidden state inside
+  `score_with_token_patches`, that is, after the patch hook and its bf16 cast.
+- The adapter-off state comes from an identically batched run of the same
+  code path.
+- Their difference is re-encoded with the frozen SAE (float64) and compared
+  with the explicitly recorded intended code. The intended code is built from
+  the cached codes, as the scored shifts were.
+- Every original condition reproduces its earlier losses to within 4.8e-7.
+
+**Implementation checks.** In the same batch configuration, the zero-edit
+hidden state equals the unhooked hidden state exactly (max abs 0.0), and the
+losses agree to 4.8e-7. Applied edit norm over intended norm is 1.000 (q99
+1.003–1.017). There are no numerical failures. 27 of 64 receivers are no-ops
+(no active selected feature), and 142 tokens on 37 receivers are edited.
+
+**Applied-edit realization** (edited tokens, n = 142; target = the 5 selected
+coordinates):
+
+| edit | intended raw norm per edited token, median | normalized target error ‖z_real,T − z_int,T‖/‖requested change‖: median [q90, q99, max] | realized change / requested, median | off-target code change vs unpatched fresh code (L2, median) | support Jaccard, realized vs intended (den = union) | intended active features absent (den = intended support) |
+|---|---|---|---|---|---|---|
+| own decoder edit | 18.2 | 0.040 [0.103, 0.297, 0.798] | 1.04 | 3.9 | 0.45 | 0.38 |
+| union decoder edit | 18.2 | 0.104 [0.249, 0.535, 0.910] | 1.03 | 3.9 | 0.36 | 0.45 |
+| projection | 7.7 | 0.003 [0.092, 0.297, 0.798] | 1.01 | 5.0 | 0.50 | 0.29 |
+| decoder at projection budget | 7.7 | 0.58 [0.64, 0.65, 0.69] | 0.44 | 2.4 | 0.67 | 0.14 |
+| projection at decoder budget | 18.2 | 0.048 [0.103, 0.297, 0.798] | 1.04 | 11.2 | 0.25 | 0.57 |
+
+Coordinate-wise absolute target errors on changed target coordinates are in
+`phase3_applied_validation.json`. The implementation passes: edits are applied
+at their intended size with no failures. Realization of the requested codes is
+approximate, not exact, and the intended support is partly replaced (TopK
+refill after deletions, plus the one-feature fresh-versus-cached floor). The
+projection at the decoder's budget still realizes about 100% of the target,
+because the requests are deletions and ReLU stops them at zero; only its
+collateral grows.
+
+**Common-budget comparison** (behaviour tokens, 8 users; direct paired
+differences, not comparisons of each method with its own baseline):
+
+| comparison | held fixed | attack windows | benign windows |
+|---|---|---|---|
+| decoder − projection | requested target | +0.0021 [−0.0017, +0.0070] | +0.0054 [+0.0018, +0.0102] |
+| decoder@projection budget − projection | magnitude (small, 7.7) | −0.0010 [−0.0030, +0.0005] | +0.0006 [−0.0002, +0.0015] |
+| decoder − projection@decoder budget | magnitude (large, 18.2) | **+0.0042 [+0.0013, +0.0077]**, 6/8 users | +0.0047 [+0.0012, +0.0096] |
+| decoder@projection budget − coherent random | magnitude (small) | −0.0015 [−0.0038, +0.0004] | +0.0003 [−0.0001, +0.0008] |
+| projection@decoder budget − coherent random | magnitude (large) | −0.0014 [−0.0046, +0.0015] | +0.0004 [−0.0011, +0.0022] |
+
 **Reading.**
 
-- **Realizing the requested code change does not produce the effect.** Two
-  edits that realize the same target change (realized fraction 1.0) behave
-  differently. The decoder edit raises behaviour loss beyond a size-matched
-  independent random direction. The minimum-movement projection does nothing
-  beyond random, and about nothing in absolute terms.
-- **Direction and size are confounded here.** The projection is 2.7× smaller,
-  and no decoder edit scaled to its size was run. A scaled decoder edit would
-  no longer realize the target, so the comparison was made, as the
-  specification allows, at a common target change rather than a common
-  budget.
-- **Coherence matters.** Coherence-preserving random rotations perturb more
-  than independent random directions, which weakens the decoder edits' excess
-  on attack windows (the intervals include zero).
-- **Nothing is attack-specific.** No attack-specific effect appears.
+- At a matched large budget, the decoder direction disturbs behaviour
+  prediction more than the projection direction.
+- The projection scaled up has three times the off-target code change (11.2
+  versus 3.9) yet does no more than a coherence-preserving random edit.
+- At a matched small budget nothing differs.
+- Neither the realized code change nor the amount of collateral code change
+  therefore tracks the effect. What remains is the decoder-direction
+  displacement at sufficient size. Coherence also matters. With 8 previously
+  examined users, this is exploratory and descriptive.
 
 ## Go / no-go
 
-**Direction A (encoder-realizable, constrained feature edits): no-go as a
-main contribution; keep the cheap checks.**
+**Direction A (encoder-realizable, constrained feature edits): inconclusive
+and currently deprioritized** *(corrected 2026-09-27 from "no-go")*. Keep the
+cheap checks.
 
 - Worth keeping as routine reporting:
   - the over-k certificate (exact and free; it flags 15–71% of union edits);
   - the realized-versus-requested change;
   - support Jaccard against a measured numerical noise floor.
-- The constrained edits are well-posed and verifiable (target errors of 1e-12
-  after re-encoding). But the property they enforce, encoder consistency with
-  minimal movement, removes the model effect rather than isolating it.
-- The diagnostic question in the specification was whether encoder mismatch
-  or collateral change explains effects beyond magnitude, support and
-  reconstruction. It does not appear to. Own-support edits have no
-  realizability problem, yet their effect exceeds random. The union edit's
-  frequent unrealizability adds nothing (union − own ≈ 0).
-- Remaining alternatives: the effect tracks decoder-direction displacement,
-  plain edit size (untested at a matched budget), or cross-token coherence.
-  All come from 8 users, previously examined.
+- The fixed-cell QP is well-posed and verifiable (target errors of 1e-12
+  after re-encoding in the cells where it applies). But the language-model
+  test used the equality-only projection, not the QP.
+- At a common requested target, decoder minus projection is inconclusive on
+  attack windows. At a common large movement budget the decoder direction
+  disturbs predictions more (repair section). At a small budget neither
+  exceeds random. So neither the realized code change nor the amount of
+  collateral code change is shown to track the effect. The union edit's
+  frequent unrealizability adds no measurable effect (union − own ≈ 0).
+- Remaining alternatives are decoder-direction displacement, edit size and
+  cross-token coherence. All the evidence comes from 8 previously examined
+  users. A larger study is not justified by this evidence.
 
 **Direction B (donor-policy sensitivity LP): go, as a low-cost robustness
 appendix; no-go as a novelty claim.**
@@ -283,7 +364,8 @@ appendix; no-go as a novelty claim.**
 |---|---|---|
 | Phase 3 smoke (RTX 3070, GPU 0) | 1 | 38 s |
 | Phase 3 full (RTX 3070, GPU 0) | 1 | 78 s |
-| **total GPU** | | **0.03 GPU-h** (cap 2; round total 0.39 of 8) |
+| Phase 3 repair: applied-edit validation and common-budget conditions (2026-09-27) | 1 | 90 s |
+| **total GPU** | | **0.06 GPU-h** (cap 2; the repair counts toward the 2026-09-27 follow-up cap) |
 | Phase 1, CERT extension (local CPU) | 0 | about 2 min |
 | Phase 2 (Aquaman CPU): stopped slow attempt + completed run | 0 | 1 h 49 min + 40 min |
 

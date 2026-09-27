@@ -21,12 +21,17 @@ from analyze_pilots import fmt, summary, user_means  # noqa: E402
 
 CONTRASTS = [("rpU", None), ("rpO", None), ("projO", None), ("recon", None),
              ("rpU", "randI_U"), ("rpU", "randR_U"), ("rpO", "randI_O"), ("rpO", "randR_O"),
-             ("projO", "randI_P"), ("projO", "randR_P"), ("rpU", "rpO"), ("rpO", "projO")]
+             ("projO", "randI_P"), ("projO", "randR_P"), ("rpU", "rpO"), ("rpO", "projO"),
+             # common movement budget (added 2026-09-27; present only in runs that scored these conditions)
+             ("rpO_atP", "projO"), ("rpO_atP", "randR_P"), ("rpO", "projO_atD"), ("projO_atD", "randR_O")]
 
 
 def main():
     rows = list(csv.DictReader(open(sys.argv[1])))
     d = {(r["condition"], r["receiver_id"]): r for r in rows}
+    present = {r["condition"] for r in rows}
+    global CONTRASTS
+    CONTRASTS = [(a, b) for a, b in CONTRASTS if a in present and (b is None or b in present)]
     meta = {r["receiver_id"]: (r["user"], r["kind"]) for r in rows}
     active = {rid for (c, rid), r in d.items() if c == "rpU" and int(r["edit_tokens"]) > 0}
     norms = defaultdict(list)

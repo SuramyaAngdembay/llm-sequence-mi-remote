@@ -27,8 +27,18 @@ Conditions (patched minus unedited, same batches):
   randR_U / randR_O   Gram-preserving random rotation of the rpU / rpO edit: the edit matrix
                       U S V^T becomes U S V'^T with a random orthonormal frame V', so per-token
                       norms and all cross-token inner products (directional coherence) are kept
-Realized-feature diagnostics are recomputed from FRESH layer-24 deltas of the receivers
-and compared with the cache.
+Diagnostic labelled "fresh recomputed" rebuilds the request from fresh deltas; it is NOT a check
+of the applied edit. The applied-edit validation (added 2026-09-27) captures the patched hidden
+state inside the scoring call (forward pre-hook on the next block, i.e. after the patch hook and
+its bf16 cast), subtracts the adapter-off state from an identically batched run of the same code
+path, re-encodes it, and compares it with the explicitly recorded intended code (built from the
+cached codes, as the scored shifts were).
+Common-budget conditions (added 2026-09-27):
+  rpO_atP   decoder own-support edit rescaled per token to projO's raw norm (magnitude fixed at the
+            projection's budget; the realized target change shrinks accordingly)
+  projO_atD projection rescaled per token to rpO's raw norm (magnitude fixed at the decoder's
+            budget; overshoots the target)
+The common-target comparison (rpO versus projO, same requested code change) is kept separately.
 
   --smoke N   run only the first N receiver pairs with batch size 1, time and measure memory, stop
 """
@@ -141,7 +151,9 @@ def main() -> None:
                 "n_pairs": len(pairs), "users": sorted({user[i] for i in receivers}), "exclusions": dup_log,
                 "receiver_ids": [[meta.loc[a, "example_id"], meta.loc[b, "example_id"]] for a, b in pairs],
                 "donors_by_team": {tm: [meta.loc[j, "example_id"] for j in v] for tm, v in donors.items()},
-                "conditions": ["zero", "recon", "rpU", "rpO", "projO", "randI_U", "randR_U", "randI_O", "randR_O", "randI_P", "randR_P"],
+                "conditions": ["zero", "recon", "rpU", "rpO", "projO", "randI_U", "randR_U", "randI_O", "randR_O", "randI_P", "randR_P",
+                               "rpO_atP", "projO_atD"],
+                "validated_conditions": ["rpU", "rpO", "projO", "rpO_atP", "projO_atD"],
                 "versions": {"torch": torch.__version__, "transformers": transformers.__version__, "peft": peft.__version__,
                              "bitsandbytes": bitsandbytes.__version__, "numpy": np.__version__},
                 "smoke": bool(args.smoke)}
@@ -236,6 +248,10 @@ def main() -> None:
             out_s[f"randI_{tag}"] = shift_random(e.astype(np.float32), rng).astype(np.float64)
             out_s[f"randR_{tag}"] = gram_preserving_rotation(e, rng).astype(np.float64)
         out_s["projO"] = projection_shift(i)
+        n_o = np.linalg.norm(out_s["rpO"], axis=1); n_p = np.linalg.norm(out_s["projO"], axis=1)
+        both = (n_o > 0) & (n_p > 0)
+        out_s["rpO_atP"] = np.zeros_like(out_s["rpO"]); out_s["rpO_atP"][both] = out_s["rpO"][both] * (n_p[both] / n_o[both])[:, None]
+        out_s["projO_atD"] = np.zeros_like(out_s["projO"]); out_s["projO_atD"][both] = out_s["projO"][both] * (n_o[both] / n_p[both])[:, None]
         rng = np.random.default_rng([args.seed, int(i), int(H(rng_tag, "P")[:8], 16)])
         out_s["randI_P"] = shift_random(out_s["projO"].astype(np.float32), rng).astype(np.float64)
         out_s["randR_P"] = gram_preserving_rotation(out_s["projO"], rng).astype(np.float64)
@@ -277,7 +293,8 @@ def main() -> None:
             z_new = topk_relu((u[rows] + e[rows] / x_std) @ We.T + be, args.k)
             m = edit_metrics(zz[rows], z_new, zr[rows], S, args.k, x_std, D, np.zeros(len(rows)), np.linalg.norm(e[rows], axis=1))
             diag[f"{src}|projection|realized_frac"].extend(m["realized_frac"].tolist()); diag[f"{src}|projection|collateral_rel"].extend(m["collateral_rel"].tolist())
-    diagnostics = {k: (float(np.median(v)) if "no_edit" not in k else int(sum(v))) for k, v in diag.items()}
+    diagnostics = {("fresh recomputed request (not the applied edit)|" if k.startswith("fresh|") else "") + k:
+                   (float(np.median(v)) if "no_edit" not in k else int(sum(v))) for k, v in diag.items()}
 
     # validity 2: a true zero edit reproduces the unhooked model
     kw = dict(layer=args.layer, max_seq_len=max_len, batch_size=bs, loss_batch_size=bs)
@@ -300,9 +317,52 @@ def main() -> None:
     t_s = time.time()
     all_shifts = {i: shifts_for(i, "phase3") for i in receivers}
     rows_out, base = [], None
+    next_block = get_layer_module(model, args.layer + 1)       # its input is the patched output of the patched block
+    captured = {}
+
+    def capture_into(store):
+        def pre(_m, a, kw_):
+            store.append((a[0] if a else kw_["hidden_states"]).detach().float().cpu())
+        return next_block.register_forward_pre_hook(pre, with_kwargs=True)
+
+    def per_receiver(store):
+        out_c, j = {}, 0
+        for chunk in store:
+            for b in range(chunk.shape[0]):
+                i = receivers[j]; out_c[i] = chunk[b, : delta_c[i].shape[0]].double().numpy(); j += 1
+        return out_c
+
+    # unpatched and adapter-off states in the same batch configuration, through the same scoring code path
+    zeros = [np.zeros_like(delta_c[i], dtype=np.float32) for i in receivers]
+    st = []; hd = capture_into(st)
+    try:
+        with torch.inference_mode():
+            plain_unhooked = []
+            for s0 in range(0, len(texts), bs):
+                tk = tokenizer(texts[s0:s0 + bs], return_tensors="pt", padding=True).to("cuda:0")
+                o = model(**tk, return_dict=True)
+                plain_unhooked.append(per_example_nll(o.logits, tk["input_ids"], tk["attention_mask"]).float().cpu().numpy())
+    finally:
+        hd.remove()
+    h_unhooked = per_receiver(st)
+    st = []; hd = capture_into(st)
+    try:
+        with model.disable_adapter():
+            score_with_token_patches(model, tokenizer, texts, zeros, class_schema="cert", **kw)
+    finally:
+        hd.remove()
+    h_base_b = per_receiver(st)
     for cond in manifest["conditions"]:
         sh = [all_shifts[i][cond].astype(np.float32) for i in receivers]
-        sc, sums, counts, names = score_with_token_patches(model, tokenizer, texts, sh, class_schema="cert", **kw)
+        st = []
+        hd = capture_into(st) if cond in manifest["validated_conditions"] or cond == "zero" else None
+        try:
+            sc, sums, counts, names = score_with_token_patches(model, tokenizer, texts, sh, class_schema="cert", **kw)
+        finally:
+            if hd is not None:
+                hd.remove()
+        if hd is not None:
+            captured[cond] = per_receiver(st)
         vm = view_means(np.asarray(sums), np.asarray(counts), names)
         if cond == "zero":
             base = vm
@@ -315,6 +375,51 @@ def main() -> None:
             rows_out.append(row)
         print(f"[phase3] {cond} done ({time.time() - t0:.0f}s)", flush=True)
     score_s = time.time() - t_s
+    # ---- applied-edit validation (2026-09-27)
+    val = defaultdict(list)
+    plain_unhooked = np.concatenate(plain_unhooked)
+    zero_rows = [r_ for r_ in rows_out if r_["condition"] == "zero"]
+    val_summary = {"zero_vs_unhooked_hidden_max_abs": float(max(np.abs(captured["zero"][i] - h_unhooked[i]).max() for i in receivers)),
+                   "zero_vs_unhooked_loss_max_abs": float(np.abs(np.asarray([r_["base_full"] for r_ in zero_rows]) - plain_unhooked).max()),
+                   "batch_size": bs}
+    Sarr = np.asarray(S)
+    notS = np.setdiff1d(np.arange(We.shape[0]), Sarr)
+    for cond in manifest["validated_conditions"]:
+        rule = "union" if cond == "rpU" else "own"
+        for i in receivers:
+            z_req = edited_codes(zc[i], S, proto[team[i]], rule)          # the intended code, from the cached codes
+            rows = np.flatnonzero((z_req != zc[i]).any(axis=1))
+            if rows.size == 0:
+                val[f"{cond}|no_op_receivers"].append(1); continue
+            hp, hu, hb = captured[cond][i][rows], captured["zero"][i][rows], h_base_b[i][rows]
+            if not (np.isfinite(hp).all() and np.isfinite(hb).all()):
+                val[f"{cond}|numerical_failures"].append(1); continue
+            z_real = enc(hp - hb); z_fresh = enc(hu - hb)
+            req = (z_req - zc[i])[rows][:, Sarr]
+            real_vs_target = (z_real - z_req[rows])[:, Sarr]
+            real_change = (z_real - z_fresh)[:, Sarr]
+            rn = np.linalg.norm(req, axis=1)
+            val[f"{cond}|coord_abs_target_err"].extend(np.abs(real_vs_target)[req != 0].tolist())
+            val[f"{cond}|norm_target_err"].extend((np.linalg.norm(real_vs_target, axis=1) / np.maximum(rn, 1e-12)).tolist())
+            val[f"{cond}|realized_change_over_requested_projection"].extend((np.sum(real_change * req, axis=1) / np.maximum(rn ** 2, 1e-24)).tolist())
+            off = (z_real - z_fresh)[:, notS]
+            val[f"{cond}|offtarget_l2_vs_fresh_unpatched"].extend(np.linalg.norm(off, axis=1).tolist())
+            val[f"{cond}|offtarget_changed_coords_gt_1e-4"].extend((np.abs(off) > 1e-4).sum(axis=1).tolist())
+            a_, b_ = z_real > 0, z_req[rows] > 0
+            val[f"{cond}|support_jaccard_realized_vs_intended(den=union)"].extend(((a_ & b_).sum(1) / np.maximum((a_ | b_).sum(1), 1)).tolist())
+            val[f"{cond}|share_intended_active_absent(den=intended support)"].extend(((b_ & ~a_).sum(1) / np.maximum(b_.sum(1), 1)).tolist())
+            val[f"{cond}|intended_raw_norm"].extend(np.linalg.norm(all_shifts[i][cond][rows], axis=1).tolist())
+            val[f"{cond}|applied_raw_norm_over_intended"].extend((np.linalg.norm(hp - hu, axis=1) / np.maximum(np.linalg.norm(all_shifts[i][cond][rows], axis=1), 1e-12)).tolist())
+            if cond == "rpO":
+                f0, fc = zc[i][rows] > 0, z_fresh > 0
+                val["baseline|support_jaccard_fresh_unpatched_vs_cached(den=union)"].extend(((f0 & fc).sum(1) / np.maximum((f0 | fc).sum(1), 1)).tolist())
+                val["baseline|features_replaced_per_token(cached support absent in fresh)"].extend((f0 & ~fc).sum(1).tolist())
+    q = lambda v: {"n": len(v), "q10": float(np.quantile(v, 0.1)), "median": float(np.median(v)), "q90": float(np.quantile(v, 0.9)),
+                   "q99": float(np.quantile(v, 0.99)), "max": float(np.max(v)), "mean": float(np.mean(v))}
+    val_summary.update({k: (q(v) if not k.endswith(("receivers", "failures")) else int(sum(v))) for k, v in sorted(val.items())})
+    (out / "phase3_applied_validation.json").write_text(json.dumps(val_summary, indent=1) + "\n")
+    print(f"[phase3] applied validation: zero/unhooked {val_summary['zero_vs_unhooked_hidden_max_abs']:.2e} hidden, "
+          f"{val_summary['zero_vs_unhooked_loss_max_abs']:.2e} loss", flush=True)
     with (out / "phase3_rows.csv").open("w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=list(rows_out[0])); w.writeheader(); w.writerows(rows_out)
     timing = {"model_load_s": round(load_s, 1), "fresh_delta_s": round(fresh_s, 1), "scoring_s": round(score_s, 1),

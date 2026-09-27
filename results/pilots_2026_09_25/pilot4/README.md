@@ -1,4 +1,4 @@
-# Pilot 4 (exploratory, H8): is the sparse dictionary necessary?
+# Pilot 4 (exploratory, H8): do simpler decompositions of the same deltas give the same intervention answers?
 
 Job 20908321 (`gpu` partition, `cis260991-gpu`, one A100, 5 min 49 s =
 0.10 GPU-h; its gpu-debug duplicate 20916290 was cancelled before starting).
@@ -10,10 +10,14 @@ benign days, donor policy and batches as Pilot 1.
 
 ## What varies and what does not
 
-Every condition edits exactly the tokens the SAE selected edit (rpU_S, from
-Pilot 1) touches, with exactly its per-token size. Only the direction of the
-edit differs, so the comparison is between directions, not between
-decompositions as detectors.
+Every condition edits the tokens the SAE selected edit (rpU_S, from Pilot 1)
+touches, with its per-token size, and only the direction differs, **with one
+exception**: the mean-difference condition skipped 44 of the 1,396
+reference-edited tokens because their rescaling gain exceeded the declared cap
+(27 tokens on 27 attack receivers, 17 tokens on 16 benign receivers), and its
+norm check excluded those zero edits. The PCA conditions have no such
+exception. The comparison is between directions, not between decompositions
+as detectors. *(Qualified 2026-09-27.)*
 
 | condition | direction |
 |---|---|
@@ -80,27 +84,33 @@ along ±d, not a move to the benign value.
 
 ## Reading
 
-1. **For changing the adapted model's session predictions, the dictionary
-   matters.** At the same tokens and sizes, the SAE edit raises behaviour
-   loss ten times more than any principal-component or mean-difference
-   direction, and those simpler directions do no more than a random
-   direction. This holds although the baselines were amplified beyond their
-   natural size. The obvious reviewer objection, that the SAE adds nothing a
-   simpler decomposition would find, is not supported for this purpose.
-2. **For anything anomaly-specific, it does not.** The SAE edit's effect is
-   the same on attack days and on the same users' ordinary days (E8c +0.0006,
-   as in Pilot 1). The only attack-day-specific response in the round comes
+1. **Under this intervention design, the selected SAE directions influence
+   the adapted model's session predictions more than the tested PCA and
+   mean-difference directions.** At the same tokens and sizes (see the
+   mean-difference exception above), the paired differences on attack days
+   are clearly positive: SAE minus gap-ranked PCA +0.0225 [+0.0144, +0.0311],
+   minus top-5 PCA +0.0213, minus lowest-gap PCA +0.0226, minus mean
+   difference +0.0236 (every interval excluding zero; benign days similar).
+   The simpler directions do no more than a random direction, although they
+   were amplified beyond their natural size. This does not show that SAEs are
+   necessary in general, identify what the directions represent, or show a
+   detection benefit. *(Corrected 2026-09-27: absolute paired differences
+   replace an earlier "ten times" ratio against near-zero effects.)*
+2. **No attack-specific differential is detected for the SAE edit** (E8c
+   +0.0006 [−0.0024, +0.0034], as in Pilot 1; not an equivalence claim). The
+   only attack-day-specific response in the round comes
    from the simplest supervised baseline: a size-matched push along the
    malicious-minus-benign direction raises benign-day loss and slightly lowers
    attack-day loss (E8c −0.0042 [−0.0066, −0.0019]; two PCA sets show
-   borderline differentials of −0.002). The effect is small (a fifth of the
-   SAE edit's generic effect), it is one of five declared E8c comparisons,
-   and its edit is an amplified push rather than a donor replacement.
-3. Together with Pilot 1: the SAE isolated a direction the adapted model
-   genuinely uses to predict session content (mainly feature 3673, plus a
-   large union-support artifact), which is why its edits are potent. That
-   potency reflects ordinary behavioural prediction. It is not what separates
-   attack days from ordinary days.
+   borderline differentials of −0.002). It is small in absolute terms
+   (0.004 nats per token), it is one of five declared E8c comparisons, it is
+   subject to the 44-token matching exception, and its edit is an amplified
+   push rather than a donor replacement. It does not show improved anomaly
+   detection.
+3. Together with Pilot 1: the selected edit's influence comes mainly from
+   feature 3673's own-support edit plus a large union-support artifact. No
+   attack-specific differential is detected for it at current precision
+   (E8c +0.0006 [−0.0024, +0.0034]), which is not an equivalence claim.
 
 What this does not establish: that meanDiff carries anomaly *information*
 (the contrast is a differential sensitivity to a size-matched push at tokens

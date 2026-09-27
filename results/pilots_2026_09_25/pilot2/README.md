@@ -40,40 +40,78 @@ F1 is +0.128, +0.196 and +0.120. F2 (attack minus benign day) is −0.008 to
 
 - **F4, identity familiarity** (training-user minus unfamiliar same-department
   swap, adapted minus base): −0.004 [−0.031, +0.022] on attack days and
-  −0.003 [−0.040, +0.032] on benign days. No familiarity effect.
+  −0.003 [−0.040, +0.032] on benign days. **No detectable familiarity effect
+  was found under the tested profile substitutions.** The interval crossing
+  zero is not an equivalence test. The two partners also differ in attributes
+  other than familiarity (department alone is matched), so this contrast does
+  not isolate familiarity.
 - **F3, selected-feature activity on session tokens** (swap minus original,
   selected minus control): −0.0005 [−0.0016, +0.0006] for the other-department
-  swap. The per-feature changes are about 1% of the mean activation or less.
-- **H4, within-field association** (`analysis_pilot3.txt`; session positions
-  predicting a session token, stratified by next-token id). Where feature 4596
-  fires, next-token loss under the adapted model is 0.83 nats lower
-  [0.53, 1.17] (12 of 12 users, both day types). Under the base model it is
-  not lower (+0.22 and −0.05). Across the selected set, active positions carry
-  a much larger adaptation gain (adapted minus base loss) than the controls
-  (−3.5 [−5.2, −1.8]).
+  swap. This statistic is a signed change in each record's *mean* activation
+  over session positions, and it cancels across tokens, features and records.
+  Record-level signed and absolute changes, separately (other-department swap;
+  saved per-record means, 414 records):
 
-## Reading
+  | feature | signed change | absolute change | original mean | absolute / original | records changed |
+  |---|---|---|---|---|---|
+  | 4596 (sel) | −0.0011 | 0.0028 | 0.112 | 2.5% | 58% |
+  | 3673 (sel) | −0.0004 | 0.0039 | 0.090 | 4.4% | 81% |
+  | 3455 (sel) | +0.0002 | 0.0055 | 0.067 | 8.2% | 69% |
+  | 2302, 7693 (sel) | ≈0 | ≈0 | < 0.001 | not meaningful | 3–7% |
+  | controls (mean of 5) | | 0.0026 | | | |
 
-1. **Adaptation made behaviour prediction depend on the profile lines.** The
-   base model barely conditions on them. Replacing a person's organisation and
-   personality lines raises the adapter's session-token loss by 0.11 to 0.18
-   nats per token, which is larger for a different department. This is input
-   sensitivity created by fine-tuning, on attack and ordinary days alike.
-2. **It is not identity memorisation.** A profile the adapter was trained on
-   disrupts no more than an unseen colleague's. What matters is how different
-   the attributes are (the department effect).
-3. **The profile's influence does not pass through the selected features.**
-   Their activity on session tokens hardly changes under swaps that move the
-   loss by 0.1 to 0.2 nats.
-4. **The selected features mark adapter-learned predictive regularities.**
-   They fire where the adapter predicts much better than the base model, not
-   where it is surprised. H4 as posed (surprise tracking) is rejected in
-   favour of this reading. It matches Pilot 1, where removing 3673 or 4596
-   hurts prediction.
+  Selected and control features change by similar absolute amounts (0.0027
+  versus 0.0026). The ratios for rare features are large only because their
+  means are tiny. Token-level trajectories were not saved, so cancellation
+  within a record cannot be assessed here. **The tested average
+  session-position activation statistic did not detect a clear
+  selected-versus-control response; mediation remains untested.**
+  *(Corrected 2026-09-27; the earlier text said the per-feature changes were
+  "about 1% or less", which holds only for signed means.)*
+- **H4, within-field associations** (`analysis_pilot3.txt`; session positions
+  predicting a session token, stratified by next-token id, per user). The
+  results differ by feature:
 
-Not established: where in the network the profile dependence is computed (H6,
-mediation or path patching, not run); whether any of this separates attack
-days from ordinary days (it does not here); a detection benefit.
+  | feature | eligible users (attack / benign) | adapted loss, active − inactive (attack) | base loss (attack) | adapted − base (attack) | adapted − base (benign) |
+  |---|---|---|---|---|---|
+  | 4596 (sel) | 12 / 12 | **−0.83 [−1.17, −0.53]**, 12/12 users | +0.22 [+0.03, +0.42] | −1.04 [−1.31, −0.78] | −0.71 [−1.03, −0.40] |
+  | 3673 (sel) | 8 / 7 | −0.000 [−0.001, +0.000] | +2.67 [+0.39, +5.71] | −2.67 [−5.71, −0.39] | −1.79 [−3.74, −0.12] |
+  | 3455 (sel) | 15 / 15 | **+2.33 [+1.55, +3.16]** | +0.27 | +2.07 [+1.27, +2.92] | +0.20 [−0.13, +0.52] |
+  | 2302, 7693 (sel) | 0 / 0 | no eligible within-token comparisons | | | |
+  | 6596 (ctl) | 17 / 17 | −0.000 | −7.61 | +7.61 [+5.63, +9.54] | +8.03 |
+
+  Selected set, adapted minus base, on attack days: **+0.20 [−0.71, +1.02]
+  (inconclusive)**; on benign days −0.46 [−0.93, −0.09]. The selected-minus-
+  control contrast (−3.5 [−5.2, −1.8]) is driven largely by the controls,
+  above all 6596, and does not show a selected-set-wide gain.
+
+## Reading (corrected 2026-09-27)
+
+1. **Adaptation substantially increased behaviour prediction's sensitivity to
+   the profile lines.** The base model barely conditions on them. Replacing a
+   person's organisation and personality lines raises the adapter's
+   session-token loss by 0.11 to 0.18 nats per token, and more for a
+   different department. This is profile dependence, or profile-conditioned
+   prediction, created by fine-tuning, on attack and ordinary days alike. It
+   is not shown to be a harmful shortcut: department and role can
+   legitimately inform predictions of normal behaviour, and whether the
+   dependence hurts detection or robustness was not tested here.
+2. **No detectable familiarity effect** under these substitutions (see F4).
+   This does not exclude memorisation.
+3. **Mediation by the selected features remains untested.** The average
+   activation statistic did not detect a selected-versus-control response.
+   That is not evidence that the influence bypasses the features.
+4. **Feature 4596 has a reproducible association with lower adapted-model
+   loss** at its active positions, beyond the base model. Other selected
+   features behave differently (3455 goes the opposite way), so this does not
+   generalise to the selected set. These are associations conditional on the
+   next token, not identified functions or causal effects. H4 as posed
+   (surprise tracking) is not supported for 4596; at the level of the whole
+   selected set the association is inconclusive.
+
+Not established: where the dependence is computed (the H6 pilot,
+`docs/H6_PROFILE_PATCHING_PROTOCOL_2026-09-27.md`); any attack-specific
+separation; a detection benefit.
 
 ## Files
 

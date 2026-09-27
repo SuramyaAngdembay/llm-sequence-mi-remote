@@ -222,22 +222,69 @@ cancels whichever copy is still pending when the other starts.
 duplicate 20921140 cancelled before starting).** Results in
 `results/pilots_2026_09_25/pilot2/README.md`. H3: supported as input
 sensitivity created by adaptation (F1 +0.11 to +0.18, base about 0.005, on
-attack and benign days alike). H7: null (F4 −0.004 [−0.031, +0.022]). F3: the
-selected features' session activity barely responds to the profile. H4 (Pilot
-3, CPU): rejected as surprise tracking; the selected features mark positions
-of adapter-learned predictive gains (4596: adapted loss 0.83 nats lower,
-12/12 users). H6 (path patching): its declared trigger, an adaptation-specific profile
+attack and benign days alike). H7: no detectable familiarity effect under the
+tested substitutions (F4 −0.004 [−0.031, +0.022]; not an equivalence test).
+F3: the tested average session-position activation statistic did not detect a
+clear selected-versus-control response; mediation untested. ~~the selected
+features' session activity barely responds to the profile~~ H4 (Pilot 3,
+CPU): feature-specific. 4596 is associated with lower adapted loss (−0.83,
+12/12 eligible users); 3455 goes the opposite way (+2.33, 15 users); the
+selected-set adaptation-gain contrast on attack days is inconclusive (+0.20
+[−0.71, +1.02]). ~~the selected features mark positions of adapter-learned
+predictive gains~~ *(wording corrected 2026-09-27)* H6 (path patching): its declared trigger, an adaptation-specific profile
 dependence, is met. It was not run in this round, which already has four pilots,
 one beyond the specification's three, added at the user's direction. It is the
-recommended next experiment. The finding that the swap effect does not pass
-through the selected features makes it more relevant, not less. **Round GPU total: 0.39 of 8 GPU-hours**
+recommended next experiment. ~~The finding that the swap effect does not pass
+through the selected features makes it more relevant, not less.~~ (Mediation
+by the selected features is untested; corrected 2026-09-27.) **Round GPU total: 0.39 of 8 GPU-hours**
 (Pilot 1 0.17, Pilot 2 0.08 including the failed attempt, Pilot 4 0.10, TWOS
 feasibility pilot on Aquaman 0.03).
 
 **2026-09-26, TWOS feasibility pilot** (separate specification;
 `results/twos_feasibility_2026_09_26/README.md`). Direction A (encoder-realizable
-constrained edits): no-go as a main contribution. Direction B (donor-policy
+constrained edits): ~~no-go as a main contribution~~ inconclusive and
+currently deprioritized (corrected 2026-09-27). Direction B (donor-policy
 LP): go as a robustness appendix.
+
+**2026-09-27, corrections after the external review**
+(`~/Documents/mi-paper-review-2026-09-27/review.md`). Each was checked against
+the saved artifacts before it was written.
+
+- (A) Familiarity: "not identity memorisation" becomes "no detectable
+  familiarity effect under the tested substitutions".
+- (B) Mediation: F3 is a signed average that cancels. Record-level absolute
+  changes are 2.5–8.2% of the means for 4596, 3673 and 3455 and similar for
+  the controls (0.0027 versus 0.0026). The earlier "about 1% or less" held
+  only for signed means. Mediation is untested.
+- (C) "Shortcut" becomes profile dependence, or profile-conditioned
+  prediction; harm is not established.
+- (D) The H4 results are reported per feature with eligible-user counts.
+- (E) TWOS Direction A becomes inconclusive and deprioritized. The model test
+  used the equality-only projection, not the QP. The direct attack-window
+  contrast includes zero. A median realized fraction of 1 is not exactness.
+  Jaccard 0.78 means one of 8 features replaced, not 22%.
+- (F) Pilot 4: the mean-difference condition skipped 44 of 1,396 reference
+  tokens (27 attack, 17 benign), and absolute paired differences replace
+  "ten times".
+- Commit messages `a260e92`, `a85fe08` and `b955acc` contain the superseded
+  wording and cannot be edited. The reports and this ledger are
+  authoritative.
+
+**2026-09-27, TWOS applied-edit validation repair**
+(`results/twos_feasibility_2026_09_26/README.md`, repair section; 90 s on one
+RTX 3070).
+
+- Applied edits match their intended size, with no failures.
+- Realization is approximate: own decoder edit normalized target error median
+  0.04, q99 0.30.
+- At a matched large budget, decoder minus projection is +0.0042
+  [+0.0013, +0.0077] on attack windows. At a matched small budget it is
+  −0.0010 [−0.0030, +0.0005]. At a common target it is +0.0021
+  [−0.0017, +0.0070].
+
+**2026-09-27, H6 pilot protocol frozen** (`docs/H6_PROFILE_PATCHING_PROTOCOL_2026-09-27.md`,
+commit `ab7299f`) and submitted (jobs 20927962 and 20927963, duplicate rule).
+CPU dry run: 120 discovery receivers, no session-alignment failures.
 
 **2026-09-25, interpretation map (written while both jobs are queued; no
 pilot output exists).** What each outcome would and would not mean. All
