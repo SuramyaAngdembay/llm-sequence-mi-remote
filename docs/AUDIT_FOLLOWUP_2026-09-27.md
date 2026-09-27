@@ -66,7 +66,7 @@ shifts used. Details and tables are in the repair section of
 |---|---|
 | Size of the dependence | Replacing DAY and PSY raises adapted loss by +0.243 [+0.203, +0.283]. The base model does not respond (−0.001). |
 | Which profile line | The DAY line alone gives +0.246. The PSY line alone gives +0.004. A second foreign partner gives +0.209. |
-| Where it enters the session positions | Through hidden state 22, profile-position patches restore 98%. By 26, session-position patches restore 84% [78%, 90%]; the matched-source control restores 23%. The move happens in blocks 22 to 25. |
+| Where it enters the session positions | Through hidden state 22, profile-position patches restore 98%. By 26, session-position patches restore 84% [78%, 90%]; the matched-source control restores 23%. The move happens mainly in blocks 22 to 25. |
 | Components | Attention outputs of blocks 21 and 25 each restore about 5%. Late MLPs at session positions (blocks 25, 29, 33) each restore 29% to 54%. These single-component rescues overlap. |
 | Mediation at layer 26 | Restoring the adapter's whole layer-26 delta at session positions restores 83%. Restoring the 5 selected coefficients restores 0.3% (+0.0008 [−0.0006, +0.0031]), no more than control or size-matched random edits. |
 | Attack-specific | None detected. Rescue fractions match between day types. Attack days are, if anything, slightly less profile-dependent. |
@@ -84,7 +84,7 @@ either (post hoc, 5 users). Only these 5 features were tested.
 | Detector performance | Not tested in this round. No endpoint here measures detection. |
 | Input dependence | Supported: adaptation makes behaviour prediction sensitive to profile replacement. Pilot 2 gives +0.11 to +0.18 nats per token on confirmation users, and H6 gives +0.24 on discovery users. It happens on attack and benign days alike and comes from the organisation line, not the personality line. No familiarity effect detected. |
 | Represented information | Feature-level associations only. 4596's association with lower adapted loss reproduces; 3455 goes the other way. What any feature represents is not identified. |
-| Causal influence and mediation | Influence: the tested SAE edits change session predictions more than the tested PCA and mean-difference edits at the same tokens and sizes. Mediation: the profile dependence passes through session positions from blocks 22 to 25 and is carried by the adapter's layer-26 delta. It is not carried by the 5 selected coefficients under the tested restoration. These are activation and component patches, not path patching. |
+| Causal influence and mediation | Influence: the tested SAE edits change session predictions more than the tested PCA and mean-difference edits at the same tokens and sizes. Mediation: the profile dependence passes into session positions mainly in blocks 22 to 25 and is carried by the adapter's layer-26 delta. It is not carried by the 5 selected coefficients under the tested restoration. These are activation and component patches, not path patching. |
 
 ## 5. Reading
 
@@ -95,7 +95,7 @@ either (post hoc, 5 users). Only these 5 features were tested.
 - Feature 4596 has a reproducible association with lower adapted loss.
 - Under the existing intervention design, the selected SAE edits influence
   predictions more than the tested PCA and mean-difference alternatives.
-- The profile dependence enters session positions in blocks 22 to 25 and is
+- The profile dependence enters session positions mainly in blocks 22 to 25 and is
   carried by the layer-26 adapter delta. The 5 selected coefficients do not
   carry it under the tested restoration (H6, development users).
 - The dependence comes from the organisation line, not the personality line.
@@ -150,7 +150,7 @@ Further work is warranted only where the paper needs it.
 
 1. **Report H6 as a characterization.** Fine-tuning made session prediction
    depend on organisational context. That information moves into session
-   positions in blocks 22 to 25, and the selected features do not carry it.
+   positions mainly in blocks 22 to 25, and the selected features do not carry it.
    This limits the SAE story: the selected features influence predictions
    (Pilots 1 and 4), but they do not mediate the profile dependence.
 2. **Test detection before any harm claim.** The one experiment the paper
