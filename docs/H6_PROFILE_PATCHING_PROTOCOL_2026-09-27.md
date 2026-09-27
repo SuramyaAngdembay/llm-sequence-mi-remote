@@ -146,3 +146,14 @@ layers still read the swapped profile.
   the remaining wall time.
 - **GPU cap for this follow-up**: 1 GPU-hour in total, including the TWOS
   validation repair. The job's wall limit is 30 minutes on one A100.
+
+## Dated changes before scoring
+
+- **2026-09-27, hardware.** Both A100 copies had an estimated start of
+  2 October. An identical H100 copy (partition `ai`) was queued, and the
+  first copy to start runs. Conditions, populations, endpoints and rules are
+  unchanged. Every comparison is within one job, so none mixes hardware. The
+  30-minute wall limit applies to whichever copy runs.
+- **2026-09-27, verification bookkeeping.** The realized-code check now
+  covers only tokens with a nonzero intended edit and counts the rest. See
+  the ledger entry of the same date.

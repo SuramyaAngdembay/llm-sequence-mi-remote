@@ -364,7 +364,7 @@ appendix; no-go as a novelty claim.**
 |---|---|---|
 | Phase 3 smoke (RTX 3070, GPU 0) | 1 | 38 s |
 | Phase 3 full (RTX 3070, GPU 0) | 1 | 78 s |
-| Phase 3 repair: applied-edit validation and common-budget conditions (2026-09-27) | 1 | 90 s |
+| Phase 3 repair: applied-edit validation and common-budget conditions (2026-09-27); CPU time 264 s user + 20 s system | 1 | 90 s |
 | **total GPU** | | **0.06 GPU-h** (cap 2; the repair counts toward the 2026-09-27 follow-up cap) |
 | Phase 1, CERT extension (local CPU) | 0 | about 2 min |
 | Phase 2 (Aquaman CPU): stopped slow attempt + completed run | 0 | 1 h 49 min + 40 min |
