@@ -329,6 +329,31 @@ output was read.**
   loss agreement and the implementation checks. No endpoint is taken from
   them, and no copy is chosen by its results.
 
+**2026-09-27, H6 result** (`results/h6_2026_09_27/README.md`; exploratory,
+development users; primary job 20927962).
+
+- **Validity.** 120 receivers, no exclusions. Zero and self-patch checks are
+  exact. The H100 duplicate moves every endpoint by 0.003 or less.
+- **Input effect.** R minus O is +0.243 [+0.203, +0.283] on attack days and
+  +0.280 on benign days; the base model gives −0.001. The DAY line alone
+  gives +0.246 and the PSY line alone +0.004.
+- **Rule 1.** The crossover is at hidden state 26: session-position rescue
+  84% [78%, 90%], against 23% for the T-sourced control. At 22,
+  profile-position rescue is 98%. The information moves in blocks 22 to 25.
+- **Rule 2.** Attention outputs of blocks 21 and 25 each restore about 5%.
+  Late MLPs at session positions each restore 29% to 54%. These rescues
+  overlap and show neither necessity nor uniqueness.
+- **Rule 3, second branch.** sel_sess restores +0.0008 [−0.0006, +0.0031],
+  no more than ctrl or rand. fulldelta_sess restores 83%. The layer-26
+  adapter contribution carries the dependence; the selected coefficients do
+  not, under this intervention. Realization is approximate (q90 normalized
+  error 1.0). 7693 switches off entirely on 17 receivers, and restoring it
+  does not help (post hoc).
+- **Rule 4.** No attack-specific rescue.
+- **H6 status.** Answered at the tested resolution. Confirmation on held-out
+  users, head-level and every-block patching, and DAY field-level
+  substitution remain open.
+
 **2026-09-25, interpretation map (written while both jobs are queued; no
 pilot output exists).** What each outcome would and would not mean. All
 readings stay exploratory; the receivers were inspected in package 4.

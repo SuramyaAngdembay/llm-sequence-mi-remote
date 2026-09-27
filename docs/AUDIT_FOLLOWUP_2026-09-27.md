@@ -4,9 +4,7 @@ Response to `~/Documents/mi-paper-review-2026-09-27/review.md`. Everything
 here is **exploratory**. Every receiver population was examined earlier, and
 the H6 cohort is development data.
 
-Status: sections 1 and 2 are complete. Section 3 (H6) is **pending**: the job
-is queued on Anvil, and its results will be added here and in
-`results/h6_2026_09_27/README.md`.
+Status: complete. The H6 detail is in `results/h6_2026_09_27/README.md`.
 
 ## 1. Corrections to the completed experiments
 
@@ -53,24 +51,40 @@ shifts used. Details and tables are in the repair section of
   The evidence comes from eight previously examined users and is
   descriptive only.
 
-## 3. H6: where profile-dependent prediction arises (pending)
+## 3. H6: where profile-dependent prediction arises
 
-Protocol frozen before scoring:
-`docs/H6_PROFILE_PATCHING_PROTOCOL_2026-09-27.md` (commit `ab7299f`), with
-dated pre-scoring notes. Code changes after the freeze and before any CERT
-output are listed in the ledger. They were tested on TWOS as an execution
-check only.
+- **Protocol.** Frozen before scoring:
+  `docs/H6_PROFILE_PATCHING_PROTOCOL_2026-09-27.md` (commit `ab7299f`), with
+  dated pre-scoring notes.
+- **Run.** One A100 job, 9 min 25 s: 120 receivers from 30 discovery users,
+  every condition in one job. No exclusions or alignment failures. The zero
+  and self-patch checks are exact.
+- **Duplicates.** Two duplicate copies also ran. An A100 copy agrees bit for
+  bit. An H100 copy moves every endpoint by 0.003 nats or less.
 
-Results: *pending.*
+| question | result (attack days; benign days agree) |
+|---|---|
+| Size of the dependence | Replacing DAY and PSY raises adapted loss by +0.243 [+0.203, +0.283]. The base model does not respond (−0.001). |
+| Which profile line | The DAY line alone gives +0.246. The PSY line alone gives +0.004. A second foreign partner gives +0.209. |
+| Where it enters the session positions | Through hidden state 22, profile-position patches restore 98%. By 26, session-position patches restore 84% [78%, 90%]; the matched-source control restores 23%. The move happens in blocks 22 to 25. |
+| Components | Attention outputs of blocks 21 and 25 each restore about 5%. Late MLPs at session positions (blocks 25, 29, 33) each restore 29% to 54%. These single-component rescues overlap. |
+| Mediation at layer 26 | Restoring the adapter's whole layer-26 delta at session positions restores 83%. Restoring the 5 selected coefficients restores 0.3% (+0.0008 [−0.0006, +0.0031]), no more than control or size-matched random edits. |
+| Attack-specific | None detected. Rescue fractions match between day types. Attack days are, if anything, slightly less profile-dependent. |
+
+**Caveat on mediation.** The coefficient edits are applied at their intended
+size, but their realization is approximate: normalized target error q90 1.0.
+The selected features barely change under the swap. The exception is 7693,
+which switches off entirely on 17 receivers, and restoring it does not help
+either (post hoc, 5 users). Only these 5 features were tested.
 
 ## 4. Claims, kept separate
 
 | claim type | what the evidence supports now |
 |---|---|
 | Detector performance | Not tested in this round. No endpoint here measures detection. |
-| Input dependence | Supported: adaptation makes behaviour prediction sensitive to profile replacement (adapted minus base +0.11 to +0.18 nats per token), on attack and benign days alike. No familiarity effect detected. |
+| Input dependence | Supported: adaptation makes behaviour prediction sensitive to profile replacement. Pilot 2 gives +0.11 to +0.18 nats per token on confirmation users, and H6 gives +0.24 on discovery users. It happens on attack and benign days alike and comes from the organisation line, not the personality line. No familiarity effect detected. |
 | Represented information | Feature-level associations only. 4596's association with lower adapted loss reproduces; 3455 goes the other way. What any feature represents is not identified. |
-| Causal influence and mediation | Influence: the tested SAE edits change session predictions more than the tested PCA and mean-difference edits at the same tokens and sizes. Mediation of the profile dependence by the selected features: untested until H6. |
+| Causal influence and mediation | Influence: the tested SAE edits change session predictions more than the tested PCA and mean-difference edits at the same tokens and sizes. Mediation: the profile dependence passes through session positions from blocks 22 to 25 and is carried by the adapter's layer-26 delta. It is not carried by the 5 selected coefficients under the tested restoration. These are activation and component patches, not path patching. |
 
 ## 5. Reading
 
@@ -81,6 +95,10 @@ Results: *pending.*
 - Feature 4596 has a reproducible association with lower adapted loss.
 - Under the existing intervention design, the selected SAE edits influence
   predictions more than the tested PCA and mean-difference alternatives.
+- The profile dependence enters session positions in blocks 22 to 25 and is
+  carried by the layer-26 adapter delta. The 5 selected coefficients do not
+  carry it under the tested restoration (H6, development users).
+- The dependence comes from the organisation line, not the personality line.
 - Donor-policy bounds give a useful finite-bank robustness check. CERT
   behaviour conclusions survive any reweighting of the bank. CERT profile
   conclusions flip at 1–2% of donor weight, and TWOS behaviour at 0.24%.
@@ -91,6 +109,9 @@ Results: *pending.*
 - Attack-specific differentials for the SAE edit (E6, E8c).
 - TWOS Direction A.
 - Familiarity, since a null interval is not equivalence.
+- Whether attack days are less profile-dependent than benign days. One H6
+  contrast excludes zero (−0.037) and the other does not; the direction
+  matches Pilot 2.
 
 **Implementation limitations.**
 
@@ -102,6 +123,11 @@ Results: *pending.*
   tokens.
 - TWOS realization is approximate, and the TWOS evidence rests on 8
   previously examined users.
+- H6 coefficient restoration is approximately realized (q90 normalized error
+  1.0). Only one block in four was patched, and there is no path patching.
+- The H6 cohort is development data. Three copies of the job ran because the
+  duplicate watcher was offline. The primary copy was declared before any
+  output was read.
 
 **Hypotheses that need another experiment.**
 
@@ -109,13 +135,40 @@ Results: *pending.*
   detection endpoint under profile substitution.
 - Whether the mean-difference differential holds at its own positions with a
   replacement-size edit on a fresh population.
-- Where and through which components the dependence arises (H6, pending).
+- Which heads, and which of blocks 22 to 24, move the organisation
+  information into session positions. That needs every-block and head-level
+  attention patching.
+- Which DAY fields drive the dependence: department, role, team or project.
+- Whether other layer-26 SAE features carry the dependence. That needs a
+  screen of the original-minus-swapped delta on discovery users, with
+  confirmation on fresh users.
+- Confirmation of the H6 localization on held-out users.
 
 ## 6. Recommendation
 
-*To be completed with the H6 result.* Independent of it: stop work on
-Direction A, keep the donor-policy LP as a robustness appendix, and do not
-expand any pilot on previously examined users.
+Further work is warranted only where the paper needs it.
+
+1. **Report H6 as a characterization.** Fine-tuning made session prediction
+   depend on organisational context. That information moves into session
+   positions in blocks 22 to 25, and the selected features do not carry it.
+   This limits the SAE story: the selected features influence predictions
+   (Pilots 1 and 4), but they do not mediate the profile dependence.
+2. **Test detection before any harm claim.** The one experiment the paper
+   needs next is a detection endpoint under organisation-line substitution:
+   does the anomaly score or the day-level PR-AUC change? Without it, the
+   dependence stays described, not judged.
+3. **Treat mechanism detail as thesis work.** If it is wanted, run one
+   bounded pilot on held-out users. It would cover every block from 21 to
+   26, head-level attention in blocks 22 to 25, DAY field-level
+   substitutions, and a feature screen of the layer-26 delta. That pilot
+   should be confirmatory, with endpoints fixed from this result.
+4. **Stop:**
+   - Direction A;
+   - further tests of the 5 selected features as mediators of the profile
+     dependence;
+   - any pilot on previously examined users.
+
+   Keep the donor-policy LP as a robustness appendix.
 
 ## 7. Compute for this follow-up
 
@@ -125,6 +178,7 @@ expand any pilot on previously examined users.
 | H6 code-path tests on TWOS (two runs) | 1 RTX 3070 (Aquaman) | 69 s + 72 s | not timed separately |
 | H6 dry run, re-run under a timer (manifest identical, md5 `fe2bd2cd`) | CPU, Anvil login node | 0 | 12 s user, 2 s system (32 s wall) |
 | H6 alignment unit tests | CPU, Anvil login node | 0 | 0.3 s user |
-| H6 analysis on the TWOS test output | CPU, laptop | 0 | 0.2 s user |
-| H6 CERT job | 1 A100 or H100 (Anvil) | pending, at most 30 min | pending |
-| **total so far** | | **0.06 GPU-h of the 1 GPU-h cap** | |
+| H6 primary job 20927962 | 1 A100 (Anvil gpu-debug) | 9 min 25 s | 10 min 9 s |
+| H6 duplicates 20927963 and 20928056 | 1 A100, then 1 H100 | 9 min 17 s + 5 min 17 s | 8 min 37 s + 4 min 35 s |
+| H6 analyses (primary and H100 copy) | CPU, laptop | 0 | 0.6 s user each |
+| **total** | | **0.46 GPU-h of the 1 GPU-h cap**, of which 0.24 is duplicate runs | about 28 min, excluding the untimed TWOS tests |
