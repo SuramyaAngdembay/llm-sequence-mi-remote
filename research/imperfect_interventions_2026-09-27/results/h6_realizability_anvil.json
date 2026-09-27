@@ -1,0 +1,39 @@
+{
+ "k": 4,
+ "sae_width": 8192,
+ "tokens": 20000,
+ "source": "layer_26/chunk_00000.pt, original inputs",
+ "share_tokens_with_at_least_k_positive_preactivations": 1.0,
+ "positive_preactivations_q001_q01_q50": [
+  5.0,
+  22.0,
+  571.0
+ ],
+ "kth_minus_k1th_preactivation_q05_q50_q95": [
+  0.00550886383280158,
+  0.13973689079284668,
+  4.520031452178955
+ ],
+ "kth_winner_value_q05_q50_q95": [
+  0.49326610565185547,
+  1.469193458557129,
+  7.534966468811035
+ ],
+ "cache_exactly_representable_in_bf16": true,
+ "bf16_subtraction_half_ulp": {
+  "support_identical_share": 0.9920499920845032,
+  "rel_code_change_q50_q90_q99": [
+   0.00015312395407818258,
+   0.00026093979249708354,
+   0.0004429859109222889
+  ]
+ },
+ "bf16_subtraction_one_ulp": {
+  "support_identical_share": 0.9818000197410583,
+  "rel_code_change_q50_q90_q99": [
+   0.0003094053245149553,
+   0.0005306584644131362,
+   0.04854648932814598
+  ]
+ }
+}

@@ -1,0 +1,10 @@
+{
+ "edited_tokens": 369,
+ "target_over_k_if_R_has_exactly_k": 173,
+ "target_under_k_deletion": 5,
+ "same_selected_support_size": 191,
+ "share_requested_squared_change_on_over_k_tokens": 0.9527412530220699,
+ "share_requested_squared_change_involving_7693": 0.949238187823235,
+ "receivers_with_over_k_tokens": 23,
+ "note": "Over-k holds exactly when every R code has k active features; the anvil part checks that premise."
+}

@@ -1,0 +1,8 @@
+{
+ "cpu_s": 16.503365,
+ "wall_s": 16.91366195678711,
+ "solver_paths": {
+  "nnls": 15464,
+  "dual_lbfgsb": 0
+ }
+}

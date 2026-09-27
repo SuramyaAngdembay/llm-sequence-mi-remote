@@ -1,0 +1,185 @@
+{
+ "note": "Development configuration (v3). The P2 realization threshold and the interval method are chosen on these worlds; every other rule is fixed a priori.",
+ "base_spec": {
+  "d": 20,
+  "d_visible": 16,
+  "m": 12,
+  "k": 3,
+  "crosstalk": 0.0,
+  "bias": -0.05,
+  "sigma_range": [
+   0.6,
+   1.6
+  ],
+  "alpha_sel": 0.0,
+  "alpha_prot": 0.8,
+  "gamma": 0.8,
+  "eta": 0.0,
+  "noise": 0.02,
+  "corruption": "reduce",
+  "prot_corruption": [
+   0.2,
+   0.4
+  ],
+  "exec": {
+   "scale": 1.0,
+   "noise": 0.0
+  }
+ },
+ "conditions": {
+  "C1a_irrelevant_exact": {
+   "spec": {}
+  },
+  "C1b_irrelevant_crosstalk": {
+   "spec": {
+    "crosstalk": 0.15
+   }
+  },
+  "C1c_irrelevant_crosstalk_hi": {
+   "spec": {
+    "crosstalk": 0.4
+   }
+  },
+  "C1d_irrelevant_exec_noise": {
+   "spec": {
+    "exec": {
+     "noise": 0.05
+    }
+   }
+  },
+  "C1e_irrelevant_under": {
+   "spec": {
+    "exec": {
+     "scale": 0.1
+    }
+   }
+  },
+  "C1f_irrelevant_mlp": {
+   "spec": {
+    "crosstalk": 0.15,
+    "mlp_hidden": 32,
+    "mlp_in_scale": 2.0,
+    "mlp_out_scale": 1.5,
+    "mlp_orth_sel": true
+   }
+  },
+  "C1g_irrelevant_coherent": {
+   "spec": {
+    "coherence": 0.97
+   }
+  },
+  "C2a_relevant_exact": {
+   "spec": {
+    "alpha_sel": 0.8
+   }
+  },
+  "C2b_relevant_crosstalk": {
+   "spec": {
+    "alpha_sel": 0.8,
+    "crosstalk": 0.15
+   }
+  },
+  "C2c_relevant_mlp": {
+   "spec": {
+    "alpha_sel": 0.8,
+    "crosstalk": 0.15,
+    "mlp_hidden": 32,
+    "mlp_in_scale": 2.0,
+    "mlp_out_scale": 1.5,
+    "mlp_orth_sel": true
+   }
+  },
+  "C2d_relevant_coherent": {
+   "spec": {
+    "alpha_sel": 0.8,
+    "coherence": 0.97
+   }
+  },
+  "C3a_relevant_under": {
+   "spec": {
+    "alpha_sel": 0.8,
+    "exec": {
+     "scale": 0.02
+    }
+   }
+  },
+  "C3b_small_relevant_under": {
+   "spec": {
+    "alpha_sel": 0.3,
+    "exec": {
+     "scale": 0.05
+    }
+   }
+  },
+  "C3c_relevant_exec_noise": {
+   "spec": {
+    "alpha_sel": 0.8,
+    "exec": {
+     "noise": 0.3
+    }
+   }
+  },
+  "C4_many_to_one": {
+   "spec": {
+    "decoder_null": 1.5,
+    "gamma": 1.0
+   }
+  },
+  "C5_interaction": {
+   "spec": {
+    "eta": 1.0,
+    "corrupt_n2": true
+   }
+  },
+  "C6a_over_k": {
+   "spec": {
+    "alpha_sel": 0.8,
+    "corruption": "swap"
+   }
+  },
+  "C6b_deletion": {
+   "spec": {
+    "alpha_sel": -0.8,
+    "corruption": "delete"
+   }
+  },
+  "C1h_irrelevant_uniform_sigma": {
+   "spec": {
+    "sigma_range": [
+     1.0,
+     1.0
+    ]
+   }
+  },
+  "C7_steep_exec_noise": {
+   "spec": {
+    "alpha_sel": 0.3,
+    "crosstalk": 0.15,
+    "mlp_hidden": 32,
+    "mlp_in_scale": 8.0,
+    "mlp_out_scale": 1.5,
+    "exec": {
+     "noise": 0.3
+    }
+   }
+  }
+ },
+ "world_seeds": {
+  "dev": [
+   1001,
+   1002,
+   1003
+  ],
+  "eval": []
+ },
+ "pool_clusters": 300,
+ "units_per_cluster": 3,
+ "clusters_per_dataset": 16,
+ "datasets_per_world": 30,
+ "boot": 1000,
+ "interval_level": 0.9,
+ "margin": 0.001,
+ "margin_fraction": 0.05,
+ "realization_threshold": 0.5,
+ "interval_method": "percentile"
+}
