@@ -1,7 +1,10 @@
 # Frozen evaluation protocol (2026-09-27, before any evaluation world existed)
 
 Configuration: `config_frozen.json`. Code: `synth.py` at the commit that adds this file.
-Development runs: `results/dev_percentile`, `results/dev_t`, `results/dev_t30`. Threshold tuning:
+Development runs: `results/dev_percentile`, `results/dev_t`, `results/dev_t30`. Two earlier development
+runs were overwritten and not kept. v1 used 40 random atoms in 18 dimensions, where crosstalk made
+the 'irrelevant' case non-negligible and most targets infeasible. v2 was the first run with
+orthonormal atoms and a crosstalk knob, before the t-interval and new cases were added. Threshold tuning:
 `results/p2_threshold_tuning.json`.
 
 ## Worlds and truth
