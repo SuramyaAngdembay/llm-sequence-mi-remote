@@ -48,8 +48,10 @@ shifts used. Details and tables are in the repair section of
   | at the projection's budget | magnitude, small | −0.0010 [−0.0030, +0.0005] |
   | common requested target | target | +0.0021 [−0.0017, +0.0070] |
 
-  Neither method beats a coherence-preserving random edit at matched
-  magnitude. Eight previously examined users; descriptive only.
+  On attack windows, neither method's excess over a coherence-preserving
+  random edit of matched magnitude is detected; the intervals include zero.
+  The evidence comes from eight previously examined users and is
+  descriptive only.
 
 ## 3. H6: where profile-dependent prediction arises (pending)
 
