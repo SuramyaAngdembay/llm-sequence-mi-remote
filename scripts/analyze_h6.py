@@ -26,7 +26,12 @@ S = [4596, 7693, 2302, 3673, 3455]; C = [6596, 8017, 6608, 2765, 886]
 
 
 def main():
+    global LAYERS, S, C
     out = Path(sys.argv[1])
+    man = out / "h6_manifest.json"
+    if man.exists():  # the run's own layers and feature sets win over the defaults
+        m = json.loads(man.read_text())
+        LAYERS = tuple(m.get("layers", LAYERS)); S = list(m.get("selected", S)); C = list(m.get("control", C))
     rows = list(csv.DictReader((out / "h6_rows.csv").open()))
     L = {(r["condition"], r["receiver_id"]): float(r["behavior_only"]) for r in rows}
     meta = {r["receiver_id"]: (r["user"], r["kind"]) for r in rows}
@@ -85,7 +90,7 @@ def main():
         ok = e["estimate"] >= 0.05 and e["excludes_zero"]
         res[f"fraction_denominator_ok|{k}"] = bool(ok)
         if not ok:
-            lines.append(f"  {k}: denominator {e['estimate']:+.4f} {e['ci95']} not eligible"); continue
+            lines.append(f"  {k}: denominator {e['estimate']:+.4f} [{e['ci95'][0]:+.4f}, {e['ci95'][1]:+.4f}] not eligible"); continue
         rng = np.random.default_rng(42)
         users = sorted(eff[("R", "on")][k])
         for c in rescue_names:
@@ -129,7 +134,7 @@ def main():
                 continue
             for j, f in enumerate(feats):
                 signed[f].append(float((r[:, j] - o[:, j]).mean())); absol[f].append(float(np.abs(r[:, j] - o[:, j]).mean())); base[f].append(float(o[:, j].mean()))
-        lines.append("\n== layer-26 SAE codes at aligned session positions, R minus O, token-level (mean over receivers)")
+        lines.append("\n== SAE-layer codes at aligned session positions, R minus O, token-level (mean over receivers)")
         tok = {}
         for f in feats:
             tok[int(f)] = {"signed": float(np.mean(signed[f])), "absolute": float(np.mean(absol[f])), "original_mean": float(np.mean(base[f]))}

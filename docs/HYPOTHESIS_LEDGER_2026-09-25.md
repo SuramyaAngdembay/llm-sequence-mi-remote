@@ -289,8 +289,8 @@ CPU dry run: 120 discovery receivers, no session-alignment failures.
 **2026-09-27, H6 code changes after the freeze and before the job started
 (no CERT output exists).**
 
-- The GPU code path was executed on TWOS (Aquaman, one RTX 3070, 72 s) as an
-  execution test only. It was run with the new parameters: SAE layer 24,
+- The GPU code path was executed twice on TWOS (Aquaman, one RTX 3070, 69 s
+  before the fix and 72 s after it) as an execution test only. It was run with the new parameters: SAE layer 24,
   context field `team`, discovery-file name. The CERT defaults are unchanged.
   Outputs are in `results/h6_2026_09_27/twos_codepath_test/`; they are not
   results.
@@ -298,10 +298,17 @@ CPU dry run: 120 discovery receivers, no session-alignment failures.
   zero intended edit. It now reports only nonzero-edit tokens and counts the
   rest.
 - The analysis script now detects self-patch checks by name instead of
-  hard-coding layer 26.
+  hard-coding layer 26. It takes the layer list and the selected and control
+  features from the run's own manifest. It ran end to end on the TWOS test
+  output.
 - The protocol's conditions, populations, endpoints and rules are unchanged.
   The fixed scripts were synced to the queued job's directory before it
-  started.
+  started (md5 checked).
+- Slurm estimated a start on 2 October for both A100 copies, so an H100
+  copy was added (job 20928056, partition `ai`, output `out_ai`). Code and
+  inputs are identical. The first copy to start runs, and the others are
+  cancelled. Every condition is scored within one job, so no comparison
+  mixes hardware.
 
 **2026-09-25, interpretation map (written while both jobs are queued; no
 pilot output exists).** What each outcome would and would not mean. All
