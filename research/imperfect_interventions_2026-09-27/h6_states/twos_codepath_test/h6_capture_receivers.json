@@ -1,0 +1,162 @@
+[
+ {
+  "recv": 0,
+  "id": "User1:2017-03-23:13:00",
+  "user": "User1",
+  "kind": "malicious",
+  "n_session_tokens": 55,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 1,
+  "id": "User1:2017-03-23:00:50",
+  "user": "User1",
+  "kind": "benign",
+  "n_session_tokens": 66,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 2,
+  "id": "User13:2017-03-23:16:40",
+  "user": "User13",
+  "kind": "malicious",
+  "n_session_tokens": 62,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 3,
+  "id": "User13:2017-03-23:00:30",
+  "user": "User13",
+  "kind": "benign",
+  "n_session_tokens": 66,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 4,
+  "id": "User17:2017-03-21:19:50",
+  "user": "User17",
+  "kind": "malicious",
+  "n_session_tokens": 71,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 5,
+  "id": "User17:2017-03-21:00:50",
+  "user": "User17",
+  "kind": "benign",
+  "n_session_tokens": 53,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 6,
+  "id": "User2:2017-03-21:19:30",
+  "user": "User2",
+  "kind": "malicious",
+  "n_session_tokens": 71,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 7,
+  "id": "User2:2017-03-21:04:40",
+  "user": "User2",
+  "kind": "benign",
+  "n_session_tokens": 53,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 8,
+  "id": "User20:2017-03-21:15:10",
+  "user": "User20",
+  "kind": "malicious",
+  "n_session_tokens": 68,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 9,
+  "id": "User20:2017-03-21:01:10",
+  "user": "User20",
+  "kind": "benign",
+  "n_session_tokens": 53,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 10,
+  "id": "User21:2017-03-23:13:30",
+  "user": "User21",
+  "kind": "malicious",
+  "n_session_tokens": 68,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 11,
+  "id": "User21:2017-03-23:01:10",
+  "user": "User21",
+  "kind": "benign",
+  "n_session_tokens": 53,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 12,
+  "id": "User3:2017-03-24:14:20",
+  "user": "User3",
+  "kind": "malicious",
+  "n_session_tokens": 60,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 13,
+  "id": "User3:2017-03-24:01:30",
+  "user": "User3",
+  "kind": "benign",
+  "n_session_tokens": 53,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 14,
+  "id": "User7:2017-03-23:19:10",
+  "user": "User7",
+  "kind": "malicious",
+  "n_session_tokens": 64,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 15,
+  "id": "User7:2017-03-23:00:50",
+  "user": "User7",
+  "kind": "benign",
+  "n_session_tokens": 65,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ }
+]
