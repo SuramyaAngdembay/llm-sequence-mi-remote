@@ -82,6 +82,21 @@ def test_over_k_target_is_empty():
         assert synth.build_P(w, tau, 1e-3) is None
 
 
+def test_sampled_lipschitz_is_not_a_bound():
+    """Counterexample: gradients sampled at the observed states miss a steep change between x_hat and x*.
+
+    F(t) = h * sigmoid((t - 1/2) / w) along the segment t in [0, 1] (x_hat at t = 0, x* at t = 1). The observed
+    states sit at the ends, where the slope is h e^{-1/(2w)} / w. For w = 0.02 the sampled 'bound' is ~1e-9 h
+    while the true change is ~h.
+    """
+    h, w = 1.0, 0.02
+    F = lambda t: h / (1 + np.exp(-(t - 0.5) / w))
+    dF = lambda t: F(t) * (1 - F(t) / h) / w
+    K_sampled = max(dF(0.0), dF(1.0))
+    assert K_sampled * 1.0 < 1e-6 * abs(F(1.0) - F(0.0))
+    assert abs(F(1.0) - F(0.0)) > 0.99 * h
+
+
 if __name__ == "__main__":
     for name, f in list(globals().items()):
         if name.startswith("test_"):

@@ -1,0 +1,29 @@
+{
+ "C1b_irrelevant_crosstalk": {
+  "tau": 0.00696590680099611,
+  "median_Kc": 1.413669324194915,
+  "tau_over_K": 0.004927536222067487,
+  "median_ideal_move_norm": 1.5820767449142261,
+  "median_applied_to_ideal_distance": 0.08139067568923665,
+  "required_accuracy_share_of_move": 0.0031145999951694117,
+  "actual_distance_share_of_move": 0.05144546618922038
+ },
+ "C2b_relevant_crosstalk": {
+  "tau": 0.02333569678028849,
+  "median_Kc": 1.7123421486896555,
+  "tau_over_K": 0.013627940419585996,
+  "median_ideal_move_norm": 1.5820767449142261,
+  "median_applied_to_ideal_distance": 0.08139067568923665,
+  "required_accuracy_share_of_move": 0.00861395660064825,
+  "actual_distance_share_of_move": 0.05144546618922038
+ },
+ "C3c_relevant_exec_noise": {
+  "tau": 0.024352287964760768,
+  "median_Kc": 2.2411129041112585,
+  "tau_over_K": 0.010866158469788462,
+  "median_ideal_move_norm": 1.2960382469794116,
+  "median_applied_to_ideal_distance": 0.3888114740938234,
+  "required_accuracy_share_of_move": 0.008384134106469064,
+  "actual_distance_share_of_move": 0.29999999999999993
+ }
+}
