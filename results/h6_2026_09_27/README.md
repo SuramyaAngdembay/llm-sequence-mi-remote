@@ -139,38 +139,58 @@ A size-matched random edit gave +0.008.
 
 ## Reading (against the frozen interpretation rules)
 
-1. **Where the profile information enters session positions (rule 1).**
-   Session-position rescue first exceeds profile-position rescue at hidden
-   state 26, on both day types. The O-sourced patch clearly beats the
-   T-sourced control there. Through hidden state 22, restoring the profile
-   positions alone recovers 98% of the effect, and restoring the session
-   positions recovers 8%. By 26, the session positions carry 84%. The
-   profile-dependent information therefore moves into the session positions
-   mainly in blocks 22 to 25. The patched layers bound the transition to that
-   window, and nothing here localizes it further.
-2. **Components (rule 2).** The attention outputs of blocks 21 and 25 each
-   restore about 5%. The move itself must happen through attention, so it
-   presumably happens in blocks 22 to 24, which were not tested, or is spread
-   across heads and blocks. Late MLPs at session positions (blocks 25, 29
-   and 33) each restore 29% to 54%, and so does block 33's attention. These
-   single-component rescues overlap and sum to more than the whole. They show
-   that late blocks carry the profile-dependent difference forward. They do
-   not show that any one component is necessary or unique.
-3. **Selected-feature mediation (rule 3).** The second branch applies.
-   Selected rescue is near zero and not larger than the control or random
-   edits. The full layer-26 adapter contribution restores 83%. **The
-   adapter's layer-26 contribution carries the dependence, but the 5 selected
-   coefficients do not under this intervention.** Three facts support this:
-   - The selected coefficients barely change under the swap.
-   - Where one does switch off entirely (7693), restoring it does not help
-     either.
-   - Restoring the whole residual stream at session positions (+0.204) and
-     restoring only the adapter delta (+0.203) agree, so the base model's own
-     layer-26 state contributes nothing measurable.
+*Wording corrected on 2026-09-27 after the follow-up review
+(`~/Documents/mi-paper-review-2026-09-27/h6-followup-review.md`). The earlier
+text said the information "moves into the session positions mainly in blocks
+22 to 25", that the selected coefficients "do not carry" the dependence, that
+"restoring" 7693 did not help, and that the base model's state "contributes
+nothing". Each went beyond what restoration patching identifies.*
 
-   The caveat is approximate realization of the coefficient edits (q90
-   normalized error 1.0). This does not show that no SAE features mediate the
-   dependence. Only these 5 were tested.
+1. **Rescue by session-position states rises sharply between hidden states
+   22 and 26 (rule 1).** Session-position rescue first exceeds
+   profile-position rescue at hidden state 26, on both day types. The
+   O-sourced patch clearly beats the T-sourced control there. The rise in
+   session-position rescue from 22 to 26 is +0.185 [+0.155, +0.215] on attack
+   days and +0.211 on benign days. This crossover is an operational
+   statistic. It does not identify where organisation information first
+   reaches session positions. Earlier information could be present but
+   overwritten by later reads of the swapped profile. It could also need other
+   corrupted components restored jointly. Restoration patching alone cannot
+   separate these.
+2. **Components (rule 2).** The attention outputs of blocks 21 and 25 each
+   restore about 5%. Late MLPs at session positions (blocks 25, 29 and 33)
+   each restore 29% to 54%, and so does block 33's attention. A positive
+   late-MLP patch identifies a useful restored output. It does not locate
+   the transfer: MLPs act within positions and may transform or amplify
+   information already present. The rescues overlap and are not additive
+   shares of a circuit.
+3. **Selected features (rule 3).** Selected rescue is near zero and not
+   larger than the control or random edits. The full layer-26 delta restores
+   83%. **The tested joint decoder-based restoration of these five
+   coefficients did not produce detectable rescue.** This supports
+   deprioritizing the set for the current paper. It does not exclude
+   mediation by these features, for two reasons:
+   - the intervention realizes the requested codes only approximately;
+   - failing to rescue in the corrupted run does not rule out necessity or an
+     interaction with other components.
+
+   Feature 7693 switches off entirely on 17 receivers. On them, the *joint*
+   five-feature restoration did not help either (post hoc). No intervention
+   restored 7693 alone. Mass-weighting also changes the picture of
+   realization. 7693 accounts for 95% of the requested squared change. About
+   30% of edited tokens request changes smaller than 5% of a typical
+   activation, and on those the per-token error ratio mostly measures
+   arithmetic noise.
+   - **Arithmetic.** The intended codes subtract bf16 states before the float32
+     cast, and the verification casts before subtracting. A zero-edit code
+     comparison under identical arithmetic has not been run.
+   - **Full-delta patch.** Ignoring rounding, the patch gives A_O + (B_R − B_O),
+     where A and B are the adapted and base states. It restores the original
+     adapted state but keeps the base model's profile-induced difference.
+     Full-residual rescue minus full-delta rescue is +0.001 [−0.003, +0.005]
+     on attack days: no difference was detected in this comparison. The delta
+     includes adaptation's effects accumulated in earlier layers, so the
+     patch does not isolate the layer-26 LoRA weights.
 4. **Attack versus benign (rule 4).** No attack-specific rescue is detected.
    Attack days are, if anything, slightly less profile-dependent (T input
    effect −0.037 [−0.066, −0.008]; the R interval includes zero). That
@@ -190,7 +210,8 @@ model shows none of this.
   endpoint was computed.
 - A circuit or path. These are activation and component patches, not path
   patching.
-- Which heads or which of blocks 22 to 24 move the information.
+- Where organisation information first reaches session positions, or which
+  heads and blocks move it.
 - Whether other SAE features at layer 26 carry the dependence.
 - Anything confirmatory, since the users are development data.
 

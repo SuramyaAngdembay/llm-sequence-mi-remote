@@ -354,6 +354,27 @@ development users; primary job 20927962).
   users, head-level and every-block patching, and DAY field-level
   substitution remain open.
 
+**2026-09-27, H6 wording corrected after the follow-up review**
+(`~/Documents/mi-paper-review-2026-09-27/h6-followup-review.md`). The result
+entry above keeps its numbers. These readings replace its interpretive
+phrases.
+
+- "The information moves in blocks 22 to 25" becomes: *session-position
+  rescue rises sharply between hidden states 22 and 26* (+0.185
+  [+0.155, +0.215]). The crossover is operational and does not identify the
+  first transfer.
+- Late-MLP rescues are useful restored outputs, not transfer locations.
+- "The selected coefficients do not carry it" becomes: *the tested joint
+  decoder-based restoration of these five coefficients did not produce
+  detectable rescue*. Deprioritize the set; do not exclude it.
+- The 7693 check used the joint five-feature restoration, not 7693 alone.
+- The full-delta patch equals A_O + (B_R − B_O). Full-residual minus
+  full-delta rescue is +0.001 [−0.003, +0.005]: no difference detected. It
+  does not isolate the layer-26 LoRA weights.
+- Realization summary: 7693 carries 95% of the requested squared change. The
+  per-token error quantiles are dominated by tiny requests. The intended and
+  verification codes use different bf16 subtraction order.
+
 **2026-09-25, interpretation map (written while both jobs are queued; no
 pilot output exists).** What each outcome would and would not mean. All
 readings stay exploratory; the receivers were inspected in package 4.

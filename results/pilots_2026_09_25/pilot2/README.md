@@ -110,10 +110,10 @@ F1 is +0.128, +0.196 and +0.120. F2 (attack minus benign day) is −0.008 to
    selected set the association is inconclusive.
 
 Not established here: where the dependence is computed. The H6 pilot
-(`results/h6_2026_09_27/README.md`, development users) has since localized
-it. The information comes from the organisation line and enters session
-positions in blocks 22 to 25. It is carried by the layer-26 adapter delta, not
-by the 5 selected coefficients. Also not established: any attack-specific
+(`results/h6_2026_09_27/README.md`, development users) found that it comes
+from the organisation line. Session-position states become able to rescue it
+between hidden states 22 and 26. The tested restoration of the 5 selected
+coefficients did not rescue it. Also not established: any attack-specific
 separation, or a detection benefit.
 
 ## Files

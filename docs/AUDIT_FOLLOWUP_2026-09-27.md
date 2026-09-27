@@ -4,7 +4,7 @@ Response to `~/Documents/mi-paper-review-2026-09-27/review.md`. Everything
 here is **exploratory**. Every receiver population was examined earlier, and
 the H6 cohort is development data.
 
-Status: complete. The H6 detail is in `results/h6_2026_09_27/README.md`.
+Status: complete. The H6 detail is in `results/h6_2026_09_27/README.md`. H6 wording was corrected on 2026-09-27 after the follow-up review (`h6-followup-review.md`).
 
 ## 1. Corrections to the completed experiments
 
@@ -66,16 +66,18 @@ shifts used. Details and tables are in the repair section of
 |---|---|
 | Size of the dependence | Replacing DAY and PSY raises adapted loss by +0.243 [+0.203, +0.283]. The base model does not respond (−0.001). |
 | Which profile line | The DAY line alone gives +0.246. The PSY line alone gives +0.004. A second foreign partner gives +0.209. |
-| Where it enters the session positions | Through hidden state 22, profile-position patches restore 98%. By 26, session-position patches restore 84% [78%, 90%]; the matched-source control restores 23%. The move happens mainly in blocks 22 to 25. |
-| Components | Attention outputs of blocks 21 and 25 each restore about 5%. Late MLPs at session positions (blocks 25, 29, 33) each restore 29% to 54%. These single-component rescues overlap. |
-| Mediation at layer 26 | Restoring the adapter's whole layer-26 delta at session positions restores 83%. Restoring the 5 selected coefficients restores 0.3% (+0.0008 [−0.0006, +0.0031]), no more than control or size-matched random edits. |
+| Where session-position rescue rises | Through hidden state 22, profile-position patches restore 98%. By 26, session-position patches restore 84% [78%, 90%]; the matched-source control restores 23%. The rise from 22 to 26 is +0.185 [+0.155, +0.215]. This operational crossover does not identify where the information first transfers. |
+| Components | Attention outputs of blocks 21 and 25 each restore about 5%. Late MLPs at session positions (blocks 25, 29, 33) each restore 29% to 54%. These are useful restored outputs, not transfer locations, and they overlap. |
+| Selected features at layer 26 | The full layer-26 delta patch at session positions restores 83%. The tested joint decoder-based restoration of the 5 selected coefficients restores 0.3% (+0.0008 [−0.0006, +0.0031]), no more than control or size-matched random edits. |
 | Attack-specific | None detected. Rescue fractions match between day types. Attack days are, if anything, slightly less profile-dependent. |
 
 **Caveat on mediation.** The coefficient edits are applied at their intended
 size, but their realization is approximate: normalized target error q90 1.0.
 The selected features barely change under the swap. The exception is 7693,
-which switches off entirely on 17 receivers, and restoring it does not help
-either (post hoc, 5 users). Only these 5 features were tested.
+which switches off entirely on 17 receivers. There, the joint five-feature
+restoration did not help either (post hoc, 5 users); no intervention restored
+7693 alone. Only these 5 features were tested. The result supports
+deprioritizing the set, not excluding mediation.
 
 ## 4. Claims, kept separate
 
@@ -84,7 +86,7 @@ either (post hoc, 5 users). Only these 5 features were tested.
 | Detector performance | Not tested in this round. No endpoint here measures detection. |
 | Input dependence | Supported: adaptation makes behaviour prediction sensitive to profile replacement. Pilot 2 gives +0.11 to +0.18 nats per token on confirmation users, and H6 gives +0.24 on discovery users. It happens on attack and benign days alike and comes from the organisation line, not the personality line. No familiarity effect detected. |
 | Represented information | Feature-level associations only. 4596's association with lower adapted loss reproduces; 3455 goes the other way. What any feature represents is not identified. |
-| Causal influence and mediation | Influence: the tested SAE edits change session predictions more than the tested PCA and mean-difference edits at the same tokens and sizes. Mediation: the profile dependence passes into session positions mainly in blocks 22 to 25 and is carried by the adapter's layer-26 delta. It is not carried by the 5 selected coefficients under the tested restoration. These are activation and component patches, not path patching. |
+| Causal influence and mediation | Influence: the tested SAE edits change session predictions more than the tested PCA and mean-difference edits at the same tokens and sizes. Mediation: session-position rescue rises sharply between hidden states 22 and 26, and the full layer-26 delta patch restores 83%. The tested joint restoration of the 5 selected coefficients produced no detectable rescue. That supports deprioritizing them, not excluding mediation: realization is approximate, and a restoration null does not rule out necessity or interactions. These are activation and component patches, not path patching. |
 
 ## 5. Reading
 
@@ -95,9 +97,10 @@ either (post hoc, 5 users). Only these 5 features were tested.
 - Feature 4596 has a reproducible association with lower adapted loss.
 - Under the existing intervention design, the selected SAE edits influence
   predictions more than the tested PCA and mean-difference alternatives.
-- The profile dependence enters session positions mainly in blocks 22 to 25 and is
-  carried by the layer-26 adapter delta. The 5 selected coefficients do not
-  carry it under the tested restoration (H6, development users).
+- Session-position rescue of the profile dependence rises sharply between
+  hidden states 22 and 26, and the full layer-26 delta patch restores 83%.
+  The tested joint restoration of the 5 selected coefficients gave no
+  detectable rescue (H6, development users).
 - The dependence comes from the organisation line, not the personality line.
 - Donor-policy bounds give a useful finite-bank robustness check. CERT
   behaviour conclusions survive any reweighting of the bank. CERT profile
@@ -135,8 +138,8 @@ either (post hoc, 5 users). Only these 5 features were tested.
   detection endpoint under profile substitution.
 - Whether the mean-difference differential holds at its own positions with a
   replacement-size edit on a fresh population.
-- Which heads, and which of blocks 22 to 24, move the organisation
-  information into session positions. That needs every-block and head-level
+- Where organisation information first reaches session positions, and
+  which heads and blocks move it. That needs every-block and head-level
   attention patching.
 - Which DAY fields drive the dependence: department, role, team or project.
 - Whether other layer-26 SAE features carry the dependence. That needs a
@@ -149,14 +152,19 @@ either (post hoc, 5 users). Only these 5 features were tested.
 Further work is warranted only where the paper needs it.
 
 1. **Report H6 as a characterization.** Fine-tuning made session prediction
-   depend on organisational context. That information moves into session
-   positions mainly in blocks 22 to 25, and the selected features do not carry it.
-   This limits the SAE story: the selected features influence predictions
-   (Pilots 1 and 4), but they do not mediate the profile dependence.
+   depend on organisational context. Session-position states become able to
+   rescue it between hidden states 22 and 26. The tested restoration of the
+   selected features did not rescue it. This limits the SAE story: the
+   selected features influence predictions (Pilots 1 and 4), but no evidence
+   links them to the profile dependence.
 2. **Test detection before any harm claim.** The one experiment the paper
-   needs next is a detection endpoint under organisation-line substitution:
-   does the anomaly score or the day-level PR-AUC change? Without it, the
-   dependence stays described, not judged.
+   needs next is a detection endpoint under organisation-line substitution.
+   Declare the estimand first, as the follow-up review notes. Metadata
+   corruption means the person, behaviour and label are fixed and the
+   substituted fields are wrong; a genuine role change is a different
+   question. Use a representative evaluation population with a threshold
+   fixed on separate data. Without this, the dependence stays described, not
+   judged.
 3. **Treat mechanism detail as thesis work.** If it is wanted, run one
    bounded pilot on held-out users. It would cover every block from 21 to
    26, head-level attention in blocks 22 to 25, DAY field-level
