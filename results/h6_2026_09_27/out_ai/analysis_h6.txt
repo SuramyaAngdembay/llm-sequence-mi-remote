@@ -1,0 +1,324 @@
+H6 (exploratory). Behaviour-only target loss, nats per token; mean of user means, 95% user bootstrap (10k; 5k).
+
+Implementation checks (max |loss - R_on|): {"self_prof@10": 0.0, "self_sess@26": 0.0, "zero": 0.0}
+
+== input effects (variant minus original)
+  malicious input R - O, adapter on                      +0.24545 [+0.20478, +0.28591] (5k: [+0.20480, +0.28600]) users 30 +30/-0
+  benign    input R - O, adapter on                      +0.27945 [+0.23805, +0.31931] (5k: [+0.23815, +0.32047]) users 30 +30/-0
+  paired    input R - O, adapter on [attack - benign]    -0.03400 [-0.07425, +0.00571] (5k: [-0.07460, +0.00730]) users 30 +11/-19
+  malicious input R - O, adapter off                     -0.00139 [-0.00857, +0.00511] (5k: [-0.00861, +0.00520]) users 30 +15/-15
+  benign    input R - O, adapter off                     -0.00020 [-0.00669, +0.00613] (5k: [-0.00673, +0.00617]) users 30 +14/-16
+  paired    input R - O, adapter off [attack - benign]   -0.00118 [-0.00515, +0.00272] (5k: [-0.00521, +0.00270]) users 30 +14/-16
+  malicious input R - O, adapted minus base              +0.24684 [+0.20449, +0.28930] (5k: [+0.20423, +0.28909]) users 30 +30/-0
+  benign    input R - O, adapted minus base              +0.27965 [+0.23925, +0.31875] (5k: [+0.23996, +0.31935]) users 30 +30/-0
+  paired    input R - O, adapted minus base [attack - benign] -0.03282 [-0.07269, +0.00703] (5k: [-0.07265, +0.00877]) users 30 +10/-20
+  malicious input D - O, adapter on                      +0.24710 [+0.20669, +0.28739] (5k: [+0.20686, +0.28768]) users 30 +30/-0
+  benign    input D - O, adapter on                      +0.28578 [+0.23851, +0.33457] (5k: [+0.23870, +0.33494]) users 30 +30/-0
+  paired    input D - O, adapter on [attack - benign]    -0.03868 [-0.07895, +0.00038] (5k: [-0.07895, +0.00164]) users 30 +9/-21
+  malicious input D - O, adapter off                     +0.00497 [-0.00098, +0.01094] (5k: [-0.00106, +0.01079]) users 30 +17/-13
+  benign    input D - O, adapter off                     +0.00449 [-0.00128, +0.01044] (5k: [-0.00119, +0.01043]) users 30 +17/-13
+  paired    input D - O, adapter off [attack - benign]   +0.00048 [-0.00268, +0.00371] (5k: [-0.00273, +0.00373]) users 30 +14/-16
+  malicious input D - O, adapted minus base              +0.24213 [+0.20156, +0.28327] (5k: [+0.20124, +0.28363]) users 30 +30/-0
+  benign    input D - O, adapted minus base              +0.28129 [+0.23424, +0.32976] (5k: [+0.23408, +0.33006]) users 30 +30/-0
+  paired    input D - O, adapted minus base [attack - benign] -0.03916 [-0.07984, +0.00078] (5k: [-0.07936, +0.00171]) users 30 +9/-21
+  malicious input P - O, adapter on                      +0.00432 [-0.00285, +0.01146] (5k: [-0.00277, +0.01144]) users 30 +18/-12
+  benign    input P - O, adapter on                      +0.00674 [+0.00124, +0.01237] (5k: [+0.00128, +0.01230]) users 30 +18/-12
+  paired    input P - O, adapter on [attack - benign]    -0.00242 [-0.00966, +0.00456] (5k: [-0.00973, +0.00477]) users 30 +16/-14
+  malicious input P - O, adapter off                     -0.00484 [-0.00920, -0.00061] (5k: [-0.00911, -0.00072]) users 30 +11/-19
+  benign    input P - O, adapter off                     -0.00318 [-0.00773, +0.00170] (5k: [-0.00780, +0.00171]) users 30 +9/-21
+  paired    input P - O, adapter off [attack - benign]   -0.00166 [-0.00505, +0.00145] (5k: [-0.00509, +0.00140]) users 30 +13/-17
+  malicious input P - O, adapted minus base              +0.00916 [+0.00055, +0.01771] (5k: [+0.00038, +0.01765]) users 30 +23/-7
+  benign    input P - O, adapted minus base              +0.00992 [+0.00333, +0.01666] (5k: [+0.00329, +0.01652]) users 30 +20/-10
+  paired    input P - O, adapted minus base [attack - benign] -0.00076 [-0.00973, +0.00773] (5k: [-0.00970, +0.00779]) users 30 +15/-15
+  malicious input T - O, adapter on                      +0.20931 [+0.17128, +0.24668] (5k: [+0.17128, +0.24628]) users 30 +29/-1
+  benign    input T - O, adapter on                      +0.24590 [+0.20305, +0.28788] (5k: [+0.20234, +0.28887]) users 30 +29/-1
+  paired    input T - O, adapter on [attack - benign]    -0.03659 [-0.06640, -0.00717] (5k: [-0.06677, -0.00661]) users 30 +10/-20
+  malicious input T - O, adapter off                     +0.00198 [-0.00435, +0.00847] (5k: [-0.00436, +0.00852]) users 30 +16/-14
+  benign    input T - O, adapter off                     +0.00191 [-0.00496, +0.00891] (5k: [-0.00496, +0.00906]) users 30 +16/-14
+  paired    input T - O, adapter off [attack - benign]   +0.00007 [-0.00325, +0.00305] (5k: [-0.00331, +0.00305]) users 30 +16/-14
+  malicious input T - O, adapted minus base              +0.20733 [+0.16818, +0.24499] (5k: [+0.16753, +0.24454]) users 30 +29/-1
+  benign    input T - O, adapted minus base              +0.24399 [+0.20133, +0.28533] (5k: [+0.20050, +0.28573]) users 30 +28/-2
+  paired    input T - O, adapted minus base [attack - benign] -0.03666 [-0.06563, -0.00762] (5k: [-0.06597, -0.00730]) users 30 +10/-20
+
+== rescue of the R input effect: L(R_on) - L(R_on + patch); positive = moves toward the original
+  malicious rescue attn_sess@10                          +0.00053 [-0.00107, +0.00198] (5k: [-0.00107, +0.00201]) users 30 +17/-13
+  benign    rescue attn_sess@10                          +0.00088 [-0.00062, +0.00240] (5k: [-0.00065, +0.00243]) users 30 +18/-12
+  paired    rescue attn_sess@10 [attack - benign]        -0.00036 [-0.00223, +0.00142] (5k: [-0.00222, +0.00145]) users 30 +15/-15
+  malicious rescue attn_sess@14                          +0.00094 [-0.00090, +0.00266] (5k: [-0.00088, +0.00264]) users 30 +19/-11
+  benign    rescue attn_sess@14                          +0.00075 [-0.00127, +0.00272] (5k: [-0.00127, +0.00272]) users 30 +17/-13
+  paired    rescue attn_sess@14 [attack - benign]        +0.00018 [-0.00178, +0.00233] (5k: [-0.00175, +0.00241]) users 30 +14/-16
+  malicious rescue attn_sess@18                          +0.00268 [+0.00092, +0.00453] (5k: [+0.00092, +0.00452]) users 30 +21/-9
+  benign    rescue attn_sess@18                          +0.00306 [+0.00096, +0.00523] (5k: [+0.00097, +0.00522]) users 30 +24/-6
+  paired    rescue attn_sess@18 [attack - benign]        -0.00038 [-0.00282, +0.00174] (5k: [-0.00282, +0.00169]) users 30 +19/-11
+  malicious rescue attn_sess@2                           +0.00091 [-0.00027, +0.00205] (5k: [-0.00027, +0.00203]) users 30 +18/-12
+  benign    rescue attn_sess@2                           +0.00093 [-0.00045, +0.00241] (5k: [-0.00046, +0.00240]) users 30 +18/-12
+  paired    rescue attn_sess@2 [attack - benign]         -0.00002 [-0.00194, +0.00185] (5k: [-0.00197, +0.00186]) users 30 +15/-15
+  malicious rescue attn_sess@22                          +0.01393 [+0.00776, +0.02119] (5k: [+0.00789, +0.02109]) users 30 +24/-6
+  benign    rescue attn_sess@22                          +0.01518 [+0.00925, +0.02213] (5k: [+0.00930, +0.02204]) users 30 +27/-3
+  paired    rescue attn_sess@22 [attack - benign]        -0.00125 [-0.00459, +0.00237] (5k: [-0.00459, +0.00239]) users 30 +13/-17
+  malicious rescue attn_sess@26                          +0.01296 [+0.00681, +0.01941] (5k: [+0.00675, +0.01933]) users 30 +20/-10
+  benign    rescue attn_sess@26                          +0.01139 [+0.00623, +0.01664] (5k: [+0.00620, +0.01663]) users 30 +23/-7
+  paired    rescue attn_sess@26 [attack - benign]        +0.00157 [-0.00287, +0.00647] (5k: [-0.00300, +0.00645]) users 30 +17/-13
+  malicious rescue attn_sess@30                          +0.01855 [+0.01030, +0.02853] (5k: [+0.01037, +0.02841]) users 30 +23/-7
+  benign    rescue attn_sess@30                          +0.01722 [+0.00570, +0.03092] (5k: [+0.00564, +0.03064]) users 30 +22/-8
+  paired    rescue attn_sess@30 [attack - benign]        +0.00133 [-0.00586, +0.00875] (5k: [-0.00586, +0.00895]) users 30 +14/-16
+  malicious rescue attn_sess@34                          +0.09245 [+0.07400, +0.11133] (5k: [+0.07439, +0.11163]) users 30 +30/-0
+  benign    rescue attn_sess@34                          +0.10681 [+0.08639, +0.12726] (5k: [+0.08670, +0.12745]) users 30 +30/-0
+  paired    rescue attn_sess@34 [attack - benign]        -0.01435 [-0.03054, +0.00117] (5k: [-0.03043, +0.00114]) users 30 +13/-17
+  malicious rescue attn_sess@6                           +0.00111 [+0.00002, +0.00223] (5k: [+0.00003, +0.00225]) users 30 +21/-9
+  benign    rescue attn_sess@6                           +0.00010 [-0.00108, +0.00127] (5k: [-0.00107, +0.00125]) users 30 +16/-14
+  paired    rescue attn_sess@6 [attack - benign]         +0.00101 [-0.00052, +0.00257] (5k: [-0.00051, +0.00260]) users 30 +18/-12
+  malicious rescue mlp_sess@10                           +0.00006 [-0.00162, +0.00160] (5k: [-0.00165, +0.00165]) users 30 +17/-13
+  benign    rescue mlp_sess@10                           +0.00021 [-0.00189, +0.00237] (5k: [-0.00187, +0.00237]) users 30 +16/-14
+  paired    rescue mlp_sess@10 [attack - benign]         -0.00014 [-0.00209, +0.00160] (5k: [-0.00208, +0.00160]) users 30 +14/-16
+  malicious rescue mlp_sess@14                           -0.00035 [-0.00180, +0.00109] (5k: [-0.00177, +0.00108]) users 30 +16/-14
+  benign    rescue mlp_sess@14                           -0.00042 [-0.00228, +0.00141] (5k: [-0.00230, +0.00138]) users 30 +15/-15
+  paired    rescue mlp_sess@14 [attack - benign]         +0.00007 [-0.00178, +0.00175] (5k: [-0.00173, +0.00179]) users 30 +14/-16
+  malicious rescue mlp_sess@18                           +0.00228 [-0.00008, +0.00458] (5k: [-0.00007, +0.00459]) users 30 +18/-12
+  benign    rescue mlp_sess@18                           +0.00096 [-0.00153, +0.00327] (5k: [-0.00156, +0.00329]) users 30 +16/-14
+  paired    rescue mlp_sess@18 [attack - benign]         +0.00132 [-0.00073, +0.00339] (5k: [-0.00077, +0.00340]) users 30 +15/-15
+  malicious rescue mlp_sess@2                            +0.00018 [-0.00059, +0.00100] (5k: [-0.00059, +0.00103]) users 30 +14/-16
+  benign    rescue mlp_sess@2                            -0.00055 [-0.00208, +0.00069] (5k: [-0.00206, +0.00071]) users 30 +16/-14
+  paired    rescue mlp_sess@2 [attack - benign]          +0.00073 [-0.00078, +0.00242] (5k: [-0.00078, +0.00244]) users 30 +15/-15
+  malicious rescue mlp_sess@22                           +0.01447 [+0.00908, +0.02115] (5k: [+0.00922, +0.02114]) users 30 +28/-2
+  benign    rescue mlp_sess@22                           +0.01329 [+0.00760, +0.01992] (5k: [+0.00759, +0.01993]) users 30 +26/-4
+  paired    rescue mlp_sess@22 [attack - benign]         +0.00118 [-0.00161, +0.00411] (5k: [-0.00153, +0.00413]) users 30 +15/-15
+  malicious rescue mlp_sess@26                           +0.07209 [+0.05719, +0.08828] (5k: [+0.05742, +0.08813]) users 30 +29/-1
+  benign    rescue mlp_sess@26                           +0.07703 [+0.06029, +0.09520] (5k: [+0.06036, +0.09532]) users 30 +30/-0
+  paired    rescue mlp_sess@26 [attack - benign]         -0.00494 [-0.01943, +0.00829] (5k: [-0.01943, +0.00849]) users 30 +17/-13
+  malicious rescue mlp_sess@30                           +0.10958 [+0.08677, +0.13427] (5k: [+0.08708, +0.13427]) users 30 +30/-0
+  benign    rescue mlp_sess@30                           +0.12159 [+0.09603, +0.15072] (5k: [+0.09597, +0.15088]) users 30 +30/-0
+  paired    rescue mlp_sess@30 [attack - benign]         -0.01201 [-0.03752, +0.01051] (5k: [-0.03784, +0.01100]) users 30 +16/-14
+  malicious rescue mlp_sess@34                           +0.13330 [+0.10377, +0.16344] (5k: [+0.10384, +0.16267]) users 30 +28/-2
+  benign    rescue mlp_sess@34                           +0.14747 [+0.11460, +0.18061] (5k: [+0.11476, +0.18062]) users 30 +29/-1
+  paired    rescue mlp_sess@34 [attack - benign]         -0.01417 [-0.04106, +0.00986] (5k: [-0.04132, +0.01008]) users 30 +13/-17
+  malicious rescue mlp_sess@6                            +0.00090 [-0.00035, +0.00215] (5k: [-0.00034, +0.00215]) users 30 +19/-11
+  benign    rescue mlp_sess@6                            -0.00020 [-0.00162, +0.00118] (5k: [-0.00162, +0.00116]) users 30 +14/-16
+  paired    rescue mlp_sess@6 [attack - benign]          +0.00110 [-0.00040, +0.00274] (5k: [-0.00040, +0.00275]) users 30 +16/-14
+  malicious rescue resid_prof@10<-O                      +0.22586 [+0.18274, +0.26851] (5k: [+0.18217, +0.26834]) users 30 +29/-1
+  benign    rescue resid_prof@10<-O                      +0.26108 [+0.21525, +0.30401] (5k: [+0.21567, +0.30411]) users 30 +29/-1
+  paired    rescue resid_prof@10<-O [attack - benign]    -0.03522 [-0.07399, +0.00347] (5k: [-0.07399, +0.00437]) users 30 +9/-21
+  malicious rescue resid_prof@10<-T                      +0.04792 [-0.00093, +0.09603] (5k: [-0.00120, +0.09486]) users 30 +18/-12
+  benign    rescue resid_prof@10<-T                      +0.04604 [+0.00007, +0.09168] (5k: [+0.00008, +0.09044]) users 30 +17/-13
+  paired    rescue resid_prof@10<-T [attack - benign]    +0.00188 [-0.02157, +0.02851] (5k: [-0.02137, +0.02890]) users 30 +14/-16
+  malicious rescue resid_prof@14<-O                      +0.23062 [+0.18771, +0.27264] (5k: [+0.18705, +0.27237]) users 30 +29/-1
+  benign    rescue resid_prof@14<-O                      +0.26557 [+0.22135, +0.30756] (5k: [+0.22180, +0.30772]) users 30 +29/-1
+  paired    rescue resid_prof@14<-O [attack - benign]    -0.03495 [-0.07429, +0.00403] (5k: [-0.07419, +0.00496]) users 30 +10/-20
+  malicious rescue resid_prof@14<-T                      +0.04496 [-0.00267, +0.09189] (5k: [-0.00309, +0.09084]) users 30 +17/-13
+  benign    rescue resid_prof@14<-T                      +0.04465 [-0.00034, +0.08987] (5k: [-0.00074, +0.08856]) users 30 +17/-13
+  paired    rescue resid_prof@14<-T [attack - benign]    +0.00030 [-0.02252, +0.02506] (5k: [-0.02217, +0.02532]) users 30 +17/-13
+  malicious rescue resid_prof@18<-O                      +0.23479 [+0.19285, +0.27645] (5k: [+0.19196, +0.27617]) users 30 +29/-1
+  benign    rescue resid_prof@18<-O                      +0.27077 [+0.22867, +0.31105] (5k: [+0.22931, +0.31163]) users 30 +30/-0
+  paired    rescue resid_prof@18<-O [attack - benign]    -0.03598 [-0.07515, +0.00275] (5k: [-0.07521, +0.00351]) users 30 +12/-18
+  malicious rescue resid_prof@18<-T                      +0.04063 [-0.00634, +0.08684] (5k: [-0.00629, +0.08637]) users 30 +17/-13
+  benign    rescue resid_prof@18<-T                      +0.04337 [-0.00238, +0.08953] (5k: [-0.00277, +0.08852]) users 30 +16/-14
+  paired    rescue resid_prof@18<-T [attack - benign]    -0.00274 [-0.02493, +0.02107] (5k: [-0.02474, +0.02138]) users 30 +15/-15
+  malicious rescue resid_prof@22<-O                      +0.24158 [+0.20070, +0.28281] (5k: [+0.20066, +0.28281]) users 30 +30/-0
+  benign    rescue resid_prof@22<-O                      +0.27339 [+0.23241, +0.31269] (5k: [+0.23250, +0.31335]) users 30 +30/-0
+  paired    rescue resid_prof@22<-O [attack - benign]    -0.03181 [-0.07166, +0.00687] (5k: [-0.07191, +0.00830]) users 30 +11/-19
+  malicious rescue resid_prof@22<-T                      +0.05232 [+0.00724, +0.09812] (5k: [+0.00768, +0.09687]) users 30 +19/-11
+  benign    rescue resid_prof@22<-T                      +0.04978 [+0.00567, +0.09446] (5k: [+0.00604, +0.09360]) users 30 +18/-12
+  paired    rescue resid_prof@22<-T [attack - benign]    +0.00254 [-0.02054, +0.02767] (5k: [-0.02030, +0.02808]) users 30 +15/-15
+  malicious rescue resid_prof@26<-O                      +0.07063 [+0.04079, +0.10158] (5k: [+0.04151, +0.10156]) users 30 +24/-6
+  benign    rescue resid_prof@26<-O                      +0.06331 [+0.03516, +0.09279] (5k: [+0.03521, +0.09219]) users 30 +23/-7
+  paired    rescue resid_prof@26<-O [attack - benign]    +0.00732 [-0.00306, +0.01807] (5k: [-0.00284, +0.01804]) users 30 +17/-13
+  malicious rescue resid_prof@26<-T                      +0.02240 [-0.01438, +0.05960] (5k: [-0.01419, +0.05934]) users 30 +16/-14
+  benign    rescue resid_prof@26<-T                      +0.01293 [-0.02272, +0.04945] (5k: [-0.02284, +0.04927]) users 30 +15/-15
+  paired    rescue resid_prof@26<-T [attack - benign]    +0.00947 [+0.00019, +0.01881] (5k: [+0.00015, +0.01884]) users 30 +18/-12
+  malicious rescue resid_prof@2<-O                       +0.22090 [+0.17964, +0.26212] (5k: [+0.17911, +0.26202]) users 30 +29/-1
+  benign    rescue resid_prof@2<-O                       +0.25392 [+0.20852, +0.29682] (5k: [+0.20858, +0.29738]) users 30 +29/-1
+  paired    rescue resid_prof@2<-O [attack - benign]     -0.03302 [-0.07060, +0.00528] (5k: [-0.07060, +0.00619]) users 30 +12/-18
+  malicious rescue resid_prof@2<-T                       +0.05031 [+0.00396, +0.09635] (5k: [+0.00329, +0.09560]) users 30 +19/-11
+  benign    rescue resid_prof@2<-T                       +0.05145 [+0.00599, +0.09583] (5k: [+0.00645, +0.09492]) users 30 +19/-11
+  paired    rescue resid_prof@2<-T [attack - benign]     -0.00114 [-0.02330, +0.02269] (5k: [-0.02303, +0.02292]) users 30 +15/-15
+  malicious rescue resid_prof@30<-O                      +0.05855 [+0.02902, +0.08912] (5k: [+0.02956, +0.08920]) users 30 +23/-7
+  benign    rescue resid_prof@30<-O                      +0.04961 [+0.02279, +0.07716] (5k: [+0.02250, +0.07726]) users 30 +23/-7
+  paired    rescue resid_prof@30<-O [attack - benign]    +0.00894 [-0.00050, +0.01893] (5k: [-0.00051, +0.01900]) users 30 +18/-12
+  malicious rescue resid_prof@30<-T                      +0.02285 [-0.01256, +0.05821] (5k: [-0.01198, +0.05744]) users 30 +18/-12
+  benign    rescue resid_prof@30<-T                      +0.01484 [-0.01851, +0.04943] (5k: [-0.01838, +0.04881]) users 30 +17/-13
+  paired    rescue resid_prof@30<-T [attack - benign]    +0.00801 [-0.00074, +0.01687] (5k: [-0.00072, +0.01698]) users 30 +17/-13
+  malicious rescue resid_prof@34<-O                      +0.02698 [+0.00153, +0.05231] (5k: [+0.00203, +0.05258]) users 30 +21/-9
+  benign    rescue resid_prof@34<-O                      +0.02236 [-0.00198, +0.04495] (5k: [-0.00171, +0.04461]) users 30 +22/-8
+  paired    rescue resid_prof@34<-O [attack - benign]    +0.00463 [-0.00422, +0.01389] (5k: [-0.00421, +0.01401]) users 30 +18/-12
+  malicious rescue resid_prof@34<-T                      +0.01105 [-0.01744, +0.03889] (5k: [-0.01651, +0.03925]) users 30 +19/-11
+  benign    rescue resid_prof@34<-T                      +0.00570 [-0.02220, +0.03287] (5k: [-0.02195, +0.03281]) users 30 +17/-13
+  paired    rescue resid_prof@34<-T [attack - benign]    +0.00535 [-0.00270, +0.01348] (5k: [-0.00272, +0.01351]) users 30 +20/-10
+  malicious rescue resid_prof@6<-O                       +0.22366 [+0.18068, +0.26653] (5k: [+0.17953, +0.26634]) users 30 +29/-1
+  benign    rescue resid_prof@6<-O                       +0.25948 [+0.21396, +0.30253] (5k: [+0.21418, +0.30260]) users 30 +29/-1
+  paired    rescue resid_prof@6<-O [attack - benign]     -0.03582 [-0.07342, +0.00247] (5k: [-0.07351, +0.00339]) users 30 +10/-20
+  malicious rescue resid_prof@6<-T                       +0.04883 [+0.00174, +0.09551] (5k: [+0.00164, +0.09440]) users 30 +17/-13
+  benign    rescue resid_prof@6<-T                       +0.05036 [+0.00525, +0.09562] (5k: [+0.00531, +0.09465]) users 30 +19/-11
+  paired    rescue resid_prof@6<-T [attack - benign]     -0.00153 [-0.02404, +0.02355] (5k: [-0.02367, +0.02387]) users 30 +14/-16
+  malicious rescue resid_sess@10<-O                      +0.00202 [+0.00004, +0.00406] (5k: [+0.00005, +0.00408]) users 30 +19/-11
+  benign    rescue resid_sess@10<-O                      +0.00159 [-0.00087, +0.00412] (5k: [-0.00084, +0.00408]) users 30 +17/-13
+  paired    rescue resid_sess@10<-O [attack - benign]    +0.00044 [-0.00183, +0.00258] (5k: [-0.00181, +0.00260]) users 30 +15/-15
+  malicious rescue resid_sess@10<-T                      +0.00208 [+0.00038, +0.00387] (5k: [+0.00038, +0.00389]) users 30 +21/-9
+  benign    rescue resid_sess@10<-T                      +0.00189 [+0.00018, +0.00369] (5k: [+0.00018, +0.00371]) users 30 +21/-9
+  paired    rescue resid_sess@10<-T [attack - benign]    +0.00019 [-0.00162, +0.00207] (5k: [-0.00162, +0.00207]) users 30 +14/-16
+  malicious rescue resid_sess@14<-O                      +0.00289 [-0.00005, +0.00561] (5k: [-0.00001, +0.00564]) users 30 +20/-10
+  benign    rescue resid_sess@14<-O                      +0.00363 [+0.00058, +0.00682] (5k: [+0.00061, +0.00685]) users 30 +18/-12
+  paired    rescue resid_sess@14<-O [attack - benign]    -0.00075 [-0.00360, +0.00197] (5k: [-0.00362, +0.00201]) users 30 +19/-11
+  malicious rescue resid_sess@14<-T                      +0.00305 [+0.00076, +0.00553] (5k: [+0.00075, +0.00553]) users 30 +21/-9
+  benign    rescue resid_sess@14<-T                      +0.00306 [+0.00042, +0.00572] (5k: [+0.00036, +0.00574]) users 30 +21/-9
+  paired    rescue resid_sess@14<-T [attack - benign]    -0.00001 [-0.00257, +0.00259] (5k: [-0.00261, +0.00266]) users 30 +11/-19
+  malicious rescue resid_sess@18<-O                      +0.00559 [+0.00197, +0.00958] (5k: [+0.00197, +0.00949]) users 30 +20/-10
+  benign    rescue resid_sess@18<-O                      +0.00644 [+0.00182, +0.01130] (5k: [+0.00188, +0.01131]) users 30 +18/-12
+  paired    rescue resid_sess@18<-O [attack - benign]    -0.00085 [-0.00394, +0.00224] (5k: [-0.00398, +0.00224]) users 30 +13/-17
+  malicious rescue resid_sess@18<-T                      +0.00402 [+0.00087, +0.00756] (5k: [+0.00089, +0.00751]) users 30 +18/-12
+  benign    rescue resid_sess@18<-T                      +0.00418 [+0.00111, +0.00747] (5k: [+0.00113, +0.00743]) users 30 +21/-9
+  paired    rescue resid_sess@18<-T [attack - benign]    -0.00017 [-0.00301, +0.00260] (5k: [-0.00302, +0.00260]) users 30 +14/-16
+  malicious rescue resid_sess@22<-O                      +0.01928 [+0.01054, +0.02956] (5k: [+0.01062, +0.02940]) users 30 +22/-8
+  benign    rescue resid_sess@22<-O                      +0.01942 [+0.01074, +0.02948] (5k: [+0.01072, +0.02931]) users 30 +22/-8
+  paired    rescue resid_sess@22<-O [attack - benign]    -0.00014 [-0.00588, +0.00510] (5k: [-0.00588, +0.00520]) users 30 +16/-14
+  malicious rescue resid_sess@22<-T                      +0.01603 [+0.00828, +0.02423] (5k: [+0.00844, +0.02432]) users 30 +22/-8
+  benign    rescue resid_sess@22<-T                      +0.01443 [+0.00713, +0.02225] (5k: [+0.00728, +0.02235]) users 30 +21/-9
+  paired    rescue resid_sess@22<-T [attack - benign]    +0.00160 [-0.00431, +0.00701] (5k: [-0.00436, +0.00712]) users 30 +15/-15
+  malicious rescue resid_sess@26<-O                      +0.20500 [+0.17564, +0.23395] (5k: [+0.17627, +0.23402]) users 30 +30/-0
+  benign    rescue resid_sess@26<-O                      +0.23269 [+0.19730, +0.26927] (5k: [+0.19786, +0.26927]) users 30 +30/-0
+  paired    rescue resid_sess@26<-O [attack - benign]    -0.02769 [-0.06414, +0.00657] (5k: [-0.06425, +0.00710]) users 30 +14/-16
+  malicious rescue resid_sess@26<-T                      +0.05722 [+0.02043, +0.09557] (5k: [+0.02109, +0.09561]) users 30 +22/-8
+  benign    rescue resid_sess@26<-T                      +0.06151 [+0.02714, +0.09720] (5k: [+0.02783, +0.09596]) users 30 +19/-11
+  paired    rescue resid_sess@26<-T [attack - benign]    -0.00430 [-0.02508, +0.01763] (5k: [-0.02486, +0.01812]) users 30 +16/-14
+  malicious rescue resid_sess@2<-O                       -0.00012 [-0.00131, +0.00105] (5k: [-0.00129, +0.00106]) users 30 +16/-14
+  benign    rescue resid_sess@2<-O                       -0.00005 [-0.00129, +0.00128] (5k: [-0.00129, +0.00129]) users 30 +16/-14
+  paired    rescue resid_sess@2<-O [attack - benign]     -0.00007 [-0.00164, +0.00155] (5k: [-0.00166, +0.00155]) users 30 +12/-18
+  malicious rescue resid_sess@2<-T                       +0.00032 [-0.00059, +0.00123] (5k: [-0.00056, +0.00124]) users 30 +18/-12
+  benign    rescue resid_sess@2<-T                       -0.00048 [-0.00163, +0.00079] (5k: [-0.00162, +0.00078]) users 30 +14/-16
+  paired    rescue resid_sess@2<-T [attack - benign]     +0.00080 [-0.00064, +0.00222] (5k: [-0.00063, +0.00221]) users 30 +16/-14
+  malicious rescue resid_sess@30<-O                      +0.22154 [+0.18839, +0.25366] (5k: [+0.18869, +0.25372]) users 30 +30/-0
+  benign    rescue resid_sess@30<-O                      +0.25253 [+0.21214, +0.29272] (5k: [+0.21263, +0.29326]) users 30 +30/-0
+  paired    rescue resid_sess@30<-O [attack - benign]    -0.03099 [-0.06952, +0.00650] (5k: [-0.06952, +0.00742]) users 30 +12/-18
+  malicious rescue resid_sess@30<-T                      +0.05197 [+0.01357, +0.09205] (5k: [+0.01414, +0.09171]) users 30 +21/-9
+  benign    rescue resid_sess@30<-T                      +0.05537 [+0.01744, +0.09501] (5k: [+0.01756, +0.09407]) users 30 +19/-11
+  paired    rescue resid_sess@30<-T [attack - benign]    -0.00340 [-0.02501, +0.01982] (5k: [-0.02474, +0.02018]) users 30 +15/-15
+  malicious rescue resid_sess@34<-O                      +0.23627 [+0.20080, +0.27017] (5k: [+0.20114, +0.26975]) users 30 +30/-0
+  benign    rescue resid_sess@34<-O                      +0.26731 [+0.22604, +0.30709] (5k: [+0.22650, +0.30751]) users 30 +30/-0
+  paired    rescue resid_sess@34<-O [attack - benign]    -0.03104 [-0.06933, +0.00666] (5k: [-0.06949, +0.00782]) users 30 +13/-17
+  malicious rescue resid_sess@34<-T                      +0.04033 [-0.00018, +0.08128] (5k: [+0.00020, +0.08083]) users 30 +20/-10
+  benign    rescue resid_sess@34<-T                      +0.04366 [+0.00543, +0.08262] (5k: [+0.00496, +0.08144]) users 30 +17/-13
+  paired    rescue resid_sess@34<-T [attack - benign]    -0.00333 [-0.02643, +0.02136] (5k: [-0.02574, +0.02188]) users 30 +16/-14
+  malicious rescue resid_sess@6<-O                       +0.00171 [-0.00027, +0.00372] (5k: [-0.00026, +0.00371]) users 30 +17/-13
+  benign    rescue resid_sess@6<-O                       +0.00136 [-0.00091, +0.00370] (5k: [-0.00089, +0.00363]) users 30 +17/-13
+  paired    rescue resid_sess@6<-O [attack - benign]     +0.00035 [-0.00209, +0.00277] (5k: [-0.00205, +0.00279]) users 30 +16/-14
+  malicious rescue resid_sess@6<-T                       +0.00210 [+0.00078, +0.00351] (5k: [+0.00081, +0.00350]) users 30 +19/-11
+  benign    rescue resid_sess@6<-T                       +0.00133 [-0.00014, +0.00284] (5k: [-0.00014, +0.00287]) users 30 +20/-10
+  paired    rescue resid_sess@6<-T [attack - benign]     +0.00077 [-0.00085, +0.00259] (5k: [-0.00087, +0.00264]) users 30 +17/-13
+  malicious rescue sel_sess                              +0.00086 [-0.00086, +0.00348] (5k: [-0.00087, +0.00342]) users 30 +8/-18
+  benign    rescue sel_sess                              +0.00154 [-0.00004, +0.00360] (5k: [-0.00003, +0.00359]) users 30 +11/-12
+  paired    rescue sel_sess [attack - benign]            -0.00068 [-0.00161, +0.00036] (5k: [-0.00162, +0.00036]) users 30 +7/-20
+  malicious rescue sel_all                               +0.00084 [-0.00096, +0.00339] (5k: [-0.00096, +0.00335]) users 30 +9/-17
+  benign    rescue sel_all                               +0.00188 [+0.00016, +0.00409] (5k: [+0.00018, +0.00407]) users 30 +12/-11
+  paired    rescue sel_all [attack - benign]             -0.00104 [-0.00205, -0.00002] (5k: [-0.00202, -0.00002]) users 30 +8/-19
+  malicious rescue ctrl_sess                             +0.00029 [-0.00046, +0.00101] (5k: [-0.00045, +0.00101]) users 30 +19/-11
+  benign    rescue ctrl_sess                             +0.00041 [-0.00010, +0.00094] (5k: [-0.00011, +0.00094]) users 30 +15/-15
+  paired    rescue ctrl_sess [attack - benign]           -0.00012 [-0.00108, +0.00072] (5k: [-0.00109, +0.00073]) users 30 +17/-13
+  malicious rescue ctrl_all                              +0.00067 [-0.00004, +0.00145] (5k: [-0.00005, +0.00143]) users 30 +18/-12
+  benign    rescue ctrl_all                              +0.00047 [-0.00027, +0.00125] (5k: [-0.00026, +0.00124]) users 30 +17/-13
+  paired    rescue ctrl_all [attack - benign]            +0.00020 [-0.00072, +0.00112] (5k: [-0.00072, +0.00112]) users 30 +16/-14
+  malicious rescue rand_sess                             +0.00139 [+0.00004, +0.00372] (5k: [+0.00004, +0.00370]) users 30 +19/-7
+  benign    rescue rand_sess                             +0.00120 [+0.00005, +0.00293] (5k: [+0.00005, +0.00291]) users 30 +12/-11
+  paired    rescue rand_sess [attack - benign]           +0.00019 [-0.00050, +0.00107] (5k: [-0.00049, +0.00104]) users 30 +13/-14
+  malicious rescue fulldelta_sess                        +0.20573 [+0.17592, +0.23534] (5k: [+0.17651, +0.23484]) users 30 +30/-0
+  benign    rescue fulldelta_sess                        +0.23512 [+0.19997, +0.27144] (5k: [+0.20027, +0.27164]) users 30 +30/-0
+  paired    rescue fulldelta_sess [attack - benign]      -0.02939 [-0.06534, +0.00384] (5k: [-0.06537, +0.00494]) users 30 +13/-17
+  malicious rescue fulldelta_all                         +0.22518 [+0.18804, +0.26226] (5k: [+0.18816, +0.26192]) users 30 +30/-0
+  benign    rescue fulldelta_all                         +0.25774 [+0.21778, +0.29797] (5k: [+0.21842, +0.29839]) users 30 +30/-0
+  paired    rescue fulldelta_all [attack - benign]       -0.03256 [-0.07071, +0.00443] (5k: [-0.07071, +0.00555]) users 30 +12/-18
+
+== matched-control and mediation contrasts (paired)
+  malicious resid_prof@2<-O minus resid_prof@2<-T        +0.17059 [+0.13071, +0.21156] (5k: [+0.13055, +0.21109]) users 30 +29/-1
+  benign    resid_prof@2<-O minus resid_prof@2<-T        +0.20247 [+0.15476, +0.24970] (5k: [+0.15407, +0.24936]) users 30 +27/-3
+  paired    resid_prof@2<-O minus resid_prof@2<-T [attack - benign] -0.03188 [-0.06075, -0.00401] (5k: [-0.06131, -0.00382]) users 30 +9/-21
+  malicious resid_sess@2<-O minus resid_sess@2<-T        -0.00044 [-0.00147, +0.00058] (5k: [-0.00150, +0.00057]) users 30 +16/-14
+  benign    resid_sess@2<-O minus resid_sess@2<-T        +0.00042 [-0.00036, +0.00122] (5k: [-0.00035, +0.00122]) users 30 +15/-15
+  paired    resid_sess@2<-O minus resid_sess@2<-T [attack - benign] -0.00087 [-0.00209, +0.00035] (5k: [-0.00212, +0.00034]) users 30 +12/-18
+  malicious resid_prof@6<-O minus resid_prof@6<-T        +0.17483 [+0.13543, +0.21511] (5k: [+0.13529, +0.21433]) users 30 +29/-1
+  benign    resid_prof@6<-O minus resid_prof@6<-T        +0.20912 [+0.16475, +0.25363] (5k: [+0.16412, +0.25356]) users 30 +29/-1
+  paired    resid_prof@6<-O minus resid_prof@6<-T [attack - benign] -0.03429 [-0.06207, -0.00693] (5k: [-0.06288, -0.00647]) users 30 +11/-19
+  malicious resid_sess@6<-O minus resid_sess@6<-T        -0.00039 [-0.00175, +0.00089] (5k: [-0.00175, +0.00091]) users 30 +12/-18
+  benign    resid_sess@6<-O minus resid_sess@6<-T        +0.00003 [-0.00158, +0.00162] (5k: [-0.00157, +0.00163]) users 30 +15/-15
+  paired    resid_sess@6<-O minus resid_sess@6<-T [attack - benign] -0.00042 [-0.00211, +0.00128] (5k: [-0.00215, +0.00127]) users 30 +15/-15
+  malicious resid_prof@10<-O minus resid_prof@10<-T      +0.17794 [+0.13798, +0.21772] (5k: [+0.13783, +0.21634]) users 30 +29/-1
+  benign    resid_prof@10<-O minus resid_prof@10<-T      +0.21504 [+0.17060, +0.25903] (5k: [+0.16997, +0.25884]) users 30 +29/-1
+  paired    resid_prof@10<-O minus resid_prof@10<-T [attack - benign] -0.03710 [-0.06445, -0.01057] (5k: [-0.06530, -0.01028]) users 30 +10/-20
+  malicious resid_sess@10<-O minus resid_sess@10<-T      -0.00005 [-0.00176, +0.00159] (5k: [-0.00179, +0.00158]) users 30 +16/-14
+  benign    resid_sess@10<-O minus resid_sess@10<-T      -0.00030 [-0.00218, +0.00154] (5k: [-0.00214, +0.00155]) users 30 +15/-15
+  paired    resid_sess@10<-O minus resid_sess@10<-T [attack - benign] +0.00025 [-0.00138, +0.00184] (5k: [-0.00137, +0.00184]) users 30 +19/-11
+  malicious resid_prof@14<-O minus resid_prof@14<-T      +0.18566 [+0.14651, +0.22519] (5k: [+0.14625, +0.22482]) users 30 +28/-2
+  benign    resid_prof@14<-O minus resid_prof@14<-T      +0.22092 [+0.17920, +0.26337] (5k: [+0.17885, +0.26383]) users 30 +30/-0
+  paired    resid_prof@14<-O minus resid_prof@14<-T [attack - benign] -0.03526 [-0.06323, -0.00780] (5k: [-0.06412, -0.00770]) users 30 +10/-20
+  malicious resid_sess@14<-O minus resid_sess@14<-T      -0.00016 [-0.00237, +0.00194] (5k: [-0.00235, +0.00200]) users 30 +15/-15
+  benign    resid_sess@14<-O minus resid_sess@14<-T      +0.00057 [-0.00130, +0.00253] (5k: [-0.00129, +0.00256]) users 30 +13/-17
+  paired    resid_sess@14<-O minus resid_sess@14<-T [attack - benign] -0.00074 [-0.00277, +0.00127] (5k: [-0.00276, +0.00129]) users 30 +15/-15
+  malicious resid_prof@18<-O minus resid_prof@18<-T      +0.19416 [+0.15512, +0.23296] (5k: [+0.15507, +0.23226]) users 30 +29/-1
+  benign    resid_prof@18<-O minus resid_prof@18<-T      +0.22740 [+0.18510, +0.26944] (5k: [+0.18500, +0.26959]) users 30 +29/-1
+  paired    resid_prof@18<-O minus resid_prof@18<-T [attack - benign] -0.03324 [-0.06184, -0.00487] (5k: [-0.06264, -0.00430]) users 30 +11/-19
+  malicious resid_sess@18<-O minus resid_sess@18<-T      +0.00157 [-0.00124, +0.00454] (5k: [-0.00119, +0.00450]) users 30 +16/-14
+  benign    resid_sess@18<-O minus resid_sess@18<-T      +0.00226 [-0.00077, +0.00548] (5k: [-0.00071, +0.00548]) users 30 +18/-12
+  paired    resid_sess@18<-O minus resid_sess@18<-T [attack - benign] -0.00069 [-0.00316, +0.00172] (5k: [-0.00311, +0.00173]) users 30 +15/-15
+  malicious resid_prof@22<-O minus resid_prof@22<-T      +0.18926 [+0.15499, +0.22288] (5k: [+0.15577, +0.22235]) users 30 +29/-1
+  benign    resid_prof@22<-O minus resid_prof@22<-T      +0.22360 [+0.18431, +0.26256] (5k: [+0.18418, +0.26256]) users 30 +30/-0
+  paired    resid_prof@22<-O minus resid_prof@22<-T [attack - benign] -0.03435 [-0.06318, -0.00722] (5k: [-0.06358, -0.00670]) users 30 +10/-20
+  malicious resid_sess@22<-O minus resid_sess@22<-T      +0.00325 [-0.00430, +0.01219] (5k: [-0.00430, +0.01204]) users 30 +19/-11
+  benign    resid_sess@22<-O minus resid_sess@22<-T      +0.00499 [-0.00225, +0.01433] (5k: [-0.00225, +0.01437]) users 30 +15/-15
+  paired    resid_sess@22<-O minus resid_sess@22<-T [attack - benign] -0.00174 [-0.00545, +0.00193] (5k: [-0.00558, +0.00199]) users 30 +16/-14
+  malicious resid_prof@26<-O minus resid_prof@26<-T      +0.04823 [+0.02551, +0.07197] (5k: [+0.02586, +0.07106]) users 30 +24/-6
+  benign    resid_prof@26<-O minus resid_prof@26<-T      +0.05038 [+0.02991, +0.07096] (5k: [+0.02985, +0.07044]) users 30 +24/-6
+  paired    resid_prof@26<-O minus resid_prof@26<-T [attack - benign] -0.00215 [-0.01268, +0.00860] (5k: [-0.01270, +0.00857]) users 30 +17/-13
+  malicious resid_sess@26<-O minus resid_sess@26<-T      +0.14778 [+0.11607, +0.18011] (5k: [+0.11614, +0.18038]) users 30 +29/-1
+  benign    resid_sess@26<-O minus resid_sess@26<-T      +0.17117 [+0.13360, +0.20856] (5k: [+0.13316, +0.20809]) users 30 +30/-0
+  paired    resid_sess@26<-O minus resid_sess@26<-T [attack - benign] -0.02339 [-0.05069, +0.00170] (5k: [-0.05091, +0.00169]) users 30 +11/-19
+  malicious resid_prof@30<-O minus resid_prof@30<-T      +0.03570 [+0.01419, +0.05793] (5k: [+0.01439, +0.05760]) users 30 +23/-7
+  benign    resid_prof@30<-O minus resid_prof@30<-T      +0.03477 [+0.01493, +0.05380] (5k: [+0.01485, +0.05337]) users 30 +23/-7
+  paired    resid_prof@30<-O minus resid_prof@30<-T [attack - benign] +0.00093 [-0.01099, +0.01312] (5k: [-0.01084, +0.01302]) users 30 +14/-16
+  malicious resid_sess@30<-O minus resid_sess@30<-T      +0.16956 [+0.13741, +0.20170] (5k: [+0.13815, +0.20138]) users 30 +30/-0
+  benign    resid_sess@30<-O minus resid_sess@30<-T      +0.19716 [+0.16073, +0.23276] (5k: [+0.16016, +0.23243]) users 30 +30/-0
+  paired    resid_sess@30<-O minus resid_sess@30<-T [attack - benign] -0.02759 [-0.05434, -0.00245] (5k: [-0.05488, -0.00231]) users 30 +9/-21
+  malicious resid_prof@34<-O minus resid_prof@34<-T      +0.01593 [-0.00062, +0.03242] (5k: [-0.00062, +0.03209]) users 30 +18/-12
+  benign    resid_prof@34<-O minus resid_prof@34<-T      +0.01665 [+0.00039, +0.03287] (5k: [+0.00028, +0.03257]) users 30 +21/-9
+  paired    resid_prof@34<-O minus resid_prof@34<-T [attack - benign] -0.00072 [-0.01116, +0.00977] (5k: [-0.01123, +0.00969]) users 30 +15/-15
+  malicious resid_sess@34<-O minus resid_sess@34<-T      +0.19594 [+0.15964, +0.23261] (5k: [+0.15964, +0.23308]) users 30 +30/-0
+  benign    resid_sess@34<-O minus resid_sess@34<-T      +0.22365 [+0.18593, +0.26035] (5k: [+0.18512, +0.26048]) users 30 +30/-0
+  paired    resid_sess@34<-O minus resid_sess@34<-T [attack - benign] -0.02771 [-0.05349, -0.00244] (5k: [-0.05378, -0.00223]) users 30 +12/-18
+  malicious rescue sel_sess minus rescue ctrl_sess       +0.00057 [-0.00132, +0.00314] (5k: [-0.00133, +0.00308]) users 30 +11/-19
+  benign    rescue sel_sess minus rescue ctrl_sess       +0.00113 [-0.00045, +0.00313] (5k: [-0.00044, +0.00313]) users 30 +17/-13
+  paired    rescue sel_sess minus rescue ctrl_sess [attack - benign] -0.00056 [-0.00184, +0.00073] (5k: [-0.00186, +0.00072]) users 30 +12/-18
+  malicious rescue sel_sess minus rescue rand_sess       -0.00054 [-0.00137, +0.00032] (5k: [-0.00137, +0.00029]) users 30 +6/-20
+  benign    rescue sel_sess minus rescue rand_sess       +0.00034 [-0.00074, +0.00130] (5k: [-0.00074, +0.00128]) users 30 +14/-9
+  paired    rescue sel_sess minus rescue rand_sess [attack - benign] -0.00087 [-0.00177, +0.00005] (5k: [-0.00178, +0.00003]) users 30 +8/-19
+  malicious rescue sel_all minus rescue ctrl_all         +0.00017 [-0.00160, +0.00269] (5k: [-0.00160, +0.00267]) users 30 +14/-16
+  benign    rescue sel_all minus rescue ctrl_all         +0.00141 [-0.00032, +0.00354] (5k: [-0.00031, +0.00354]) users 30 +17/-13
+  paired    rescue sel_all minus rescue ctrl_all [attack - benign] -0.00124 [-0.00260, +0.00002] (5k: [-0.00259, +0.00002]) users 30 +11/-19
+  malicious rescue fulldelta_sess minus rescue sel_sess  +0.20487 [+0.17474, +0.23457] (5k: [+0.17495, +0.23435]) users 30 +30/-0
+  benign    rescue fulldelta_sess minus rescue sel_sess  +0.23358 [+0.19797, +0.27024] (5k: [+0.19864, +0.27058]) users 30 +30/-0
+  paired    rescue fulldelta_sess minus rescue sel_sess [attack - benign] -0.02871 [-0.06456, +0.00444] (5k: [-0.06469, +0.00543]) users 30 +13/-17
+
+== rescue fractions (only where the adapter-on R input effect is >= 0.05 with an interval excluding zero)
+  malicious: resid_prof@22<-O 0.98 [0.96, 1.00]; resid_sess@34<-O 0.96 [0.92, 1.01]; resid_prof@18<-O 0.96 [0.90, 0.99]; resid_prof@14<-O 0.94 [0.87, 0.98]; resid_prof@10<-O 0.92 [0.84, 0.98]; fulldelta_all 0.92 [0.87, 0.96]
+  benign: resid_prof@22<-O 0.98 [0.96, 1.00]; resid_prof@18<-O 0.97 [0.94, 0.99]; resid_sess@34<-O 0.96 [0.93, 0.99]; resid_prof@14<-O 0.95 [0.90, 0.98]; resid_prof@10<-O 0.93 [0.87, 0.98]; resid_prof@6<-O 0.93 [0.86, 0.98]
+
+== layer profile (attack | benign), absolute rescue point estimates
+  layer   resid_prof<-O   resid_sess<-O   resid_prof<-T   resid_sess<-T   attn_sess   mlp_sess
+      2   +0.2209|+0.2539   -0.0001|-0.0001   +0.0503|+0.0515   +0.0003|-0.0005   +0.0009|+0.0009   +0.0002|-0.0005
+      6   +0.2237|+0.2595   +0.0017|+0.0014   +0.0488|+0.0504   +0.0021|+0.0013   +0.0011|+0.0001   +0.0009|-0.0002
+     10   +0.2259|+0.2611   +0.0020|+0.0016   +0.0479|+0.0460   +0.0021|+0.0019   +0.0005|+0.0009   +0.0001|+0.0002
+     14   +0.2306|+0.2656   +0.0029|+0.0036   +0.0450|+0.0447   +0.0031|+0.0031   +0.0009|+0.0008   -0.0003|-0.0004
+     18   +0.2348|+0.2708   +0.0056|+0.0064   +0.0406|+0.0434   +0.0040|+0.0042   +0.0027|+0.0031   +0.0023|+0.0010
+     22   +0.2416|+0.2734   +0.0193|+0.0194   +0.0523|+0.0498   +0.0160|+0.0144   +0.0139|+0.0152   +0.0145|+0.0133
+     26   +0.0706|+0.0633   +0.2050|+0.2327   +0.0224|+0.0129   +0.0572|+0.0615   +0.0130|+0.0114   +0.0721|+0.0770
+     30   +0.0586|+0.0496   +0.2215|+0.2525   +0.0228|+0.0148   +0.0520|+0.0554   +0.0185|+0.0172   +0.1096|+0.1216
+     34   +0.0270|+0.0224   +0.2363|+0.2673   +0.0110|+0.0057   +0.0403|+0.0437   +0.0925|+0.1068   +0.1333|+0.1475
+
+First layer where session-position rescue exceeds profile-position rescue (point estimates): {'malicious': 26, 'benign': 26}
+
+== SAE-layer codes at aligned session positions, R minus O, token-level (mean over receivers)
+  sel  4596: signed -0.00083  absolute 0.00181  original mean 0.06924
+  sel  7693: signed -0.03028  absolute 0.03028  original mean 0.03028
+  sel  2302: signed -0.00001  absolute 0.00015  original mean 0.00013
+  sel  3673: signed -0.00099  absolute 0.00265  original mean 0.07061
+  sel  3455: signed -0.00112  absolute 0.00444  original mean 0.05703
+  ctl  6596: signed +0.00142  absolute 0.00256  original mean 0.01322
+  ctl  8017: signed +0.00003  absolute 0.00012  original mean 0.00008
+  ctl  6608: signed -0.00105  absolute 0.00360  original mean 0.03863
+  ctl  2765: signed +0.00189  absolute 0.00618  original mean 0.00402
+  ctl   886: signed +0.00008  absolute 0.00568  original mean 0.00378

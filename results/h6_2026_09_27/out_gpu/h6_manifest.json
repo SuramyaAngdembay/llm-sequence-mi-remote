@@ -1,0 +1,880 @@
+{
+ "exploratory": true,
+ "written_before_scoring": true,
+ "protocol": "docs/H6_PROFILE_PATCHING_PROTOCOL_2026-09-27.md",
+ "salt": "h6-2026-09-27",
+ "layers": [
+  2,
+  6,
+  10,
+  14,
+  18,
+  22,
+  26,
+  30,
+  34
+ ],
+ "sae_layer": 26,
+ "selected": [
+  4596,
+  7693,
+  2302,
+  3673,
+  3455
+ ],
+ "control": [
+  6596,
+  8017,
+  6608,
+  2765,
+  886
+ ],
+ "n_receivers": 120,
+ "n_users": 30,
+ "exclusions": [],
+ "session_alignment_failures": [],
+ "share_alignment_failures": 0.0,
+ "profile_token_alignment_coverage_median": 1.0,
+ "receivers": [
+  {
+   "id": "AKR0057:318",
+   "user": "AKR0057",
+   "kind": "malicious",
+   "partner_R": "JTM0223",
+   "partner_T": "TOR0193"
+  },
+  {
+   "id": "AKR0057:336",
+   "user": "AKR0057",
+   "kind": "benign",
+   "partner_R": "JTM0223",
+   "partner_T": "TOR0193"
+  },
+  {
+   "id": "AKR0057:317",
+   "user": "AKR0057",
+   "kind": "malicious",
+   "partner_R": "JTM0223",
+   "partner_T": "TOR0193"
+  },
+  {
+   "id": "AKR0057:337",
+   "user": "AKR0057",
+   "kind": "benign",
+   "partner_R": "JTM0223",
+   "partner_T": "TOR0193"
+  },
+  {
+   "id": "BDV0168:210",
+   "user": "BDV0168",
+   "kind": "malicious",
+   "partner_R": "FOB0756",
+   "partner_T": "TOR0193"
+  },
+  {
+   "id": "BDV0168:207",
+   "user": "BDV0168",
+   "kind": "benign",
+   "partner_R": "FOB0756",
+   "partner_T": "TOR0193"
+  },
+  {
+   "id": "BDV0168:211",
+   "user": "BDV0168",
+   "kind": "malicious",
+   "partner_R": "FOB0756",
+   "partner_T": "TOR0193"
+  },
+  {
+   "id": "BDV0168:206",
+   "user": "BDV0168",
+   "kind": "benign",
+   "partner_R": "FOB0756",
+   "partner_T": "TOR0193"
+  },
+  {
+   "id": "BLS0678:267",
+   "user": "BLS0678",
+   "kind": "malicious",
+   "partner_R": "BQS0525",
+   "partner_T": "DCH0843"
+  },
+  {
+   "id": "BLS0678:273",
+   "user": "BLS0678",
+   "kind": "benign",
+   "partner_R": "BQS0525",
+   "partner_T": "DCH0843"
+  },
+  {
+   "id": "BLS0678:270",
+   "user": "BLS0678",
+   "kind": "malicious",
+   "partner_R": "BQS0525",
+   "partner_T": "DCH0843"
+  },
+  {
+   "id": "BLS0678:274",
+   "user": "BLS0678",
+   "kind": "benign",
+   "partner_R": "BQS0525",
+   "partner_T": "DCH0843"
+  },
+  {
+   "id": "BTL0226:283",
+   "user": "BTL0226",
+   "kind": "malicious",
+   "partner_R": "LUR0896",
+   "partner_T": "CCH0182"
+  },
+  {
+   "id": "BTL0226:287",
+   "user": "BTL0226",
+   "kind": "benign",
+   "partner_R": "LUR0896",
+   "partner_T": "CCH0182"
+  },
+  {
+   "id": "BTL0226:281",
+   "user": "BTL0226",
+   "kind": "malicious",
+   "partner_R": "LUR0896",
+   "partner_T": "CCH0182"
+  },
+  {
+   "id": "BTL0226:276",
+   "user": "BTL0226",
+   "kind": "benign",
+   "partner_R": "LUR0896",
+   "partner_T": "CCH0182"
+  },
+  {
+   "id": "DRR0162:330",
+   "user": "DRR0162",
+   "kind": "malicious",
+   "partner_R": "GTD0219",
+   "partner_T": "USH0199"
+  },
+  {
+   "id": "DRR0162:312",
+   "user": "DRR0162",
+   "kind": "benign",
+   "partner_R": "GTD0219",
+   "partner_T": "USH0199"
+  },
+  {
+   "id": "DRR0162:347",
+   "user": "DRR0162",
+   "kind": "malicious",
+   "partner_R": "GTD0219",
+   "partner_T": "USH0199"
+  },
+  {
+   "id": "DRR0162:371",
+   "user": "DRR0162",
+   "kind": "benign",
+   "partner_R": "GTD0219",
+   "partner_T": "USH0199"
+  },
+  {
+   "id": "EGD0132:242",
+   "user": "EGD0132",
+   "kind": "malicious",
+   "partner_R": "CCH0182",
+   "partner_T": "QSV0778"
+  },
+  {
+   "id": "EGD0132:270",
+   "user": "EGD0132",
+   "kind": "benign",
+   "partner_R": "CCH0182",
+   "partner_T": "QSV0778"
+  },
+  {
+   "id": "EGD0132:220",
+   "user": "EGD0132",
+   "kind": "malicious",
+   "partner_R": "CCH0182",
+   "partner_T": "QSV0778"
+  },
+  {
+   "id": "EGD0132:211",
+   "user": "EGD0132",
+   "kind": "benign",
+   "partner_R": "CCH0182",
+   "partner_T": "QSV0778"
+  },
+  {
+   "id": "EHB0824:205",
+   "user": "EHB0824",
+   "kind": "malicious",
+   "partner_R": "HKB0418",
+   "partner_T": "BQS0525"
+  },
+  {
+   "id": "EHB0824:200",
+   "user": "EHB0824",
+   "kind": "benign",
+   "partner_R": "HKB0418",
+   "partner_T": "BQS0525"
+  },
+  {
+   "id": "EHB0824:207",
+   "user": "EHB0824",
+   "kind": "malicious",
+   "partner_R": "HKB0418",
+   "partner_T": "BQS0525"
+  },
+  {
+   "id": "EHB0824:210",
+   "user": "EHB0824",
+   "kind": "benign",
+   "partner_R": "HKB0418",
+   "partner_T": "BQS0525"
+  },
+  {
+   "id": "FMG0527:374",
+   "user": "FMG0527",
+   "kind": "malicious",
+   "partner_R": "PMJ0564",
+   "partner_T": "BBS0039"
+  },
+  {
+   "id": "FMG0527:375",
+   "user": "FMG0527",
+   "kind": "benign",
+   "partner_R": "PMJ0564",
+   "partner_T": "BBS0039"
+  },
+  {
+   "id": "FMG0527:373",
+   "user": "FMG0527",
+   "kind": "malicious",
+   "partner_R": "PMJ0564",
+   "partner_T": "BBS0039"
+  },
+  {
+   "id": "FMG0527:378",
+   "user": "FMG0527",
+   "kind": "benign",
+   "partner_R": "PMJ0564",
+   "partner_T": "BBS0039"
+  },
+  {
+   "id": "GHL0460:310",
+   "user": "GHL0460",
+   "kind": "malicious",
+   "partner_R": "CCH0182",
+   "partner_T": "SBK0161"
+  },
+  {
+   "id": "GHL0460:309",
+   "user": "GHL0460",
+   "kind": "benign",
+   "partner_R": "CCH0182",
+   "partner_T": "SBK0161"
+  },
+  {
+   "id": "GHL0460:311",
+   "user": "GHL0460",
+   "kind": "malicious",
+   "partner_R": "CCH0182",
+   "partner_T": "SBK0161"
+  },
+  {
+   "id": "GHL0460:312",
+   "user": "GHL0460",
+   "kind": "benign",
+   "partner_R": "CCH0182",
+   "partner_T": "SBK0161"
+  },
+  {
+   "id": "HBO0413:422",
+   "user": "HBO0413",
+   "kind": "malicious",
+   "partner_R": "SKG0759",
+   "partner_T": "LNR0656"
+  },
+  {
+   "id": "HBO0413:407",
+   "user": "HBO0413",
+   "kind": "benign",
+   "partner_R": "SKG0759",
+   "partner_T": "LNR0656"
+  },
+  {
+   "id": "HBO0413:452",
+   "user": "HBO0413",
+   "kind": "malicious",
+   "partner_R": "SKG0759",
+   "partner_T": "LNR0656"
+  },
+  {
+   "id": "HBO0413:462",
+   "user": "HBO0413",
+   "kind": "benign",
+   "partner_R": "SKG0759",
+   "partner_T": "LNR0656"
+  },
+  {
+   "id": "HJB0742:324",
+   "user": "HJB0742",
+   "kind": "malicious",
+   "partner_R": "PMJ0564",
+   "partner_T": "SVL0803"
+  },
+  {
+   "id": "HJB0742:319",
+   "user": "HJB0742",
+   "kind": "benign",
+   "partner_R": "PMJ0564",
+   "partner_T": "SVL0803"
+  },
+  {
+   "id": "HJB0742:326",
+   "user": "HJB0742",
+   "kind": "malicious",
+   "partner_R": "PMJ0564",
+   "partner_T": "SVL0803"
+  },
+  {
+   "id": "HJB0742:329",
+   "user": "HJB0742",
+   "kind": "benign",
+   "partner_R": "PMJ0564",
+   "partner_T": "SVL0803"
+  },
+  {
+   "id": "HXL0968:262",
+   "user": "HXL0968",
+   "kind": "malicious",
+   "partner_R": "CCA0046",
+   "partner_T": "BVC0790"
+  },
+  {
+   "id": "HXL0968:240",
+   "user": "HXL0968",
+   "kind": "benign",
+   "partner_R": "CCA0046",
+   "partner_T": "BVC0790"
+  },
+  {
+   "id": "HXL0968:277",
+   "user": "HXL0968",
+   "kind": "malicious",
+   "partner_R": "CCA0046",
+   "partner_T": "BVC0790"
+  },
+  {
+   "id": "HXL0968:301",
+   "user": "HXL0968",
+   "kind": "benign",
+   "partner_R": "CCA0046",
+   "partner_T": "BVC0790"
+  },
+  {
+   "id": "IJM0776:224",
+   "user": "IJM0776",
+   "kind": "malicious",
+   "partner_R": "JGT0221",
+   "partner_T": "CIM0926"
+  },
+  {
+   "id": "IJM0776:245",
+   "user": "IJM0776",
+   "kind": "benign",
+   "partner_R": "JGT0221",
+   "partner_T": "CIM0926"
+  },
+  {
+   "id": "IJM0776:211",
+   "user": "IJM0776",
+   "kind": "malicious",
+   "partner_R": "JGT0221",
+   "partner_T": "CIM0926"
+  },
+  {
+   "id": "IJM0776:184",
+   "user": "IJM0776",
+   "kind": "benign",
+   "partner_R": "JGT0221",
+   "partner_T": "CIM0926"
+  },
+  {
+   "id": "IKR0401:408",
+   "user": "IKR0401",
+   "kind": "malicious",
+   "partner_R": "MAH0864",
+   "partner_T": "JZD0888"
+  },
+  {
+   "id": "IKR0401:413",
+   "user": "IKR0401",
+   "kind": "benign",
+   "partner_R": "MAH0864",
+   "partner_T": "JZD0888"
+  },
+  {
+   "id": "IKR0401:392",
+   "user": "IKR0401",
+   "kind": "malicious",
+   "partner_R": "MAH0864",
+   "partner_T": "JZD0888"
+  },
+  {
+   "id": "IKR0401:414",
+   "user": "IKR0401",
+   "kind": "benign",
+   "partner_R": "MAH0864",
+   "partner_T": "JZD0888"
+  },
+  {
+   "id": "IUB0565:281",
+   "user": "IUB0565",
+   "kind": "malicious",
+   "partner_R": "NSS0876",
+   "partner_T": "MSS0001"
+  },
+  {
+   "id": "IUB0565:276",
+   "user": "IUB0565",
+   "kind": "benign",
+   "partner_R": "NSS0876",
+   "partner_T": "MSS0001"
+  },
+  {
+   "id": "IUB0565:301",
+   "user": "IUB0565",
+   "kind": "malicious",
+   "partner_R": "NSS0876",
+   "partner_T": "MSS0001"
+  },
+  {
+   "id": "IUB0565:275",
+   "user": "IUB0565",
+   "kind": "benign",
+   "partner_R": "NSS0876",
+   "partner_T": "MSS0001"
+  },
+  {
+   "id": "JMB0308:199",
+   "user": "JMB0308",
+   "kind": "malicious",
+   "partner_R": "JZD0888",
+   "partner_T": "AKH0758"
+  },
+  {
+   "id": "JMB0308:200",
+   "user": "JMB0308",
+   "kind": "benign",
+   "partner_R": "JZD0888",
+   "partner_T": "AKH0758"
+  },
+  {
+   "id": "JMB0308:198",
+   "user": "JMB0308",
+   "kind": "malicious",
+   "partner_R": "JZD0888",
+   "partner_T": "AKH0758"
+  },
+  {
+   "id": "JMB0308:203",
+   "user": "JMB0308",
+   "kind": "benign",
+   "partner_R": "JZD0888",
+   "partner_T": "AKH0758"
+  },
+  {
+   "id": "JRG0207:386",
+   "user": "JRG0207",
+   "kind": "malicious",
+   "partner_R": "SVS0871",
+   "partner_T": "KKW0879"
+  },
+  {
+   "id": "JRG0207:389",
+   "user": "JRG0207",
+   "kind": "benign",
+   "partner_R": "SVS0871",
+   "partner_T": "KKW0879"
+  },
+  {
+   "id": "JRG0207:382",
+   "user": "JRG0207",
+   "kind": "malicious",
+   "partner_R": "SVS0871",
+   "partner_T": "KKW0879"
+  },
+  {
+   "id": "JRG0207:381",
+   "user": "JRG0207",
+   "kind": "benign",
+   "partner_R": "SVS0871",
+   "partner_T": "KKW0879"
+  },
+  {
+   "id": "LJR0523:211",
+   "user": "LJR0523",
+   "kind": "malicious",
+   "partner_R": "JGT0221",
+   "partner_T": "IAT0263"
+  },
+  {
+   "id": "LJR0523:207",
+   "user": "LJR0523",
+   "kind": "benign",
+   "partner_R": "JGT0221",
+   "partner_T": "IAT0263"
+  },
+  {
+   "id": "LJR0523:220",
+   "user": "LJR0523",
+   "kind": "malicious",
+   "partner_R": "JGT0221",
+   "partner_T": "IAT0263"
+  },
+  {
+   "id": "LJR0523:221",
+   "user": "LJR0523",
+   "kind": "benign",
+   "partner_R": "JGT0221",
+   "partner_T": "IAT0263"
+  },
+  {
+   "id": "MAR0955:404",
+   "user": "MAR0955",
+   "kind": "malicious",
+   "partner_R": "MSO0222",
+   "partner_T": "AIP0982"
+  },
+  {
+   "id": "MAR0955:406",
+   "user": "MAR0955",
+   "kind": "benign",
+   "partner_R": "MSO0222",
+   "partner_T": "AIP0982"
+  },
+  {
+   "id": "MAR0955:401",
+   "user": "MAR0955",
+   "kind": "malicious",
+   "partner_R": "MSO0222",
+   "partner_T": "AIP0982"
+  },
+  {
+   "id": "MAR0955:400",
+   "user": "MAR0955",
+   "kind": "benign",
+   "partner_R": "MSO0222",
+   "partner_T": "AIP0982"
+  },
+  {
+   "id": "MAS0025:269",
+   "user": "MAS0025",
+   "kind": "malicious",
+   "partner_R": "DCH0843",
+   "partner_T": "JJB0127"
+  },
+  {
+   "id": "MAS0025:268",
+   "user": "MAS0025",
+   "kind": "benign",
+   "partner_R": "DCH0843",
+   "partner_T": "JJB0127"
+  },
+  {
+   "id": "MAS0025:270",
+   "user": "MAS0025",
+   "kind": "malicious",
+   "partner_R": "DCH0843",
+   "partner_T": "JJB0127"
+  },
+  {
+   "id": "MAS0025:267",
+   "user": "MAS0025",
+   "kind": "benign",
+   "partner_R": "DCH0843",
+   "partner_T": "JJB0127"
+  },
+  {
+   "id": "MDH0580:381",
+   "user": "MDH0580",
+   "kind": "malicious",
+   "partner_R": "JDC0030",
+   "partner_T": "GCR0554"
+  },
+  {
+   "id": "MDH0580:366",
+   "user": "MDH0580",
+   "kind": "benign",
+   "partner_R": "JDC0030",
+   "partner_T": "GCR0554"
+  },
+  {
+   "id": "MDH0580:424",
+   "user": "MDH0580",
+   "kind": "malicious",
+   "partner_R": "JDC0030",
+   "partner_T": "GCR0554"
+  },
+  {
+   "id": "MDH0580:427",
+   "user": "MDH0580",
+   "kind": "benign",
+   "partner_R": "JDC0030",
+   "partner_T": "GCR0554"
+  },
+  {
+   "id": "MYD0978:346",
+   "user": "MYD0978",
+   "kind": "malicious",
+   "partner_R": "BSS0463",
+   "partner_T": "JJB0127"
+  },
+  {
+   "id": "MYD0978:344",
+   "user": "MYD0978",
+   "kind": "benign",
+   "partner_R": "BSS0463",
+   "partner_T": "JJB0127"
+  },
+  {
+   "id": "MYD0978:347",
+   "user": "MYD0978",
+   "kind": "malicious",
+   "partner_R": "BSS0463",
+   "partner_T": "JJB0127"
+  },
+  {
+   "id": "MYD0978:343",
+   "user": "MYD0978",
+   "kind": "benign",
+   "partner_R": "BSS0463",
+   "partner_T": "JJB0127"
+  },
+  {
+   "id": "PSF0133:218",
+   "user": "PSF0133",
+   "kind": "malicious",
+   "partner_R": "SKG0759",
+   "partner_T": "GCR0554"
+  },
+  {
+   "id": "PSF0133:211",
+   "user": "PSF0133",
+   "kind": "benign",
+   "partner_R": "SKG0759",
+   "partner_T": "GCR0554"
+  },
+  {
+   "id": "PSF0133:246",
+   "user": "PSF0133",
+   "kind": "malicious",
+   "partner_R": "SKG0759",
+   "partner_T": "GCR0554"
+  },
+  {
+   "id": "PSF0133:273",
+   "user": "PSF0133",
+   "kind": "benign",
+   "partner_R": "SKG0759",
+   "partner_T": "GCR0554"
+  },
+  {
+   "id": "RAB0589:255",
+   "user": "RAB0589",
+   "kind": "malicious",
+   "partner_R": "KKW0879",
+   "partner_T": "LAP0338"
+  },
+  {
+   "id": "RAB0589:253",
+   "user": "RAB0589",
+   "kind": "benign",
+   "partner_R": "KKW0879",
+   "partner_T": "LAP0338"
+  },
+  {
+   "id": "RAB0589:261",
+   "user": "RAB0589",
+   "kind": "malicious",
+   "partner_R": "KKW0879",
+   "partner_T": "LAP0338"
+  },
+  {
+   "id": "RAB0589:266",
+   "user": "RAB0589",
+   "kind": "benign",
+   "partner_R": "KKW0879",
+   "partner_T": "LAP0338"
+  },
+  {
+   "id": "RAR0725:218",
+   "user": "RAR0725",
+   "kind": "malicious",
+   "partner_R": "BBS0039",
+   "partner_T": "JTM0223"
+  },
+  {
+   "id": "RAR0725:231",
+   "user": "RAR0725",
+   "kind": "benign",
+   "partner_R": "BBS0039",
+   "partner_T": "JTM0223"
+  },
+  {
+   "id": "RAR0725:190",
+   "user": "RAR0725",
+   "kind": "malicious",
+   "partner_R": "BBS0039",
+   "partner_T": "JTM0223"
+  },
+  {
+   "id": "RAR0725:184",
+   "user": "RAR0725",
+   "kind": "benign",
+   "partner_R": "BBS0039",
+   "partner_T": "JTM0223"
+  },
+  {
+   "id": "RHL0992:217",
+   "user": "RHL0992",
+   "kind": "malicious",
+   "partner_R": "UAD0771",
+   "partner_T": "SVS0871"
+  },
+  {
+   "id": "RHL0992:191",
+   "user": "RHL0992",
+   "kind": "benign",
+   "partner_R": "UAD0771",
+   "partner_T": "SVS0871"
+  },
+  {
+   "id": "RHL0992:245",
+   "user": "RHL0992",
+   "kind": "malicious",
+   "partner_R": "UAD0771",
+   "partner_T": "SVS0871"
+  },
+  {
+   "id": "RHL0992:253",
+   "user": "RHL0992",
+   "kind": "benign",
+   "partner_R": "UAD0771",
+   "partner_T": "SVS0871"
+  },
+  {
+   "id": "RMW0542:212",
+   "user": "RMW0542",
+   "kind": "malicious",
+   "partner_R": "KKW0879",
+   "partner_T": "JTM0223"
+  },
+  {
+   "id": "RMW0542:231",
+   "user": "RMW0542",
+   "kind": "benign",
+   "partner_R": "KKW0879",
+   "partner_T": "JTM0223"
+  },
+  {
+   "id": "RMW0542:213",
+   "user": "RMW0542",
+   "kind": "malicious",
+   "partner_R": "KKW0879",
+   "partner_T": "JTM0223"
+  },
+  {
+   "id": "RMW0542:232",
+   "user": "RMW0542",
+   "kind": "benign",
+   "partner_R": "KKW0879",
+   "partner_T": "JTM0223"
+  },
+  {
+   "id": "TAP0551:295",
+   "user": "TAP0551",
+   "kind": "malicious",
+   "partner_R": "CNE0352",
+   "partner_T": "BJP0134"
+  },
+  {
+   "id": "TAP0551:291",
+   "user": "TAP0551",
+   "kind": "benign",
+   "partner_R": "CNE0352",
+   "partner_T": "BJP0134"
+  },
+  {
+   "id": "TAP0551:297",
+   "user": "TAP0551",
+   "kind": "malicious",
+   "partner_R": "CNE0352",
+   "partner_T": "BJP0134"
+  },
+  {
+   "id": "TAP0551:301",
+   "user": "TAP0551",
+   "kind": "benign",
+   "partner_R": "CNE0352",
+   "partner_T": "BJP0134"
+  },
+  {
+   "id": "VSS0154:253",
+   "user": "VSS0154",
+   "kind": "malicious",
+   "partner_R": "CLH0703",
+   "partner_T": "CSH0626"
+  },
+  {
+   "id": "VSS0154:247",
+   "user": "VSS0154",
+   "kind": "benign",
+   "partner_R": "CLH0703",
+   "partner_T": "CSH0626"
+  },
+  {
+   "id": "VSS0154:249",
+   "user": "VSS0154",
+   "kind": "malicious",
+   "partner_R": "CLH0703",
+   "partner_T": "CSH0626"
+  },
+  {
+   "id": "VSS0154:246",
+   "user": "VSS0154",
+   "kind": "benign",
+   "partner_R": "CLH0703",
+   "partner_T": "CSH0626"
+  },
+  {
+   "id": "XHW0498:245",
+   "user": "XHW0498",
+   "kind": "malicious",
+   "partner_R": "NGC0058",
+   "partner_T": "KBP0008"
+  },
+  {
+   "id": "XHW0498:218",
+   "user": "XHW0498",
+   "kind": "benign",
+   "partner_R": "NGC0058",
+   "partner_T": "KBP0008"
+  },
+  {
+   "id": "XHW0498:248",
+   "user": "XHW0498",
+   "kind": "malicious",
+   "partner_R": "NGC0058",
+   "partner_T": "KBP0008"
+  },
+  {
+   "id": "XHW0498:217",
+   "user": "XHW0498",
+   "kind": "benign",
+   "partner_R": "NGC0058",
+   "partner_T": "KBP0008"
+  }
+ ]
+}
