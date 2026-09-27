@@ -439,3 +439,25 @@ the adapted model uses to predict session tokens raises behaviour loss
 (ordinary predictive use; rpO_S and the single session-feature edits carry the
 effect, beyond matched random directions); (b) the organisation-direction
 injection carries it (E5 large, rpO_S small).
+
+**2026-09-27, bounded mathematical investigation of near-zero effects from
+imperfect feature interventions** (`research/imperfect_interventions_2026-09-27/`;
+protocol frozen at `8aa4fcd` before evaluation; CPU only, 0 GPU-h). It is
+separate from the paper's claims.
+
+- **Method result: negative.** A Lipschitz-widened equivalence interval for a
+  declared ideal intervention is valid (no false negligible in any condition).
+  But it was decisive in only 1 of 14 inexact-realization conditions, worse
+  than a realization gate. Direct execution of the ideal was correct in 98% of
+  datasets. The frozen criteria 2 and 3 fail, so there is no small-model pilot.
+- **H6 application.** 173 of 369 edited tokens, carrying 95% of the requested
+  change, had an over-k target, so no state realizes it. The 0.3% describes
+  the decoder edit, not a coefficient restoration.
+- **Possible contribution.** Only a feasibility-first protocol:
+  1. certify that the declared target exists;
+  2. execute declared lifts directly;
+  3. compare two lifts;
+  4. test equivalence at a declared margin;
+  5. keep restoration, necessity and interaction separate.
+
+  Every piece is established.
