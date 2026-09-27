@@ -1,0 +1,76 @@
+{
+ "exploratory": true,
+ "written_before_scoring": true,
+ "salt": "twos-phase3-2026-09-26",
+ "selected": [
+  6036,
+  7375,
+  1197,
+  7420,
+  3218
+ ],
+ "layer": 24,
+ "k": 8,
+ "n_pairs": 2,
+ "users": [
+  "User12"
+ ],
+ "exclusions": [],
+ "receiver_ids": [
+  [
+   "User12:2017-03-21:09:30",
+   "User12:2017-03-21:07:40"
+  ],
+  [
+   "User12:2017-03-21:10:10",
+   "User12:2017-03-21:11:30"
+  ]
+ ],
+ "donors_by_team": {
+  "Team2": [
+   "User5:2017-03-24:23:30",
+   "User5:2017-03-25:02:30",
+   "User5:2017-03-25:15:40",
+   "User5:2017-03-24:01:10"
+  ],
+  "Team3": [
+   "User22:2017-03-24:02:50",
+   "User22:2017-03-25:22:40",
+   "User22:2017-03-21:16:00",
+   "User22:2017-03-22:04:10"
+  ],
+  "Team4": [
+   "User11:2017-03-19:04:30",
+   "User10:2017-03-26:05:10",
+   "User11:2017-03-26:20:30",
+   "User10:2017-03-22:22:50"
+  ],
+  "Team5": [
+   "User16:2017-03-20:17:00",
+   "User16:2017-03-26:02:40",
+   "User16:2017-03-20:22:10",
+   "User16:2017-03-26:07:30"
+  ]
+ },
+ "conditions": [
+  "zero",
+  "recon",
+  "rpU",
+  "rpO",
+  "projO",
+  "randI_U",
+  "randR_U",
+  "randI_O",
+  "randR_O",
+  "randI_P",
+  "randR_P"
+ ],
+ "versions": {
+  "torch": "2.5.1+cu121",
+  "transformers": "5.14.1",
+  "peft": "0.19.1",
+  "bitsandbytes": "0.49.2",
+  "numpy": "2.2.6"
+ },
+ "smoke": true
+}

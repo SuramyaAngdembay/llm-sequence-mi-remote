@@ -1,0 +1,39 @@
+[phase3] 2 pairs, users ['User12'], donors {'Team2': ['User5:2017-03-24:23:30', 'User5:2017-03-25:02:30', 'User5:2017-03-25:15:40', 'User5:2017-03-24:01:10'], 'Team3': ['User22:2017-03-24:02:50', 'User22:2017-03-25:22:40', 'User22:2017-03-21:16:00', 'User22:2017-03-22:04:10'], 'Team4': ['User11:2017-03-19:04:30', 'User10:2017-03-26:05:10', 'User11:2017-03-26:20:30', 'User10:2017-03-22:22:50'], 'Team5': ['User16:2017-03-20:17:00', 'User16:2017-03-26:02:40', 'User16:2017-03-20:22:10', 'User16:2017-03-26:07:30']}
+Loading weights:   0%|          | 0/434 [00:00<?, ?it/s]Loading weights:   0%|          | 1/434 [00:01<11:50,  1.64s/it]Loading weights:   1%|          | 3/434 [00:01<03:32,  2.03it/s]Loading weights:   1%|          | 5/434 [00:02<02:17,  3.12it/s]Loading weights:   3%|▎         | 15/434 [00:02<00:34, 11.99it/s]Loading weights:   4%|▍         | 18/434 [00:02<00:42,  9.80it/s]Loading weights:   6%|▌         | 27/434 [00:03<00:26, 15.30it/s]Loading weights:   7%|▋         | 30/434 [00:03<00:28, 14.22it/s]Loading weights:   9%|▉         | 39/434 [00:03<00:20, 19.57it/s]Loading weights:  10%|▉         | 42/434 [00:03<00:23, 16.40it/s]Loading weights:  12%|█▏        | 51/434 [00:04<00:16, 22.70it/s]Loading weights:  12%|█▏        | 54/434 [00:04<00:18, 20.50it/s]Loading weights:  15%|█▍        | 63/434 [00:04<00:13, 27.99it/s]Loading weights:  15%|█▌        | 67/434 [00:04<00:14, 25.31it/s]Loading weights:  17%|█▋        | 75/434 [00:04<00:11, 31.28it/s]Loading weights:  18%|█▊        | 79/434 [00:05<00:13, 27.24it/s]Loading weights:  20%|██        | 87/434 [00:05<00:10, 32.43it/s]Loading weights:  21%|██        | 91/434 [00:05<00:12, 26.97it/s]Loading weights:  23%|██▎       | 99/434 [00:05<00:10, 32.25it/s]Loading weights:  24%|██▎       | 103/434 [00:05<00:13, 23.86it/s]Loading weights:  26%|██▌       | 111/434 [00:06<00:12, 25.12it/s]Loading weights:  26%|██▋       | 114/434 [00:06<00:14, 22.58it/s]Loading weights:  28%|██▊       | 123/434 [00:06<00:10, 30.77it/s]Loading weights:  29%|██▉       | 127/434 [00:06<00:11, 27.23it/s]Loading weights:  31%|███       | 135/434 [00:06<00:08, 33.54it/s]Loading weights:  32%|███▏      | 139/434 [00:07<00:10, 29.16it/s]Loading weights:  34%|███▍      | 147/434 [00:07<00:08, 35.02it/s]Loading weights:  35%|███▍      | 151/434 [00:07<00:12, 22.59it/s]Loading weights:  36%|███▌      | 155/434 [00:07<00:11, 24.73it/s]Loading weights:  37%|███▋      | 159/434 [00:07<00:10, 26.61it/s]Loading weights:  38%|███▊      | 163/434 [00:08<00:11, 22.90it/s]Loading weights:  39%|███▉      | 171/434 [00:08<00:11, 23.08it/s]Loading weights:  40%|████      | 174/434 [00:08<00:12, 20.87it/s]Loading weights:  42%|████▏     | 183/434 [00:08<00:08, 29.54it/s]Loading weights:  43%|████▎     | 187/434 [00:09<00:09, 26.61it/s]Loading weights:  45%|████▍     | 195/434 [00:09<00:07, 33.15it/s]Loading weights:  46%|████▌     | 199/434 [00:09<00:08, 28.62it/s]Loading weights:  48%|████▊     | 207/434 [00:09<00:08, 27.58it/s]Loading weights:  49%|████▊     | 211/434 [00:09<00:08, 25.37it/s]Loading weights:  50%|█████     | 219/434 [00:10<00:06, 31.86it/s]Loading weights:  51%|█████▏    | 223/434 [00:10<00:07, 27.78it/s]Loading weights:  53%|█████▎    | 231/434 [00:10<00:05, 34.10it/s]Loading weights:  54%|█████▍    | 235/434 [00:10<00:06, 28.61it/s]Loading weights:  56%|█████▌    | 243/434 [00:10<00:05, 34.68it/s]Loading weights:  57%|█████▋    | 247/434 [00:11<00:06, 28.15it/s]Loading weights:  59%|█████▉    | 255/434 [00:11<00:05, 32.74it/s]Loading weights:  60%|█████▉    | 259/434 [00:11<00:06, 28.15it/s]Loading weights:  62%|██████▏   | 267/434 [00:11<00:04, 34.82it/s]Loading weights:  62%|██████▏   | 271/434 [00:11<00:06, 26.93it/s]Loading weights:  64%|██████▍   | 279/434 [00:12<00:04, 31.88it/s]Loading weights:  65%|██████▌   | 283/434 [00:12<00:07, 19.11it/s]Loading weights:  67%|██████▋   | 291/434 [00:12<00:05, 25.33it/s]Loading weights:  68%|██████▊   | 295/434 [00:12<00:06, 23.07it/s]Loading weights:  70%|██████▉   | 303/434 [00:13<00:04, 28.72it/s]Loading weights:  71%|███████   | 307/434 [00:13<00:05, 24.94it/s]Loading weights:  73%|███████▎  | 315/434 [00:13<00:03, 30.48it/s]Loading weights:  74%|███████▎  | 319/434 [00:13<00:04, 26.00it/s]Loading weights:  75%|███████▌  | 327/434 [00:13<00:03, 31.40it/s]Loading weights:  76%|███████▋  | 331/434 [00:14<00:03, 26.60it/s]Loading weights:  78%|███████▊  | 339/434 [00:14<00:02, 31.86it/s]Loading weights:  79%|███████▉  | 343/434 [00:14<00:03, 26.75it/s]Loading weights:  81%|████████  | 351/434 [00:14<00:02, 32.09it/s]Loading weights:  82%|████████▏ | 355/434 [00:15<00:02, 26.91it/s]Loading weights:  84%|████████▎ | 363/434 [00:15<00:02, 30.73it/s]Loading weights:  85%|████████▍ | 367/434 [00:15<00:02, 27.36it/s]Loading weights:  86%|████████▋ | 375/434 [00:15<00:01, 32.62it/s]Loading weights:  87%|████████▋ | 379/434 [00:15<00:02, 27.16it/s]Loading weights:  89%|████████▉ | 387/434 [00:15<00:01, 32.40it/s]Loading weights:  90%|█████████ | 391/434 [00:16<00:01, 27.01it/s]Loading weights:  92%|█████████▏| 399/434 [00:16<00:01, 32.21it/s]Loading weights:  93%|█████████▎| 403/434 [00:16<00:01, 26.81it/s]Loading weights:  95%|█████████▍| 411/434 [00:16<00:00, 32.17it/s]Loading weights:  96%|█████████▌| 415/434 [00:17<00:00, 26.87it/s]Loading weights:  97%|█████████▋| 423/434 [00:17<00:00, 32.09it/s]Loading weights:  98%|█████████▊| 427/434 [00:17<00:00, 26.84it/s]Loading weights: 100%|██████████| 434/434 [00:17<00:00, 24.78it/s]
+[phase3] validity {"token_lengths_equal_cache": true, "fresh_vs_cache_rel_err_median": 0.001526200126240489, "fresh_vs_cache_rel_err_p95": 0.0017356550010158294, "active_set_jaccard_median": 1.0, "active_set_jaccard_mean": 0.9972766884531591, "selected_support_identical_share_of_receivers": 1.0, "dtype": "bfloat16 compute, NF4 weights, float64 SAE arithmetic", "zero_edit_vs_unhooked_max_abs": 0.0}
+[phase3] zero done (28s)
+[phase3] recon done (28s)
+[phase3] rpU done (29s)
+[phase3] rpO done (29s)
+[phase3] projO done (30s)
+[phase3] randI_U done (30s)
+[phase3] randR_U done (30s)
+[phase3] randI_O done (31s)
+[phase3] randR_O done (31s)
+[phase3] randI_P done (32s)
+[phase3] randR_P done (32s)
+[phase3] timing {"model_load_s": 19.5, "fresh_delta_s": 1.2, "scoring_s": 5.0, "forward_passes_scored": 44, "batch_size": 1, "peak_gpu_mem_gib": 2.23, "total_s": 32.0, "gpu": "NVIDIA GeForce RTX 3070"}
+PHASE3_DONE
+	Command being timed: "python -u scripts/twos_edit_validation_gpu.py --config /data/suramya/insider_mi/twos_work/qwen3b_twos.yaml --data-dir /data/suramya/insider_mi/twos_work/audit_pool_v3 --adapter-dir /data/suramya/insider_mi/lm/twos_adapter_s42_fixed --extract-dir /data/suramya/insider_mi/twos_work/v3_deltas_s42 --frontier-dir /data/suramya/insider_mi/review_2026_09_24/twos_s42_reselect_discovery --split-dir /data/suramya/insider_mi/review_2026_09_24/twos_split --out-dir /data/suramya/insider_mi/twos_feasibility_2026_09_26/phase3_smoke --smoke 2"
+	User time (seconds): 44.27
+	System time (seconds): 19.16
+	Percent of CPU this job got: 168%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:37.55
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 7469572
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 1536503
+	Minor (reclaiming a frame) page faults: 1189816
+	Voluntary context switches: 7087
+	Involuntary context switches: 287
+	Swaps: 0
+	File system inputs: 3057552
+	File system outputs: 108
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

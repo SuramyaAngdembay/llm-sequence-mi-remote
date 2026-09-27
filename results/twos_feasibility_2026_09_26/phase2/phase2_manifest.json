@@ -1,0 +1,76 @@
+{
+ "exploratory": true,
+ "written_before_computation": true,
+ "hashes": {
+  "ranking": "12b1069034954d01a83232a6f2c73be39b2f04e3a2e8454116f159659bf03ce5",
+  "candidate_rows": "2fbfe5f2da58d7a18fd700ecf88d93f98c67aebea12a90ee34348359145922e4",
+  "confirmation_users": "a17e75c4ebe1e7264f3610c7630eaa8d5cad58e3d757a4b23ea278c2f0b66cd3",
+  "discovery_users": "44b1f0324522c36b31bff93d90c84ed32528ee29d9965e32713655592f894f41",
+  "sae_model": "a2e1ac26ca3a5c9d685862a34c7e2ccf05a77f73c92d684b1b3a7c1049351fc1"
+ },
+ "selected": [
+  6036,
+  7375,
+  1197,
+  7420,
+  3218
+ ],
+ "control": [
+  7962,
+  972,
+  8082,
+  7232,
+  3157
+ ],
+ "layer": 24,
+ "k": 8,
+ "dev_donor_rule": "sha256('twos-dev-donors-2026-09-26|receiver|donor') order, benign, same team, other users, up to 16",
+ "populations": {
+  "development|benign": {
+   "pairs": 1120,
+   "receivers": 70,
+   "users": [
+    "User1",
+    "User13",
+    "User17",
+    "User2",
+    "User20",
+    "User21",
+    "User3",
+    "User7"
+   ]
+  },
+  "evaluation|benign": {
+   "pairs": 1088,
+   "receivers": 68,
+   "users": [
+    "User12",
+    "User14",
+    "User15",
+    "User18",
+    "User4",
+    "User6",
+    "User8",
+    "User9"
+   ]
+  },
+  "evaluation|anomalous": {
+   "pairs": 1012,
+   "receivers": 68,
+   "users": [
+    "User12",
+    "User14",
+    "User15",
+    "User18",
+    "User4",
+    "User6",
+    "User8",
+    "User9"
+   ]
+  }
+ },
+ "changed_threshold": 0.0001,
+ "eps_grid": "0.01,0.05,0.10,0.25",
+ "margin": 0.001,
+ "qp_cells": 40
+}

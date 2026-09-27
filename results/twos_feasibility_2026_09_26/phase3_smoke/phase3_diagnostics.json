@@ -1,0 +1,18 @@
+{
+ "cached|union|realized_frac": 0.9892527405738105,
+ "cached|union|collateral_rel": 0.37063389550767534,
+ "cached|union|over_k": 1.0,
+ "cached|own|realized_frac": 1.0,
+ "cached|own|collateral_rel": 0.3723323564051468,
+ "cached|own|over_k": 0.0,
+ "fresh|union|realized_frac": 0.98926113077279,
+ "fresh|union|collateral_rel": 0.3705520207510112,
+ "fresh|union|over_k": 1.0,
+ "fresh|own|realized_frac": 1.0,
+ "fresh|own|collateral_rel": 0.37225152198909256,
+ "fresh|own|over_k": 0.0,
+ "cached|projection|realized_frac": 1.0,
+ "cached|projection|collateral_rel": 0.38005218806711366,
+ "fresh|projection|realized_frac": 1.0,
+ "fresh|projection|collateral_rel": 0.38004633875973237
+}

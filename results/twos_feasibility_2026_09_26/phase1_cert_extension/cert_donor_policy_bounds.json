@@ -1,0 +1,2117 @@
+{
+ "input_sha256": "2387be9480f11dc1980768b74f96b619ebf6ee2e041b9502dc5537ec189d9b4f",
+ "rho_grid": [
+  0.0,
+  0.05,
+  0.1,
+  0.25
+ ],
+ "analyses": {
+  "dept|benign|behavior_only": {
+   "n_pairs": 9680,
+   "n_receivers": 605,
+   "n_users": 29,
+   "baseline_uniform": 0.017238621953842716,
+   "published_endpoint": 0.017238621953842716,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.017238621953842716,
+     "upper": 0.017238621953842716,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.013910534737758815,
+     "upper": 0.020728248231216995,
+     "width": 0.00681771349345818,
+     "lower_policy": {
+      "receivers_reweighted": 220,
+      "max_single_donor_share": 0.7499999999999998,
+      "mean_effective_donors_per_receiver": 13.385333958503326,
+      "tv_used": 0.05000000000000019
+     },
+     "upper_policy": {
+      "receivers_reweighted": 214,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 13.571331778911162,
+      "tv_used": 0.050000000000000294
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": 0.011600987269893559,
+     "upper": 0.02312390202696415,
+     "width": 0.011522914757070592,
+     "lower_policy": {
+      "receivers_reweighted": 332,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 11.045822945021534,
+      "tv_used": 0.10000000000000203
+     },
+     "upper_policy": {
+      "receivers_reweighted": 317,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 11.347738629201558,
+      "tv_used": 0.10000000000000211
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": 0.007243072343880978,
+     "upper": 0.02781499170322105,
+     "width": 0.020571919359340073,
+     "lower_policy": {
+      "receivers_reweighted": 464,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 6.6560836759738615,
+      "tv_used": 0.24999999999999933
+     },
+     "upper_policy": {
+      "receivers_reweighted": 455,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 6.864259290412951,
+      "tv_used": 0.25000000000000017
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    0.0027423398971754866,
+    0.03271762735672873
+   ],
+   "breakdown_radius_to_zero": Infinity
+  },
+  "dept|benign|profile_only": {
+   "n_pairs": 9680,
+   "n_receivers": 605,
+   "n_users": 29,
+   "baseline_uniform": 0.006856865587211546,
+   "published_endpoint": 0.006856865587211546,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.006856865587211546,
+     "upper": 0.006856865587211546,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": -0.005386463979873577,
+     "upper": 0.015637733417899636,
+     "width": 0.02102419739777321,
+     "lower_policy": {
+      "receivers_reweighted": 85,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 15.172414078765014,
+      "tv_used": 0.04999999999999984
+     },
+     "upper_policy": {
+      "receivers_reweighted": 142,
+      "max_single_donor_share": 0.8750000000000003,
+      "mean_effective_donors_per_receiver": 14.915673941406288,
+      "tv_used": 0.04999999999999986
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": -0.009353611390519233,
+     "upper": 0.01933045012482531,
+     "width": 0.02868406151534454,
+     "lower_policy": {
+      "receivers_reweighted": 195,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 14.231492707131682,
+      "tv_used": 0.10000000000000048
+     },
+     "upper_policy": {
+      "receivers_reweighted": 259,
+      "max_single_donor_share": 0.8750000000000003,
+      "mean_effective_donors_per_receiver": 13.869859783385252,
+      "tv_used": 0.10000000000000064
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": -0.018757152762094248,
+     "upper": 0.028192593694583185,
+     "width": 0.04694974645667743,
+     "lower_policy": {
+      "receivers_reweighted": 466,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 10.711170351953296,
+      "tv_used": 0.2500000000000021
+     },
+     "upper_policy": {
+      "receivers_reweighted": 502,
+      "max_single_donor_share": 0.9375000000000003,
+      "mean_effective_donors_per_receiver": 9.77187180555235,
+      "tv_used": 0.25000000000000117
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    -0.039401888834686254,
+    0.047271781789830825
+   ],
+   "breakdown_radius_to_zero": 0.01491358122534642
+  },
+  "dept|benign|full": {
+   "n_pairs": 9680,
+   "n_receivers": 605,
+   "n_users": 29,
+   "baseline_uniform": 0.014506922647224038,
+   "published_endpoint": 0.01450692264722404,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.014506922647224038,
+     "upper": 0.014506922647224038,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.01054080662205793,
+     "upper": 0.017954302097533455,
+     "width": 0.007413495475475526,
+     "lower_policy": {
+      "receivers_reweighted": 172,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 14.23683536782814,
+      "tv_used": 0.04999999999999987
+     },
+     "upper_policy": {
+      "receivers_reweighted": 182,
+      "max_single_donor_share": 0.9375,
+      "mean_effective_donors_per_receiver": 13.970617529338746,
+      "tv_used": 0.05000000000000007
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": 0.008504621384187165,
+     "upper": 0.019982414023178477,
+     "width": 0.011477792638991312,
+     "lower_policy": {
+      "receivers_reweighted": 306,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 11.905334903869733,
+      "tv_used": 0.10000000000000145
+     },
+     "upper_policy": {
+      "receivers_reweighted": 305,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 11.761786335792038,
+      "tv_used": 0.10000000000000173
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": 0.00444609741765591,
+     "upper": 0.02410351564988204,
+     "width": 0.01965741823222613,
+     "lower_policy": {
+      "receivers_reweighted": 484,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 7.183505568207573,
+      "tv_used": 0.25000000000000067
+     },
+     "upper_policy": {
+      "receivers_reweighted": 484,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 7.070367307933672,
+      "tv_used": 0.2500000000000007
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    -0.0021255340244572115,
+    0.030559414412044395
+   ],
+   "breakdown_radius_to_zero": 0.5493652773808978
+  },
+  "dept|anomalous|behavior_only": {
+   "n_pairs": 9520,
+   "n_receivers": 605,
+   "n_users": 29,
+   "baseline_uniform": 0.01371024230698132,
+   "published_endpoint": 0.01371024230698132,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.01371024230698132,
+     "upper": 0.01371024230698132,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.08333333333333333,
+      "mean_effective_donors_per_receiver": 15.735537190082646,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.08333333333333333,
+      "mean_effective_donors_per_receiver": 15.735537190082646,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.0111189559482875,
+     "upper": 0.016890772165812345,
+     "width": 0.005771816217524844,
+     "lower_policy": {
+      "receivers_reweighted": 282,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 12.892852321294763,
+      "tv_used": 0.05000000000000006
+     },
+     "upper_policy": {
+      "receivers_reweighted": 159,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 13.638093226555336,
+      "tv_used": 0.050000000000000336
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": 0.009565259227795215,
+     "upper": 0.01918584902418355,
+     "width": 0.009620589796388334,
+     "lower_policy": {
+      "receivers_reweighted": 397,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 10.972149559270225,
+      "tv_used": 0.10000000000000231
+     },
+     "upper_policy": {
+      "receivers_reweighted": 239,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 11.926727163771425,
+      "tv_used": 0.10000000000000205
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": 0.006748510539642031,
+     "upper": 0.024038841216993102,
+     "width": 0.01729033067735107,
+     "lower_policy": {
+      "receivers_reweighted": 513,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 6.359694704155112,
+      "tv_used": 0.25000000000000006
+     },
+     "upper_policy": {
+      "receivers_reweighted": 420,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 7.335319273628667,
+      "tv_used": 0.24999999999999678
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    0.003581352375365498,
+    0.02934129987346614
+   ],
+   "breakdown_radius_to_zero": Infinity
+  },
+  "dept|anomalous|profile_only": {
+   "n_pairs": 9520,
+   "n_receivers": 605,
+   "n_users": 29,
+   "baseline_uniform": 0.006599719376388043,
+   "published_endpoint": 0.0065997193763880435,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.006599719376388043,
+     "upper": 0.006599719376388043,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.08333333333333333,
+      "mean_effective_donors_per_receiver": 15.735537190082646,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.08333333333333333,
+      "mean_effective_donors_per_receiver": 15.735537190082646,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.0013659513227894104,
+     "upper": 0.014806049189283393,
+     "width": 0.013440097866493982,
+     "lower_policy": {
+      "receivers_reweighted": 128,
+      "max_single_donor_share": 0.9375,
+      "mean_effective_donors_per_receiver": 14.82221424298428,
+      "tv_used": 0.049999999999999926
+     },
+     "upper_policy": {
+      "receivers_reweighted": 97,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 14.941986516195108,
+      "tv_used": 0.049999999999999864
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": -0.002080117530843577,
+     "upper": 0.018430890028998947,
+     "width": 0.020511007559842524,
+     "lower_policy": {
+      "receivers_reweighted": 278,
+      "max_single_donor_share": 0.9375,
+      "mean_effective_donors_per_receiver": 13.500827561281374,
+      "tv_used": 0.10000000000000042
+     },
+     "upper_policy": {
+      "receivers_reweighted": 234,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 13.85234367786961,
+      "tv_used": 0.10000000000000063
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": -0.010566258270566585,
+     "upper": 0.02697015375939443,
+     "width": 0.03753641202996101,
+     "lower_policy": {
+      "receivers_reweighted": 488,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 9.863715482400002,
+      "tv_used": 0.2500000000000021
+     },
+     "upper_policy": {
+      "receivers_reweighted": 496,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 9.751891740670935,
+      "tv_used": 0.250000000000002
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    -0.02951610901677447,
+    0.04572475330063636
+   ],
+   "breakdown_radius_to_zero": 0.06880924165381702
+  },
+  "dept|anomalous|full": {
+   "n_pairs": 9520,
+   "n_receivers": 605,
+   "n_users": 29,
+   "baseline_uniform": 0.011740609971366157,
+   "published_endpoint": 0.011740609971366157,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.011740609971366157,
+     "upper": 0.011740609971366157,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.08333333333333333,
+      "mean_effective_donors_per_receiver": 15.735537190082646,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.08333333333333333,
+      "mean_effective_donors_per_receiver": 15.735537190082646,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.009482286485222513,
+     "upper": 0.014945595258936321,
+     "width": 0.005463308773713808,
+     "lower_policy": {
+      "receivers_reweighted": 282,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 13.14960157250547,
+      "tv_used": 0.050000000000000225
+     },
+     "upper_policy": {
+      "receivers_reweighted": 143,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 13.92356127664748,
+      "tv_used": 0.05000000000000012
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": 0.008068384520290996,
+     "upper": 0.016861594945619538,
+     "width": 0.008793210425328542,
+     "lower_policy": {
+      "receivers_reweighted": 397,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 11.18946580584437,
+      "tv_used": 0.100000000000002
+     },
+     "upper_policy": {
+      "receivers_reweighted": 250,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 12.10826092385687,
+      "tv_used": 0.1000000000000017
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": 0.0052316442740918375,
+     "upper": 0.02091376526148632,
+     "width": 0.015682120987394483,
+     "lower_policy": {
+      "receivers_reweighted": 528,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 6.770261461163346,
+      "tv_used": 0.2499999999999998
+     },
+     "upper_policy": {
+      "receivers_reweighted": 448,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 7.507282507689175,
+      "tv_used": 0.24999999999999903
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    0.0001893732524753595,
+    0.027306592678000792
+   ],
+   "breakdown_radius_to_zero": Infinity
+  },
+  "dept_role|benign|behavior_only": {
+   "n_pairs": 8448,
+   "n_receivers": 528,
+   "n_users": 27,
+   "baseline_uniform": 0.01584403671397227,
+   "published_endpoint": 0.01584403671397227,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.01584403671397227,
+     "upper": 0.01584403671397227,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.012808261043458955,
+     "upper": 0.0189349522858982,
+     "width": 0.006126691242439244,
+     "lower_policy": {
+      "receivers_reweighted": 192,
+      "max_single_donor_share": 0.875,
+      "mean_effective_donors_per_receiver": 13.41484437046861,
+      "tv_used": 0.04999999999999995
+     },
+     "upper_policy": {
+      "receivers_reweighted": 189,
+      "max_single_donor_share": 0.9999999999999997,
+      "mean_effective_donors_per_receiver": 13.441502514150926,
+      "tv_used": 0.049999999999999906
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": 0.010758056454450758,
+     "upper": 0.02102946314514662,
+     "width": 0.01027140669069586,
+     "lower_policy": {
+      "receivers_reweighted": 277,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 10.984583936895142,
+      "tv_used": 0.09999999999999888
+     },
+     "upper_policy": {
+      "receivers_reweighted": 274,
+      "max_single_donor_share": 1.0000000000000002,
+      "mean_effective_donors_per_receiver": 11.122666629014866,
+      "tv_used": 0.09999999999999862
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": 0.006839109345228686,
+     "upper": 0.02508692192327346,
+     "width": 0.018247812578044774,
+     "lower_policy": {
+      "receivers_reweighted": 400,
+      "max_single_donor_share": 1.0000000000000002,
+      "mean_effective_donors_per_receiver": 6.985698844709642,
+      "tv_used": 0.24999999999999897
+     },
+     "upper_policy": {
+      "receivers_reweighted": 393,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 7.019269993547638,
+      "tv_used": 0.24999999999999903
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    0.002852158657406611,
+    0.029486051521220608
+   ],
+   "breakdown_radius_to_zero": Infinity
+  },
+  "dept_role|benign|profile_only": {
+   "n_pairs": 8448,
+   "n_receivers": 528,
+   "n_users": 27,
+   "baseline_uniform": 0.008589151481310085,
+   "published_endpoint": 0.008589151481310084,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.008589151481310085,
+     "upper": 0.008589151481310085,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": -0.0033935478156086087,
+     "upper": 0.01700358628938311,
+     "width": 0.020397134104991718,
+     "lower_policy": {
+      "receivers_reweighted": 59,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 15.253021346214748,
+      "tv_used": 0.04999999999999989
+     },
+     "upper_policy": {
+      "receivers_reweighted": 115,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 14.942326363909425,
+      "tv_used": 0.04999999999999992
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": -0.007293911251878076,
+     "upper": 0.02063269455341992,
+     "width": 0.027926605805297995,
+     "lower_policy": {
+      "receivers_reweighted": 193,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 14.023184435534331,
+      "tv_used": 0.10000000000000016
+     },
+     "upper_policy": {
+      "receivers_reweighted": 224,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 13.774694140223271,
+      "tv_used": 0.10000000000000005
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": -0.016335676734258762,
+     "upper": 0.029197159834514305,
+     "width": 0.045532836568773064,
+     "lower_policy": {
+      "receivers_reweighted": 416,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 10.474849524557992,
+      "tv_used": 0.2499999999999978
+     },
+     "upper_policy": {
+      "receivers_reweighted": 452,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 9.455738544876699,
+      "tv_used": 0.2499999999999977
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    -0.036434337230492934,
+    0.04760146988530221
+   ],
+   "breakdown_radius_to_zero": 0.021306972042714617
+  },
+  "dept_role|benign|full": {
+   "n_pairs": 8448,
+   "n_receivers": 528,
+   "n_users": 27,
+   "baseline_uniform": 0.013880460073272012,
+   "published_endpoint": 0.013880460073272012,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.013880460073272012,
+     "upper": 0.013880460073272012,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.009949542299546813,
+     "upper": 0.017010421097984667,
+     "width": 0.007060878798437854,
+     "lower_policy": {
+      "receivers_reweighted": 155,
+      "max_single_donor_share": 0.9375,
+      "mean_effective_donors_per_receiver": 14.181525000872748,
+      "tv_used": 0.04999999999999988
+     },
+     "upper_policy": {
+      "receivers_reweighted": 168,
+      "max_single_donor_share": 0.9999999999999997,
+      "mean_effective_donors_per_receiver": 13.893723648533552,
+      "tv_used": 0.049999999999999864
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": 0.008068241022059344,
+     "upper": 0.018837983026547735,
+     "width": 0.010769742004488391,
+     "lower_policy": {
+      "receivers_reweighted": 256,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 11.898005775423695,
+      "tv_used": 0.0999999999999997
+     },
+     "upper_policy": {
+      "receivers_reweighted": 263,
+      "max_single_donor_share": 1.0000000000000002,
+      "mean_effective_donors_per_receiver": 11.562100024075493,
+      "tv_used": 0.09999999999999908
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": 0.004368031434389798,
+     "upper": 0.022465376877719243,
+     "width": 0.018097345443329443,
+     "lower_policy": {
+      "receivers_reweighted": 417,
+      "max_single_donor_share": 1.0000000000000002,
+      "mean_effective_donors_per_receiver": 7.346070110835106,
+      "tv_used": 0.24999999999999722
+     },
+     "upper_policy": {
+      "receivers_reweighted": 420,
+      "max_single_donor_share": 1.0000000000000002,
+      "mean_effective_donors_per_receiver": 7.0262100590262015,
+      "tv_used": 0.24999999999999856
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    -0.0015999043089140231,
+    0.028178147558715092
+   ],
+   "breakdown_radius_to_zero": 0.5857352086034022
+  },
+  "dept_role|anomalous|behavior_only": {
+   "n_pairs": 6708,
+   "n_receivers": 528,
+   "n_users": 27,
+   "baseline_uniform": 0.014754909303954435,
+   "published_endpoint": 0.014754909303954435,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.014754909303954435,
+     "upper": 0.014754909303954435,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 12.704545454545455,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 12.704545454545455,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.011889577092696496,
+     "upper": 0.017728754729595064,
+     "width": 0.005839177636898568,
+     "lower_policy": {
+      "receivers_reweighted": 203,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 10.56948406970533,
+      "tv_used": 0.050000000000000225
+     },
+     "upper_policy": {
+      "receivers_reweighted": 160,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 10.764468297768769,
+      "tv_used": 0.05000000000000046
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": 0.010203429261320082,
+     "upper": 0.01985880788402293,
+     "width": 0.009655378622702849,
+     "lower_policy": {
+      "receivers_reweighted": 291,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 8.96519969374322,
+      "tv_used": 0.09999999999999934
+     },
+     "upper_policy": {
+      "receivers_reweighted": 227,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 8.885120373520124,
+      "tv_used": 0.099999999999999
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": 0.007651491515820228,
+     "upper": 0.023845438628307503,
+     "width": 0.016193947112487277,
+     "lower_policy": {
+      "receivers_reweighted": 399,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 5.362213883088753,
+      "tv_used": 0.2499999999999953
+     },
+     "upper_policy": {
+      "receivers_reweighted": 351,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 5.180119810934134,
+      "tv_used": 0.24999999999999545
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    0.0052610624438500135,
+    0.027201757526140583
+   ],
+   "breakdown_radius_to_zero": Infinity
+  },
+  "dept_role|anomalous|profile_only": {
+   "n_pairs": 6708,
+   "n_receivers": 528,
+   "n_users": 27,
+   "baseline_uniform": 0.0059733922582943,
+   "published_endpoint": 0.005973392258294301,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.0059733922582943,
+     "upper": 0.0059733922582943,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 12.704545454545455,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 12.704545454545455,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.0009047232149690554,
+     "upper": 0.013470911905347745,
+     "width": 0.012566188690378689,
+     "lower_policy": {
+      "receivers_reweighted": 109,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 11.710633933445761,
+      "tv_used": 0.04999999999999993
+     },
+     "upper_policy": {
+      "receivers_reweighted": 73,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 11.937591684268707,
+      "tv_used": 0.04999999999999998
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": -0.0023506115749660837,
+     "upper": 0.016998406998976784,
+     "width": 0.019349018573942868,
+     "lower_policy": {
+      "receivers_reweighted": 226,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 10.60476345633828,
+      "tv_used": 0.10000000000000003
+     },
+     "upper_policy": {
+      "receivers_reweighted": 188,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 10.958647288605524,
+      "tv_used": 0.10000000000000023
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": -0.010118499716472251,
+     "upper": 0.025217157641005083,
+     "width": 0.03533565735747733,
+     "lower_policy": {
+      "receivers_reweighted": 385,
+      "max_single_donor_share": 1.0000000000000002,
+      "mean_effective_donors_per_receiver": 7.175741450044133,
+      "tv_used": 0.24999999999999709
+     },
+     "upper_policy": {
+      "receivers_reweighted": 366,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 7.731634223165981,
+      "tv_used": 0.24999999999999692
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    -0.025476785076674145,
+    0.04252360419484779
+   ],
+   "breakdown_radius_to_zero": 0.06300493397557154
+  },
+  "dept_role|anomalous|full": {
+   "n_pairs": 6708,
+   "n_receivers": 528,
+   "n_users": 27,
+   "baseline_uniform": 0.012333002630667507,
+   "published_endpoint": 0.012333002630667509,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.012333002630667507,
+     "upper": 0.012333002630667507,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 12.704545454545455,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 12.704545454545455,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.009914919514187897,
+     "upper": 0.01556479461784743,
+     "width": 0.005649875103659533,
+     "lower_policy": {
+      "receivers_reweighted": 207,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 10.6565351148194,
+      "tv_used": 0.05000000000000014
+     },
+     "upper_policy": {
+      "receivers_reweighted": 133,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 11.042103267244222,
+      "tv_used": 0.04999999999999999
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": 0.008496468618142183,
+     "upper": 0.017396540110303903,
+     "width": 0.00890007149216172,
+     "lower_policy": {
+      "receivers_reweighted": 302,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 9.109077073364954,
+      "tv_used": 0.09999999999999926
+     },
+     "upper_policy": {
+      "receivers_reweighted": 220,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 9.147476128711567,
+      "tv_used": 0.0999999999999995
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": 0.005828353454855041,
+     "upper": 0.020877868958436976,
+     "width": 0.015049515503581936,
+     "lower_policy": {
+      "receivers_reweighted": 408,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 5.660517495010013,
+      "tv_used": 0.24999999999999603
+     },
+     "upper_policy": {
+      "receivers_reweighted": 371,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 5.369384852012981,
+      "tv_used": 0.2499999999999959
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    0.0015544030812363406,
+    0.025597317380188504
+   ],
+   "breakdown_radius_to_zero": Infinity
+  },
+  "role|benign|behavior_only": {
+   "n_pairs": 8448,
+   "n_receivers": 528,
+   "n_users": 27,
+   "baseline_uniform": 0.015561550490094344,
+   "published_endpoint": 0.015561550490094342,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.015561550490094344,
+     "upper": 0.015561550490094344,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.012562185506263148,
+     "upper": 0.018723652161605975,
+     "width": 0.006161466655342828,
+     "lower_policy": {
+      "receivers_reweighted": 190,
+      "max_single_donor_share": 0.8124999999999998,
+      "mean_effective_donors_per_receiver": 13.323887304275932,
+      "tv_used": 0.04999999999999994
+     },
+     "upper_policy": {
+      "receivers_reweighted": 185,
+      "max_single_donor_share": 0.8125,
+      "mean_effective_donors_per_receiver": 13.39247056370587,
+      "tv_used": 0.04999999999999978
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": 0.010530687475554098,
+     "upper": 0.020806220177177634,
+     "width": 0.010275532701623536,
+     "lower_policy": {
+      "receivers_reweighted": 286,
+      "max_single_donor_share": 0.9999999999999997,
+      "mean_effective_donors_per_receiver": 10.899538347212596,
+      "tv_used": 0.0999999999999989
+     },
+     "upper_policy": {
+      "receivers_reweighted": 272,
+      "max_single_donor_share": 0.9375000000000003,
+      "mean_effective_donors_per_receiver": 11.084258627649147,
+      "tv_used": 0.09999999999999865
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": 0.006711942861482803,
+     "upper": 0.024850050272499976,
+     "width": 0.018138107411017172,
+     "lower_policy": {
+      "receivers_reweighted": 408,
+      "max_single_donor_share": 1.0000000000000002,
+      "mean_effective_donors_per_receiver": 6.738406205673067,
+      "tv_used": 0.24999999999999903
+     },
+     "upper_policy": {
+      "receivers_reweighted": 399,
+      "max_single_donor_share": 1.0000000000000002,
+      "mean_effective_donors_per_receiver": 6.83271970764751,
+      "tv_used": 0.249999999999999
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    0.002716635713333115,
+    0.029128935286940556
+   ],
+   "breakdown_radius_to_zero": Infinity
+  },
+  "role|benign|profile_only": {
+   "n_pairs": 8448,
+   "n_receivers": 528,
+   "n_users": 27,
+   "baseline_uniform": 0.008231089925241306,
+   "published_endpoint": 0.008231089925241304,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.008231089925241306,
+     "upper": 0.008231089925241306,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": -0.005748164231992573,
+     "upper": 0.016961027090964247,
+     "width": 0.022709191322956818,
+     "lower_policy": {
+      "receivers_reweighted": 64,
+      "max_single_donor_share": 0.9999999999999997,
+      "mean_effective_donors_per_receiver": 15.223886423922815,
+      "tv_used": 0.04999999999999991
+     },
+     "upper_policy": {
+      "receivers_reweighted": 109,
+      "max_single_donor_share": 0.9375,
+      "mean_effective_donors_per_receiver": 14.990498653246133,
+      "tv_used": 0.04999999999999996
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": -0.009651263694622894,
+     "upper": 0.020573463302301788,
+     "width": 0.030224726996924682,
+     "lower_policy": {
+      "receivers_reweighted": 187,
+      "max_single_donor_share": 0.9999999999999997,
+      "mean_effective_donors_per_receiver": 14.07428350786936,
+      "tv_used": 0.10000000000000024
+     },
+     "upper_policy": {
+      "receivers_reweighted": 239,
+      "max_single_donor_share": 0.9375,
+      "mean_effective_donors_per_receiver": 13.614487311346,
+      "tv_used": 0.09999999999999999
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": -0.018594326677537083,
+     "upper": 0.028981816332859064,
+     "width": 0.047576143010396144,
+     "lower_policy": {
+      "receivers_reweighted": 420,
+      "max_single_donor_share": 0.9999999999999997,
+      "mean_effective_donors_per_receiver": 9.982502357847132,
+      "tv_used": 0.24999999999999759
+     },
+     "upper_policy": {
+      "receivers_reweighted": 451,
+      "max_single_donor_share": 0.9375,
+      "mean_effective_donors_per_receiver": 9.29697558451611,
+      "tv_used": 0.24999999999999797
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    -0.037891859420286216,
+    0.047068193820778
+   ],
+   "breakdown_radius_to_zero": 0.01677697179032135
+  },
+  "role|benign|full": {
+   "n_pairs": 8448,
+   "n_receivers": 528,
+   "n_users": 27,
+   "baseline_uniform": 0.013586622694698063,
+   "published_endpoint": 0.013586622694698063,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.013586622694698063,
+     "upper": 0.013586622694698063,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.009425712603533682,
+     "upper": 0.016853725691405703,
+     "width": 0.007428013087872021,
+     "lower_policy": {
+      "receivers_reweighted": 130,
+      "max_single_donor_share": 0.9375,
+      "mean_effective_donors_per_receiver": 14.364206880091695,
+      "tv_used": 0.049999999999999906
+     },
+     "upper_policy": {
+      "receivers_reweighted": 157,
+      "max_single_donor_share": 0.8125,
+      "mean_effective_donors_per_receiver": 13.947804688492369,
+      "tv_used": 0.04999999999999985
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": 0.007543708066827467,
+     "upper": 0.018663212338154423,
+     "width": 0.011119504271326956,
+     "lower_policy": {
+      "receivers_reweighted": 273,
+      "max_single_donor_share": 0.9999999999999997,
+      "mean_effective_donors_per_receiver": 11.84982685813225,
+      "tv_used": 0.0999999999999999
+     },
+     "upper_policy": {
+      "receivers_reweighted": 278,
+      "max_single_donor_share": 0.9374999999999997,
+      "mean_effective_donors_per_receiver": 11.56484370439233,
+      "tv_used": 0.09999999999999931
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": 0.003864588595696872,
+     "upper": 0.022327291310721642,
+     "width": 0.01846270271502477,
+     "lower_policy": {
+      "receivers_reweighted": 427,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 7.154077956071536,
+      "tv_used": 0.24999999999999753
+     },
+     "upper_policy": {
+      "receivers_reweighted": 426,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 6.87032880019924,
+      "tv_used": 0.24999999999999836
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    -0.0018154332223029891,
+    0.02816333241697496
+   ],
+   "breakdown_radius_to_zero": 0.5472582571851049
+  },
+  "role|anomalous|behavior_only": {
+   "n_pairs": 6708,
+   "n_receivers": 528,
+   "n_users": 27,
+   "baseline_uniform": 0.014801294152186612,
+   "published_endpoint": 0.01480129415218661,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.014801294152186612,
+     "upper": 0.014801294152186612,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 12.704545454545455,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 12.704545454545455,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.011941579269097237,
+     "upper": 0.017759813123857337,
+     "width": 0.0058182338547601,
+     "lower_policy": {
+      "receivers_reweighted": 200,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 10.68160685308541,
+      "tv_used": 0.05000000000000023
+     },
+     "upper_policy": {
+      "receivers_reweighted": 150,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 10.881875626798122,
+      "tv_used": 0.05000000000000031
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": 0.010261386118917097,
+     "upper": 0.019907076892441644,
+     "width": 0.009645690773524547,
+     "lower_policy": {
+      "receivers_reweighted": 284,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 9.043213325034525,
+      "tv_used": 0.09999999999999949
+     },
+     "upper_policy": {
+      "receivers_reweighted": 228,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 9.105788341781714,
+      "tv_used": 0.09999999999999942
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": 0.007644747444917777,
+     "upper": 0.024107159289720098,
+     "width": 0.01646241184480232,
+     "lower_policy": {
+      "receivers_reweighted": 394,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 5.456897235234459,
+      "tv_used": 0.24999999999999467
+     },
+     "upper_policy": {
+      "receivers_reweighted": 335,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 5.722893447856459,
+      "tv_used": 0.2499999999999955
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    0.005182003889666557,
+    0.02730798578435785
+   ],
+   "breakdown_radius_to_zero": Infinity
+  },
+  "role|anomalous|profile_only": {
+   "n_pairs": 6708,
+   "n_receivers": 528,
+   "n_users": 27,
+   "baseline_uniform": 0.00562561483563129,
+   "published_endpoint": 0.005625614835631288,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.00562561483563129,
+     "upper": 0.00562561483563129,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 12.704545454545455,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 12.704545454545455,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.0003180795795130853,
+     "upper": 0.015578287870998145,
+     "width": 0.015260208291485059,
+     "lower_policy": {
+      "receivers_reweighted": 93,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 11.928524158175913,
+      "tv_used": 0.049999999999999975
+     },
+     "upper_policy": {
+      "receivers_reweighted": 59,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 12.049990503748827,
+      "tv_used": 0.04999999999999997
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": -0.0031852897527493707,
+     "upper": 0.019285062505767517,
+     "width": 0.022470352258516887,
+     "lower_policy": {
+      "receivers_reweighted": 192,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 10.973355444282,
+      "tv_used": 0.10000000000000009
+     },
+     "upper_policy": {
+      "receivers_reweighted": 163,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 11.169679084842652,
+      "tv_used": 0.10000000000000038
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": -0.011317629348119312,
+     "upper": 0.027478360668421502,
+     "width": 0.03879599001654081,
+     "lower_policy": {
+      "receivers_reweighted": 374,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 7.665006455050409,
+      "tv_used": 0.24999999999999706
+     },
+     "upper_policy": {
+      "receivers_reweighted": 375,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 7.693606018672924,
+      "tv_used": 0.24999999999999675
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    -0.02775183753693318,
+    0.044120489021187405
+   ],
+   "breakdown_radius_to_zero": 0.054161014371393076
+  },
+  "role|anomalous|full": {
+   "n_pairs": 6708,
+   "n_receivers": 528,
+   "n_users": 27,
+   "baseline_uniform": 0.012278328441313508,
+   "published_endpoint": 0.012278328441313506,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.012278328441313508,
+     "upper": 0.012278328441313508,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 12.704545454545455,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 12.704545454545455,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.009889391562508135,
+     "upper": 0.015666406332340038,
+     "width": 0.0057770147698319035,
+     "lower_policy": {
+      "receivers_reweighted": 212,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 10.710994662110982,
+      "tv_used": 0.05000000000000021
+     },
+     "upper_policy": {
+      "receivers_reweighted": 111,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 11.454046682863321,
+      "tv_used": 0.04999999999999995
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": 0.008472250700898309,
+     "upper": 0.017584671006041504,
+     "width": 0.009112420305143195,
+     "lower_policy": {
+      "receivers_reweighted": 299,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 9.108990161314097,
+      "tv_used": 0.0999999999999995
+     },
+     "upper_policy": {
+      "receivers_reweighted": 207,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 9.665245277469385,
+      "tv_used": 0.10000000000000006
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": 0.005709263265391656,
+     "upper": 0.02123651791187895,
+     "width": 0.015527254646487295,
+     "lower_policy": {
+      "receivers_reweighted": 403,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 5.793165030273115,
+      "tv_used": 0.2499999999999955
+     },
+     "upper_policy": {
+      "receivers_reweighted": 363,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 5.841208988308161,
+      "tv_used": 0.2499999999999955
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    0.0014940865081291379,
+    0.026407066216743456
+   ],
+   "breakdown_radius_to_zero": Infinity
+  },
+  "team|benign|behavior_only": {
+   "n_pairs": 10208,
+   "n_receivers": 638,
+   "n_users": 30,
+   "baseline_uniform": 0.01791062943315232,
+   "published_endpoint": 0.01791062943315232,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.01791062943315232,
+     "upper": 0.01791062943315232,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.014742873024587886,
+     "upper": 0.021087629517623132,
+     "width": 0.006344756493035246,
+     "lower_policy": {
+      "receivers_reweighted": 190,
+      "max_single_donor_share": 0.875,
+      "mean_effective_donors_per_receiver": 13.588798433339813,
+      "tv_used": 0.05000000000000002
+     },
+     "upper_policy": {
+      "receivers_reweighted": 196,
+      "max_single_donor_share": 0.9374999999999997,
+      "mean_effective_donors_per_receiver": 13.598319806464533,
+      "tv_used": 0.050000000000000086
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": 0.012663999703853375,
+     "upper": 0.023156976197249907,
+     "width": 0.010492976493396531,
+     "lower_policy": {
+      "receivers_reweighted": 304,
+      "max_single_donor_share": 0.9375,
+      "mean_effective_donors_per_receiver": 11.298947991500365,
+      "tv_used": 0.1000000000000017
+     },
+     "upper_policy": {
+      "receivers_reweighted": 303,
+      "max_single_donor_share": 0.9999999999999997,
+      "mean_effective_donors_per_receiver": 11.371780890689847,
+      "tv_used": 0.10000000000000177
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": 0.00885856672451795,
+     "upper": 0.02701992861492675,
+     "width": 0.0181613618904088,
+     "lower_policy": {
+      "receivers_reweighted": 471,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 7.204258226438219,
+      "tv_used": 0.24999999999999142
+     },
+     "upper_policy": {
+      "receivers_reweighted": 470,
+      "max_single_donor_share": 1.0000000000000004,
+      "mean_effective_donors_per_receiver": 7.158456518495302,
+      "tv_used": 0.24999999999999212
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    0.00489821890690702,
+    0.031002577220395358
+   ],
+   "breakdown_radius_to_zero": Infinity
+  },
+  "team|benign|profile_only": {
+   "n_pairs": 10208,
+   "n_receivers": 638,
+   "n_users": 30,
+   "baseline_uniform": 0.006493938018284189,
+   "published_endpoint": 0.006493938018284188,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.006493938018284189,
+     "upper": 0.006493938018284189,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": -0.005329026617427133,
+     "upper": 0.015300222717446556,
+     "width": 0.020629249334873687,
+     "lower_policy": {
+      "receivers_reweighted": 91,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 15.241884257261107,
+      "tv_used": 0.04999999999999992
+     },
+     "upper_policy": {
+      "receivers_reweighted": 124,
+      "max_single_donor_share": 0.9375000000000002,
+      "mean_effective_donors_per_receiver": 15.04049219463033,
+      "tv_used": 0.04999999999999995
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": -0.00926130998497873,
+     "upper": 0.01896039036284878,
+     "width": 0.02822170034782751,
+     "lower_policy": {
+      "receivers_reweighted": 240,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 14.03015968971178,
+      "tv_used": 0.10000000000000095
+     },
+     "upper_policy": {
+      "receivers_reweighted": 300,
+      "max_single_donor_share": 0.9375000000000002,
+      "mean_effective_donors_per_receiver": 13.654619248711011,
+      "tv_used": 0.10000000000000071
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": -0.01827369230531728,
+     "upper": 0.02746982614445857,
+     "width": 0.04574351844977585,
+     "lower_policy": {
+      "receivers_reweighted": 507,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 10.318033529594395,
+      "tv_used": 0.24999999999999722
+     },
+     "upper_policy": {
+      "receivers_reweighted": 546,
+      "max_single_donor_share": 1.0000000000000002,
+      "mean_effective_donors_per_receiver": 9.489295216301933,
+      "tv_used": 0.24999999999999756
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    -0.037556179477064223,
+    0.045967478353897265
+   ],
+   "breakdown_radius_to_zero": 0.013513119209524924
+  },
+  "team|benign|full": {
+   "n_pairs": 10208,
+   "n_receivers": 638,
+   "n_users": 30,
+   "baseline_uniform": 0.015001602291300414,
+   "published_endpoint": 0.015001602291300412,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.015001602291300414,
+     "upper": 0.015001602291300414,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.0625,
+      "mean_effective_donors_per_receiver": 16.0,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.011033665504762874,
+     "upper": 0.018154714589076092,
+     "width": 0.007121049084313219,
+     "lower_policy": {
+      "receivers_reweighted": 158,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 14.209643256539959,
+      "tv_used": 0.04999999999999993
+     },
+     "upper_policy": {
+      "receivers_reweighted": 185,
+      "max_single_donor_share": 0.9374999999999997,
+      "mean_effective_donors_per_receiver": 13.938996359182806,
+      "tv_used": 0.049999999999999954
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": 0.009122659994916238,
+     "upper": 0.019974621271268794,
+     "width": 0.010851961276352556,
+     "lower_policy": {
+      "receivers_reweighted": 288,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 12.092329018158756,
+      "tv_used": 0.10000000000000128
+     },
+     "upper_policy": {
+      "receivers_reweighted": 296,
+      "max_single_donor_share": 0.9999999999999997,
+      "mean_effective_donors_per_receiver": 11.821929150031142,
+      "tv_used": 0.10000000000000166
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": 0.00546620139404582,
+     "upper": 0.023552326335322463,
+     "width": 0.018086124941276642,
+     "lower_policy": {
+      "receivers_reweighted": 498,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 7.723194336367223,
+      "tv_used": 0.24999999999999167
+     },
+     "upper_policy": {
+      "receivers_reweighted": 508,
+      "max_single_donor_share": 1.0000000000000002,
+      "mean_effective_donors_per_receiver": 7.405703573435693,
+      "tv_used": 0.24999999999999192
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    -0.0006810414496206017,
+    0.02945217916731201
+   ],
+   "breakdown_radius_to_zero": 0.716359629880212
+  },
+  "team|anomalous|behavior_only": {
+   "n_pairs": 6629,
+   "n_receivers": 516,
+   "n_users": 26,
+   "baseline_uniform": 0.015062478875487829,
+   "published_endpoint": 0.015062478875487829,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.015062478875487829,
+     "upper": 0.015062478875487829,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.5,
+      "mean_effective_donors_per_receiver": 12.8468992248062,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.5,
+      "mean_effective_donors_per_receiver": 12.8468992248062,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.012340964287729992,
+     "upper": 0.017919309565031374,
+     "width": 0.005578345277301382,
+     "lower_policy": {
+      "receivers_reweighted": 152,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 11.181817501296882,
+      "tv_used": 0.04999999999999975
+     },
+     "upper_policy": {
+      "receivers_reweighted": 133,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 11.092362094009312,
+      "tv_used": 0.04999999999999978
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": 0.010744261906074687,
+     "upper": 0.01969725528755963,
+     "width": 0.008952993381484942,
+     "lower_policy": {
+      "receivers_reweighted": 246,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 9.48364402345176,
+      "tv_used": 0.09999999999999981
+     },
+     "upper_policy": {
+      "receivers_reweighted": 220,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 9.5211388839277,
+      "tv_used": 0.10000000000000056
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": 0.00794479773966891,
+     "upper": 0.02261391942225352,
+     "width": 0.01466912168258461,
+     "lower_policy": {
+      "receivers_reweighted": 377,
+      "max_single_donor_share": 1.0000000000000002,
+      "mean_effective_donors_per_receiver": 6.14360877321639,
+      "tv_used": 0.25000000000000205
+     },
+     "upper_policy": {
+      "receivers_reweighted": 370,
+      "max_single_donor_share": 1.0000000000000002,
+      "mean_effective_donors_per_receiver": 5.683461088141286,
+      "tv_used": 0.2500000000000018
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    0.005323094037518107,
+    0.025310221269807837
+   ],
+   "breakdown_radius_to_zero": Infinity
+  },
+  "team|anomalous|profile_only": {
+   "n_pairs": 6629,
+   "n_receivers": 516,
+   "n_users": 26,
+   "baseline_uniform": 0.007336068133299772,
+   "published_endpoint": 0.007336068133299774,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.007336068133299772,
+     "upper": 0.007336068133299772,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.5,
+      "mean_effective_donors_per_receiver": 12.8468992248062,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.5,
+      "mean_effective_donors_per_receiver": 12.8468992248062,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.0021552352975433373,
+     "upper": 0.017275870601737242,
+     "width": 0.015120635304193905,
+     "lower_policy": {
+      "receivers_reweighted": 125,
+      "max_single_donor_share": 0.75,
+      "mean_effective_donors_per_receiver": 11.763260396034427,
+      "tv_used": 0.04999999999999999
+     },
+     "upper_policy": {
+      "receivers_reweighted": 64,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 12.186376388263316,
+      "tv_used": 0.050000000000000176
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": -0.0011519395575836672,
+     "upper": 0.02080634304703136,
+     "width": 0.021958282604615027,
+     "lower_policy": {
+      "receivers_reweighted": 226,
+      "max_single_donor_share": 0.8125000000000001,
+      "mean_effective_donors_per_receiver": 10.61365086861737,
+      "tv_used": 0.10000000000000038
+     },
+     "upper_policy": {
+      "receivers_reweighted": 200,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 10.936055288738094,
+      "tv_used": 0.10000000000000037
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": -0.00907566019218835,
+     "upper": 0.028794237590241703,
+     "width": 0.03786989778243005,
+     "lower_policy": {
+      "receivers_reweighted": 388,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 7.1957035273707115,
+      "tv_used": 0.2500000000000028
+     },
+     "upper_policy": {
+      "receivers_reweighted": 389,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 7.142673552150058,
+      "tv_used": 0.2500000000000029
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    -0.02420046892289503,
+    0.043352754110355635
+   ],
+   "breakdown_radius_to_zero": 0.08182110689686715
+  },
+  "team|anomalous|full": {
+   "n_pairs": 6629,
+   "n_receivers": 516,
+   "n_users": 26,
+   "baseline_uniform": 0.01293541647200748,
+   "published_endpoint": 0.012935416472007482,
+   "bounds": [
+    {
+     "rho": 0.0,
+     "lower": 0.01293541647200748,
+     "upper": 0.01293541647200748,
+     "width": 0.0,
+     "lower_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.5,
+      "mean_effective_donors_per_receiver": 12.8468992248062,
+      "tv_used": 0.0
+     },
+     "upper_policy": {
+      "receivers_reweighted": 0,
+      "max_single_donor_share": 0.5,
+      "mean_effective_donors_per_receiver": 12.8468992248062,
+      "tv_used": 0.0
+     }
+    },
+    {
+     "rho": 0.05,
+     "lower": 0.010623325762858259,
+     "upper": 0.016336014182550297,
+     "width": 0.0057126884196920386,
+     "lower_policy": {
+      "receivers_reweighted": 167,
+      "max_single_donor_share": 0.9285714285714288,
+      "mean_effective_donors_per_receiver": 11.150918370380358,
+      "tv_used": 0.04999999999999982
+     },
+     "upper_policy": {
+      "receivers_reweighted": 100,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 11.608751744931407,
+      "tv_used": 0.05000000000000008
+     }
+    },
+    {
+     "rho": 0.1,
+     "lower": 0.009243592996703895,
+     "upper": 0.018066876873701496,
+     "width": 0.0088232838769976,
+     "lower_policy": {
+      "receivers_reweighted": 262,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 9.443578038217785,
+      "tv_used": 0.09999999999999992
+     },
+     "upper_policy": {
+      "receivers_reweighted": 201,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 10.0223547138081,
+      "tv_used": 0.10000000000000045
+     }
+    },
+    {
+     "rho": 0.25,
+     "lower": 0.006518270110829744,
+     "upper": 0.021173079141133713,
+     "width": 0.014654809030303969,
+     "lower_policy": {
+      "receivers_reweighted": 403,
+      "max_single_donor_share": 1.0,
+      "mean_effective_donors_per_receiver": 5.951624626400587,
+      "tv_used": 0.250000000000002
+     },
+     "upper_policy": {
+      "receivers_reweighted": 387,
+      "max_single_donor_share": 1.0000000000000002,
+      "mean_effective_donors_per_receiver": 5.991225934667886,
+      "tv_used": 0.25000000000000083
+     }
+    }
+   ],
+   "fully_concentrated_limits": [
+    0.0022142708160461048,
+    0.025279797740397892
+   ],
+   "breakdown_radius_to_zero": Infinity
+  }
+ },
+ "checks": {
+  "dept|benign|behavior_only rho=0 equals published endpoint": true,
+  "dept|benign|behavior_only|rho=0.05 LP = exact": true,
+  "dept|benign|behavior_only|rho=0.25 LP = exact": true,
+  "dept|benign|profile_only rho=0 equals published endpoint": true,
+  "dept|benign|full rho=0 equals published endpoint": true,
+  "dept|anomalous|behavior_only rho=0 equals published endpoint": true,
+  "dept|anomalous|behavior_only|rho=0.05 LP = exact": true,
+  "dept|anomalous|behavior_only|rho=0.25 LP = exact": true,
+  "dept|anomalous|profile_only rho=0 equals published endpoint": true,
+  "dept|anomalous|full rho=0 equals published endpoint": true,
+  "dept_role|benign|behavior_only rho=0 equals published endpoint": true,
+  "dept_role|benign|behavior_only|rho=0.05 LP = exact": true,
+  "dept_role|benign|behavior_only|rho=0.25 LP = exact": true,
+  "dept_role|benign|profile_only rho=0 equals published endpoint": true,
+  "dept_role|benign|full rho=0 equals published endpoint": true,
+  "dept_role|anomalous|behavior_only rho=0 equals published endpoint": true,
+  "dept_role|anomalous|behavior_only|rho=0.05 LP = exact": true,
+  "dept_role|anomalous|behavior_only|rho=0.25 LP = exact": true,
+  "dept_role|anomalous|profile_only rho=0 equals published endpoint": true,
+  "dept_role|anomalous|full rho=0 equals published endpoint": true,
+  "role|benign|behavior_only rho=0 equals published endpoint": true,
+  "role|benign|behavior_only|rho=0.05 LP = exact": true,
+  "role|benign|behavior_only|rho=0.25 LP = exact": true,
+  "role|benign|profile_only rho=0 equals published endpoint": true,
+  "role|benign|full rho=0 equals published endpoint": true,
+  "role|anomalous|behavior_only rho=0 equals published endpoint": true,
+  "role|anomalous|behavior_only|rho=0.05 LP = exact": true,
+  "role|anomalous|behavior_only|rho=0.25 LP = exact": true,
+  "role|anomalous|profile_only rho=0 equals published endpoint": true,
+  "role|anomalous|full rho=0 equals published endpoint": true,
+  "team|benign|behavior_only rho=0 equals published endpoint": true,
+  "team|benign|behavior_only|rho=0.05 LP = exact": true,
+  "team|benign|behavior_only|rho=0.25 LP = exact": true,
+  "team|benign|profile_only rho=0 equals published endpoint": true,
+  "team|benign|full rho=0 equals published endpoint": true,
+  "team|anomalous|behavior_only rho=0 equals published endpoint": true,
+  "team|anomalous|behavior_only|rho=0.05 LP = exact": true,
+  "team|anomalous|behavior_only|rho=0.25 LP = exact": true,
+  "team|anomalous|profile_only rho=0 equals published endpoint": true,
+  "team|anomalous|full rho=0 equals published endpoint": true
+ }
+}

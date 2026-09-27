@@ -1,0 +1,10 @@
+{
+ "token_lengths_equal_cache": true,
+ "fresh_vs_cache_rel_err_median": 0.001526200126240489,
+ "fresh_vs_cache_rel_err_p95": 0.0017356550010158294,
+ "active_set_jaccard_median": 1.0,
+ "active_set_jaccard_mean": 0.9972766884531591,
+ "selected_support_identical_share_of_receivers": 1.0,
+ "dtype": "bfloat16 compute, NF4 weights, float64 SAE arithmetic",
+ "zero_edit_vs_unhooked_max_abs": 0.0
+}

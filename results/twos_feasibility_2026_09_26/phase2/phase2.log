@@ -1,0 +1,231 @@
+[phase2] populations {"development|benign": {"pairs": 1120, "receivers": 70, "users": ["User1", "User13", "User17", "User2", "User20", "User21", "User3", "User7"]}, "evaluation|benign": {"pairs": 1088, "receivers": 68, "users": ["User12", "User14", "User15", "User18", "User4", "User6", "User8", "User9"]}, "evaluation|anomalous": {"pairs": 1012, "receivers": 68, "users": ["User12", "User14", "User15", "User18", "User4", "User6", "User8", "User9"]}}
+[phase2] encoder fidelity {'support_agreement_torch_float32_vs_numpy_float64': 1.0, 'share_tokens_near_tie_kth': 0.0, 'share_tokens_with_exactly_k_positive': 1.0} (112s)
+[phase2] development|benign done (223s)
+[phase2] evaluation|benign done (298s)
+[phase2] evaluation|anomalous done (367s)
+[phase2] edit metrics written (367s)
+[phase2] realizability development|benign|control|own: {'realizable': 33, 'not_run_budget': 117} (1903s)
+[phase2] realizability development|benign|control|union: {'not_run_budget': 150} (1903s)
+[phase2] realizability development|benign|selected|own: {'not_run_budget': 150} (1903s)
+[phase2] realizability development|benign|selected|union: {'not_run_budget': 150} (1903s)
+[phase2] realizability evaluation|anomalous|control|own: {'not_run_budget': 150} (1903s)
+[phase2] realizability evaluation|anomalous|control|union: {'not_run_budget': 150} (1903s)
+[phase2] realizability evaluation|anomalous|selected|own: {'not_run_budget': 150} (1903s)
+[phase2] realizability evaluation|anomalous|selected|union: {'not_run_budget': 150} (1903s)
+[phase2] realizability evaluation|benign|control|own: {'not_run_budget': 150} (1903s)
+[phase2] realizability evaluation|benign|control|union: {'not_run_budget': 150} (1903s)
+[phase2] realizability evaluation|benign|selected|own: {'not_run_budget': 150} (1903s)
+[phase2] realizability evaluation|benign|selected|union: {'not_run_budget': 150} (1903s)
+[phase2] realizability done (1903s)
+[phase2] fixed-cell QP development|benign|control: {"0.01": {"feasible": 11, "request_leaves_cell": 29}, "0.05": {"feasible": 11, "request_leaves_cell": 29}, "0.1": {"feasible": 11, "request_leaves_cell": 29}, "0.25": {"feasible": 11, "request_leaves_cell": 29}} (2153s)
+[phase2] fixed-cell QP development|benign|selected: {"0.01": {"feasible": 4, "request_leaves_cell": 36}, "0.05": {"feasible": 4, "request_leaves_cell": 36}, "0.1": {"feasible": 4, "request_leaves_cell": 36}, "0.25": {"feasible": 4, "request_leaves_cell": 36}} (2161s)
+[phase2] fixed-cell QP evaluation|anomalous|control: {"0.01": {"feasible": 15, "request_leaves_cell": 25}, "0.05": {"feasible": 15, "request_leaves_cell": 25}, "0.1": {"feasible": 15, "request_leaves_cell": 25}, "0.25": {"feasible": 15, "request_leaves_cell": 25}} (2230s)
+[phase2] fixed-cell QP evaluation|anomalous|selected: {"0.01": {"feasible": 22, "request_leaves_cell": 18}, "0.05": {"feasible": 22, "request_leaves_cell": 18}, "0.1": {"feasible": 22, "request_leaves_cell": 18}, "0.25": {"feasible": 22, "request_leaves_cell": 18}} (2292s)
+[phase2] fixed-cell QP evaluation|benign|control: {"0.01": {"feasible": 11, "request_leaves_cell": 29}, "0.05": {"feasible": 11, "request_leaves_cell": 29}, "0.1": {"feasible": 11, "request_leaves_cell": 29}, "0.25": {"feasible": 11, "request_leaves_cell": 29}} (2386s)
+[phase2] fixed-cell QP evaluation|benign|selected: {"0.01": {"feasible": 2, "request_leaves_cell": 38}, "0.05": {"feasible": 2, "request_leaves_cell": 38}, "0.1": {"feasible": 2, "request_leaves_cell": 38}, "0.25": {"feasible": 2, "request_leaves_cell": 38}} (2391s)
+{
+ "zero_effect_edits": {
+  "development|benign|control|union": 144,
+  "development|benign|control|own": 144,
+  "evaluation|benign|selected|union": 400,
+  "evaluation|benign|selected|own": 400,
+  "evaluation|benign|control|union": 144,
+  "evaluation|benign|control|own": 144,
+  "evaluation|anomalous|selected|union": 392,
+  "evaluation|anomalous|selected|own": 392,
+  "evaluation|anomalous|control|union": 144,
+  "evaluation|anomalous|control|own": 144
+ },
+ "encoder_fidelity": {
+  "support_agreement_torch_float32_vs_numpy_float64": 1.0,
+  "share_tokens_near_tie_kth": 0.0,
+  "share_tokens_with_exactly_k_positive": 1.0
+ },
+ "exact_realizability_sample": {
+  "development|benign|control|own": {
+   "n": 150,
+   "realizable": 33,
+   "not_run_budget": 117
+  },
+  "development|benign|control|union": {
+   "n": 150,
+   "not_run_budget": 150
+  },
+  "development|benign|selected|own": {
+   "n": 150,
+   "not_run_budget": 150
+  },
+  "development|benign|selected|union": {
+   "n": 150,
+   "not_run_budget": 150
+  },
+  "evaluation|anomalous|control|own": {
+   "n": 150,
+   "not_run_budget": 150
+  },
+  "evaluation|anomalous|control|union": {
+   "n": 150,
+   "not_run_budget": 150
+  },
+  "evaluation|anomalous|selected|own": {
+   "n": 150,
+   "not_run_budget": 150
+  },
+  "evaluation|anomalous|selected|union": {
+   "n": 150,
+   "not_run_budget": 150
+  },
+  "evaluation|benign|control|own": {
+   "n": 150,
+   "not_run_budget": 150
+  },
+  "evaluation|benign|control|union": {
+   "n": 150,
+   "not_run_budget": 150
+  },
+  "evaluation|benign|selected|own": {
+   "n": 150,
+   "not_run_budget": 150
+  },
+  "evaluation|benign|selected|union": {
+   "n": 150,
+   "not_run_budget": 150
+  }
+ },
+ "fixed_cell_qp": {
+  "development|benign|control": {
+   "0.01": {
+    "n_cells": 40,
+    "status_counts": {
+     "feasible": 11,
+     "request_leaves_cell": 29
+    },
+    "median_move_ratio_qp_over_decoder": 6.022899977485025,
+    "max_target_err_after_reencode": 2.5934809855243657e-13,
+    "share_support_kept": 1.0,
+    "decoder_realized_frac_median_same_cells": 1.0,
+    "decoder_collateral_rel_median_same_cells": 0.4574841799889145
+   },
+   "0.05": {
+    "n_cells": 40,
+    "status_counts": {
+     "feasible": 11,
+     "request_leaves_cell": 29
+    },
+    "median_move_ratio_qp_over_decoder": 5.822366092151569,
+    "max_target_err_after_reencode": 2.5934809855243657e-13,
+    "share_support_kept": 1.0,
+    "decoder_realized_frac_median_same_cells": 1.0,
+    "decoder_collateral_rel_median_same_cells": 0.4574841799889145
+   },
+   "0.1": {
+    "n_cells": 40,
+    "status_counts": {
+     "feasible": 11,
+     "request_leaves_cell": 29
+    },
+    "median_move_ratio_qp_over_decoder": 5.732036312709854,
+    "max_target_err_after_reencode": 3.588240815588506e-13,
+    "share_support_kept": 1.0,
+    "decoder_realized_frac_median_same_cells": 1.0,
+    "decoder_collateral_rel_median_same_cells": 0.4574841799889145
+   },
+   "0.25": {
+    "n_cells": 40,
+    "status_counts": {
+     "feasible": 11,
+     "request_leaves_cell": 29
+    },
+    "median_move_ratio_qp_over_decoder": 5.629920236640408,
+    "max_target_err_after_reencode": 2.717825964282383e-13,
+    "share_support_kept": 1.0,
+    "decoder_realized_frac_median_same_cells": 1.0,
+    "decoder_collateral_rel_median_same_cells": 0.4574841799889145
+   }
+  },
+  "development|benign|selected": {
+   "0.01": {
+    "n_cells": 40,
+    "status_counts": {
+     "feasible": 4,
+     "request_leaves_cell": 36
+    },
+    "median_move_ratio_qp_over_decoder": 0.4949303627608894,
+    "max_target_err_after_reencode": 3.019806626980426e-14,
+    "share_support_kept": 1.0,
+    "decoder_realized_frac_median_same_cells": 1.0,
+    "decoder_collateral_rel_median_same_cells": 0.2389232246179528
+   },
+   "0.05": {
+    "n_cells": 40,
+    "status_counts": {
+     "feasible": 4,
+     "request_leaves_cell": 36
+    },
+    "median_move_ratio_qp_over_decoder": 0.4891813648791838,
+    "max_target_err_after_reencode": 3.907985046680551e-14,
+    "share_support_kept": 1.0,
+    "decoder_realized_frac_median_same_cells": 1.0,
+    "decoder_collateral_rel_median_same_cells": 0.2389232246179528
+   },
+   "0.1": {
+    "n_cells": 40,
+    "status_counts": {
+     "feasible": 4,
+     "request_leaves_cell": 36
+    },
+    "median_move_ratio_qp_over_decoder": 0.4890641890366725,
+    "max_target_err_after_reencode": 3.375077994860476e-14,
+    "share_support_kept": 1.0,
+    "decoder_realized_frac_median_same_cells": 1.0,
+    "decoder_collateral_rel_median_same_cells": 0.2389232246179528
+   },
+   "0.25": {
+    "n_cells": 40,
+    "status_counts": {
+     "feasible": 4,
+     "request_leaves_cell": 36
+    },
+    "median_move_ratio_qp_over_decoder": 0.4890641890366725,
+    "max_target_err_after_reencode": 2.842170943040401e-14,
+    "share_support_kept": 1.0,
+    "decoder_realized_frac_median_same_cells": 1.0,
+    "decoder_collateral_rel_median_same_cells": 0.2389232246179528
+   }
+  },
+  "evaluation|anomalous|control": {
+   "0.01": {
+    "n_cells": 40,
+    "status_counts": {
+     "feasible": 15,
+     "request_leaves_cell": 25
+    },
+    "median_move_ratio_qp_over_decoder": 3.3294910718419897,
+    "max_target_err_after_reencode": 1.532107773982716e-14,
+    "share_support_kept": 1.0,
+    "decoder_realized_frac_median_same_cells": 1.0,
+    "decoder_collateral_rel_median_same_cells": 0.3777666187628516
+   },
+   "0.05": {
+    "n_cells": 40,
+    "status_counts": {
+     "feasible": 15,
+     "request_leaves_cell": 25
+    },
+    "median_move_ratio_qp_over_decoder": 3.3294910718419897,
+    "max_target_err_after_reencode": 3.9968028886505635e-15,
+    "share_support_kept": 1.0,
+    "decoder_realized_frac_median_same_cells": 1.0,
+    "decoder_collateral_rel_median_same_cells": 0.3777666187628516
+   },
+   "0.1": {
+    "n_cells": 40,
+    "status_counts": {
+     "feasible": 15,
+     "request_leaves_cell": 25
+    },
+    "median_move_ratio_qp_over_decoder": 3.3294910718419897,
+    "max_target_err_after_reencode": 8.659739592076221e-15,
+    "share_support_kept": 1.0,
+    "decoder_realized_f
+PHASE2_DONE (2391s)

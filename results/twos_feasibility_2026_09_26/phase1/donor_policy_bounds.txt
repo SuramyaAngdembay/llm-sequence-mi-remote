@@ -1,0 +1,92 @@
+TWOS donor-policy sensitivity (EXPLORATORY; finite-bank bounds over the declared policy set, not confidence intervals)
+
+== benign donors | behavior_only  (1088 pairs, 68 receivers, 8 users)
+   uniform baseline -0.00011; breakdown radius to zero 0.0024; fully concentrated limits [-0.00590, +0.00530]
+   rho 0.00: [-0.00011, -0.00011] width 0.00000  all negative; lower policy: 0 receivers reweighted, max donor share 0.06; upper policy: 0 reweighted, max share 0.06
+   rho 0.05: [-0.00176, +0.00129] width 0.00305  both signs possible; lower policy: 8 receivers reweighted, max donor share 0.98; upper policy: 11 reweighted, max share 0.81
+   rho 0.10: [-0.00273, +0.00217] width 0.00490  both signs possible; lower policy: 19 receivers reweighted, max donor share 1.00; upper policy: 21 reweighted, max share 1.00
+   rho 0.25: [-0.00433, +0.00370] width 0.00803  both signs possible; lower policy: 36 receivers reweighted, max donor share 1.00; upper policy: 35 reweighted, max share 1.00
+
+== benign donors | behavior_only | alpha-0 reconstruction contrast  (1088 pairs, 68 receivers, 8 users)
+   uniform baseline +0.00010; breakdown radius to zero inf; fully concentrated limits [+0.00010, +0.00010]
+   rho 0.00: [+0.00010, +0.00010] width 0.00000  all positive; lower policy: 0 receivers reweighted, max donor share 0.06; upper policy: 0 reweighted, max share 0.06
+   rho 0.05: [+0.00010, +0.00010] width 0.00000  all positive; lower policy: 13 receivers reweighted, max donor share 0.94; upper policy: 12 reweighted, max share 0.94
+   rho 0.10: [+0.00010, +0.00010] width 0.00000  all positive; lower policy: 22 receivers reweighted, max donor share 1.00; upper policy: 17 reweighted, max share 1.00
+   rho 0.25: [+0.00010, +0.00010] width 0.00000  all positive; lower policy: 32 receivers reweighted, max donor share 1.00; upper policy: 31 reweighted, max share 1.00
+
+== benign donors | behavior_only | alpha-1 minus alpha-0 (additive subtraction; nonlinear interactions not removed)  (1088 pairs, 68 receivers, 8 users)
+   uniform baseline -0.00021; breakdown radius to zero 0.0052; fully concentrated limits [-0.00600, +0.00520]
+   rho 0.00: [-0.00021, -0.00021] width 0.00000  all negative; lower policy: 0 receivers reweighted, max donor share 0.06; upper policy: 0 reweighted, max share 0.06
+   rho 0.05: [-0.00186, +0.00119] width 0.00305  both signs possible; lower policy: 8 receivers reweighted, max donor share 0.98; upper policy: 11 reweighted, max share 0.81
+   rho 0.10: [-0.00283, +0.00207] width 0.00490  both signs possible; lower policy: 19 receivers reweighted, max donor share 1.00; upper policy: 21 reweighted, max share 1.00
+   rho 0.25: [-0.00443, +0.00360] width 0.00803  both signs possible; lower policy: 36 receivers reweighted, max donor share 1.00; upper policy: 35 reweighted, max share 1.00
+
+== benign donors | profile_only  (1088 pairs, 68 receivers, 8 users)
+   uniform baseline -0.01286; breakdown radius to zero inf; fully concentrated limits [-0.02142, -0.00361]
+   rho 0.00: [-0.01286, -0.01286] width 0.00000  all negative; lower policy: 0 receivers reweighted, max donor share 0.06; upper policy: 0 reweighted, max share 0.06
+   rho 0.05: [-0.01592, -0.00980] width 0.00613  all negative; lower policy: 12 receivers reweighted, max donor share 0.81; upper policy: 10 reweighted, max share 0.88
+   rho 0.10: [-0.01779, -0.00773] width 0.01007  all negative; lower policy: 18 receivers reweighted, max donor share 0.88; upper policy: 15 reweighted, max share 0.94
+   rho 0.25: [-0.02092, -0.00410] width 0.01682  all negative; lower policy: 23 receivers reweighted, max donor share 1.00; upper policy: 23 reweighted, max share 1.00
+
+== benign donors | profile_only | alpha-0 reconstruction contrast  (1088 pairs, 68 receivers, 8 users)
+   uniform baseline -0.01077; breakdown radius to zero inf; fully concentrated limits [-0.01077, -0.01077]
+   rho 0.00: [-0.01077, -0.01077] width 0.00000  all negative; lower policy: 0 receivers reweighted, max donor share 0.06; upper policy: 0 reweighted, max share 0.06
+   rho 0.05: [-0.01077, -0.01077] width 0.00000  all negative; lower policy: 0 receivers reweighted, max donor share 0.06; upper policy: 0 reweighted, max share 0.06
+   rho 0.10: [-0.01077, -0.01077] width 0.00000  all negative; lower policy: 0 receivers reweighted, max donor share 0.06; upper policy: 0 reweighted, max share 0.06
+   rho 0.25: [-0.01077, -0.01077] width 0.00000  all negative; lower policy: 0 receivers reweighted, max donor share 0.06; upper policy: 0 reweighted, max share 0.06
+
+== benign donors | profile_only | alpha-1 minus alpha-0 (additive subtraction; nonlinear interactions not removed)  (1088 pairs, 68 receivers, 8 users)
+   uniform baseline -0.00209; breakdown radius to zero 0.0320; fully concentrated limits [-0.01065, +0.00716]
+   rho 0.00: [-0.00209, -0.00209] width 0.00000  all negative; lower policy: 0 receivers reweighted, max donor share 0.06; upper policy: 0 reweighted, max share 0.06
+   rho 0.05: [-0.00515, +0.00098] width 0.00613  both signs possible; lower policy: 12 receivers reweighted, max donor share 0.81; upper policy: 10 reweighted, max share 0.88
+   rho 0.10: [-0.00702, +0.00305] width 0.01007  both signs possible; lower policy: 18 receivers reweighted, max donor share 0.88; upper policy: 15 reweighted, max share 0.94
+   rho 0.25: [-0.01015, +0.00667] width 0.01682  both signs possible; lower policy: 23 receivers reweighted, max donor share 1.00; upper policy: 23 reweighted, max share 1.00
+
+   (benign) alpha-0 contrast spread across donors within a receiver (behaviour): max 2.38e-07
+
+== anomalous donors | behavior_only  (1012 pairs, 68 receivers, 8 users)
+   uniform baseline -0.00092; breakdown radius to zero 0.0296; fully concentrated limits [-0.00630, +0.00511]
+   rho 0.00: [-0.00092, -0.00092] width 0.00000  all negative; lower policy: 0 receivers reweighted, max donor share 0.11; upper policy: 0 reweighted, max share 0.11
+   rho 0.05: [-0.00224, +0.00050] width 0.00274  both signs possible; lower policy: 12 receivers reweighted, max donor share 0.69; upper policy: 10 reweighted, max share 0.87
+   rho 0.10: [-0.00309, +0.00145] width 0.00454  both signs possible; lower policy: 24 receivers reweighted, max donor share 0.81; upper policy: 20 reweighted, max share 0.94
+   rho 0.25: [-0.00466, +0.00326] width 0.00792  both signs possible; lower policy: 37 receivers reweighted, max donor share 0.87; upper policy: 31 reweighted, max share 1.00
+
+== anomalous donors | behavior_only | alpha-0 reconstruction contrast  (1012 pairs, 68 receivers, 8 users)
+   uniform baseline +0.00010; breakdown radius to zero inf; fully concentrated limits [+0.00010, +0.00010]
+   rho 0.00: [+0.00010, +0.00010] width 0.00000  all positive; lower policy: 0 receivers reweighted, max donor share 0.11; upper policy: 0 reweighted, max share 0.11
+   rho 0.05: [+0.00010, +0.00010] width 0.00000  all positive; lower policy: 13 receivers reweighted, max donor share 0.94; upper policy: 8 reweighted, max share 0.94
+   rho 0.10: [+0.00010, +0.00010] width 0.00000  all positive; lower policy: 22 receivers reweighted, max donor share 0.94; upper policy: 21 reweighted, max share 1.00
+   rho 0.25: [+0.00010, +0.00010] width 0.00000  all positive; lower policy: 33 receivers reweighted, max donor share 1.00; upper policy: 34 reweighted, max share 1.00
+
+== anomalous donors | behavior_only | alpha-1 minus alpha-0 (additive subtraction; nonlinear interactions not removed)  (1012 pairs, 68 receivers, 8 users)
+   uniform baseline -0.00102; breakdown radius to zero 0.0334; fully concentrated limits [-0.00640, +0.00501]
+   rho 0.00: [-0.00102, -0.00102] width 0.00000  all negative; lower policy: 0 receivers reweighted, max donor share 0.11; upper policy: 0 reweighted, max share 0.11
+   rho 0.05: [-0.00234, +0.00040] width 0.00274  both signs possible; lower policy: 12 receivers reweighted, max donor share 0.69; upper policy: 10 reweighted, max share 0.87
+   rho 0.10: [-0.00319, +0.00135] width 0.00454  both signs possible; lower policy: 24 receivers reweighted, max donor share 0.81; upper policy: 20 reweighted, max share 0.94
+   rho 0.25: [-0.00476, +0.00316] width 0.00792  both signs possible; lower policy: 37 receivers reweighted, max donor share 0.87; upper policy: 31 reweighted, max share 1.00
+
+== anomalous donors | profile_only  (1012 pairs, 68 receivers, 8 users)
+   uniform baseline -0.01489; breakdown radius to zero inf; fully concentrated limits [-0.02105, -0.00641]
+   rho 0.00: [-0.01489, -0.01489] width 0.00000  all negative; lower policy: 0 receivers reweighted, max donor share 0.11; upper policy: 0 reweighted, max share 0.11
+   rho 0.05: [-0.01702, -0.01255] width 0.00447  all negative; lower policy: 20 receivers reweighted, max donor share 0.78; upper policy: 13 reweighted, max share 1.00
+   rho 0.10: [-0.01835, -0.01095] width 0.00740  all negative; lower policy: 25 receivers reweighted, max donor share 0.89; upper policy: 24 reweighted, max share 1.00
+   rho 0.25: [-0.02071, -0.00741] width 0.01330  all negative; lower policy: 25 receivers reweighted, max donor share 1.00; upper policy: 25 reweighted, max share 1.00
+
+== anomalous donors | profile_only | alpha-0 reconstruction contrast  (1012 pairs, 68 receivers, 8 users)
+   uniform baseline -0.01077; breakdown radius to zero inf; fully concentrated limits [-0.01077, -0.01077]
+   rho 0.00: [-0.01077, -0.01077] width 0.00000  all negative; lower policy: 0 receivers reweighted, max donor share 0.11; upper policy: 0 reweighted, max share 0.11
+   rho 0.05: [-0.01077, -0.01077] width 0.00000  all negative; lower policy: 0 receivers reweighted, max donor share 0.11; upper policy: 0 reweighted, max share 0.11
+   rho 0.10: [-0.01077, -0.01077] width 0.00000  all negative; lower policy: 0 receivers reweighted, max donor share 0.11; upper policy: 0 reweighted, max share 0.11
+   rho 0.25: [-0.01077, -0.01077] width 0.00000  all negative; lower policy: 0 receivers reweighted, max donor share 0.11; upper policy: 0 reweighted, max share 0.11
+
+== anomalous donors | profile_only | alpha-1 minus alpha-0 (additive subtraction; nonlinear interactions not removed)  (1012 pairs, 68 receivers, 8 users)
+   uniform baseline -0.00412; breakdown radius to zero 0.1058; fully concentrated limits [-0.01028, +0.00437]
+   rho 0.00: [-0.00412, -0.00412] width 0.00000  all negative; lower policy: 0 receivers reweighted, max donor share 0.11; upper policy: 0 reweighted, max share 0.11
+   rho 0.05: [-0.00625, -0.00178] width 0.00447  all negative; lower policy: 20 receivers reweighted, max donor share 0.78; upper policy: 13 reweighted, max share 1.00
+   rho 0.10: [-0.00758, -0.00017] width 0.00740  all negative; lower policy: 25 receivers reweighted, max donor share 0.89; upper policy: 24 reweighted, max share 1.00
+   rho 0.25: [-0.00994, +0.00336] width 0.01330  both signs possible; lower policy: 25 receivers reweighted, max donor share 1.00; upper policy: 25 reweighted, max share 1.00
+
+   (anomalous) alpha-0 contrast spread across donors within a receiver (behaviour): max 2.38e-07
+
+Largest |HiGHS LP - exact greedy| over all bounds: 3.99e-16
+Checks (88): all pass
