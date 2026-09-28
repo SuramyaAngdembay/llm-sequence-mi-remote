@@ -2,6 +2,9 @@
 """Check the day alignment between labels_daily.parquet and the LC-DAL session day index (2026-09-28).
 
 The session extraction's `day` column and labels_daily's `day_index` may count days from different origins.
+This historical shift diagnostic is NOT a label-repair procedure: CTMC days start
+at a non-midnight timestamp, and event flags differ from incident-window labels.
+Use build_cert_calendar_labels.py for authoritative calendar-window labels.
 This script compares, per insider scenario, the session-days that the extraction itself flags as malicious
 (`insider` > 0 on the session row) with the labelled days, under label shifts of -7..+7 days, and reports the
 malicious user-day population that a join would produce with and without the best shift.
@@ -38,7 +41,7 @@ def main() -> None:
     sess = {(u, d) for u, ds in days.items() for d in ds}
     F = {(u, d) for u, ds in flagged.items() for d in ds}
     first_day = min(min(ds) for ds in days.values())
-    res = {"session_day_range": [first_day, max(max(ds) for ds in days.values())], "labelled_malicious_user_days": int(len(lab)),
+    res = {"status": "historical_shift_diagnostic_not_canonical_labels", "session_day_range": [first_day, max(max(ds) for ds in days.values())], "labelled_malicious_user_days": int(len(lab)),
            "labelled_insiders": int(lab.user_id.nunique()), "flagged_session_days": len(F), "flagged_insiders": len(flagged),
            "flagged_by_scenario": {str(s): {"insiders": sum(1 for u in flagged if scen[u] == s),
                                             "session_days": sum(len(flagged[u]) for u in flagged if scen[u] == s)} for s in sorted(set(scen.values()))},
@@ -56,7 +59,7 @@ def main() -> None:
     old = {(u, int(d)) for u, d in zip(lab.user_id, lab.day_index)} & sess
     new = {(u, int(d) + int(best)) for u, d in zip(lab.user_id, lab.day_index)} & sess
     res.update({"best_shift": int(best), "currently_joined_days_that_stay_malicious_after_best_shift": len(old & new),
-                "currently_joined_days": len(old), "true_days_missing_from_current_join": len(new - old)})
+                "currently_joined_days": len(old), "best_shift_days_missing_from_current_join": len(new - old)})
     print(json.dumps(res, indent=1))
     open(a.out, "w").write(json.dumps(res, indent=1) + "\n")
 

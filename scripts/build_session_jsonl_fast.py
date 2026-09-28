@@ -22,6 +22,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from cert_calendar_labels import ORIGIN, VERSION, load_label_artifact, validate_label_table, validate_session_calendar
+
 from remote_common import dump_json, ensure_dir, read_session_shards, load_user_map, write_jsonl
 from build_session_jsonl import (
     DAY_CONTEXT_COLS,
@@ -43,6 +45,10 @@ def _effective_session_cols(present_cols: list[str]) -> list[str]:
 
 
 def build_examples_fast(df: pd.DataFrame, labels: pd.DataFrame, val_frac: float, max_sessions: int, repair_hyphenated_cols: bool = False, profile_mode: str = 'full'):
+    validate_label_table(labels)
+    validate_session_calendar(df)
+    if not set(labels.user_id).issubset(set(df.user_id)):
+        raise ValueError('Official label users missing from session data; check dataset/version and coverage')
     labels = labels[["user_id", "day_index", "y"]].drop_duplicates()
     label_map = {(str(r.user_id), int(r.day_index)): int(r.y) for r in labels.itertuples(index=False)}
     positive_users = set(labels.loc[labels["y"] > 0, "user_id"].astype(str))
@@ -114,10 +120,13 @@ def build_examples_fast(df: pd.DataFrame, labels: pd.DataFrame, val_frac: float,
         elif profile_mode == "no_profile":
             text = "\n".join(l for l in text.split("\n") if not (l.startswith("PSY ") or l.startswith("DAY ")))
         example_id = f"{user_id}:{day_index}"
+        calendar_date = str((ORIGIN + pd.Timedelta(days=day_index)).date())
         rows.append({
             "example_id": example_id,
             "user_id": user_id,
             "day_index": day_index,
+            "calendar_date": calendar_date,
+            "label_version": VERSION,
             "split": split,
             "y": y,
             "n_sessions_total": int(n_total),
@@ -130,6 +139,8 @@ def build_examples_fast(df: pd.DataFrame, labels: pd.DataFrame, val_frac: float,
             "example_id": example_id,
             "user_id": user_id,
             "day_index": day_index,
+            "calendar_date": calendar_date,
+            "label_version": VERSION,
             "split": split,
             "y": y,
             "n_sessions_total": int(n_total),
@@ -143,7 +154,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--input-dir", type=Path, required=True)
     ap.add_argument("--user-map", type=Path, default=None)
-    ap.add_argument("--labels", type=Path, default=None)
+    ap.add_argument("--labels", type=Path, required=True, help="Verified incident_calendar_labels.parquet with adjacent .manifest.json")
     ap.add_argument("--out-dir", type=Path, required=True)
     ap.add_argument("--val-frac", type=float, default=0.10)
     ap.add_argument("--max-sessions", type=int, default=24)
@@ -153,8 +164,10 @@ def main() -> None:
                     default="full", help="P1 profile-manipulation condition")
     args = ap.parse_args()
 
-    out_dir = ensure_dir(args.out_dir)
-    labels_path = args.labels or (args.input_dir / "labels_daily.parquet")
+    if args.out_dir.exists():
+        raise FileExistsError('Use a new output directory; historical JSONL must be preserved')
+    out_dir = args.out_dir
+    labels_path = args.labels
     user_map_path = resolve_user_map(args.input_dir, args.user_map)
 
     user_map = load_user_map(user_map_path)
@@ -163,10 +176,11 @@ def main() -> None:
     print(f"[build_fast] loaded raw sessions: {len(raw_df)} rows", flush=True)
     raw_df = sanitize_frame(raw_df, user_map)
     print(f"[build_fast] sanitized: {raw_df['user_id'].nunique()} users, {raw_df[['user_id','day_index']].drop_duplicates().shape[0]} user-days", flush=True)
-    labels = pd.read_parquet(labels_path)
+    labels = load_label_artifact(labels_path)
     print(f"[build_fast] loaded labels: {len(labels)} rows", flush=True)
 
     examples, meta_df = build_examples_fast(raw_df, labels, val_frac=args.val_frac, max_sessions=args.max_sessions, repair_hyphenated_cols=args.repair_hyphenated_cols, profile_mode=args.profile_mode)
+    ensure_dir(out_dir)
     print(f"[build_fast] built examples: {len(meta_df)}", flush=True)
 
     train_rows = [r for r in examples if r["split"] == "train"]
@@ -186,6 +200,7 @@ def main() -> None:
         "input_dir": str(args.input_dir),
         "user_map": str(user_map_path),
         "labels": str(labels_path),
+        "label_provenance": labels.attrs["manifest"],
         "out_dir": str(out_dir),
         "n_examples": int(len(meta_df)),
         "split_counts": {k: int(v) for k, v in split_counts.items()},

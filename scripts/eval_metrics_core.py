@@ -33,7 +33,7 @@ import pandas as pd
 from sklearn.metrics import average_precision_score, roc_auc_score
 
 TIE_POLICY = (
-    "ROC/AP from sklearn (ties get the midpoint rank); recall@FPR uses a "
+    "ROC from sklearn gives ties half credit; AP groups equal-score thresholds; recall@FPR uses a "
     "threshold at the (1-fpr) quantile of eligible negatives with "
     "method='higher' and counts scores strictly greater than it"
 )
@@ -87,7 +87,7 @@ def dedup_by_id(ids: Sequence, frames: Dict[str, np.ndarray]) -> np.ndarray:
     if dup.any():
         for name, arr in frames.items():
             a = np.asarray(arr)
-            bad = ~np.isclose(a[dup].astype(float), a[first[dup]].astype(float), equal_nan=True) \
+            bad = ~np.isclose(a[dup].astype(float), a[first[dup]].astype(float), rtol=0, atol=0, equal_nan=True) \
                 if a.dtype.kind in "fc" else a[dup] != a[first[dup]]
             if np.any(bad):
                 n = int(np.sum(bad))

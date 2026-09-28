@@ -8,6 +8,8 @@ from typing import Any, Dict, Iterable, List
 
 import pandas as pd
 
+from cert_calendar_labels import ORIGIN, VERSION, load_label_artifact, validate_label_table, validate_session_calendar
+
 from remote_common import dump_json, ensure_dir, fmt_num, load_user_map, read_session_shards, stable_hash_frac, write_jsonl
 
 
@@ -103,6 +105,10 @@ def serialize_text(context: Dict[str, Any], sessions: List[Dict[str, Any]], tota
 
 
 def build_examples(df: pd.DataFrame, labels: pd.DataFrame, val_frac: float, max_sessions: int) -> tuple[list[Dict[str, Any]], pd.DataFrame]:
+    validate_label_table(labels)
+    validate_session_calendar(df)
+    if not set(labels.user_id).issubset(set(df.user_id)):
+        raise ValueError('Official label users missing from session data; check dataset/version and coverage')
     labels = labels[["user_id", "day_index", "y"]].drop_duplicates()
     label_map = {(str(r.user_id), int(r.day_index)): int(r.y) for r in labels.itertuples(index=False)}
     positive_users = set(labels.loc[labels["y"] > 0, "user_id"].astype(str))
@@ -129,10 +135,13 @@ def build_examples(df: pd.DataFrame, labels: pd.DataFrame, val_frac: float, max_
             sessions.append(sess)
         text = serialize_text(context, sessions, total_sessions=int(len(group)))
         example_id = f"{user_id}:{day_index}"
+        calendar_date = str((ORIGIN + pd.Timedelta(days=day_index)).date())
         rec = {
             "example_id": example_id,
             "user_id": user_id,
             "day_index": day_index,
+            "calendar_date": calendar_date,
+            "label_version": VERSION,
             "split": split,
             "y": y,
             "n_sessions_total": int(len(group)),
@@ -147,6 +156,8 @@ def build_examples(df: pd.DataFrame, labels: pd.DataFrame, val_frac: float, max_
                 "example_id": example_id,
                 "user_id": user_id,
                 "day_index": day_index,
+                "calendar_date": calendar_date,
+                "label_version": VERSION,
                 "split": split,
                 "y": y,
                 "n_sessions_total": int(len(group)),
@@ -159,16 +170,18 @@ def build_examples(df: pd.DataFrame, labels: pd.DataFrame, val_frac: float, max_
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--input-dir", type=Path, required=True, help="Directory containing session*_shard_*.csv.gz and labels_daily.parquet")
+    ap.add_argument("--input-dir", type=Path, required=True, help="Directory containing session*_shard_*.csv.gz")
     ap.add_argument("--user-map", type=Path, default=None, help="Path to session*_user_map.csv")
-    ap.add_argument("--labels", type=Path, default=None, help="Path to labels_daily.parquet; defaults to input-dir/labels_daily.parquet")
+    ap.add_argument("--labels", type=Path, required=True, help="Verified incident_calendar_labels.parquet with adjacent .manifest.json")
     ap.add_argument("--out-dir", type=Path, required=True)
     ap.add_argument("--val-frac", type=float, default=0.10)
     ap.add_argument("--max-sessions", type=int, default=24)
     args = ap.parse_args()
 
-    out_dir = ensure_dir(args.out_dir)
-    labels_path = args.labels or (args.input_dir / "labels_daily.parquet")
+    if args.out_dir.exists():
+        raise FileExistsError('Use a new output directory; historical JSONL must be preserved')
+    out_dir = args.out_dir
+    labels_path = args.labels
     user_map_path = resolve_user_map(args.input_dir, args.user_map)
 
     user_map = load_user_map(user_map_path)
@@ -177,10 +190,11 @@ def main() -> None:
     print(f"[build_session_jsonl] loaded raw sessions: {len(raw_df)} rows", flush=True)
     raw_df = sanitize_frame(raw_df, user_map)
     print(f"[build_session_jsonl] sanitized sessions: {raw_df['user_id'].nunique()} users, {raw_df[['user_id', 'day_index']].drop_duplicates().shape[0]} user-days", flush=True)
-    labels = pd.read_parquet(labels_path)
+    labels = load_label_artifact(labels_path)
     print(f"[build_session_jsonl] loaded labels: {len(labels)} rows", flush=True)
 
     examples, meta_df = build_examples(raw_df, labels, val_frac=args.val_frac, max_sessions=args.max_sessions)
+    ensure_dir(out_dir)
     print(f"[build_session_jsonl] built examples: {len(meta_df)}", flush=True)
 
     train_rows = [r for r in examples if r["split"] == "train"]
@@ -200,6 +214,7 @@ def main() -> None:
         "input_dir": str(args.input_dir),
         "user_map": str(user_map_path),
         "labels": str(labels_path),
+        "label_provenance": labels.attrs["manifest"],
         "out_dir": str(out_dir),
         "n_examples": int(len(meta_df)),
         "split_counts": {k: int(v) for k, v in split_counts.items()},
