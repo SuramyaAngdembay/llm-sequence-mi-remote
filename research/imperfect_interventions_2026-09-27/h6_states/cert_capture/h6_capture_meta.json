@@ -1,0 +1,48 @@
+{
+ "exploratory": true,
+ "behavioural_outcomes_computed": false,
+ "definitions": {
+  "site": "forward-hook output of get_layer_module(model, 26) = transformer block index 25 (0-based), hidden state 26",
+  "positions": "aligned session positions (SES and SESCOUNT classes); O source and R destination from H6's key alignment",
+  "adapted_state": "adapter enabled; bf16 residual output of that block",
+  "base_state": "same input with model.disable_adapter(); bf16 residual output of that block",
+  "path_A": "delta = (adapted - base) computed in bf16, then .float(); used by H6 to build intended codes and the edit",
+  "path_B": "delta = adapted.float() - base.float(); used by H6's post-patch verification",
+  "normalization": "u = (delta - x_mean) / x_std; pre = u @ W_enc^T + b_enc; ReLU; TopK(k); float32",
+  "edit": "e = ((z_O,S - z_R,S) @ D_S^T) * x_std from path-A codes; applied with put(add=True): hs + e.to(bf16) in bf16",
+  "patched_state": "block output captured after the hook (bf16)",
+  "batches": "first 4 receivers in batches of 2, then batches of 6, as in H6"
+ },
+ "sae_checkpoint": "/anvil/scratch/x-sangdembay/pkg4_share/frontier/layer_26/m02_k04/delta_sae_model.pt",
+ "sae_sha256": "189840ce191e2b256b9f249b60ff2d2fad332796eff75f66133536b2c6975305",
+ "k": 4,
+ "sae_width": 8192,
+ "d_model": 4096,
+ "adapter_sha256": "e0bf51124174de5ee0209d621aade81e3fe0256246ef3b58a39657ee52756d49",
+ "selected": [
+  4596,
+  7693,
+  2302,
+  3673,
+  3455
+ ],
+ "control": [
+  6596,
+  8017,
+  6608,
+  2765,
+  886
+ ],
+ "receivers": 120,
+ "saved_code_check_vs_h6": {
+  "max_abs_O": 0.0,
+  "max_abs_R": 0.0,
+  "receivers_checked": 120
+ },
+ "gpu": "NVIDIA A100-SXM4-40GB",
+ "wall_s": 107.78774166107178,
+ "cpu_s": 83.27605562599999,
+ "versions": {
+  "torch": "2.5.1+cu121"
+ }
+}

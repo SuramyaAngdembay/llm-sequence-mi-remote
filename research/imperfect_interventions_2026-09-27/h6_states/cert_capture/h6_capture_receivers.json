@@ -1,0 +1,1202 @@
+[
+ {
+  "recv": 0,
+  "id": "AKR0057:318",
+  "user": "AKR0057",
+  "kind": "malicious",
+  "n_session_tokens": 304,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 1,
+  "id": "AKR0057:336",
+  "user": "AKR0057",
+  "kind": "benign",
+  "n_session_tokens": 308,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 2,
+  "id": "AKR0057:317",
+  "user": "AKR0057",
+  "kind": "malicious",
+  "n_session_tokens": 296,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 3,
+  "id": "AKR0057:337",
+  "user": "AKR0057",
+  "kind": "benign",
+  "n_session_tokens": 298,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 4,
+  "id": "BDV0168:210",
+  "user": "BDV0168",
+  "kind": "malicious",
+  "n_session_tokens": 148,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 5,
+  "id": "BDV0168:207",
+  "user": "BDV0168",
+  "kind": "benign",
+  "n_session_tokens": 153,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 6,
+  "id": "BDV0168:211",
+  "user": "BDV0168",
+  "kind": "malicious",
+  "n_session_tokens": 154,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 7,
+  "id": "BDV0168:206",
+  "user": "BDV0168",
+  "kind": "benign",
+  "n_session_tokens": 152,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 8,
+  "id": "BLS0678:267",
+  "user": "BLS0678",
+  "kind": "malicious",
+  "n_session_tokens": 428,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 9,
+  "id": "BLS0678:273",
+  "user": "BLS0678",
+  "kind": "benign",
+  "n_session_tokens": 148,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 10,
+  "id": "BLS0678:270",
+  "user": "BLS0678",
+  "kind": "malicious",
+  "n_session_tokens": 437,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 11,
+  "id": "BLS0678:274",
+  "user": "BLS0678",
+  "kind": "benign",
+  "n_session_tokens": 151,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 12,
+  "id": "BTL0226:283",
+  "user": "BTL0226",
+  "kind": "malicious",
+  "n_session_tokens": 297,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 13,
+  "id": "BTL0226:287",
+  "user": "BTL0226",
+  "kind": "benign",
+  "n_session_tokens": 301,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 14,
+  "id": "BTL0226:281",
+  "user": "BTL0226",
+  "kind": "malicious",
+  "n_session_tokens": 305,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 15,
+  "id": "BTL0226:276",
+  "user": "BTL0226",
+  "kind": "benign",
+  "n_session_tokens": 295,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 16,
+  "id": "DRR0162:330",
+  "user": "DRR0162",
+  "kind": "malicious",
+  "n_session_tokens": 160,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 17,
+  "id": "DRR0162:312",
+  "user": "DRR0162",
+  "kind": "benign",
+  "n_session_tokens": 161,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 18,
+  "id": "DRR0162:347",
+  "user": "DRR0162",
+  "kind": "malicious",
+  "n_session_tokens": 160,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 19,
+  "id": "DRR0162:371",
+  "user": "DRR0162",
+  "kind": "benign",
+  "n_session_tokens": 162,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 20,
+  "id": "EGD0132:242",
+  "user": "EGD0132",
+  "kind": "malicious",
+  "n_session_tokens": 154,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 21,
+  "id": "EGD0132:270",
+  "user": "EGD0132",
+  "kind": "benign",
+  "n_session_tokens": 150,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 22,
+  "id": "EGD0132:220",
+  "user": "EGD0132",
+  "kind": "malicious",
+  "n_session_tokens": 154,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 23,
+  "id": "EGD0132:211",
+  "user": "EGD0132",
+  "kind": "benign",
+  "n_session_tokens": 153,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 24,
+  "id": "EHB0824:205",
+  "user": "EHB0824",
+  "kind": "malicious",
+  "n_session_tokens": 155,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 25,
+  "id": "EHB0824:200",
+  "user": "EHB0824",
+  "kind": "benign",
+  "n_session_tokens": 153,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 26,
+  "id": "EHB0824:207",
+  "user": "EHB0824",
+  "kind": "malicious",
+  "n_session_tokens": 151,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 27,
+  "id": "EHB0824:210",
+  "user": "EHB0824",
+  "kind": "benign",
+  "n_session_tokens": 152,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 28,
+  "id": "FMG0527:374",
+  "user": "FMG0527",
+  "kind": "malicious",
+  "n_session_tokens": 147,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 29,
+  "id": "FMG0527:375",
+  "user": "FMG0527",
+  "kind": "benign",
+  "n_session_tokens": 291,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 30,
+  "id": "FMG0527:373",
+  "user": "FMG0527",
+  "kind": "malicious",
+  "n_session_tokens": 287,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 31,
+  "id": "FMG0527:378",
+  "user": "FMG0527",
+  "kind": "benign",
+  "n_session_tokens": 147,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 32,
+  "id": "GHL0460:310",
+  "user": "GHL0460",
+  "kind": "malicious",
+  "n_session_tokens": 295,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 33,
+  "id": "GHL0460:309",
+  "user": "GHL0460",
+  "kind": "benign",
+  "n_session_tokens": 152,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 34,
+  "id": "GHL0460:311",
+  "user": "GHL0460",
+  "kind": "malicious",
+  "n_session_tokens": 154,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 35,
+  "id": "GHL0460:312",
+  "user": "GHL0460",
+  "kind": "benign",
+  "n_session_tokens": 155,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 36,
+  "id": "HBO0413:422",
+  "user": "HBO0413",
+  "kind": "malicious",
+  "n_session_tokens": 155,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 37,
+  "id": "HBO0413:407",
+  "user": "HBO0413",
+  "kind": "benign",
+  "n_session_tokens": 154,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 38,
+  "id": "HBO0413:452",
+  "user": "HBO0413",
+  "kind": "malicious",
+  "n_session_tokens": 156,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 39,
+  "id": "HBO0413:462",
+  "user": "HBO0413",
+  "kind": "benign",
+  "n_session_tokens": 155,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 40,
+  "id": "HJB0742:324",
+  "user": "HJB0742",
+  "kind": "malicious",
+  "n_session_tokens": 152,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 41,
+  "id": "HJB0742:319",
+  "user": "HJB0742",
+  "kind": "benign",
+  "n_session_tokens": 154,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 42,
+  "id": "HJB0742:326",
+  "user": "HJB0742",
+  "kind": "malicious",
+  "n_session_tokens": 433,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 43,
+  "id": "HJB0742:329",
+  "user": "HJB0742",
+  "kind": "benign",
+  "n_session_tokens": 435,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 44,
+  "id": "HXL0968:262",
+  "user": "HXL0968",
+  "kind": "malicious",
+  "n_session_tokens": 153,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 45,
+  "id": "HXL0968:240",
+  "user": "HXL0968",
+  "kind": "benign",
+  "n_session_tokens": 153,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 46,
+  "id": "HXL0968:277",
+  "user": "HXL0968",
+  "kind": "malicious",
+  "n_session_tokens": 154,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 47,
+  "id": "HXL0968:301",
+  "user": "HXL0968",
+  "kind": "benign",
+  "n_session_tokens": 155,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 48,
+  "id": "IJM0776:224",
+  "user": "IJM0776",
+  "kind": "malicious",
+  "n_session_tokens": 149,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 49,
+  "id": "IJM0776:245",
+  "user": "IJM0776",
+  "kind": "benign",
+  "n_session_tokens": 143,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 50,
+  "id": "IJM0776:211",
+  "user": "IJM0776",
+  "kind": "malicious",
+  "n_session_tokens": 147,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 51,
+  "id": "IJM0776:184",
+  "user": "IJM0776",
+  "kind": "benign",
+  "n_session_tokens": 147,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 52,
+  "id": "IKR0401:408",
+  "user": "IKR0401",
+  "kind": "malicious",
+  "n_session_tokens": 156,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 53,
+  "id": "IKR0401:413",
+  "user": "IKR0401",
+  "kind": "benign",
+  "n_session_tokens": 158,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 54,
+  "id": "IKR0401:392",
+  "user": "IKR0401",
+  "kind": "malicious",
+  "n_session_tokens": 158,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 55,
+  "id": "IKR0401:414",
+  "user": "IKR0401",
+  "kind": "benign",
+  "n_session_tokens": 156,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 56,
+  "id": "IUB0565:281",
+  "user": "IUB0565",
+  "kind": "malicious",
+  "n_session_tokens": 152,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 57,
+  "id": "IUB0565:276",
+  "user": "IUB0565",
+  "kind": "benign",
+  "n_session_tokens": 159,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 58,
+  "id": "IUB0565:301",
+  "user": "IUB0565",
+  "kind": "malicious",
+  "n_session_tokens": 156,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 59,
+  "id": "IUB0565:275",
+  "user": "IUB0565",
+  "kind": "benign",
+  "n_session_tokens": 156,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 60,
+  "id": "JMB0308:199",
+  "user": "JMB0308",
+  "kind": "malicious",
+  "n_session_tokens": 294,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 61,
+  "id": "JMB0308:200",
+  "user": "JMB0308",
+  "kind": "benign",
+  "n_session_tokens": 155,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 62,
+  "id": "JMB0308:198",
+  "user": "JMB0308",
+  "kind": "malicious",
+  "n_session_tokens": 292,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 63,
+  "id": "JMB0308:203",
+  "user": "JMB0308",
+  "kind": "benign",
+  "n_session_tokens": 152,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 64,
+  "id": "JRG0207:386",
+  "user": "JRG0207",
+  "kind": "malicious",
+  "n_session_tokens": 289,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 65,
+  "id": "JRG0207:389",
+  "user": "JRG0207",
+  "kind": "benign",
+  "n_session_tokens": 152,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 66,
+  "id": "JRG0207:382",
+  "user": "JRG0207",
+  "kind": "malicious",
+  "n_session_tokens": 152,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 67,
+  "id": "JRG0207:381",
+  "user": "JRG0207",
+  "kind": "benign",
+  "n_session_tokens": 153,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 68,
+  "id": "LJR0523:211",
+  "user": "LJR0523",
+  "kind": "malicious",
+  "n_session_tokens": 143,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 69,
+  "id": "LJR0523:207",
+  "user": "LJR0523",
+  "kind": "benign",
+  "n_session_tokens": 145,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 70,
+  "id": "LJR0523:220",
+  "user": "LJR0523",
+  "kind": "malicious",
+  "n_session_tokens": 288,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 71,
+  "id": "LJR0523:221",
+  "user": "LJR0523",
+  "kind": "benign",
+  "n_session_tokens": 151,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 72,
+  "id": "MAR0955:404",
+  "user": "MAR0955",
+  "kind": "malicious",
+  "n_session_tokens": 149,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 73,
+  "id": "MAR0955:406",
+  "user": "MAR0955",
+  "kind": "benign",
+  "n_session_tokens": 152,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 74,
+  "id": "MAR0955:401",
+  "user": "MAR0955",
+  "kind": "malicious",
+  "n_session_tokens": 155,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 75,
+  "id": "MAR0955:400",
+  "user": "MAR0955",
+  "kind": "benign",
+  "n_session_tokens": 155,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 76,
+  "id": "MAS0025:269",
+  "user": "MAS0025",
+  "kind": "malicious",
+  "n_session_tokens": 157,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 77,
+  "id": "MAS0025:268",
+  "user": "MAS0025",
+  "kind": "benign",
+  "n_session_tokens": 297,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 78,
+  "id": "MAS0025:270",
+  "user": "MAS0025",
+  "kind": "malicious",
+  "n_session_tokens": 157,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 79,
+  "id": "MAS0025:267",
+  "user": "MAS0025",
+  "kind": "benign",
+  "n_session_tokens": 157,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 80,
+  "id": "MDH0580:381",
+  "user": "MDH0580",
+  "kind": "malicious",
+  "n_session_tokens": 153,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 81,
+  "id": "MDH0580:366",
+  "user": "MDH0580",
+  "kind": "benign",
+  "n_session_tokens": 155,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 82,
+  "id": "MDH0580:424",
+  "user": "MDH0580",
+  "kind": "malicious",
+  "n_session_tokens": 155,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 83,
+  "id": "MDH0580:427",
+  "user": "MDH0580",
+  "kind": "benign",
+  "n_session_tokens": 153,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 84,
+  "id": "MYD0978:346",
+  "user": "MYD0978",
+  "kind": "malicious",
+  "n_session_tokens": 162,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 85,
+  "id": "MYD0978:344",
+  "user": "MYD0978",
+  "kind": "benign",
+  "n_session_tokens": 162,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 86,
+  "id": "MYD0978:347",
+  "user": "MYD0978",
+  "kind": "malicious",
+  "n_session_tokens": 162,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 87,
+  "id": "MYD0978:343",
+  "user": "MYD0978",
+  "kind": "benign",
+  "n_session_tokens": 158,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 88,
+  "id": "PSF0133:218",
+  "user": "PSF0133",
+  "kind": "malicious",
+  "n_session_tokens": 155,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 89,
+  "id": "PSF0133:211",
+  "user": "PSF0133",
+  "kind": "benign",
+  "n_session_tokens": 155,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 90,
+  "id": "PSF0133:246",
+  "user": "PSF0133",
+  "kind": "malicious",
+  "n_session_tokens": 155,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 91,
+  "id": "PSF0133:273",
+  "user": "PSF0133",
+  "kind": "benign",
+  "n_session_tokens": 155,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 92,
+  "id": "RAB0589:255",
+  "user": "RAB0589",
+  "kind": "malicious",
+  "n_session_tokens": 292,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 93,
+  "id": "RAB0589:253",
+  "user": "RAB0589",
+  "kind": "benign",
+  "n_session_tokens": 289,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 94,
+  "id": "RAB0589:261",
+  "user": "RAB0589",
+  "kind": "malicious",
+  "n_session_tokens": 154,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 95,
+  "id": "RAB0589:266",
+  "user": "RAB0589",
+  "kind": "benign",
+  "n_session_tokens": 433,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 96,
+  "id": "RAR0725:218",
+  "user": "RAR0725",
+  "kind": "malicious",
+  "n_session_tokens": 145,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 97,
+  "id": "RAR0725:231",
+  "user": "RAR0725",
+  "kind": "benign",
+  "n_session_tokens": 147,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 98,
+  "id": "RAR0725:190",
+  "user": "RAR0725",
+  "kind": "malicious",
+  "n_session_tokens": 147,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 99,
+  "id": "RAR0725:184",
+  "user": "RAR0725",
+  "kind": "benign",
+  "n_session_tokens": 146,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 100,
+  "id": "RHL0992:217",
+  "user": "RHL0992",
+  "kind": "malicious",
+  "n_session_tokens": 160,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 101,
+  "id": "RHL0992:191",
+  "user": "RHL0992",
+  "kind": "benign",
+  "n_session_tokens": 302,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 102,
+  "id": "RHL0992:245",
+  "user": "RHL0992",
+  "kind": "malicious",
+  "n_session_tokens": 299,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 103,
+  "id": "RHL0992:253",
+  "user": "RHL0992",
+  "kind": "benign",
+  "n_session_tokens": 296,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 104,
+  "id": "RMW0542:212",
+  "user": "RMW0542",
+  "kind": "malicious",
+  "n_session_tokens": 154,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 105,
+  "id": "RMW0542:231",
+  "user": "RMW0542",
+  "kind": "benign",
+  "n_session_tokens": 155,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 106,
+  "id": "RMW0542:213",
+  "user": "RMW0542",
+  "kind": "malicious",
+  "n_session_tokens": 154,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 107,
+  "id": "RMW0542:232",
+  "user": "RMW0542",
+  "kind": "benign",
+  "n_session_tokens": 156,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 108,
+  "id": "TAP0551:295",
+  "user": "TAP0551",
+  "kind": "malicious",
+  "n_session_tokens": 303,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 109,
+  "id": "TAP0551:291",
+  "user": "TAP0551",
+  "kind": "benign",
+  "n_session_tokens": 300,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 110,
+  "id": "TAP0551:297",
+  "user": "TAP0551",
+  "kind": "malicious",
+  "n_session_tokens": 155,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 111,
+  "id": "TAP0551:301",
+  "user": "TAP0551",
+  "kind": "benign",
+  "n_session_tokens": 301,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 112,
+  "id": "VSS0154:253",
+  "user": "VSS0154",
+  "kind": "malicious",
+  "n_session_tokens": 158,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 113,
+  "id": "VSS0154:247",
+  "user": "VSS0154",
+  "kind": "benign",
+  "n_session_tokens": 156,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 114,
+  "id": "VSS0154:249",
+  "user": "VSS0154",
+  "kind": "malicious",
+  "n_session_tokens": 159,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 115,
+  "id": "VSS0154:246",
+  "user": "VSS0154",
+  "kind": "benign",
+  "n_session_tokens": 154,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 116,
+  "id": "XHW0498:245",
+  "user": "XHW0498",
+  "kind": "malicious",
+  "n_session_tokens": 153,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 117,
+  "id": "XHW0498:218",
+  "user": "XHW0498",
+  "kind": "benign",
+  "n_session_tokens": 153,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 118,
+  "id": "XHW0498:248",
+  "user": "XHW0498",
+  "kind": "malicious",
+  "n_session_tokens": 153,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ },
+ {
+  "recv": 119,
+  "id": "XHW0498:217",
+  "user": "XHW0498",
+  "kind": "benign",
+  "n_session_tokens": 154,
+  "zero_identity_equal": true,
+  "zero_addzero_equal": true,
+  "zero_addzero_max_abs": 0.0
+ }
+]
