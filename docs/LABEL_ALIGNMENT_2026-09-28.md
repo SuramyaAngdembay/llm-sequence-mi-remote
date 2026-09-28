@@ -73,3 +73,14 @@ episodes of scenarios 1 and 3 mostly miss.
 3. Recompute the evaluation populations and the analyses listed above, in order of dependence.
 
 Which results to rerun, and how to report the change, is a decision for the paper and the thesis.
+
+## Addendum: the labels are activity windows, not event days
+
+`labels_daily` marks every day in each insider's answer-key window, from the first to the last
+malicious event (`insiders.csv` start and end). 1,871 of its 1,883 labelled days fall inside
+those windows, which total 1,892 days.
+
+The LC-DAL extraction flags only days with a malicious event: 966 days in `dayr4.2.csv` (85, 861
+and 20 by scenario). Both definitions are legitimate, but they differ, and the thesis now states
+which one each experiment uses. The five-day misalignment above applies to the window labels as
+joined in the language-model pipeline.

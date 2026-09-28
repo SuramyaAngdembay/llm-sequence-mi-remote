@@ -1,0 +1,38 @@
+7b9f69eb52198b1da7c06d557cb6c3e9  pca_reconstruction_r42.py
+9e4f7d99de43126c726e9ebe27019ca2  /homes/01/srangdembay/InsiderThreatDetection/r4.2/ExtractedData/dayr4.2.csv
+533048701ea8ea71160f19b63414d34c  r42_user_splits.csv
+bbd6ba8a5112df45b15c6c35b88e5363  sessionr4.2_user_map.csv
+{"rows": 330452, "users": 1000, "malicious_days": 966, "malicious_days_by_scenario": {"1": 85, "2": 861, "3": 20}, "insider_users": 70, "insider_users_all_in_eval_split": true, "eval_split_users_all_insiders": true, "users_without_split": 0}
+Traceback (most recent call last):
+  File "/homes/01/srangdembay/InsiderThreatDetection/r4.2/pca_reconstruction_2026_09_28/pca_reconstruction_r42.py", line 160, in <module>
+    main()
+  File "/homes/01/srangdembay/InsiderThreatDetection/r4.2/pca_reconstruction_2026_09_28/pca_reconstruction_r42.py", line 116, in main
+    e_const = ((Xev[:, const] - rec_mean_const(full, const)) ** 2).sum(axis=1)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/homes/01/srangdembay/InsiderThreatDetection/r4.2/pca_reconstruction_2026_09_28/pca_reconstruction_r42.py", line 41, in rec_mean_const
+    assert np.allclose(full.components_[:, const], 0) and np.allclose(full.mean_[const], 0)
+AssertionError
+Command exited with non-zero status 1
+	Command being timed: "/homes/01/srangdembay/miniconda3/bin/python -u pca_reconstruction_r42.py --day-csv /homes/01/srangdembay/InsiderThreatDetection/r4.2/ExtractedData/dayr4.2.csv --user-map sessionr4.2_user_map.csv --splits r42_user_splits.csv --out-dir /homes/01/srangdembay/InsiderThreatDetection/r4.2/pca_reconstruction_2026_09_28 --pve 0.95"
+	User time (seconds): 127.60
+	System time (seconds): 41.10
+	Percent of CPU this job got: 368%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:45.77
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 8469488
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 1080344
+	Voluntary context switches: 4182
+	Involuntary context switches: 8934
+	Swaps: 0
+	File system inputs: 24
+	File system outputs: 16
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 1

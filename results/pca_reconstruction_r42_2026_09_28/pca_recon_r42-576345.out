@@ -1,0 +1,31 @@
+c1e968733f6c8208a5d86b1530c5a270  pca_reconstruction_r42.py
+9e4f7d99de43126c726e9ebe27019ca2  /homes/01/srangdembay/InsiderThreatDetection/r4.2/ExtractedData/dayr4.2.csv
+533048701ea8ea71160f19b63414d34c  r42_user_splits.csv
+bbd6ba8a5112df45b15c6c35b88e5363  sessionr4.2_user_map.csv
+{"rows": 330452, "users": 1000, "malicious_days": 966, "malicious_days_by_scenario": {"1": 85, "2": 861, "3": 20}, "insider_users": 70, "insider_users_all_in_eval_split": true, "eval_split_users_all_insiders": true, "users_without_split": 0}
+all features {"p": 502, "q": 71, "pve": 0.951375256042987, "mse_train_days": 15.025045882717098, "mse_heldout_benign_days": 12.897212562630637, "mse_malicious_days": 31117.25012873509, "mse_insider_benign_days": 49.36161494234313, "all 70 insiders": {"user_auc": 0.8323688969258589, "user_auc_ci95": [0.764371609403255, 0.8936708860759494], "day_auc": 0.7558472720292473, "day_auc_ci95": [0.7151681144146004, 0.7972714183659697], "malicious_users": 70, "benign_users": 79, "days": 42491, "malicious_days": 966}, "language-model pool (60 insiders)": {"user_auc": 0.8044303797468354, "user_auc_ci95": [0.7265770042194093, 0.8746835443037975], "day_auc": 0.762242463219204, "day_auc_ci95": [0.7203566386396499, 0.8022680105991867], "malicious_users": 60, "benign_users": 79, "days": 40541, "malicious_days": 947}}
+behavior only {"p": 491, "q": 63, "pve": 0.9506366047037047, "mse_train_days": 14.75965519359235, "mse_heldout_benign_days": 11.253338240070004, "mse_malicious_days": 31316.970006641284, "mse_insider_benign_days": 54.023398752642024, "all 70 insiders": {"user_auc": 0.8350813743218807, "user_auc_ci95": [0.7649186256781193, 0.8962025316455696], "day_auc": 0.7909775472631793, "day_auc_ci95": [0.7547324659577135, 0.8256147474742296], "malicious_users": 70, "benign_users": 79, "days": 42491, "malicious_days": 966}, "language-model pool (60 insiders)": {"user_auc": 0.8075949367088607, "user_auc_ci95": [0.7297415611814346, 0.8767932489451477], "day_auc": 0.7953542607412437, "day_auc_ci95": [0.7579952921164828, 0.8302281827508498], "malicious_users": 60, "benign_users": 79, "days": 40541, "malicious_days": 947}}
+PCA_RECON_DONE
+	Command being timed: "/homes/01/srangdembay/miniconda3/bin/python -u pca_reconstruction_r42.py --day-csv /homes/01/srangdembay/InsiderThreatDetection/r4.2/ExtractedData/dayr4.2.csv --user-map sessionr4.2_user_map.csv --splits r42_user_splits.csv --out-dir /homes/01/srangdembay/InsiderThreatDetection/r4.2/pca_reconstruction_2026_09_28 --pve 0.95"
+	User time (seconds): 224.90
+	System time (seconds): 42.45
+	Percent of CPU this job got: 171%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 2:35.58
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 8469828
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 324
+	Minor (reclaiming a frame) page faults: 1595331
+	Voluntary context switches: 7036
+	Involuntary context switches: 15935
+	Swaps: 0
+	File system inputs: 894600
+	File system outputs: 32
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

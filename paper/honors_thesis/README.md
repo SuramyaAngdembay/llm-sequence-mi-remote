@@ -11,7 +11,7 @@ Components to Interpretable Sparse Features*. Search the source for `NEW`,
 | Title, abstract, keywords, abbreviations | changed; CTMC removed from keywords and abbreviations |
 | Chapter I, introduction | unchanged placeholder |
 | Chapter II, PCA | **unchanged, verbatim** |
-| Chapter III, setup | written in full 2026-09-28: the dataset as users, days and events; the insider case (scenarios, labels, base rate, one-class framing); DFS and PCA-GMM preparation with `[To complete: ...]` markers for pipeline details only the author has; language-model data (sessions, serialization, training settings, user-disjoint splits, evaluation pool); five design rules. A visible note flags the label misalignment found the same day |
+| Chapter III, setup | written in full 2026-09-28: the dataset as users, days and events; the insider case (scenarios, labels, base rate, one-class framing); PCA preparation and result, filled from the Magnolia run of 2026-09-28 (one `[To complete]` note remains: the label alignment, pending a decision); language-model data (sessions, serialization, training settings, user-disjoint splits, evaluation pool); five design rules. A visible note flags the label misalignment found the same day |
 | Chapter IV, language-model surprisal and its decomposition | new. Section 4.3 explains how the next-token probability is produced (context vector, dot-product scores, softmax, surprisal as log-sum-exp minus the actual token's score). Section 4.4, on why $-\log p$ measures surprise, and the whole-day negative log-likelihood subsection moved here from the removed CTMC chapter. Section 4.5 derives that minimizing surprisal learns the benign frequencies and shows low-rank adaptation as a rank-16 correction |
 | Chapter V, interpretable dimensionality reduction of the fine-tuned model | new; the sparse autoencoder is presented as a sparse, overcomplete relative of PCA |
 | References | ten entries added: nine from `paper/references.bib`, plus Shannon (1948) |
@@ -19,7 +19,7 @@ Components to Interpretable Sparse Features*. Search the source for `NEW`,
 The removed CTMC chapter and its data-preparation section are preserved verbatim
 in `ctmc_chapter_removed.tex`.
 
-Compiles cleanly with TeX Live 2020 (53 pages as of 2026-09-28, two passes, no
+Compiles cleanly with TeX Live 2020 (55 pages as of 2026-09-28, two passes, no
 errors, no undefined references, no overfull lines). It needs the seven PCA figure files alongside it. The one
 overfull line left is in the original PCA chapter. `thesis_mechinterp_preview.pdf`
 is built in graphicx draft mode, with placeholder frames in place of those
@@ -53,7 +53,7 @@ described as threshold-selected, not activity-matched. The withdrawn TWOS seed
 reversal is no longer cited, and the abstract no longer anticipates the pending
 per-class result.
 
-**Chapter III sources (checked 2026-09-28).**
+**Chapter III sources (checked 2026-09-28).** Section 3.3 (PCA) numbers: `results/pca_reconstruction_r42_2026_09_28/pca_reconstruction_r42.json`, explained in that folder's README.
 
 | number | source |
 |---|---|
@@ -65,6 +65,10 @@ per-class result.
 | evaluation pool 40,519 days, 139 users, 1,309 malicious; 29 / 30 / 1 insiders and 139 / 1,168 / 2 days by scenario | the same metadata joined with `insiders.csv` |
 | rank 16, α 32, dropout 0.05, seven projections; 1 epoch, 22 × 4 GPUs, learning rate 1.5e-4 cosine, 3% warm-up; 3,271 steps | `pkg4_share/adapter/adapter_config.json`, `training_args.bin`, `checkpoint-3271` |
 | the label misalignment note | `docs/LABEL_ALIGNMENT_2026-09-28.md` |
+| window labels (1,883 days) vs event-day labels (966; 85 / 861 / 20) | `labels_daily.parquet` vs `insiders.csv` windows; `dayr4.2.csv` `insider` column |
+| PCA: n = 330,452, 502 features, 193 constant in training so p = 309 (299 without profile; `b_unit` constant), 287,961 training days, q = 71 (63), 95.1% | `results/pca_reconstruction_r42_2026_09_28/pca_reconstruction_r42.json` (Magnolia job 576348) |
+| PCA: medians 6.6 / 17.0, 6.4% vs 0.5% above training q99; user AUC 0.75 [0.67, 0.83], 0.76, 0.78 (70); thresholds 0.81 / 0.75 / 0.78; raw constant columns 99.7% and 0.80 [0.73, 0.87] | the same file |
+| leak, hacking and supervisor-PC columns; pc code 3 = supervisor's PC | the same file; `InsiderThreatDetection/r4.2/feature_extractor.py:399` on Magnolia |
 
 **Restructure of 2026-09-28 (advisor feedback, Dr. Tian).**
 

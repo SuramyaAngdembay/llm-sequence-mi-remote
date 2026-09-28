@@ -546,3 +546,18 @@ checked against the artifacts; its pooled counts match a recount).
   a verified feasible restoration nor noising changes behaviour-token loss beyond the margin.
   Interactions are untested. The attack/benign labels inherit the five-day misalignment. This
   supports deprioritizing the set, not a general exclusion.
+
+**2026-09-28, PCA reconstruction-error detector for the thesis (Magnolia CPU job 576348, 5 min)**
+(`results/pca_reconstruction_r42_2026_09_28/README.md`). Run on the user's request for thesis
+Section 3.3. It lifts the 2026-09-24 pause on PCA runs for this purpose only.
+
+- **Protocol.** LC-DAL day features, the language model's user split, benign-only fit, q at 95%
+  variance, score e = ‖x − x̂‖², user score = the largest daily error.
+- **Constant columns.** 193 of 502 columns never vary in training. 32 of them (leak-site and
+  hacking-site visits, supervisor-PC logons) are nonzero almost only on malicious days. Left in
+  raw units, they carry 99.7% of the malicious squared error.
+- **Result.** Without those columns (p = 309, q = 71): user AUC 0.75 [0.67, 0.83] on the
+  60-insider pool, 0.78 with all 70 insiders; 0.81 to 0.75 across 80% to 99% variance. With
+  them: 0.80. Profile columns barely matter: 0.76 without them.
+- **Labels.** `labels_daily` is window-based (first to last malicious event). The extraction's
+  event-day flag gives 966 days. The PCA day AUC uses event days.

@@ -183,6 +183,7 @@ CERT \> CERT Division of the Software Engineering Institute \\
 LoRA \> Low-Rank Adaptation \\
 PCA \> Principal Component Analysis \\
 QLoRA \> Quantized Low-Rank Adaptation \\
+ROC \> Receiver Operating Characteristic \\
 SAE \> Sparse Autoencoder \\
 USM \> The University of Southern Mississippi \\
 \end{tabbing}
@@ -515,44 +516,83 @@ as the supervisor with the captured credentials and sends an alarming mass email
 \end{tabular}
 \end{table}
 
-A user-day is \emph{malicious} if the answer key lists at least one malicious event of that user on
-that day,
+The answer key also gives the time of each insider's first and last malicious event. A user-day
+is labelled \emph{malicious} if it falls within that window,
 \begin{equation}
 y(u,t) \;=\;
 \begin{cases}
-1 & \text{if the answer key lists a malicious event of user } u \text{ on day } t, \\
+1 & \text{if day } t \text{ lies between the first and last malicious event of insider } u, \\
 0 & \text{otherwise,}
 \end{cases}
 \label{eq:day-label}
 \end{equation}
-and a user is malicious if any of their days is, $y(u) = \max_t y(u,t)$. The answer key marks
-1,883 malicious user-days: 1,676 for scenario 2, whose insiders act over weeks, 187 for scenario 1
-and 20 for scenario 3.
+and a user is malicious if any of their days is, $y(u) = \max_t y(u,t)$. This labels 1,883
+user-days: 1,676 for scenario 2, whose insiders act over weeks, 187 for scenario 1 and 20 for
+scenario 3. A stricter label marks only the days on which a malicious event actually occurs; the
+feature extraction used in this thesis \cite{le2020analyzing} records 966 such days (85, 861 and
+20 by scenario). The language-model experiments use the window labels, and the PCA experiment
+uses the stricter labels. User-level results depend only on which users are malicious, so they
+are comparable across the two.
 
 Malicious days are rare. At most 1,883 of the 330,295 user-days with computer activity
 (Section~\ref{sec:lm-data}) are malicious, a fraction $\pi \le 1{,}883/330{,}295 = 0.0057$. A rule
 that calls every day benign would therefore be correct on at least $99.4\%$ of days while
-detecting nothing, so this thesis measures detection by ranking, with the user-level area under
-the ROC curve of Section~\ref{sec:lm-auc}. Malicious examples are also too few and too varied to
+detecting nothing, so this thesis measures detection by ranking. A detector flags every
+observation whose score exceeds a threshold, and each threshold catches some fraction of the
+malicious cases (the true positive rate) at the cost of flagging some fraction of the benign ones
+(the false positive rate). The receiver operating characteristic (ROC) curve plots these two rates
+as the threshold moves from strict to lenient---a curve that rises steeply toward the top-left
+corner catches malicious cases before it flags many benign ones, while the diagonal is what random
+scores would give. The area under the curve (AUC) is the probability that a randomly chosen
+malicious case scores higher than a randomly chosen benign one, so 1 means perfect ranking and 0.5
+means chance; Section~\ref{sec:lm-auc} defines the user-level version used in this thesis. Malicious examples are also too few and too varied to
 learn from, so every detector is \emph{one-class}: it is fit only on benign training data,
 $\mathcal{B} = \{ D : y(D) = 0 \}$ restricted to training users, and scores how far a new day
 departs from what it learned. The labels are used only for evaluation.
 
-\section{Data Preparation for PCA Reconstruction Analysis}
+\section[Data Preparation for PCA Reconstruction Analysis]{Data Preparation for PCA\\ Reconstruction Analysis}
 \label{sec:pca-data}
 The method of \chref{ch:pca} needs each observation as a vector of $p$ numerical features, so the
 activity of each observation is summarized into one row $\mathbf{x}_i^\top$ of a matrix
-$X \in \mathbb{R}^{n\times p}$ \fillin{the feature table used for the PCA experiments, $n$ and $p$}.
+$X \in \mathbb{R}^{n\times p}$. Here an observation is a user-day, and its features are the
+day-level features of Le et al. \cite{le2020analyzing}: counts of logons, removable-drive
+connections, file accesses, emails and web visits, each split by working hours and after hours
+and by the kind of computer, file or website involved (for example, visits to job-search,
+cloud-storage or leak websites), averages such as file and email sizes, whether the day is a
+weekday, and the user's organizational and personality attributes. Release 4.2 gives
+$n = 330{,}452$ user-days with 502 features once identifiers and time indices are removed.
 Because PCA is sensitive to scale, each column is standardized with the mean and standard
-deviation of the training rows.
+deviation of the training rows. Standardization needs a positive standard deviation, and 193 of
+the 502 columns never vary among the training days, so they are removed, leaving $p = 309$
+features. Removing the organizational and personality attributes as well (ten of the 309; the
+eleventh, the business unit, takes a single value in this release) leaves 299, the PCA counterpart
+of the behavior-only score of \chref{ch:lm}.
 
-PCA is fit on the training rows \fillin{confirm that only benign rows are used}, keeping the first $q$ principal directions $U_q$, with $q$
-chosen by the proportion of variance explained \eqref{eq:evr} \fillin{q and the threshold}. Each
+PCA is fit on the 287,961 days of the 851 training users of Section~\ref{sec:lm-data}, the users
+that also train the language model; all of them are benign, so PCA sees no insider and no
+held-out benign user. It keeps the first $q$ principal directions $U_q$, with $q$ the smallest
+number whose proportion of variance explained \eqref{eq:evr} reaches $95\%$; this gives $q = 71$
+directions, which explain $95.1\%$ of the variance ($q = 63$ without the profile attributes). Each
 observation is reduced to its scores and mapped back to the feature space with the inverse PCA
 transformation \eqref{eq:inverse-pca}, and its anomaly score is its reconstruction error $e_i$
 \eqref{eq:recon-error}; the mean squared error \eqref{eq:mse} summarizes a set of observations.
 Benign behavior is reconstructed well by the dominant directions of benign variation, so a large
 $e_i$ marks an observation that those directions cannot explain.
+
+The median reconstruction error is 6.6 on the days of the 79 held-out benign users and 17.0 on
+the 966 malicious days, and $6.4\%$ of the malicious days exceed the $99$th percentile of the
+training errors, against $0.5\%$ of the held-out benign days. On the evaluation pool of
+Section~\ref{sec:lm-data} (60 insiders and 79 held-out benign users), scoring each user by their
+largest error gives a user-level AUC of
+$0.75$ (95\% interval $[0.67, 0.83]$), and $0.76$ $[0.67, 0.83]$ without the profile attributes;
+with all 70 insiders it is $0.78$ $[0.70, 0.85]$. The threshold matters somewhat: keeping
+$80\%$, $90\%$ or $99\%$ of the variance ($q = 36$, $55$ or $94$) gives $0.81$, $0.75$ and $0.78$.
+The removed columns matter as well. Among them are visits to leak and hacking websites and logons
+to the supervisor's computer, which no training day contains and which occur, in the evaluation
+data, almost only on malicious days. Left in their raw units, as some software does for a
+column with zero standard deviation, they carry $99.7\%$ of the malicious days' squared error
+and raise the user-level AUC to $0.80$ $[0.73, 0.87]$. On the same users, the language model's
+full score reaches $0.65$ and its behavior-only score $0.86$ (\chref{ch:lm}).
 
 \section{Data Preparation for Language-Model Analysis}
 \label{sec:lm-data}
@@ -632,8 +672,8 @@ Sparse features (\chref{ch:mech}) & the model's internal change at layer 26 & sp
 \end{tabular}
 \end{table}
 
-\noindent The language-model experiments follow five rules; \fillin{state which of them the PCA
-experiment also follows}.
+\noindent The language-model experiments follow five rules, and the PCA experiment follows the
+first four; the fifth does not apply, because PCA selects nothing with the labels.
 \begin{enumerate}
 \item \textbf{One-class training.} Models are fit on benign data only; labels are used for
 evaluation and, in \chref{ch:mech}, for choosing which features to study.
