@@ -529,3 +529,20 @@ checked against the artifacts; its pooled counts match a recount).
 - **Consequence.** Day-level analyses, feature ranking, causal tests, the pilots and H6 all used
   partly wrong malicious days. User-level scores are unaffected, but the malicious population is
   not. Nothing has been rerun.
+
+**2026-09-28, H6 intervention-validity pilot (Part 3b; A100 job 20937290, 3 min 35 s)**
+(`research/imperfect_interventions_2026-09-27/h6_states/README.md`; protocol frozen at `da775ec`).
+
+- **Checks.** Bit-identical states. Exact zero hooks. The H6 decoder edit reproduces H6 exactly.
+  All 369/369/411/369 patched tokens realize their declared targets on the GPU.
+- **Results.** All declared estimands are negligible at τ = 0.012:
+  - restoration, I2: +0.0009 [−0.0010, +0.0027] on attack-labelled days, +0.0014 on benign days;
+  - restoration, I1: −0.0004 [−0.0010, +0.0001];
+  - necessity, noising in O: −0.0004 [−0.0010, +0.0002];
+  - the control, random and contrast estimands.
+
+  Both lifts agree.
+- **Reading.** For these five coefficients, in this development population and context, neither
+  a verified feasible restoration nor noising changes behaviour-token loss beyond the margin.
+  Interactions are untested. The attack/benign labels inherit the five-day misalignment. This
+  supports deprioritizing the set, not a general exclusion.

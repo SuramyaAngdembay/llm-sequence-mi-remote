@@ -1,0 +1,561 @@
+{
+ "tau": 0.012,
+ "checks": {
+  "state_bitwise_mismatch_tokens": 0,
+  "state_tokens_checked": 775,
+  "zero_R_max_abs": 0.0,
+  "zero_O_max_abs": 0.0,
+  "dec_vs_h6_sel_sess_max_abs": 0.0,
+  "R_vs_h6_R_on_max_abs": 0.0,
+  "O_vs_h6_O_on_max_abs": 0.0,
+  "gpu": "NVIDIA A100-SXM4-40GB",
+  "wall_s": 196.1679072380066,
+  "cpu_s": 183.061598371,
+  "patched_tokens": {
+   "I2_sel": 369,
+   "I1_sel": 369,
+   "I2_ctl": 411,
+   "rand_I2": 369,
+   "noise_I2": 369,
+   "rand_noise": 369
+  },
+  "seed": 20260927
+ },
+ "verification": {
+  "I2_sel": {
+   "tokens": 369,
+   "matched_target": 369,
+   "support_ok": 369,
+   "values_ok": 369
+  },
+  "I1_sel": {
+   "tokens": 369,
+   "matched_target": 369,
+   "support_ok": 369,
+   "values_ok": 369
+  },
+  "I2_ctl": {
+   "tokens": 411,
+   "matched_target": 411,
+   "support_ok": 411,
+   "values_ok": 411
+  },
+  "noise_I2": {
+   "tokens": 369,
+   "matched_target": 369,
+   "support_ok": 369,
+   "values_ok": 369
+  }
+ },
+ "estimands": {
+  "rescue dec (H6 edit)|malicious": {
+   "estimate": 0.0008335630098978678,
+   "ci90_t": [
+    -0.0009081070098776706,
+    0.002575233029673406
+   ],
+   "ci95_boot": [
+    -0.0006239639595150947,
+    0.003109531986216704
+   ],
+   "users": 30,
+   "positive_users": 11,
+   "decision": "negligible"
+  },
+  "rescue dec (H6 edit)|benign": {
+   "estimate": 0.0013830184936523438,
+   "ci90_t": [
+    -0.00029253758936343376,
+    0.0030585745766681213
+   ],
+   "ci95_boot": [
+    -0.00027527898550033564,
+    0.0034933996821443227
+   ],
+   "users": 30,
+   "positive_users": 12,
+   "decision": "negligible"
+  },
+  "rescue dec (H6 edit)|attack-minus-benign": {
+   "estimate": -0.000549455483754476,
+   "ci90_t": [
+    -0.001432588078137839,
+    0.0003336771106288871
+   ],
+   "ci95_boot": [
+    -0.0015228746210535367,
+    0.0004954950263102843
+   ],
+   "users": 30,
+   "positive_users": 11,
+   "decision": "negligible"
+  },
+  "rescue I2_sel|malicious": {
+   "estimate": 0.0008539780974388123,
+   "ci90_t": [
+    -0.0009589774761910345,
+    0.0026669336710686588
+   ],
+   "ci95_boot": [
+    -0.0006473551193873087,
+    0.003239345028996468
+   ],
+   "users": 30,
+   "positive_users": 12,
+   "decision": "negligible"
+  },
+  "rescue I2_sel|benign": {
+   "estimate": 0.0013966647287209828,
+   "ci90_t": [
+    -0.00011033340089373054,
+    0.0029036628583356964
+   ],
+   "ci95_boot": [
+    -7.818772147099174e-05,
+    0.003300102998812993
+   ],
+   "users": 30,
+   "positive_users": 13,
+   "decision": "negligible"
+  },
+  "rescue I2_sel|attack-minus-benign": {
+   "estimate": -0.0005426866312821706,
+   "ci90_t": [
+    -0.0013938728338060045,
+    0.0003084995712416632
+   ],
+   "ci95_boot": [
+    -0.0014496875802675884,
+    0.0004895001525680222
+   ],
+   "users": 30,
+   "positive_users": 11,
+   "decision": "negligible"
+  },
+  "rescue I1_sel|malicious": {
+   "estimate": -0.00043348918358484905,
+   "ci90_t": [
+    -0.0009690253348088219,
+    0.00010204696763912384
+   ],
+   "ci95_boot": [
+    -0.00109118706236283,
+    8.299955477317172e-05
+   ],
+   "users": 30,
+   "positive_users": 11,
+   "decision": "negligible"
+  },
+  "rescue I1_sel|benign": {
+   "estimate": -6.711408495903015e-05,
+   "ci90_t": [
+    -0.0003791898187268157,
+    0.0002449616488087554
+   ],
+   "ci95_boot": [
+    -0.00045463009426991146,
+    0.0002593821783860524
+   ],
+   "users": 30,
+   "positive_users": 13,
+   "decision": "negligible"
+  },
+  "rescue I1_sel|attack-minus-benign": {
+   "estimate": -0.0003663750986258189,
+   "ci90_t": [
+    -0.0008440079182094591,
+    0.0001112577209578213
+   ],
+   "ci95_boot": [
+    -0.0009540577419102193,
+    0.00011515834058324494
+   ],
+   "users": 30,
+   "positive_users": 11,
+   "decision": "negligible"
+  },
+  "rescue I2_ctl|malicious": {
+   "estimate": 0.00015635366241137187,
+   "ci90_t": [
+    -0.0003225067542113262,
+    0.0006352140790340699
+   ],
+   "ci95_boot": [
+    -0.00037371876339117687,
+    0.0007139596591393153
+   ],
+   "users": 30,
+   "positive_users": 14,
+   "decision": "negligible"
+  },
+  "rescue I2_ctl|benign": {
+   "estimate": -0.0001364568869272868,
+   "ci90_t": [
+    -0.0005408038311827919,
+    0.0002678900573282183
+   ],
+   "ci95_boot": [
+    -0.0005878494121134281,
+    0.0003305600459376966
+   ],
+   "users": 30,
+   "positive_users": 13,
+   "decision": "negligible"
+  },
+  "rescue I2_ctl|attack-minus-benign": {
+   "estimate": 0.00029281054933865867,
+   "ci90_t": [
+    -0.00040703796690644376,
+    0.000992659065583761
+   ],
+   "ci95_boot": [
+    -0.0004755996664365133,
+    0.0011153924341003097
+   ],
+   "users": 30,
+   "positive_users": 16,
+   "decision": "negligible"
+  },
+  "rescue rand_I2|malicious": {
+   "estimate": -2.6127696037292482e-05,
+   "ci90_t": [
+    -0.00038949517653486584,
+    0.00033723978446028083
+   ],
+   "ci95_boot": [
+    -0.0004383369783560435,
+    0.000379786205788453
+   ],
+   "users": 30,
+   "positive_users": 14,
+   "decision": "negligible"
+  },
+  "rescue rand_I2|benign": {
+   "estimate": 0.0009305859605471293,
+   "ci90_t": [
+    0.0003040518629899128,
+    0.001557120058104346
+   ],
+   "ci95_boot": [
+    0.0003102762065827847,
+    0.001712183728814125
+   ],
+   "users": 30,
+   "positive_users": 18,
+   "decision": "negligible"
+  },
+  "rescue rand_I2|attack-minus-benign": {
+   "estimate": -0.0009567136565844218,
+   "ci90_t": [
+    -0.0016731169079186486,
+    -0.00024031040525019504
+   ],
+   "ci95_boot": [
+    -0.0018055265955626964,
+    -0.00021899209047357242
+   ],
+   "users": 30,
+   "positive_users": 11,
+   "decision": "negligible"
+  },
+  "necessity noise_I2|malicious": {
+   "estimate": -0.00039912878225247065,
+   "ci90_t": [
+    -0.0009554922991954976,
+    0.0001572347346905563
+   ],
+   "ci95_boot": [
+    -0.0010635217046365143,
+    0.000193090671673417
+   ],
+   "users": 30,
+   "positive_users": 12,
+   "decision": "negligible"
+  },
+  "necessity noise_I2|benign": {
+   "estimate": 9.371570001045862e-05,
+   "ci90_t": [
+    -0.00013492480234694612,
+    0.00032235620236786334
+   ],
+   "ci95_boot": [
+    -0.00015472210633258023,
+    0.00036891487737496687
+   ],
+   "users": 30,
+   "positive_users": 15,
+   "decision": "negligible"
+  },
+  "necessity noise_I2|attack-minus-benign": {
+   "estimate": -0.0004928444822629292,
+   "ci90_t": [
+    -0.0011089878931602203,
+    0.00012329892863436177
+   ],
+   "ci95_boot": [
+    -0.0012637467651317516,
+    0.0001445201070358356
+   ],
+   "users": 30,
+   "positive_users": 14,
+   "decision": "negligible"
+  },
+  "necessity rand_noise|malicious": {
+   "estimate": -0.00035213281710942587,
+   "ci90_t": [
+    -0.0007211151636411163,
+    1.6849529422264533e-05
+   ],
+   "ci95_boot": [
+    -0.0007899025703469912,
+    4.115830796460268e-05
+   ],
+   "users": 30,
+   "positive_users": 11,
+   "decision": "negligible"
+  },
+  "necessity rand_noise|benign": {
+   "estimate": 8.568167686462402e-06,
+   "ci90_t": [
+    -0.0002046237028368023,
+    0.0002217600382097271
+   ],
+   "ci95_boot": [
+    -0.0002286546335866054,
+    0.0002564820026357967
+   ],
+   "users": 30,
+   "positive_users": 14,
+   "decision": "negligible"
+  },
+  "necessity rand_noise|attack-minus-benign": {
+   "estimate": -0.00036070098479588827,
+   "ci90_t": [
+    -0.000710317584681809,
+    -1.1084384909967578e-05
+   ],
+   "ci95_boot": [
+    -0.0007642222785701354,
+    2.401267178356641e-05
+   ],
+   "users": 30,
+   "positive_users": 11,
+   "decision": "negligible"
+  },
+  "I2_sel minus I2_ctl|malicious": {
+   "estimate": 0.0006976244350274404,
+   "ci90_t": [
+    -0.0011558451540224259,
+    0.002551094024077307
+   ],
+   "ci95_boot": [
+    -0.00100518848747015,
+    0.003079654984176159
+   ],
+   "users": 30,
+   "positive_users": 15,
+   "decision": "negligible"
+  },
+  "I2_sel minus I2_ctl|benign": {
+   "estimate": 0.0015331216156482697,
+   "ci90_t": [
+    5.417115740703423e-05,
+    0.003012072073889505
+   ],
+   "ci95_boot": [
+    5.0424784421920814e-05,
+    0.003369997615615526
+   ],
+   "users": 30,
+   "positive_users": 19,
+   "decision": "negligible"
+  },
+  "I2_sel minus I2_ctl|attack-minus-benign": {
+   "estimate": -0.0008354971806208293,
+   "ci90_t": [
+    -0.0019078776816237632,
+    0.00023688332038210443
+   ],
+   "ci95_boot": [
+    -0.002026661808292071,
+    0.00040763555715481425
+   ],
+   "users": 30,
+   "positive_users": 13,
+   "decision": "negligible"
+  },
+  "I2_sel minus rand_I2|malicious": {
+   "estimate": 0.0008801057934761048,
+   "ci90_t": [
+    -0.0010996734168133445,
+    0.002859885003765554
+   ],
+   "ci95_boot": [
+    -0.0007765646775563558,
+    0.0034637220203876493
+   ],
+   "users": 30,
+   "positive_users": 12,
+   "decision": "negligible"
+  },
+  "I2_sel minus rand_I2|benign": {
+   "estimate": 0.00046607876817385355,
+   "ci90_t": [
+    -0.001038733736628086,
+    0.0019708912729757932
+   ],
+   "ci95_boot": [
+    -0.0010519517585635186,
+    0.0023193302067617567
+   ],
+   "users": 30,
+   "positive_users": 8,
+   "decision": "negligible"
+  },
+  "I2_sel minus rand_I2|attack-minus-benign": {
+   "estimate": 0.0004140270253022512,
+   "ci90_t": [
+    -0.0008404385951389527,
+    0.001668492645743455
+   ],
+   "ci95_boot": [
+    -0.0008675716631114483,
+    0.001919735657672087
+   ],
+   "users": 30,
+   "positive_users": 13,
+   "decision": "negligible"
+  },
+  "I2_sel minus I1_sel|malicious": {
+   "estimate": 0.0012874672810236612,
+   "ci90_t": [
+    -0.0009614836914277373,
+    0.00353641825347506
+   ],
+   "ci95_boot": [
+    -0.0005501033862431844,
+    0.004199945293366906
+   ],
+   "users": 30,
+   "positive_users": 12,
+   "decision": "negligible"
+  },
+  "I2_sel minus I1_sel|benign": {
+   "estimate": 0.0014637788136800131,
+   "ci90_t": [
+    -0.00018575832163673749,
+    0.0031133159489967637
+   ],
+   "ci95_boot": [
+    -0.0001870000859101613,
+    0.0035334222639600435
+   ],
+   "users": 30,
+   "positive_users": 12,
+   "decision": "negligible"
+  },
+  "I2_sel minus I1_sel|attack-minus-benign": {
+   "estimate": -0.00017631153265635174,
+   "ci90_t": [
+    -0.0013147783818115058,
+    0.0009621553164988023
+   ],
+   "ci95_boot": [
+    -0.0013107314830025038,
+    0.0012468365083138134
+   ],
+   "users": 30,
+   "positive_users": 11,
+   "decision": "negligible"
+  },
+  "noise_I2 minus rand_noise|malicious": {
+   "estimate": -4.699596514304479e-05,
+   "ci90_t": [
+    -0.0004730164831342217,
+    0.0003790245528481321
+   ],
+   "ci95_boot": [
+    -0.000506840522090594,
+    0.0004639684222638603
+   ],
+   "users": 30,
+   "positive_users": 12,
+   "decision": "negligible"
+  },
+  "noise_I2 minus rand_noise|benign": {
+   "estimate": 8.514753232399622e-05,
+   "ci90_t": [
+    -0.0002481667218431158,
+    0.00041846178649110826
+   ],
+   "ci95_boot": [
+    -0.00026222579957296447,
+    0.0004936022699500123
+   ],
+   "users": 30,
+   "positive_users": 14,
+   "decision": "negligible"
+  },
+  "noise_I2 minus rand_noise|attack-minus-benign": {
+   "estimate": -0.00013214349746704102,
+   "ci90_t": [
+    -0.000571279257237118,
+    0.00030699226230303597
+   ],
+   "ci95_boot": [
+    -0.0006626058431963126,
+    0.0003341418132185936
+   ],
+   "users": 30,
+   "positive_users": 14,
+   "decision": "negligible"
+  },
+  "input effect R - O (context)|malicious": {
+   "estimate": 0.24320557384441296,
+   "ci90_t": [
+    0.20851280736204914,
+    0.2778983403267768
+   ],
+   "ci95_boot": [
+    0.20308186874414483,
+    0.28303815725259485
+   ],
+   "users": 30,
+   "positive_users": 30,
+   "decision": "non-negligible"
+  },
+  "input effect R - O (context)|benign": {
+   "estimate": 0.2801456145942211,
+   "ci90_t": [
+    0.2439946958422305,
+    0.3162965333462117
+   ],
+   "ci95_boot": [
+    0.23856577091074238,
+    0.320405981267492
+   ],
+   "users": 30,
+   "positive_users": 30,
+   "decision": "non-negligible"
+  },
+  "input effect R - O (context)|attack-minus-benign": {
+   "estimate": -0.03694004074980815,
+   "ci90_t": [
+    -0.07240614614878241,
+    -0.0014739353508338923
+   ],
+   "ci95_boot": [
+    -0.0771821394826596,
+    0.0030375163753827163
+   ],
+   "users": 30,
+   "positive_users": 11,
+   "decision": "inconclusive"
+  }
+ },
+ "lift_identification": {
+  "malicious": "I1 negligible, I2 negligible",
+  "benign": "I1 negligible, I2 negligible"
+ },
+ "interaction": "not tested (no joint intervention)"
+}

@@ -1,0 +1,21 @@
+{
+ "state_bitwise_mismatch_tokens": 0,
+ "state_tokens_checked": 775,
+ "zero_R_max_abs": 0.0,
+ "zero_O_max_abs": 0.0,
+ "dec_vs_h6_sel_sess_max_abs": 0.0,
+ "R_vs_h6_R_on_max_abs": 0.0,
+ "O_vs_h6_O_on_max_abs": 0.0,
+ "gpu": "NVIDIA A100-SXM4-40GB",
+ "wall_s": 196.1679072380066,
+ "cpu_s": 183.061598371,
+ "patched_tokens": {
+  "I2_sel": 369,
+  "I1_sel": 369,
+  "I2_ctl": 411,
+  "rand_I2": 369,
+  "noise_I2": 369,
+  "rand_noise": 369
+ },
+ "seed": 20260927
+}

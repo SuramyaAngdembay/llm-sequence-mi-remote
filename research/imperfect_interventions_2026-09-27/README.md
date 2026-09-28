@@ -66,12 +66,17 @@ would be informative on real SAE geometry is open. See `METHOD_STATUS.md`.
 - the answer is specific to restoration: a restoration null can coexist with necessity and a
   large interaction.
 
-**H6.** 173 of the 369 edited tokens (46.9%, on 23 receivers) increase the selected support by
-one. They carry 95.3% of the requested squared coefficient change. *If* their swapped codes
-each have four actives, the full-code target (selected from O, every other coefficient held) has
-five nonzeros and cannot be realized. That premise is checked on the actual states in
-`h6_states/README.md`. Impossibility would concern only the full-code target. It would not
-explain the behavioural null, and it would not make feature 7693 causally important.
+**H6 (verified on the actual states, `h6_states/README.md`).**
+- **The premise holds.** Every edited swapped code has four actives, so the full-code target is
+  unrealizable for 173 of 369 tokens, which carry 95.3% of the requested squared change.
+- **Declared feasible replacements verify exactly.** On those tokens the swap-in target drops the
+  weakest other winner, and it was executed with a decoder-anchored lift and a minimum-change
+  lift, plus a noising intervention for necessity. Every realized code matches its target after
+  bf16 casting.
+- **All effects are negligible at the pre-declared 0.012 nats/token margin.**
+- **Scope.** This covers restoration and necessity for these five coefficients in this
+  development population. Interactions are untested. Attack-versus-benign contrasts are affected
+  by the label misalignment in `docs/LABEL_ALIGNMENT_2026-09-28.md`.
 
 ## Documents
 

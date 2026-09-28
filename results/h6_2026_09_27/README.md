@@ -181,6 +181,16 @@ nothing". Each went beyond what restoration patching identifies.*
    30% of edited tokens request changes smaller than 5% of a typical
    activation, and on those the per-token error ratio mostly measures
    arithmetic noise.
+   - **Validity check completed (2026-09-28;
+     `research/imperfect_interventions_2026-09-27/h6_states/README.md`).**
+     On the actual states, the over-k premise holds: every edited swapped code
+     has 4 actives, so the full-code target is unrealizable for 173 tokens
+     (95.3% of requested change). Declared feasible replacements were executed
+     and verified: swap-in or refill targets, decoder-anchored and
+     minimum-change lifts, and noising for necessity. All gave negligible
+     effects at the 0.012 margin (for example, I2 restoration +0.0009
+     [−0.0010, +0.0027] on attack-labelled days). The attack/benign labels are
+     affected by `docs/LABEL_ALIGNMENT_2026-09-28.md`.
    - **Most of the requested change may have had no realizable target**
      (added 2026-09-27, made conditional after review). 173 of 369 edited
      tokens (46.9%, 23 receivers), carrying 95.3% of the requested squared
