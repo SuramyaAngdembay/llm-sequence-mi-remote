@@ -1,0 +1,64 @@
+  x_dec = ctx.astype(np.float64) + sae.sd.astype(np.float64) * (sae.D[:, feats].astype(np.float64) @ req)
+  x_dec = ctx.astype(np.float64) + sae.sd.astype(np.float64) * (sae.D[:, feats].astype(np.float64) @ req)
+  x_dec = ctx.astype(np.float64) + sae.sd.astype(np.float64) * (sae.D[:, feats].astype(np.float64) @ req)
+  slack = (cw - Mw @ x) if len(work) else np.zeros(0)
+  slack = (cw - Mw @ x) if len(work) else np.zeros(0)
+  slack = (cw - Mw @ x) if len(work) else np.zeros(0)
+  G = A @ A.T; h = A @ y - rhs
+  G = A @ A.T; h = A @ y - rhs
+  G = A @ A.T; h = A @ y - rhs
+  fun = lambda v: (0.5 * v @ G @ v - h @ v, G @ v - h)
+  fun = lambda v: (0.5 * v @ G @ v - h @ v, G @ v - h)
+  fun = lambda v: (0.5 * v @ G @ v - h @ v, G @ v - h)
+[project] 25/775 tokens (2s)
+[project] 50/775 tokens (3s)
+[project] 75/775 tokens (4s)
+[project] 100/775 tokens (5s)
+[project] 125/775 tokens (7s)
+[project] 150/775 tokens (8s)
+[project] 175/775 tokens (9s)
+[project] 200/775 tokens (10s)
+[project] 225/775 tokens (11s)
+[project] 250/775 tokens (13s)
+[project] 275/775 tokens (14s)
+[project] 300/775 tokens (15s)
+[project] 325/775 tokens (16s)
+[project] 350/775 tokens (17s)
+[project] 375/775 tokens (18s)
+[project] 400/775 tokens (19s)
+[project] 425/775 tokens (21s)
+[project] 450/775 tokens (22s)
+[project] 475/775 tokens (23s)
+[project] 500/775 tokens (24s)
+[project] 525/775 tokens (25s)
+[project] 550/775 tokens (26s)
+[project] 575/775 tokens (28s)
+[project] 600/775 tokens (29s)
+[project] 625/775 tokens (30s)
+[project] 650/775 tokens (31s)
+[project] 675/775 tokens (32s)
+[project] 700/775 tokens (33s)
+[project] 725/775 tokens (34s)
+[project] 750/775 tokens (35s)
+[project] 775/775 tokens (36s)
+{
+ "cpu_vs_gpu_path_B_codes": {
+  "tokens": 775,
+  "support_mismatch": 0,
+  "max_abs_value_diff": 7.05718994140625e-05
+ },
+ "tokens": 775,
+ "cpu_s": 36.728320999999994,
+ "wall_s": 37.96822381019592,
+ "margins": [
+  0.01,
+  0.02,
+  0.05,
+  0.1,
+  0.2,
+  0.5
+ ]
+}
+real 38.39
+user 36.21
+sys 1.14

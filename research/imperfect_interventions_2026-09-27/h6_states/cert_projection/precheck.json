@@ -1,0 +1,256 @@
+{
+ "cpu_vs_gpu": {
+  "tokens": 775,
+  "support_mismatch": 0,
+  "max_abs_value_diff": 7.05718994140625e-05
+ },
+ "restore_sel|I2_decoder": {
+  "tokens": 369,
+  "verified_tokens": 369,
+  "verified_token_share": 1.0,
+  "verified_mass_share": 1.0,
+  "receivers": 89,
+  "users": 28,
+  "target_kinds": {
+   "swap_in": 173,
+   "full_code": 191,
+   "refill": 5
+  },
+  "target_kinds_mass_share": {
+   "full_code": 0.046058617578216034,
+   "swap_in": 0.9526968480113003,
+   "refill": 0.0012445344104833184
+  },
+  "verified_by_kind": {
+   "full_code": "191/191",
+   "swap_in": "173/173",
+   "refill": "5/5"
+  },
+  "margins_used": {
+   "0.01": 367,
+   "0.02": 2
+  },
+  "solver_status": {
+   "ok": 369
+  },
+  "failures": [],
+  "move_over_full_restoration": {
+   "q50": 0.2081280022041463,
+   "q90": 0.48489329144632454,
+   "max": 0.7418051880916112
+  },
+  "move_from_anchor_over_decoder_edit": {
+   "q50": 0.10589770919064129,
+   "q90": 0.5468247147164542,
+   "max": 1.2553934182623694
+  },
+  "move_from_anchor_over_decoder_edit_mass_weighted_mean": 0.07381258011132977,
+  "move_from_context_abs": {
+   "q50": 8.368739358817512,
+   "q90": 31.42524474259323,
+   "max": 48.050472827835705
+  },
+  "decoder_edit_norm": {
+   "q50": 8.204901161009658,
+   "q90": 31.297173509182034,
+   "max": 48.89857895264649
+  },
+  "full_restoration_norm": {
+   "q50": 47.01354300030551,
+   "q90": 80.74067288844728,
+   "max": 105.3954771717019
+  },
+  "max_abs_fixed_coordinate_error": 0.04643058776855469,
+  "kkt_ok_share": 1.0
+ },
+ "restore_sel|I1_min_change": {
+  "tokens": 369,
+  "verified_tokens": 369,
+  "verified_token_share": 1.0,
+  "verified_mass_share": 1.0,
+  "receivers": 89,
+  "users": 28,
+  "target_kinds": {
+   "swap_in": 173,
+   "full_code": 191,
+   "refill": 5
+  },
+  "target_kinds_mass_share": {
+   "full_code": 0.046058617578216034,
+   "swap_in": 0.9526968480113003,
+   "refill": 0.0012445344104833184
+  },
+  "verified_by_kind": {
+   "full_code": "191/191",
+   "swap_in": "173/173",
+   "refill": "5/5"
+  },
+  "margins_used": {
+   "0.01": 350,
+   "0.1": 9,
+   "0.05": 2,
+   "0.2": 1,
+   "0.02": 7
+  },
+  "solver_status": {
+   "ok": 369
+  },
+  "failures": [],
+  "move_over_full_restoration": {
+   "q50": 0.06032244610320336,
+   "q90": 0.21390872401585184,
+   "max": 0.2661281204900789
+  },
+  "move_from_anchor_over_decoder_edit": {
+   "q50": 0.2866782046214215,
+   "q90": 0.5656861258504735,
+   "max": 1.7002972612232374
+  },
+  "move_from_anchor_over_decoder_edit_mass_weighted_mean": 0.4461554044849589,
+  "move_from_context_abs": {
+   "q50": 2.90157982164585,
+   "q90": 14.43347924625483,
+   "max": 20.827675666618674
+  },
+  "decoder_edit_norm": {
+   "q50": 8.204901161009658,
+   "q90": 31.297173509182034,
+   "max": 48.89857895264649
+  },
+  "full_restoration_norm": {
+   "q50": 47.01354300030551,
+   "q90": 80.74067288844728,
+   "max": 105.3954771717019
+  },
+  "max_abs_fixed_coordinate_error": 0.08320045471191406,
+  "kkt_ok_share": 1.0
+ },
+ "restore_ctl|I2_decoder": {
+  "tokens": 411,
+  "verified_tokens": 411,
+  "verified_token_share": 1.0,
+  "verified_mass_share": 1.0,
+  "receivers": 120,
+  "users": 30,
+  "target_kinds": {
+   "swap_in": 71,
+   "refill": 80,
+   "full_code": 260
+  },
+  "target_kinds_mass_share": {
+   "full_code": 0.4213203144595913,
+   "swap_in": 0.2483538760029787,
+   "refill": 0.33032580953742907
+  },
+  "verified_by_kind": {
+   "full_code": "260/260",
+   "swap_in": "71/71",
+   "refill": "80/80"
+  },
+  "margins_used": {
+   "0.01": 408,
+   "0.02": 3
+  },
+  "solver_status": {
+   "ok": 411
+  },
+  "failures": [],
+  "move_over_full_restoration": {
+   "q50": 0.13645236911384848,
+   "q90": 0.3639744467489063,
+   "max": 1.7701092284695537
+  },
+  "move_from_anchor_over_decoder_edit": {
+   "q50": 0.221032423313395,
+   "q90": 0.762449774962819,
+   "max": 1.1900896188704595
+  },
+  "move_from_anchor_over_decoder_edit_mass_weighted_mean": 0.26696090216396884,
+  "move_from_context_abs": {
+   "q50": 2.6018259580064553,
+   "q90": 7.930559814843445,
+   "max": 43.79211922195231
+  },
+  "decoder_edit_norm": {
+   "q50": 2.521702877767091,
+   "q90": 7.680803540270092,
+   "max": 40.12689971976328
+  },
+  "full_restoration_norm": {
+   "q50": 15.450984335995539,
+   "q90": 48.06195623405844,
+   "max": 120.78805120400206
+  },
+  "max_abs_fixed_coordinate_error": 0.037828922271728516,
+  "kkt_ok_share": 1.0
+ },
+ "noise_sel|I2_decoder": {
+  "tokens": 369,
+  "verified_tokens": 369,
+  "verified_token_share": 1.0,
+  "verified_mass_share": 1.0,
+  "receivers": 89,
+  "users": 28,
+  "target_kinds": {
+   "refill": 173,
+   "full_code": 191,
+   "swap_in": 5
+  },
+  "target_kinds_mass_share": {
+   "full_code": 0.046058617578216034,
+   "refill": 0.9526968480113003,
+   "swap_in": 0.0012445344104833184
+  },
+  "verified_by_kind": {
+   "full_code": "191/191",
+   "refill": "173/173",
+   "swap_in": "5/5"
+  },
+  "margins_used": {
+   "0.01": 364,
+   "0.02": 5
+  },
+  "solver_status": {
+   "ok": 369
+  },
+  "failures": [],
+  "move_over_full_restoration": {
+   "q50": 0.20546321111456536,
+   "q90": 0.4907202653882673,
+   "max": 0.7080569956856176
+  },
+  "move_from_anchor_over_decoder_edit": {
+   "q50": 0.07673640567606894,
+   "q90": 0.5312500284467595,
+   "max": 0.9945055448300607
+  },
+  "move_from_anchor_over_decoder_edit_mass_weighted_mean": 0.04911465579671114,
+  "move_from_context_abs": {
+   "q50": 8.146119822867286,
+   "q90": 31.273376033156694,
+   "max": 48.45386621835146
+  },
+  "decoder_edit_norm": {
+   "q50": 8.204901161009658,
+   "q90": 31.297173509182034,
+   "max": 48.89857895264649
+  },
+  "full_restoration_norm": {
+   "q50": 47.01354300030551,
+   "q90": 80.74067288844728,
+   "max": 105.3954771717019
+  },
+  "max_abs_fixed_coordinate_error": 0.04667472839355469,
+  "kkt_ok_share": 1.0
+ },
+ "criteria": {
+  "P-a restore_sel|I2_decoder": true,
+  "P-a restore_sel|I1_min_change": true,
+  "P-a noise_sel|I2_decoder": true,
+  "P-b restore_sel|I2_decoder median move / full restoration <= 1": true,
+  "P-b restore_sel|I1_min_change median move / full restoration <= 1": true,
+  "P-b restore_sel|I2_decoder mass-weighted correction / edit <= 1": true,
+  "P-c KKT for every accepted token": true
+ },
+ "precheck_passes": true
+}

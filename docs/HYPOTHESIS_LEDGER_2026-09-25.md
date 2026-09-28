@@ -488,3 +488,26 @@ checked against the artifacts; its pooled counts match a recount).
   error. The null-space basis must be orthonormal. Positive-margin infeasibility is not
   zero-margin impossibility. The full-code cell has about 8,188 inequality rows per token.
 - **Method status.** Deferred, not abandoned (`METHOD_STATUS.md`).
+
+**2026-09-28, H6 intervention-validity check, Parts 2 and 3a**
+(`research/imperfect_interventions_2026-09-27/h6_states/`; protocol frozen at
+`da775ec` before any CERT state existed).
+
+- **Capture.** A100 job 20931848, 2 min 9 s. It reproduced H6's saved codes exactly on all 120
+  receivers and found the same 369 edited tokens. Both zero-edit checks are bit-identical.
+- **Over-k premise verified on the swapped states.** Every edited token's swapped code has
+  exactly 4 actives. 173 full-code targets (46.9% of tokens; 23 receivers, 10 users; 95.3% of
+  requested squared change; 166 involving 7693) have 5 nonzeros and cannot be realized.
+  Selected-only targets: none over-k.
+- **Arithmetic.** Paths A and B change the TopK support on 1.0% of swapped session tokens (max
+  relative code difference 27%). That covers only 4 edited tokens and changes no over-k
+  classification.
+- **Vector execution error of H6's edit.** Median 4.6%, q90 54%, max 99%, minimum cosine 0.14,
+  all from bf16 rounding of state plus edit. The norm ratio of 1.001 hid it.
+- **Precheck passed every frozen criterion.**
+  - All 369 selected restorations verified for both lifts, and all 369 noising targets. The
+    173 over-k tokens use the declared swap-in: the weakest non-selected winner drops.
+  - The decoder-anchored correction is 7% of the edit, mass-weighted.
+  - The median move is 21% (I2) and 6% (I1) of the full-restoration distance.
+  - KKT certificates hold for every accepted token.
+- **Pilot.** Submitted as jobs 20937290 and 20937291, with an atomic lock.

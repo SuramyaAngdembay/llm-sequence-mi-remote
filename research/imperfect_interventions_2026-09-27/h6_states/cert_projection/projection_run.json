@@ -1,0 +1,18 @@
+{
+ "cpu_vs_gpu_path_B_codes": {
+  "tokens": 775,
+  "support_mismatch": 0,
+  "max_abs_value_diff": 7.05718994140625e-05
+ },
+ "tokens": 775,
+ "cpu_s": 36.728320999999994,
+ "wall_s": 37.96822381019592,
+ "margins": [
+  0.01,
+  0.02,
+  0.05,
+  0.1,
+  0.2,
+  0.5
+ ]
+}
