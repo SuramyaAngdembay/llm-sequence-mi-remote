@@ -11,7 +11,7 @@ Components to Interpretable Sparse Features*. Search the source for `NEW`,
 | Title, abstract, keywords, abbreviations | changed; CTMC removed from keywords and abbreviations |
 | Chapter I, introduction | unchanged placeholder |
 | Chapter II, PCA | **unchanged, verbatim** |
-| Chapter III, setup | CTMC data-preparation section removed; one section added (language-model data) |
+| Chapter III, setup | written in full 2026-09-28: the dataset as users, days and events; the insider case (scenarios, labels, base rate, one-class framing); DFS and PCA-GMM preparation with `[To complete: ...]` markers for pipeline details only the author has; language-model data (sessions, serialization, training settings, user-disjoint splits, evaluation pool); five design rules. A visible note flags the label misalignment found the same day |
 | Chapter IV, language-model surprisal and its decomposition | new. Section 4.3 explains how the next-token probability is produced (context vector, dot-product scores, softmax, surprisal as log-sum-exp minus the actual token's score). Section 4.4, on why $-\log p$ measures surprise, and the whole-day negative log-likelihood subsection moved here from the removed CTMC chapter. Section 4.5 derives that minimizing surprisal learns the benign frequencies and shows low-rank adaptation as a rank-16 correction |
 | Chapter V, interpretable dimensionality reduction of the fine-tuned model | new; the sparse autoencoder is presented as a sparse, overcomplete relative of PCA |
 | References | ten entries added: nine from `paper/references.bib`, plus Shannon (1948) |
@@ -19,7 +19,7 @@ Components to Interpretable Sparse Features*. Search the source for `NEW`,
 The removed CTMC chapter and its data-preparation section are preserved verbatim
 in `ctmc_chapter_removed.tex`.
 
-Compiles cleanly with TeX Live 2020 (74 pages as of 2026-09-25, two passes, no
+Compiles cleanly with TeX Live 2020 (85 pages as of 2026-09-28, two passes, no
 errors, no undefined references). It needs the seven PCA figure files alongside it. The one
 overfull line left is in the original PCA chapter. `thesis_mechinterp_preview.pdf`
 is built in graphicx draft mode, with placeholder frames in place of those
@@ -52,3 +52,16 @@ and which predictions their edit changes are kept apart. The controls are
 described as threshold-selected, not activity-matched. The withdrawn TWOS seed
 reversal is no longer cited, and the abstract no longer anticipates the pending
 per-class result.
+
+**Chapter III sources (checked 2026-09-28).**
+
+| number | source |
+|---|---|
+| 1,000 users, 470,611 sessions, session days 5–505 (2 January 2010 to 17 May 2011) | r4.2 session shards; `results/label_alignment_2026_09_28/label_alignment_r42.json` |
+| 70 insiders (30, 30, 10) and the scenario text | CERT `answers.tar.bz2` (`insiders.csv`, `scenarios.txt`), downloaded from the KiltHub record 12841247 |
+| 1,883 labelled malicious user-days; 187, 1,676 and 20 by scenario | `labels_daily.parquet` (r4.2) |
+| 330,295 user-days; splits 851 / 79 / 70 users; 287,827 / 27,026 / 15,442 days | `pkg4_share/session_jsonl_r42/example_metadata.parquet` |
+| sessions-per-day table; `project=na` on every day; longest texts about 1,300 tokens (1,325 among the 200 longest by characters) | the same metadata, `all.jsonl`, and the adapter's tokenizer |
+| evaluation pool 40,519 days, 139 users, 1,309 malicious; 29 / 30 / 1 insiders and 139 / 1,168 / 2 days by scenario | the same metadata joined with `insiders.csv` |
+| rank 16, α 32, dropout 0.05, seven projections; 1 epoch, 22 × 4 GPUs, learning rate 1.5e-4 cosine, 3% warm-up; 3,271 steps | `pkg4_share/adapter/adapter_config.json`, `training_args.bin`, `checkpoint-3271` |
+| the label misalignment note | `docs/LABEL_ALIGNMENT_2026-09-28.md` |

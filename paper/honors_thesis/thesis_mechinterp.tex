@@ -12,9 +12,12 @@
 \usepackage{float}
 \usepackage{url}
 \usepackage{refcount} %%%%% NEW: lets chapter cross-references print as Roman numerals
+\usepackage{array} %%%%% NEW (2026-09-28): ragged-right table columns in Chapter III
 
 %%%%% NEW: headings read "Chapter II", so references should too (plain \ref gives "2")
 \newcommand{\chref}[1]{Chapter~\uppercase\expandafter{\romannumeral\getrefnumber{#1}}}
+%%%%% NEW (2026-09-28): visible marker for text the author must complete
+\newcommand{\fillin}[1]{\textbf{[To complete: #1]}}
 
 % Double spacing
 \doublespacing
@@ -785,32 +788,379 @@ foundation for reconstruction-error anomaly scoring developed in later chapters.
 \chapter{Experimental Setup and Datasets}
 \label{ch:experimental_setup}
 
-\section{The CMU CERT Dataset}
-[General introduction to the CERT dataset, log types, and the concept of malicious scenarios goes here.]
+%%%%% NEW (2026-09-28): chapter written in full. Every number was checked against the data
+%%%%% files listed in the thesis README. Items marked \fillin{...} must be completed by the author.
+
+\chref{ch:pca} described a method that needs a data matrix $X$. \chref{ch:lm} will need a text
+for each day, and \chref{ch:mech} will need the internal states of a model that has read those
+texts. All three chapters study the same people, the same days and the same definition of a
+malicious act. This chapter fixes those shared objects once. It describes the dataset
+(Section~\ref{sec:cert}), states precisely what counts as insider activity
+(Section~\ref{sec:insider-case}), turns the raw logs into the two representations used later
+(Sections~\ref{sec:pca-data} and~\ref{sec:lm-data}), and lists the rules that every experiment
+follows (Section~\ref{sec:design}).
+
+\section{The CMU CERT Insider Threat Dataset}
+\label{sec:cert}
+The CERT Insider Threat Test Dataset is a collection of synthetic datasets produced by the CERT
+Division of Carnegie Mellon University's Software Engineering Institute, with ExactData, LLC,
+under sponsorship from DARPA \cite{glasser2013,certdataset2016}. Each dataset simulates an
+organization: ordinary employees go about their work, and a small number of simulated insiders
+act out a scripted malicious scenario. The data are organized by \emph{release}; later releases
+contain the features of earlier ones. This thesis uses release 4.2.
+
+\subsection{What the logs contain}
+Release 4.2 simulates 1,000 employees. Their recorded activity runs from 2 January 2010 to 17 May
+2011. The data consist of activity logs and two kinds of personnel records:
+\begin{itemize}
+\item \textbf{Activity logs}: logons and logoffs (with the computer used), connections of
+removable devices such as USB drives, file operations, emails (recipients, attachments, size),
+and web visits (with the address visited).
+\item \textbf{Organizational records}: each employee's role, business unit, functional unit,
+department and team, and whether the employee is an IT administrator.
+\item \textbf{Psychometric scores}: five personality scores (openness, conscientiousness,
+extraversion, agreeableness and neuroticism) for every employee.
+\end{itemize}
+
+\subsection{The data as a mathematical object}
+Every log entry is an \emph{event}
+\[
+e = (u,\; \tau,\; s,\; \mathbf{a}),
+\]
+where $u \in \mathcal{U}$ is the employee (user), $\tau$ is the time, $s$ is the source (logon,
+device, file, email or web), and $\mathbf{a}$ lists the event's attributes, such as the
+computer, the file name or the email size. Here $\mathcal{U}$ is the set of all users, with
+$|\mathcal{U}| = 1{,}000$.
+
+The unit of observation in this thesis is the \emph{user-day}: one user on one calendar day.
+For user $u$ and day $t$, write
+\[
+E_{u,t} \;=\; \{\, e : e \text{ is an event of user } u \text{ on day } t \,\}
+\]
+for the day's events. Every method in this thesis maps a user-day $D = (u, t)$ to an anomaly score
+$s(D) \in \mathbb{R}$. A larger score means a more unusual day.
+
+\section{The Insider Case}
+\label{sec:insider-case}
+
+\subsection{Scenarios}
+The dataset's answer key names each simulated insider, the scenario that insider follows, and
+the malicious events involved \cite{certdataset2016}. Release 4.2 contains 70 insiders in three
+scenarios (Table~\ref{tab:scenarios}).
+
+\begin{table}[H]
+\centering
+\caption{The three insider scenarios of CERT release 4.2. Descriptions follow the answer key's
+scenario file; counts are from its list of insiders.}
+\label{tab:scenarios}
+\begin{tabular}{c p{10.8cm} c}
+\toprule
+scenario & what the insider does & insiders \\
+\midrule
+1 & Starts working after hours and using a removable drive, which the user had not done before;
+uploads data to wikileaks.org and soon leaves. & 30 \\
+2 & Browses job websites and seeks work at a competitor; before leaving, copies data with a thumb
+drive at a much higher rate than before. & 30 \\
+3 & A disgruntled system administrator installs a keylogger on the supervisor's computer, logs in
+as the supervisor with the captured credentials and sends an alarming mass email, then leaves. & 10 \\
+\midrule
+ & total & 70 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent The scenarios differ in length. The answer key marks 1,676 malicious user-days for the 30
+insiders of scenario 2, about 56 each, spread over weeks. Scenario 1 has 187 (about 6 each) and
+scenario 3 has 20 (2 each). Scenario 3 is unusual in a second way: its key acts are
+performed on another person's computer and under another person's account.
+
+\subsection{Labels}
+A user-day is \emph{malicious} if the answer key lists at least one malicious event of that user
+on that calendar day:
+\begin{equation}
+y(u,t) \;=\;
+\begin{cases}
+1 & \text{if the answer key lists a malicious event of user } u \text{ on day } t, \\
+0 & \text{otherwise.}
+\end{cases}
+\label{eq:day-label}
+\end{equation}
+A user is malicious if at least one of their days is:
+\[
+y(u) \;=\; \max_{t}\; y(u,t).
+\]
+In release 4.2 the answer key marks 1,883 user-days as malicious, spread over the 70 insiders.
+
+\subsection{The detection problem}
+Malicious days are rare. Section~\ref{sec:lm-data} counts 330,295 user-days on which a user had
+at least one computer session. At most 1,883 of them can be malicious, so the fraction of
+malicious days is at most
+\[
+\pi \;\le\; \frac{1{,}883}{330{,}295} \;=\; 0.0057,
+\]
+fewer than 6 in every 1,000. Accuracy is therefore a poor measure: a rule that calls every day
+benign is correct on at least $1 - 0.0057 = 99.4\%$ of days and detects nothing. This thesis
+measures detection by ranking instead, with the user-level area under the ROC curve of
+Section~\ref{sec:lm-auc}.
+
+Malicious examples are also too few, and too varied, to learn from directly; a future insider
+need not follow any of the three scenarios. Every detector in this thesis is therefore
+\emph{one-class}. It is fit only on benign data, the set
+\[
+\mathcal{B} \;=\; \{\, D : y(D) = 0 \,\},
+\]
+restricted to users set aside for training, and it scores how far a new day departs from what it
+learned. The labels $y$ are used only to evaluate the scores, never to train the model that
+produces them.
 
 \section{Data Preparation for Static PCA Analysis}
-[This section will detail the Deep Feature Synthesis, tabular flattening, and setup for the PCA-GMM pipeline.]
+\label{sec:pca-data}
+The method of \chref{ch:pca} needs each observation as a fixed-length vector of numbers. This
+section describes how the logs become the matrix $X \in \mathbb{R}^{n \times p}$, and how that
+matrix is scored.
 
-%%%%% NEW SECTION
+\subsection{Deep Feature Synthesis}
+Deep Feature Synthesis (DFS) builds features automatically from related tables
+\cite{kanter2015dfs}. The tables here are the users, their observation units, and the events of
+each unit, linked by \emph{parent--child} relationships: one user has many units, and one unit
+has many events. DFS applies two kinds of operation.
+\begin{itemize}
+\item A \textbf{transform} computes a new value for each event from its own attributes, for
+example the hour of its time stamp, $h(e) = \mathrm{hour}(\tau)$.
+\item An \textbf{aggregation} summarizes the children of a parent with a function such as the
+count, sum, mean or maximum:
+\[
+f(\text{parent}) \;=\; \mathrm{agg}\bigl(\{\, g(e) : e \text{ a child of the parent} \,\}\bigr).
+\]
+\end{itemize}
+Stacking these operations along the relationships gives features such as ``the mean hour of the
+unit's logons'' or ``the number of emails with attachments''. The number of stacked aggregations
+is the \emph{depth}.
+
+\noindent \textit{Illustrative example (made-up numbers).} Suppose a user-day has three logon
+events at hours 8, 9 and 22, and two emails with 1 and 3 attachments. Then
+\[
+\mathrm{count}(\text{logons}) = 3, \quad
+\mathrm{mean}(\text{logon hour}) = \tfrac{8+9+22}{3} = 13, \quad
+\mathrm{max}(\text{logon hour}) = 22,
+\]
+\[
+\mathrm{count}(\text{emails}) = 2, \quad
+\mathrm{mean}(\text{attachments}) = \tfrac{1+3}{2} = 2,
+\]
+and the day contributes the row $(3,\; 13,\; 22,\; 2,\; 2,\; \dots)$ to $X$.
+
+\subsection{Tabular flattening}
+Each observation unit becomes one row $\mathbf{x}_i^\top$ of $X$, whatever the number of events
+behind it: this is the \emph{flattening}. A unit with no events of some kind receives a count of
+zero for that kind.
+\begin{itemize}
+\item Release and observation unit: \fillin{release; user-day or user-week}.
+\item Number of generated features $p$, primitives and depth: \fillin{p, primitives, depth}.
+\item Encoding of categorical attributes and treatment of missing values: \fillin{encoding}.
+\end{itemize}
+The columns are then standardized with the mean and standard deviation of the benign training
+rows, as \chref{ch:pca} requires:
+\[
+\tilde{x}_{ij} \;=\; \frac{x_{ij} - \bar{x}_j}{\mathrm{sd}_j}.
+\]
+
+\subsection{The PCA--GMM pipeline}
+PCA is fit on the standardized benign training rows. The first $q$ principal directions $U_q$
+give each observation the score vector
+\[
+\mathbf{z} \;=\; U_q^\top(\tilde{\mathbf{x}} - \bar{\tilde{\mathbf{x}}}) \in \mathbb{R}^{q},
+\]
+with $q$ chosen by the proportion of variance explained, \eqref{eq:evr}:
+\fillin{q and the threshold used}. A Gaussian mixture model then describes the benign score
+vectors as a weighted sum of $K$ normal distributions,
+\[
+p(\mathbf{z}) \;=\; \sum_{k=1}^{K} \pi_k\, \mathcal{N}(\mathbf{z} \mid \boldsymbol{\mu}_k, \Sigma_k),
+\qquad \pi_k \ge 0, \quad \sum_{k} \pi_k = 1,
+\]
+fit by the expectation--maximization algorithm \cite{dempster1977em}: \fillin{K and covariance
+type}. An observation is anomalous when the benign model finds it unlikely, so its score is
+\[
+s(\mathbf{x}) \;=\; -\log p(\mathbf{z}) .
+\]
+This is the same idea as the reconstruction error of \eqref{eq:recon-error}: both measure how
+poorly a model of benign data accounts for an observation. \fillin{Confirm the score used, and
+state the training and evaluation split.}
+
 \section{Data Preparation for Language-Model Analysis}
 \label{sec:lm-data}
+%%%%% CHANGED (2026-09-28): expanded with checked counts; the earlier three short subsections
+%%%%% are kept in substance.
+
+\subsection{From events to sessions}
+The language model reads activity grouped into \emph{sessions}. A session runs from a logon to
+the matching logoff on one computer. The session features follow the extraction of Le et al.
+\cite{le2020analyzing}. Each session is summarized by its time of day, duration, computer, and
+counts of the logon, device, file, email and web events inside it. For release 4.2 this gives
+470,611 sessions of the 1,000 users. They fall on 330,295 user-days. A user-day with no session
+has no text, so it does not appear in the language-model data.
 
 \subsection{Serialization}
-Each user-day is written as plain text: one line of organizational attributes, one line of
-personality scores, a line counting the day's sessions, and one line per session describing
-what the user did. Texts longer than 2,048 tokens are truncated. \chref{ch:lm} shows an
-example.
+Each user-day $D$ is written as a text $T(D)$ of lines joined by newlines:
+\[
+T(D) \;=\; \texttt{DAY} \;\Vert\; \texttt{PSY} \;\Vert\; \texttt{SESSIONS} \;\Vert\;
+\texttt{SES}_1 \;\Vert\; \cdots \;\Vert\; \texttt{SES}_k .
+\]
+\begin{itemize}
+\item \texttt{DAY}: the week number and the organizational attributes. Release 4.2 records no
+project, so its \texttt{project} field is \texttt{na} on every day.
+\item \texttt{PSY}: the five personality scores.
+\item \texttt{SESSIONS}: the day's number of sessions.
+\item $\texttt{SES}_1, \dots, \texttt{SES}_k$: one line per session, in time order, each listing
+that session's features as \texttt{key=value} pairs.
+\end{itemize}
+Two limits exist in the pipeline, and neither is ever reached in release 4.2.
+\begin{itemize}
+\item At most 24 sessions are written per day, but no day has more than 9 (Table~\ref{tab:sessions-per-day}).
+\item Texts longer than 2,048 tokens would be truncated, but the longest days have about 1,300
+tokens.
+\end{itemize}
+\chref{ch:lm} shows a full example and explains how its tokens divide into profile and behavior
+tokens.
 
-\subsection{Model and Training}
-The language model is Qwen3-8B \cite{qwen3}, adapted with QLoRA \cite{dettmers2023qlora}
-(low-rank adaptation of rank 16 on top of a 4-bit copy of the model). Only benign user-days
-are used for training; no malicious day is ever shown to the model.
+\begin{table}[H]
+\centering
+\caption{Sessions per user-day in CERT release 4.2 (330,295 user-days).}
+\label{tab:sessions-per-day}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+sessions & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
+\midrule
+user-days & 224,070 & 88,865 & 9,509 & 2,613 & 2,315 & 2,256 & 616 & 50 & 1 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\subsection{User-Disjoint Evaluation}
-All results for the language model use CERT release 4.2 \cite{glasser2013}. The evaluation
-pool contains 60 malicious users and 79 benign users, none of whom appear in training:
-40,519 user-days, of which 1,309 are malicious. Each malicious user is ranked against the same 79 benign users, a one-class comparison in
-which no malicious example is used for training.
+\noindent Two thirds of user-days ($224{,}070 / 330{,}295 = 67.8\%$) have a single session.
+
+\subsection{Model and training}
+The language model is Qwen3-8B \cite{qwen3}, a stack of 36 layers with context vectors of
+dimension $d = 4096$ and a vocabulary of 151,669 tokens. It is adapted with QLoRA
+\cite{dettmers2023qlora}.
+\begin{itemize}
+\item The original weights are stored in 4 bits and kept fixed.
+\item Each adapted weight matrix $W$ receives a trainable correction of rank $r = 16$, the $GH$
+of Section~\ref{sec:lm-train}.
+\end{itemize}
+Training minimizes the total surprisal of the benign training texts, \eqref{eq:lm-objective}.
+Table~\ref{tab:training} lists the settings.
+
+\begin{table}[H]
+\centering
+\caption{Training settings of the adapted model (read from the saved training arguments and
+adapter configuration).}
+\label{tab:training}
+\begin{tabular}{l p{9.5cm}}
+\toprule
+setting & value \\
+\midrule
+rank $r$; scaling $\alpha$ & 16; 32 (the factor $\alpha / r = 2$ is absorbed into $G$) \\
+dropout on the correction & 0.05 \\
+adapted matrices & the seven attention and feed-forward projections in each of the 36 layers \\
+training data & 287,827 benign user-days of 851 users \\
+passes over the data & 1 (3,271 steps) \\
+user-days per step & 88 (22 on each of 4 GPUs) \\
+learning rate & $1.5 \times 10^{-4}$, cosine schedule, 3\% warm-up \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{User-disjoint splits}
+The users are divided into three disjoint groups:
+\[
+\mathcal{U} \;=\; \mathcal{U}_{\mathrm{train}} \;\cup\; \mathcal{U}_{\mathrm{val}} \;\cup\;
+\mathcal{U}_{\mathrm{ins}} .
+\]
+\begin{itemize}
+\item Every user with a labelled malicious day goes to $\mathcal{U}_{\mathrm{ins}}$.
+\item Each remaining user goes to $\mathcal{U}_{\mathrm{val}}$ with probability 0.1, decided by a
+fixed hash of the user's identifier, and otherwise to $\mathcal{U}_{\mathrm{train}}$.
+\end{itemize}
+The model is trained only on the days of $\mathcal{U}_{\mathrm{train}}$. Table~\ref{tab:splits}
+gives the sizes.
+
+\begin{table}[H]
+\centering
+\caption{User-disjoint splits of CERT release 4.2.}
+\label{tab:splits}
+\begin{tabular}{lrrr}
+\toprule
+group & users & user-days & labelled malicious user-days \\
+\midrule
+$\mathcal{U}_{\mathrm{train}}$ (training) & 851 & 287,827 & 0 \\
+$\mathcal{U}_{\mathrm{val}}$ (held-out benign) & 79 & 27,026 & 0 \\
+$\mathcal{U}_{\mathrm{ins}}$ (insiders) & 70 & 15,442 & 1,309 \\
+\midrule
+total & 1,000 & 330,295 & 1,309 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent No insider is ever in training, and no training day is labelled malicious. The model
+has seen neither the insiders nor the held-out benign users. They are therefore compared on equal
+terms.
+
+\subsection{The evaluation pool}
+The results of \chref{ch:lm} and \chref{ch:mech} use one fixed evaluation pool:
+\begin{itemize}
+\item every day of the 60 insiders with at least one labelled malicious session-day (13,493 days);
+\item every day of the 79 held-out benign users (27,026 days).
+\end{itemize}
+That is $13{,}493 + 27{,}026 = 40{,}519$ user-days of 139 users, of which 1,309 are labelled
+malicious, a fraction of $1{,}309 / 40{,}519 = 3.2\%$. Each malicious user is ranked against the
+same 79 benign users.
+
+The 60 insiders are 29 from scenario 1, all 30 from scenario 2, and 1 from scenario 3. Their
+labelled malicious days number 139, 1,168 and 2, so scenario 2 supplies 89\% of the malicious
+days.
+
+\fillin{Label alignment (found 2026-09-28): in the data behind these counts, the labels were
+joined to the sessions on day numbers that count from two different start dates, so each
+malicious date's label fell on the session-day five days earlier. Aligned, the pool would contain
+70 insiders (30, 30 and 10 by scenario) and 1,355 malicious session-days. The numbers in this
+section, and the results of \chref{ch:lm} and \chref{ch:mech}, must be updated or explained
+once the correction is made; see docs/LABEL\_ALIGNMENT\_2026-09-28.md in the repository.}
+
+\section{Experimental Design}
+\label{sec:design}
+The thesis runs three experiments on the same dataset (Table~\ref{tab:experiments}).
+
+\begin{table}[H]
+\centering
+\caption{The three experiments.}
+\label{tab:experiments}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.3cm}>{\raggedright\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}p{3.9cm}>{\raggedright\arraybackslash}p{3.5cm}}
+\toprule
+experiment & input & model & score of a day \\
+\midrule
+PCA--GMM (\chref{ch:pca}) & DFS feature vector $\mathbf{x}$ & PCA to $q$ dimensions, then a GMM & $-\log p(\mathbf{z})$ \\
+Surprisal (\chref{ch:lm}) & text $T(D)$ & Qwen3-8B with a rank-16 correction & average token surprisal $\bar{\ell}$, and its profile and behavior parts \\
+Sparse features (\chref{ch:mech}) & the model's internal change at layer 26 & sparse dictionary with 8,192 features, 4 active per token & change in $\bar{\ell}$ when selected features are edited \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent Five rules hold throughout the language-model experiments of \chref{ch:lm} and
+\chref{ch:mech}. \fillin{state which of them the PCA--GMM experiment also follows}.
+\begin{enumerate}
+\item \textbf{One-class training.} Every model is fit on benign data only. Labels are used only
+for evaluation, and for choosing which features to study in \chref{ch:mech}.
+\item \textbf{User-disjoint evaluation.} No user contributes days to both training and
+evaluation.
+\item \textbf{A user score from day scores.} A user is scored by their most unusual day,
+$s(u) = \max_{D \in \mathcal{D}_u} s(D)$, and detection is measured by the user-level AUC of
+\chref{ch:lm}.
+\item \textbf{Users as the unit of uncertainty.} Days of the same user are not independent, so
+every interval resamples users rather than days.
+\item \textbf{Selection and testing on different users.} Where features are chosen using labels,
+they are tested on malicious users not used in the choice. \chref{ch:mech} splits the 60
+malicious users into 30 used for selection and 30 held out.
+\end{enumerate}
 
 \newpage
 
@@ -1442,6 +1792,7 @@ weighted share restores the order: $1.56 - 0.2(3.0) = 0.96 = 0.8(1.2)$ and
 $0.68 - 0.2(0.2) = 0.64 = 0.8(0.8)$.
 
 \section{Measuring Detection: The User-Level AUC}
+\label{sec:lm-auc} %%%%% NEW label (2026-09-28), cited from Chapter III
 With one malicious user $m$ compared against $n_-$ benign users $u_1,\dots,u_{n_-}$, the
 area under the ROC curve for $m$ is the fraction of benign users that $m$ outranks,
 \begin{equation}
@@ -1930,6 +2281,26 @@ Bridging the gap: A pragmatic approach to generating insider threat data.
 In \textit{2013 IEEE Security and Privacy Workshops} (pp. 98--104).
 IEEE.
 https://doi.org/10.1109/SPW.2013.37
+
+%%%%% NEW (2026-09-28) references for Chapter III
+\bibitem{kanter2015dfs}
+Kanter, J. M., \& Veeramachaneni, K. (2015).
+Deep feature synthesis: Towards automating data science endeavors.
+In \textit{2015 IEEE International Conference on Data Science and Advanced Analytics (DSAA)} (pp. 1--10).
+IEEE.
+https://doi.org/10.1109/DSAA.2015.7344858
+
+\bibitem{dempster1977em}
+Dempster, A. P., Laird, N. M., \& Rubin, D. B. (1977).
+Maximum likelihood from incomplete data via the EM algorithm.
+\textit{Journal of the Royal Statistical Society: Series B (Methodological)}, 39(1), 1--22.
+https://doi.org/10.1111/j.2517-6161.1977.tb01600.x
+
+\bibitem{le2020analyzing}
+Le, D. C., Zincir-Heywood, N., \& Heywood, M. I. (2020).
+Analyzing data granularity levels for insider threat detection using machine learning.
+\textit{IEEE Transactions on Network and Service Management}, 17(1), 30--44.
+https://doi.org/10.1109/TNSM.2020.2967721
 
 \bibitem{shlens2014}
 Shlens, J. (2014).
