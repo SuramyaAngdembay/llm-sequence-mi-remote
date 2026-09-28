@@ -85,7 +85,7 @@ malicious; see `docs/LABEL_ALIGNMENT_2026-09-28.md`.
 | `pca_reconstruction_r42.json`, `pca_recon_r42-576348.out` | final run: job 576348, 5 min 3 s, 8.2 GB, 1 node |
 | `pca_reconstruction_r42_job576345.json`, `pca_recon_r42-576345.out` | first run (2 variants). The final run reproduces it exactly |
 | `pca_recon_r42-576347.out` | failed on a wrong self-check: every direction, rather than only the first q, was required to be zero on the constant columns. Fixed |
-| `r42_user_splits.csv`, `sessionr4.2_user_map.csv` | split and user-code inputs; md5 `533048…`, `bbd6ba…` |
+| `r42_user_splits.csv`, `sessionr4.2_user_map.csv` | split and user-code inputs; md5 `533048…`, `bbd6ba…`. Kept on Magnolia next to the run (the repo ignores `*.csv`); the split follows `pkg4_share/session_jsonl_r42/example_metadata.parquet` |
 | input day table | md5 `9e4f7d99de43126c726e9ebe27019ca2` (on Magnolia, not copied) |
 
 ```
