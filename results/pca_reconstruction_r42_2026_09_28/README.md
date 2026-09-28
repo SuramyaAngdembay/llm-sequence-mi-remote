@@ -82,7 +82,8 @@ malicious; see `docs/LABEL_ALIGNMENT_2026-09-28.md`.
 
 | item | detail |
 |---|---|
-| `pca_reconstruction_r42.json`, `pca_recon_r42-576348.out` | final run: job 576348, 5 min 3 s, 8.2 GB, 1 node |
+| `pca_reconstruction_r42.json`, `pca_recon_r42-576351.out` | final run: job 576351, 5 min 30 s. Adds each user's score (`user_max_error`), the user groups and the column lists, used for thesis Figure 3.1 and Table 3.2. Everything else is identical to job 576348 |
+| `pca_reconstruction_r42_job576348.json`, `pca_recon_r42-576348.out` | job 576348, 5 min 3 s, 8.2 GB, 1 node |
 | `pca_reconstruction_r42_job576345.json`, `pca_recon_r42-576345.out` | first run (2 variants). The final run reproduces it exactly |
 | `pca_recon_r42-576347.out` | failed on a wrong self-check: every direction, rather than only the first q, was required to be zero on the constant columns. Fixed |
 | `r42_user_splits.csv`, `sessionr4.2_user_map.csv` | split and user-code inputs; md5 `533048…`, `bbd6ba…`. Kept on Magnolia next to the run (the repo ignores `*.csv`); the split follows `pkg4_share/session_jsonl_r42/example_metadata.parquet` |
@@ -91,3 +92,10 @@ malicious; see `docs/LABEL_ALIGNMENT_2026-09-28.md`.
 ```
 sbatch slurm/magnolia_pca_reconstruction_r42.sbatch   # on Magnolia, from r4.2/pca_reconstruction_2026_09_28/
 ```
+
+**Thesis Figure 3.1 (user-level ROC).**
+- It plots the `user_max_error` of the variant "all features, varying in training", for the 60
+  pool insiders against the 79 held-out benign users.
+- There are no tied scores. The figure lists the 51 corners of the step curve, whose area is
+  0.7508 and equals `user_auc`.
+- The marked threshold flags 30 of 60 insiders and 12 of 79 benign users.

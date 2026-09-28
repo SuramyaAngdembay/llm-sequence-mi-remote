@@ -19,7 +19,7 @@ Components to Interpretable Sparse Features*. Search the source for `NEW`,
 The removed CTMC chapter and its data-preparation section are preserved verbatim
 in `ctmc_chapter_removed.tex`.
 
-Compiles cleanly with TeX Live 2020 (55 pages as of 2026-09-28, two passes, no
+Compiles cleanly with TeX Live 2020 (58 pages as of 2026-09-28, two passes, no
 errors, no undefined references, no overfull lines). It needs the seven PCA figure files alongside it. The one
 overfull line left is in the original PCA chapter. `thesis_mechinterp_preview.pdf`
 is built in graphicx draft mode, with placeholder frames in place of those
@@ -68,6 +68,7 @@ per-class result.
 | window labels (1,883 days) vs event-day labels (966; 85 / 861 / 20) | `labels_daily.parquet` vs `insiders.csv` windows; `dayr4.2.csv` `insider` column |
 | PCA: n = 330,452, 502 features, 193 constant in training so p = 309 (299 without profile; `b_unit` constant), 287,961 training days, q = 71 (63), 95.1% | `results/pca_reconstruction_r42_2026_09_28/pca_reconstruction_r42.json` (Magnolia job 576348) |
 | PCA: medians 6.6 / 17.0, 6.4% vs 0.5% above training q99; user AUC 0.75 [0.67, 0.83], 0.76, 0.78 (70); thresholds 0.81 / 0.75 / 0.78; raw constant columns 99.7% and 0.80 [0.73, 0.87] | the same file |
+| Figure 3.1 (user-level ROC of the PCA detector; 30 of 60 insiders, 12 of 79 benign at the marked threshold); Table 3.2 feature counts by group (502 / 309); Table 3.3 | `pca_reconstruction_r42.json` from job 576351 (`user_max_error`, `columns`); the curve's corners are computed in the script that wrote the figure and checked against `user_auc` |
 | leak, hacking and supervisor-PC columns; pc code 3 = supervisor's PC | the same file; `InsiderThreatDetection/r4.2/feature_extractor.py:399` on Magnolia |
 
 **Restructure of 2026-09-28 (advisor feedback, Dr. Tian).**

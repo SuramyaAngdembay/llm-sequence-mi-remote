@@ -13,6 +13,8 @@
 \usepackage{url}
 \usepackage{refcount} %%%%% NEW: lets chapter cross-references print as Roman numerals
 \usepackage{array} %%%%% NEW (2026-09-28): ragged-right table columns in Chapter III
+\usepackage{pgfplots} %%%%% NEW (2026-09-28): the ROC figure in Chapter III, drawn from data in this file
+\pgfplotsset{compat=1.16}
 
 %%%%% NEW: headings read "Chapter II", so references should too (plain \ref gives "2")
 \newcommand{\chref}[1]{Chapter~\uppercase\expandafter{\romannumeral\getrefnumber{#1}}}
@@ -537,36 +539,96 @@ are comparable across the two.
 Malicious days are rare. At most 1,883 of the 330,295 user-days with computer activity
 (Section~\ref{sec:lm-data}) are malicious, a fraction $\pi \le 1{,}883/330{,}295 = 0.0057$. A rule
 that calls every day benign would therefore be correct on at least $99.4\%$ of days while
-detecting nothing, so this thesis measures detection by ranking. A detector flags every
-observation whose score exceeds a threshold, and each threshold catches some fraction of the
-malicious cases (the true positive rate) at the cost of flagging some fraction of the benign ones
-(the false positive rate). The receiver operating characteristic (ROC) curve plots these two rates
-as the threshold moves from strict to lenient---a curve that rises steeply toward the top-left
-corner catches malicious cases before it flags many benign ones, while the diagonal is what random
-scores would give. The area under the curve (AUC) is the probability that a randomly chosen
-malicious case scores higher than a randomly chosen benign one, so 1 means perfect ranking and 0.5
-means chance; Section~\ref{sec:lm-auc} defines the user-level version used in this thesis. Malicious examples are also too few and too varied to
-learn from, so every detector is \emph{one-class}: it is fit only on benign training data,
-$\mathcal{B} = \{ D : y(D) = 0 \}$ restricted to training users, and scores how far a new day
-departs from what it learned. The labels are used only for evaluation.
+detecting nothing, so this thesis measures detection by ranking.
+
+A detector flags every observation whose score exceeds a threshold. Each threshold catches some
+fraction of the malicious cases (the true positive rate) at the cost of flagging some fraction of
+the benign ones (the false positive rate). The receiver operating characteristic (ROC) curve plots
+these two rates as the threshold moves from strict to lenient---a curve that rises steeply toward
+the top-left corner catches malicious cases before it flags many benign ones, while the diagonal
+is what random scores would give (Figure~\ref{fig:roc}). The area under the curve (AUC) is the
+probability that a randomly chosen malicious case scores higher than a randomly chosen benign one,
+so 1 means perfect ranking and 0.5 means chance; Section~\ref{sec:lm-auc} defines the user-level
+version used in this thesis.
+
+%%%%% NEW (2026-09-28): ROC figure. The curve is the user-level ROC of the PCA detector of
+%%%%% Section 3.3 (60 insiders vs 79 held-out benign users), computed from
+%%%%% results/pca_reconstruction_r42_2026_09_28/pca_reconstruction_r42.json (user_max_error);
+%%%%% only the corners of the step curve are listed. Area = 0.7508.
+\begin{figure}[!htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.52\textwidth, height=0.52\textwidth,
+  xmin=0, xmax=1, ymin=0, ymax=1,
+  xtick={0,0.25,0.5,0.75,1}, ytick={0,0.25,0.5,0.75,1},
+  xlabel={false positive rate (share of benign users flagged)},
+  ylabel={true positive rate (share of insiders flagged)},
+  label style={font=\small}, tick label style={font=\small},
+  axis line style={black!60}, tick style={black!60}]
+\addplot[fill=black!8, draw=none] coordinates {(0.0000,0.0000) (0.0000,0.0500) (0.0127,0.0500) (0.0127,0.2167) (0.0253,0.2167) (0.0253,0.3333) (0.0380,0.3333) (0.0380,0.3500) (0.0633,0.3500) (0.0633,0.3833) (0.0759,0.3833) (0.0759,0.4000) (0.1013,0.4000) (0.1013,0.4667) (0.1139,0.4667) (0.1139,0.4833) (0.1519,0.4833) (0.1519,0.5500) (0.1772,0.5500) (0.1772,0.5667) (0.2025,0.5667) (0.2025,0.5833) (0.2405,0.5833) (0.2405,0.6000) (0.2785,0.6000) (0.2785,0.6333) (0.3671,0.6333) (0.3671,0.6833) (0.3797,0.6833) (0.3797,0.7000) (0.4177,0.7000) (0.4177,0.7333) (0.4304,0.7333) (0.4304,0.7500) (0.4430,0.7500) (0.4430,0.7833) (0.5063,0.7833) (0.5063,0.8000) (0.5316,0.8000) (0.5316,0.8167) (0.5570,0.8167) (0.5570,0.8333) (0.6329,0.8333) (0.6329,0.9000) (0.7089,0.9000) (0.7089,0.9167) (0.7215,0.9167) (0.7215,0.9833) (0.7468,0.9833) (0.7468,1.0000) (1.0000,1.0000)} \closedcycle;
+\addplot[dashed, black!45] coordinates {(0,0) (1,1)};
+\addplot[thick, black] coordinates {(0.0000,0.0000) (0.0000,0.0500) (0.0127,0.0500) (0.0127,0.2167) (0.0253,0.2167) (0.0253,0.3333) (0.0380,0.3333) (0.0380,0.3500) (0.0633,0.3500) (0.0633,0.3833) (0.0759,0.3833) (0.0759,0.4000) (0.1013,0.4000) (0.1013,0.4667) (0.1139,0.4667) (0.1139,0.4833) (0.1519,0.4833) (0.1519,0.5500) (0.1772,0.5500) (0.1772,0.5667) (0.2025,0.5667) (0.2025,0.5833) (0.2405,0.5833) (0.2405,0.6000) (0.2785,0.6000) (0.2785,0.6333) (0.3671,0.6333) (0.3671,0.6833) (0.3797,0.6833) (0.3797,0.7000) (0.4177,0.7000) (0.4177,0.7333) (0.4304,0.7333) (0.4304,0.7500) (0.4430,0.7500) (0.4430,0.7833) (0.5063,0.7833) (0.5063,0.8000) (0.5316,0.8000) (0.5316,0.8167) (0.5570,0.8167) (0.5570,0.8333) (0.6329,0.8333) (0.6329,0.9000) (0.7089,0.9000) (0.7089,0.9167) (0.7215,0.9167) (0.7215,0.9833) (0.7468,0.9833) (0.7468,1.0000) (1.0000,1.0000)};
+\addplot[only marks, mark=*, mark size=2pt, black] coordinates {(0.1519,0.5000)};
+\draw[->, black!70] (axis cs:0.41,0.27) -- (axis cs:0.165,0.475);
+\node[anchor=north west, align=left, font=\footnotesize] at (axis cs:0.40,0.29)
+  {one threshold flags\\30 of 60 insiders and\\12 of 79 benign users};
+\node[font=\footnotesize] at (axis cs:0.72,0.42) {AUC $= 0.75$ (shaded)};
+\node[font=\footnotesize, text=black!60, rotate=45] at (axis cs:0.80,0.71) {random scores};
+\end{axis}
+\end{tikzpicture}
+\caption{The user-level ROC curve of the PCA detector of Section~\ref{sec:pca-data}: 60 insiders
+against 79 held-out benign users, each user scored by their largest daily reconstruction error.
+Each point on the curve is one threshold; the dot marks the threshold that catches half of the
+insiders. The dashed diagonal is what random scores would give (AUC $= 0.5$).}
+\label{fig:roc}
+\end{figure}
+
+Malicious examples are also too few and too varied to learn from, so every detector is
+\emph{one-class}: it is fit only on benign training data, $\mathcal{B} = \{ D : y(D) = 0 \}$
+restricted to training users, and scores how far a new day departs from what it learned. The
+labels are used only for evaluation.
 
 \section[Data Preparation for PCA Reconstruction Analysis]{Data Preparation for PCA\\ Reconstruction Analysis}
 \label{sec:pca-data}
 The method of \chref{ch:pca} needs each observation as a vector of $p$ numerical features, so the
 activity of each observation is summarized into one row $\mathbf{x}_i^\top$ of a matrix
-$X \in \mathbb{R}^{n\times p}$. Here an observation is a user-day, and its features are the
-day-level features of Le et al. \cite{le2020analyzing}: counts of logons, removable-drive
-connections, file accesses, emails and web visits, each split by working hours and after hours
-and by the kind of computer, file or website involved (for example, visits to job-search,
-cloud-storage or leak websites), averages such as file and email sizes, whether the day is a
-weekday, and the user's organizational and personality attributes. Release 4.2 gives
+$X \in \mathbb{R}^{n\times p}$. Here an observation is a user-day, described by the day-level
+features of Le et al. \cite{le2020analyzing} (Table~\ref{tab:pca-features}). Release 4.2 gives
 $n = 330{,}452$ user-days with 502 features once identifiers and time indices are removed.
 Because PCA is sensitive to scale, each column is standardized with the mean and standard
-deviation of the training rows. Standardization needs a positive standard deviation, and 193 of
-the 502 columns never vary among the training days, so they are removed, leaving $p = 309$
-features. Removing the organizational and personality attributes as well (ten of the 309; the
-eleventh, the business unit, takes a single value in this release) leaves 299, the PCA counterpart
-of the behavior-only score of \chref{ch:lm}.
+deviation of the training rows. Standardization needs a positive standard deviation, so the 193
+columns that never vary among the training days are removed, leaving $p = 309$ features, or 299
+without the organizational and personality attributes, the PCA counterpart of the behavior-only
+score of \chref{ch:lm}.
+
+%%%%% NEW (2026-09-28): feature table; counts from pca_reconstruction_r42.json ("columns")
+\begin{table}[!htbp]
+\centering
+\caption{The day-level features of CERT release 4.2 \cite{le2020analyzing}, and how many of them
+vary among the training days. Activity features are also split by working hours and after hours
+and by the kind of computer used (the user's own, a shared one, another user's or the
+supervisor's). Files are split into six types and websites into six kinds, among them job-search,
+cloud-storage, leak and hacking websites. The profile attribute that does not vary is the business
+unit, which takes a single value in this release.}
+\label{tab:pca-features}
+\begin{tabular}{l>{\raggedright\arraybackslash}p{8.4cm}cc}
+\toprule
+group & what is measured & features & varying \\
+\midrule
+all activity & events of any kind & 15 & 14 \\
+logons & logons & 15 & 14 \\
+removable drives & connections and their mean duration & 18 & 14 \\
+files & accesses by type, with mean length, depth and word count & 210 & 132 \\
+emails & recipients, attachments, size and text length & 42 & 33 \\
+web & visits by kind of website, with mean URL and content length & 189 & 90 \\
+calendar & weekday or weekend & 2 & 2 \\
+profile & organizational attributes and five personality scores & 11 & 10 \\
+\midrule
+total & & 502 & 309 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 PCA is fit on the 287,961 days of the 851 training users of Section~\ref{sec:lm-data}, the users
 that also train the language model; all of them are benign, so PCA sees no insider and no
@@ -581,18 +643,40 @@ $e_i$ marks an observation that those directions cannot explain.
 
 The median reconstruction error is 6.6 on the days of the 79 held-out benign users and 17.0 on
 the 966 malicious days, and $6.4\%$ of the malicious days exceed the $99$th percentile of the
-training errors, against $0.5\%$ of the held-out benign days. On the evaluation pool of
-Section~\ref{sec:lm-data} (60 insiders and 79 held-out benign users), scoring each user by their
-largest error gives a user-level AUC of
-$0.75$ (95\% interval $[0.67, 0.83]$), and $0.76$ $[0.67, 0.83]$ without the profile attributes;
-with all 70 insiders it is $0.78$ $[0.70, 0.85]$. The threshold matters somewhat: keeping
-$80\%$, $90\%$ or $99\%$ of the variance ($q = 36$, $55$ or $94$) gives $0.81$, $0.75$ and $0.78$.
-The removed columns matter as well. Among them are visits to leak and hacking websites and logons
-to the supervisor's computer, which no training day contains and which occur, in the evaluation
-data, almost only on malicious days. Left in their raw units, as some software does for a
-column with zero standard deviation, they carry $99.7\%$ of the malicious days' squared error
-and raise the user-level AUC to $0.80$ $[0.73, 0.87]$. On the same users, the language model's
-full score reaches $0.65$ and its behavior-only score $0.86$ (\chref{ch:lm}).
+training errors, against $0.5\%$ of the held-out benign days. Scoring each user by their largest
+error gives the user-level AUCs of Table~\ref{tab:pca-results} and the ROC curve of
+Figure~\ref{fig:roc}. The PCA estimate lies between the language model's full score and its
+behavior-only score; removing the profile attributes changes it little, and the variance
+threshold moves it between 0.75 and 0.81. The last PCA row shows why the constant columns are
+removed. They include visits to leak and hacking websites and logons to the supervisor's computer,
+which no training day contains and which occur, in the evaluation data, almost only on malicious
+days. Left in their raw units, as some software does for a column with zero standard deviation,
+they carry $99.7\%$ of the malicious days' squared error.
+
+%%%%% NEW (2026-09-28): results table; PCA from pca_reconstruction_r42.json, language model from Table 4.x
+\begin{table}[!htbp]
+\centering
+\caption{User-level AUC of the PCA reconstruction error on CERT release 4.2, each group of
+insiders against the 79 held-out benign users. The PCA intervals are 95\% bootstrap intervals
+that resample malicious and benign users; the row with three variance thresholds gives point
+estimates. The last row keeps the 193 constant columns in raw units. The language-model rows
+repeat Table~\ref{tab:lm-views} of \chref{ch:lm}, whose intervals resample malicious users only.}
+\label{tab:pca-results}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccc}
+\toprule
+score & $p$ & $q$ & 60 insiders & all 70 insiders \\
+\midrule
+PCA, 95\% variance & 309 & 71 & 0.75 [0.67, 0.83] & 0.78 [0.70, 0.85] \\
+PCA, no profile attributes & 299 & 63 & 0.76 [0.67, 0.83] & 0.79 [0.72, 0.86] \\
+PCA, 80 / 90 / 99\% variance & 309 & 36 / 55 / 94 & 0.81 / 0.75 / 0.78 & 0.84 / 0.79 / 0.81 \\
+PCA, raw constant columns & 502 & 71 & 0.80 [0.73, 0.87] & 0.83 [0.76, 0.89] \\
+\midrule
+language model, full score & & & 0.65 [0.58, 0.72] & \\
+language model, behavior only & & & 0.86 [0.83, 0.89] & \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Data Preparation for Language-Model Analysis}
 \label{sec:lm-data}

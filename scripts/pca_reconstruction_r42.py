@@ -88,7 +88,9 @@ def main() -> None:
     rng = np.random.default_rng(a.seed)
     res = {"checks": checks, "protocol": {"pve_threshold": a.pve, "train_users": int(train.user_id.nunique()), "train_days": int(len(train)),
                                           "heldout_benign_users": len(ben_users), "insiders": len(mal_all), "lm_pool_insiders": len(mal_lm),
-                                          "bootstrap": a.boot, "seed": a.seed}, "variants": {}}
+                                          "bootstrap": a.boot, "seed": a.seed},
+           "columns": {"features": feats_all, "constant_in_training": [c for c in feats_all if c not in varying]},
+           "users": {"heldout_benign": ben_users, "insiders": mal_all, "lm_pool_insiders": mal_lm}, "variants": {}}
     for name, cols in variants.items():
         scaler = StandardScaler().fit(train[cols].to_numpy(np.float64))
         Xtr = scaler.transform(train[cols].to_numpy(np.float64))
@@ -142,6 +144,7 @@ def main() -> None:
             v[pool] = {"user_auc": u_auc, "user_auc_ci95": [float(np.quantile(bs_u, 0.025)), float(np.quantile(bs_u, 0.975))],
                        "day_auc": day_auc, "day_auc_ci95": [float(np.quantile(bs_d, 0.025)), float(np.quantile(bs_d, 0.975))],
                        "malicious_users": len(mal), "benign_users": len(ben_users), "days": int(len(sub)), "malicious_days": int(sub.y.sum())}
+        v["user_max_error"] = {u: float(x) for u, x in umax.items()}   # the user scores behind the user AUC (ROC figure)
         # sensitivity to the variance threshold (point estimates only)
         v["threshold_sensitivity"] = {}
         for t in (0.80, 0.90, 0.95, 0.99):

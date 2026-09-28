@@ -1,0 +1,696 @@
+{
+ "checks": {
+  "rows": 330452,
+  "users": 1000,
+  "malicious_days": 966,
+  "malicious_days_by_scenario": {
+   "1": 85,
+   "2": 861,
+   "3": 20
+  },
+  "insider_users": 70,
+  "insider_users_all_in_eval_split": true,
+  "eval_split_users_all_insiders": true,
+  "users_without_split": 0
+ },
+ "protocol": {
+  "pve_threshold": 0.95,
+  "train_users": 851,
+  "train_days": 287961,
+  "heldout_benign_users": 79,
+  "insiders": 70,
+  "lm_pool_insiders": 60,
+  "bootstrap": 10000,
+  "seed": 42
+ },
+ "variants": {
+  "all features": {
+   "p": 502,
+   "p_varying_in_train": 309,
+   "q": 71,
+   "pve": 0.951375256042987,
+   "mse_train_days": 15.025045882717098,
+   "median_e_train_days": 5.7476468491493495,
+   "train_constant_columns_nonzero_in_eval": {
+    "workhourallact_n-pc3": {
+     "days": 5,
+     "malicious_days": 4
+    },
+    "workhourlogon_n-pc3": {
+     "days": 5,
+     "malicious_days": 4
+    },
+    "http_n_leakf": {
+     "days": 68,
+     "malicious_days": 68
+    },
+    "http_leakf_mean_url_len": {
+     "days": 68,
+     "malicious_days": 68
+    },
+    "http_leakf_mean_url_depth": {
+     "days": 68,
+     "malicious_days": 68
+    },
+    "http_leakf_mean_http_c_len": {
+     "days": 68,
+     "malicious_days": 68
+    },
+    "http_leakf_mean_http_c_nwords": {
+     "days": 68,
+     "malicious_days": 68
+    },
+    "http_leakf_n-pc0": {
+     "days": 68,
+     "malicious_days": 68
+    },
+    "http_n_hackf": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "http_hackf_mean_url_len": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "http_hackf_mean_url_depth": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "http_hackf_mean_http_c_len": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "http_hackf_mean_http_c_nwords": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "http_hackf_n-pc0": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "workhourhttp_n_leakf": {
+     "days": 2,
+     "malicious_days": 2
+    },
+    "workhourhttp_leakf_mean_url_len": {
+     "days": 2,
+     "malicious_days": 2
+    },
+    "workhourhttp_leakf_mean_url_depth": {
+     "days": 2,
+     "malicious_days": 2
+    },
+    "workhourhttp_leakf_mean_http_c_len": {
+     "days": 2,
+     "malicious_days": 2
+    },
+    "workhourhttp_leakf_mean_http_c_nwords": {
+     "days": 2,
+     "malicious_days": 2
+    },
+    "workhourhttp_leakf_n-pc0": {
+     "days": 2,
+     "malicious_days": 2
+    },
+    "workhourhttp_n_hackf": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "workhourhttp_hackf_mean_url_len": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "workhourhttp_hackf_mean_url_depth": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "workhourhttp_hackf_mean_http_c_len": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "workhourhttp_hackf_mean_http_c_nwords": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "workhourhttp_hackf_n-pc0": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "afterhourhttp_n_leakf": {
+     "days": 66,
+     "malicious_days": 66
+    },
+    "afterhourhttp_leakf_mean_url_len": {
+     "days": 66,
+     "malicious_days": 66
+    },
+    "afterhourhttp_leakf_mean_url_depth": {
+     "days": 66,
+     "malicious_days": 66
+    },
+    "afterhourhttp_leakf_mean_http_c_len": {
+     "days": 66,
+     "malicious_days": 66
+    },
+    "afterhourhttp_leakf_mean_http_c_nwords": {
+     "days": 66,
+     "malicious_days": 66
+    },
+    "afterhourhttp_leakf_n-pc0": {
+     "days": 66,
+     "malicious_days": 66
+    }
+   },
+   "share_of_error_from_train_constant_columns": {
+    "heldout_benign_days": 0.0,
+    "malicious_days": 0.997315601793081,
+    "insider_benign_days": 6.993460532861563e-06
+   },
+   "mse_heldout_benign_days": 12.897212562630637,
+   "median_e_heldout_benign_days": 6.630031951732946,
+   "share_above_train_q99_heldout_benign_days": 0.0051773233238415735,
+   "mse_malicious_days": 31117.25012873509,
+   "median_e_malicious_days": 16.983411783131363,
+   "share_above_train_q99_malicious_days": 0.12111801242236025,
+   "mse_insider_benign_days": 49.36161494234313,
+   "median_e_insider_benign_days": 8.044047277952867,
+   "share_above_train_q99_insider_benign_days": 0.049571941452637394,
+   "all 70 insiders": {
+    "user_auc": 0.8323688969258589,
+    "user_auc_ci95": [
+     0.764371609403255,
+     0.8936708860759494
+    ],
+    "day_auc": 0.7558472720292473,
+    "day_auc_ci95": [
+     0.7151681144146004,
+     0.7972714183659697
+    ],
+    "malicious_users": 70,
+    "benign_users": 79,
+    "days": 42491,
+    "malicious_days": 966
+   },
+   "language-model pool (60 insiders)": {
+    "user_auc": 0.8044303797468354,
+    "user_auc_ci95": [
+     0.7265770042194093,
+     0.8746835443037975
+    ],
+    "day_auc": 0.762242463219204,
+    "day_auc_ci95": [
+     0.7203566386396499,
+     0.8022680105991867
+    ],
+    "malicious_users": 60,
+    "benign_users": 79,
+    "days": 40541,
+    "malicious_days": 947
+   },
+   "threshold_sensitivity": {
+    "0.8": {
+     "q": 36,
+     "pve": 0.803657046371036,
+     "all 70 insiders": {
+      "user_auc": 0.9074141048824593,
+      "day_auc": 0.7447674640361077
+     },
+     "language-model pool (60 insiders)": {
+      "user_auc": 0.8919831223628693,
+      "day_auc": 0.7491133473606097
+     }
+    },
+    "0.9": {
+     "q": 55,
+     "pve": 0.9006694973081645,
+     "all 70 insiders": {
+      "user_auc": 0.8450271247739602,
+      "day_auc": 0.7463792048243532
+     },
+     "language-model pool (60 insiders)": {
+      "user_auc": 0.8191983122362869,
+      "day_auc": 0.7552416264791967
+     }
+    },
+    "0.95": {
+     "q": 71,
+     "pve": 0.951375256042987,
+     "all 70 insiders": {
+      "user_auc": 0.8323688969258589,
+      "day_auc": 0.7558472720292473
+     },
+     "language-model pool (60 insiders)": {
+      "user_auc": 0.8044303797468354,
+      "day_auc": 0.762242463219204
+     }
+    },
+    "0.99": {
+     "q": 94,
+     "pve": 0.9901422223009547,
+     "all 70 insiders": {
+      "user_auc": 0.8717902350813743,
+      "day_auc": 0.725133304165841
+     },
+     "language-model pool (60 insiders)": {
+      "user_auc": 0.8504219409282701,
+      "day_auc": 0.7346138277113547
+     }
+    }
+   }
+  },
+  "behavior only": {
+   "p": 491,
+   "p_varying_in_train": 299,
+   "q": 63,
+   "pve": 0.9506366047037048,
+   "mse_train_days": 14.75965519359235,
+   "median_e_train_days": 3.5711915788764297,
+   "train_constant_columns_nonzero_in_eval": {
+    "workhourallact_n-pc3": {
+     "days": 5,
+     "malicious_days": 4
+    },
+    "workhourlogon_n-pc3": {
+     "days": 5,
+     "malicious_days": 4
+    },
+    "http_n_leakf": {
+     "days": 68,
+     "malicious_days": 68
+    },
+    "http_leakf_mean_url_len": {
+     "days": 68,
+     "malicious_days": 68
+    },
+    "http_leakf_mean_url_depth": {
+     "days": 68,
+     "malicious_days": 68
+    },
+    "http_leakf_mean_http_c_len": {
+     "days": 68,
+     "malicious_days": 68
+    },
+    "http_leakf_mean_http_c_nwords": {
+     "days": 68,
+     "malicious_days": 68
+    },
+    "http_leakf_n-pc0": {
+     "days": 68,
+     "malicious_days": 68
+    },
+    "http_n_hackf": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "http_hackf_mean_url_len": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "http_hackf_mean_url_depth": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "http_hackf_mean_http_c_len": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "http_hackf_mean_http_c_nwords": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "http_hackf_n-pc0": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "workhourhttp_n_leakf": {
+     "days": 2,
+     "malicious_days": 2
+    },
+    "workhourhttp_leakf_mean_url_len": {
+     "days": 2,
+     "malicious_days": 2
+    },
+    "workhourhttp_leakf_mean_url_depth": {
+     "days": 2,
+     "malicious_days": 2
+    },
+    "workhourhttp_leakf_mean_http_c_len": {
+     "days": 2,
+     "malicious_days": 2
+    },
+    "workhourhttp_leakf_mean_http_c_nwords": {
+     "days": 2,
+     "malicious_days": 2
+    },
+    "workhourhttp_leakf_n-pc0": {
+     "days": 2,
+     "malicious_days": 2
+    },
+    "workhourhttp_n_hackf": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "workhourhttp_hackf_mean_url_len": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "workhourhttp_hackf_mean_url_depth": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "workhourhttp_hackf_mean_http_c_len": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "workhourhttp_hackf_mean_http_c_nwords": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "workhourhttp_hackf_n-pc0": {
+     "days": 10,
+     "malicious_days": 10
+    },
+    "afterhourhttp_n_leakf": {
+     "days": 66,
+     "malicious_days": 66
+    },
+    "afterhourhttp_leakf_mean_url_len": {
+     "days": 66,
+     "malicious_days": 66
+    },
+    "afterhourhttp_leakf_mean_url_depth": {
+     "days": 66,
+     "malicious_days": 66
+    },
+    "afterhourhttp_leakf_mean_http_c_len": {
+     "days": 66,
+     "malicious_days": 66
+    },
+    "afterhourhttp_leakf_mean_http_c_nwords": {
+     "days": 66,
+     "malicious_days": 66
+    },
+    "afterhourhttp_leakf_n-pc0": {
+     "days": 66,
+     "malicious_days": 66
+    }
+   },
+   "share_of_error_from_train_constant_columns": {
+    "heldout_benign_days": 0.0,
+    "malicious_days": 0.9909553520568575,
+    "insider_benign_days": 6.389981265677103e-06
+   },
+   "mse_heldout_benign_days": 11.253338240070004,
+   "median_e_heldout_benign_days": 4.171995417295085,
+   "share_above_train_q99_heldout_benign_days": 0.004918457157649495,
+   "mse_malicious_days": 31316.970006641284,
+   "median_e_malicious_days": 17.21635694225314,
+   "share_above_train_q99_malicious_days": 0.12215320910973085,
+   "mse_insider_benign_days": 54.023398752642024,
+   "median_e_insider_benign_days": 5.823639653659276,
+   "share_above_train_q99_insider_benign_days": 0.04888152444076222,
+   "all 70 insiders": {
+    "user_auc": 0.8350813743218807,
+    "user_auc_ci95": [
+     0.7649186256781193,
+     0.8962025316455696
+    ],
+    "day_auc": 0.7909775472631793,
+    "day_auc_ci95": [
+     0.7547324659577135,
+     0.8256147474742296
+    ],
+    "malicious_users": 70,
+    "benign_users": 79,
+    "days": 42491,
+    "malicious_days": 966
+   },
+   "language-model pool (60 insiders)": {
+    "user_auc": 0.8075949367088607,
+    "user_auc_ci95": [
+     0.7297415611814346,
+     0.8767932489451477
+    ],
+    "day_auc": 0.7953542607412437,
+    "day_auc_ci95": [
+     0.7579952921164828,
+     0.8302281827508498
+    ],
+    "malicious_users": 60,
+    "benign_users": 79,
+    "days": 40541,
+    "malicious_days": 947
+   },
+   "threshold_sensitivity": {
+    "0.8": {
+     "q": 33,
+     "pve": 0.8054386992007949,
+     "all 70 insiders": {
+      "user_auc": 0.9177215189873418,
+      "day_auc": 0.754329914255051
+     },
+     "language-model pool (60 insiders)": {
+      "user_auc": 0.9040084388185654,
+      "day_auc": 0.7583682668419196
+     }
+    },
+    "0.9": {
+     "q": 50,
+     "pve": 0.9042233842941383,
+     "all 70 insiders": {
+      "user_auc": 0.8566003616636528,
+      "day_auc": 0.766657542476719
+     },
+     "language-model pool (60 insiders)": {
+      "user_auc": 0.8327004219409283,
+      "day_auc": 0.7745181437418733
+     }
+    },
+    "0.95": {
+     "q": 63,
+     "pve": 0.9506366047037048,
+     "all 70 insiders": {
+      "user_auc": 0.8350813743218807,
+      "day_auc": 0.7909775472631793
+     },
+     "language-model pool (60 insiders)": {
+      "user_auc": 0.8075949367088607,
+      "day_auc": 0.7953542607412437
+     }
+    },
+    "0.99": {
+     "q": 85,
+     "pve": 0.9903023675062402,
+     "all 70 insiders": {
+      "user_auc": 0.87124773960217,
+      "day_auc": 0.7379011122287829
+     },
+     "language-model pool (60 insiders)": {
+      "user_auc": 0.849789029535865,
+      "day_auc": 0.7384859438400078
+     }
+    }
+   }
+  },
+  "all features, varying in training": {
+   "p": 309,
+   "p_varying_in_train": 309,
+   "q": 71,
+   "pve": 0.9513752560429867,
+   "mse_train_days": 15.025045882717098,
+   "median_e_train_days": 5.747646849149379,
+   "mse_heldout_benign_days": 12.897212562630639,
+   "median_e_heldout_benign_days": 6.630031951732919,
+   "share_above_train_q99_heldout_benign_days": 0.0051773233238415735,
+   "mse_malicious_days": 83.53109044982939,
+   "median_e_malicious_days": 16.983411783131285,
+   "share_above_train_q99_malicious_days": 0.06418219461697723,
+   "mse_insider_benign_days": 49.361269733837204,
+   "median_e_insider_benign_days": 8.044047277952824,
+   "share_above_train_q99_insider_benign_days": 0.049571941452637394,
+   "all 70 insiders": {
+    "user_auc": 0.7773960216998191,
+    "user_auc_ci95": [
+     0.7010849909584087,
+     0.8477441229656418
+    ],
+    "day_auc": 0.752173663748671,
+    "day_auc_ci95": [
+     0.7109725905285096,
+     0.7955070694665971
+    ],
+    "malicious_users": 70,
+    "benign_users": 79,
+    "days": 42491,
+    "malicious_days": 966
+   },
+   "language-model pool (60 insiders)": {
+    "user_auc": 0.75084388185654,
+    "user_auc_ci95": [
+     0.6681434599156119,
+     0.8284810126582278
+    ],
+    "day_auc": 0.7593004315875833,
+    "day_auc_ci95": [
+     0.7174033668089211,
+     0.8011767222967625
+    ],
+    "malicious_users": 60,
+    "benign_users": 79,
+    "days": 40541,
+    "malicious_days": 947
+   },
+   "threshold_sensitivity": {
+    "0.8": {
+     "q": 36,
+     "pve": 0.8036570463710367,
+     "all 70 insiders": {
+      "user_auc": 0.839240506329114,
+      "day_auc": 0.738740338268124
+     },
+     "language-model pool (60 insiders)": {
+      "user_auc": 0.8141350210970464,
+      "day_auc": 0.7436360260444995
+     }
+    },
+    "0.9": {
+     "q": 55,
+     "pve": 0.9006694973081639,
+     "all 70 insiders": {
+      "user_auc": 0.7884267631103075,
+      "day_auc": 0.7425646203302408
+     },
+     "language-model pool (60 insiders)": {
+      "user_auc": 0.7542194092827004,
+      "day_auc": 0.7521060517153011
+     }
+    },
+    "0.95": {
+     "q": 71,
+     "pve": 0.9513752560429867,
+     "all 70 insiders": {
+      "user_auc": 0.7773960216998191,
+      "day_auc": 0.752173663748671
+     },
+     "language-model pool (60 insiders)": {
+      "user_auc": 0.75084388185654,
+      "day_auc": 0.7593004315875833
+     }
+    },
+    "0.99": {
+     "q": 94,
+     "pve": 0.9901422223009548,
+     "all 70 insiders": {
+      "user_auc": 0.805244122965642,
+      "day_auc": 0.7227521897432638
+     },
+     "language-model pool (60 insiders)": {
+      "user_auc": 0.7824894514767933,
+      "day_auc": 0.7327616063338557
+     }
+    }
+   }
+  },
+  "behavior only, varying in training": {
+   "p": 299,
+   "p_varying_in_train": 299,
+   "q": 63,
+   "pve": 0.9506366047037044,
+   "mse_train_days": 14.759655193592353,
+   "median_e_train_days": 3.5711915788764244,
+   "mse_heldout_benign_days": 11.253338240069999,
+   "median_e_heldout_benign_days": 4.171995417295086,
+   "share_above_train_q99_heldout_benign_days": 0.004918457157649495,
+   "mse_malicious_days": 283.250968356023,
+   "median_e_malicious_days": 17.21635694225319,
+   "share_above_train_q99_malicious_days": 0.06521739130434782,
+   "mse_insider_benign_days": 54.02305354413608,
+   "median_e_insider_benign_days": 5.82363965365928,
+   "share_above_train_q99_insider_benign_days": 0.04888152444076222,
+   "all 70 insiders": {
+    "user_auc": 0.7909584086799276,
+    "user_auc_ci95": [
+     0.7160940325497287,
+     0.8602169981916817
+    ],
+    "day_auc": 0.7877019630719602,
+    "day_auc_ci95": [
+     0.7493093296192613,
+     0.8239780155568988
+    ],
+    "malicious_users": 70,
+    "benign_users": 79,
+    "days": 42491,
+    "malicious_days": 966
+   },
+   "language-model pool (60 insiders)": {
+    "user_auc": 0.7563291139240507,
+    "user_auc_ci95": [
+     0.6717299578059072,
+     0.8335443037974684
+    ],
+    "day_auc": 0.7927200792372038,
+    "day_auc_ci95": [
+     0.7534226330677113,
+     0.8290578467841948
+    ],
+    "malicious_users": 60,
+    "benign_users": 79,
+    "days": 40541,
+    "malicious_days": 947
+   },
+   "threshold_sensitivity": {
+    "0.8": {
+     "q": 33,
+     "pve": 0.8054386992007961,
+     "all 70 insiders": {
+      "user_auc": 0.8349005424954792,
+      "day_auc": 0.7481165154070424
+     },
+     "language-model pool (60 insiders)": {
+      "user_auc": 0.809915611814346,
+      "day_auc": 0.7526947887478177
+     }
+    },
+    "0.9": {
+     "q": 50,
+     "pve": 0.9042233842941378,
+     "all 70 insiders": {
+      "user_auc": 0.8009041591320072,
+      "day_auc": 0.762793846905566
+     },
+     "language-model pool (60 insiders)": {
+      "user_auc": 0.7689873417721519,
+      "day_auc": 0.7713435509812134
+     }
+    },
+    "0.95": {
+     "q": 63,
+     "pve": 0.9506366047037044,
+     "all 70 insiders": {
+      "user_auc": 0.7909584086799276,
+      "day_auc": 0.7877019630719602
+     },
+     "language-model pool (60 insiders)": {
+      "user_auc": 0.7563291139240507,
+      "day_auc": 0.7927200792372038
+     }
+    },
+    "0.99": {
+     "q": 85,
+     "pve": 0.9903023675062398,
+     "all 70 insiders": {
+      "user_auc": 0.8030741410488246,
+      "day_auc": 0.7358241624006093
+     },
+     "language-model pool (60 insiders)": {
+      "user_auc": 0.7816455696202531,
+      "day_auc": 0.7367913679709666
+     }
+    }
+   }
+  }
+ },
+ "cpu_s": 609.1140129300001,
+ "wall_s": 299.02400064468384
+}
