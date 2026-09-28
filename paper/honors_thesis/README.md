@@ -19,8 +19,8 @@ Components to Interpretable Sparse Features*. Search the source for `NEW`,
 The removed CTMC chapter and its data-preparation section are preserved verbatim
 in `ctmc_chapter_removed.tex`.
 
-Compiles cleanly with TeX Live 2020 (85 pages as of 2026-09-28, two passes, no
-errors, no undefined references). It needs the seven PCA figure files alongside it. The one
+Compiles cleanly with TeX Live 2020 (53 pages as of 2026-09-28, two passes, no
+errors, no undefined references, no overfull lines). It needs the seven PCA figure files alongside it. The one
 overfull line left is in the original PCA chapter. `thesis_mechinterp_preview.pdf`
 is built in graphicx draft mode, with placeholder frames in place of those
 figures (rebuilt 2026-09-25 after the Chapter V corrections).
@@ -65,3 +65,25 @@ per-class result.
 | evaluation pool 40,519 days, 139 users, 1,309 malicious; 29 / 30 / 1 insiders and 139 / 1,168 / 2 days by scenario | the same metadata joined with `insiders.csv` |
 | rank 16, α 32, dropout 0.05, seven projections; 1 epoch, 22 × 4 GPUs, learning rate 1.5e-4 cosine, 3% warm-up; 3,271 steps | `pkg4_share/adapter/adapter_config.json`, `training_args.bin`, `checkpoint-3271` |
 | the label misalignment note | `docs/LABEL_ALIGNMENT_2026-09-28.md` |
+
+**Restructure of 2026-09-28 (advisor feedback, Dr. Tian).**
+
+- **DFS and GMM removed everywhere:** the abstract, abbreviations, Chapter III and two references.
+  The PCA part now uses PCA, the inverse PCA transformation $\widehat{X} = ZU_q^\top +
+  \mathbf{1}\bar{\mathbf{x}}^\top$ and the reconstruction error, with the per-observation error
+  and the MSE (Chapter II, Section 2.3).
+- **Mini headings removed** in Chapters II to V; only numbered sections remain. Chapter I's
+  template headings are untouched placeholders.
+- **Step-by-step details condensed:**
+  - Chapter II: the seven-step PCA example is now one worked example with a table.
+  - Chapter IV: the four-step softmax walk-through, the coin-flip and count examples, and the
+    six-step decomposition example.
+  - Chapter V: the sparse-coding and attribution toy examples. The causal test is now a numbered
+    six-step list.
+- **Kept:** every definition, derivation and reported result. The Chapter IV and V finding
+  sections are unchanged apart from their subsection headings.
+- **Still to complete** (bold `[To complete: ...]` in the text):
+  - the PCA feature table, $n$, $p$ and $q$;
+  - whether PCA is fit on benign rows only;
+  - which design rules the PCA experiment follows;
+  - the label-alignment note.
