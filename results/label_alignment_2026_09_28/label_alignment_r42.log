@@ -1,0 +1,183 @@
+{
+ "session_day_range": [
+  5,
+  505
+ ],
+ "labelled_malicious_user_days": 1883,
+ "labelled_insiders": 70,
+ "flagged_session_days": 949,
+ "flagged_insiders": 70,
+ "flagged_by_scenario": {
+  "1": {
+   "insiders": 30,
+   "session_days": 68
+  },
+  "2": {
+   "insiders": 30,
+   "session_days": 861
+  },
+  "3": {
+   "insiders": 10,
+   "session_days": 20
+  }
+ },
+ "shift": {
+  "-7": {
+   "flagged_days_matched": 761,
+   "matched_by_scenario": {
+    "1": 0,
+    "2": 761,
+    "3": 0
+   },
+   "joined_malicious_user_days": 1302,
+   "joined_malicious_insiders": 60
+  },
+  "-6": {
+   "flagged_days_matched": 773,
+   "matched_by_scenario": {
+    "1": 0,
+    "2": 773,
+    "3": 0
+   },
+   "joined_malicious_user_days": 1297,
+   "joined_malicious_insiders": 68
+  },
+  "-5": {
+   "flagged_days_matched": 786,
+   "matched_by_scenario": {
+    "1": 3,
+    "2": 783,
+    "3": 0
+   },
+   "joined_malicious_user_days": 1293,
+   "joined_malicious_insiders": 68
+  },
+  "-4": {
+   "flagged_days_matched": 790,
+   "matched_by_scenario": {
+    "1": 3,
+    "2": 787,
+    "3": 0
+   },
+   "joined_malicious_user_days": 1295,
+   "joined_malicious_insiders": 67
+  },
+  "-3": {
+   "flagged_days_matched": 806,
+   "matched_by_scenario": {
+    "1": 4,
+    "2": 802,
+    "3": 0
+   },
+   "joined_malicious_user_days": 1323,
+   "joined_malicious_insiders": 69
+  },
+  "-2": {
+   "flagged_days_matched": 820,
+   "matched_by_scenario": {
+    "1": 8,
+    "2": 812,
+    "3": 0
+   },
+   "joined_malicious_user_days": 1345,
+   "joined_malicious_insiders": 69
+  },
+  "-1": {
+   "flagged_days_matched": 832,
+   "matched_by_scenario": {
+    "1": 18,
+    "2": 814,
+    "3": 0
+   },
+   "joined_malicious_user_days": 1330,
+   "joined_malicious_insiders": 68
+  },
+  "0": {
+   "flagged_days_matched": 842,
+   "matched_by_scenario": {
+    "1": 25,
+    "2": 817,
+    "3": 0
+   },
+   "joined_malicious_user_days": 1309,
+   "joined_malicious_insiders": 60
+  },
+  "1": {
+   "flagged_days_matched": 845,
+   "matched_by_scenario": {
+    "1": 25,
+    "2": 820,
+    "3": 0
+   },
+   "joined_malicious_user_days": 1302,
+   "joined_malicious_insiders": 70
+  },
+  "2": {
+   "flagged_days_matched": 854,
+   "matched_by_scenario": {
+    "1": 28,
+    "2": 826,
+    "3": 0
+   },
+   "joined_malicious_user_days": 1300,
+   "joined_malicious_insiders": 68
+  },
+  "3": {
+   "flagged_days_matched": 857,
+   "matched_by_scenario": {
+    "1": 31,
+    "2": 826,
+    "3": 0
+   },
+   "joined_malicious_user_days": 1303,
+   "joined_malicious_insiders": 67
+  },
+  "4": {
+   "flagged_days_matched": 878,
+   "matched_by_scenario": {
+    "1": 37,
+    "2": 831,
+    "3": 10
+   },
+   "joined_malicious_user_days": 1332,
+   "joined_malicious_insiders": 70
+  },
+  "5": {
+   "flagged_days_matched": 937,
+   "matched_by_scenario": {
+    "1": 56,
+    "2": 861,
+    "3": 20
+   },
+   "joined_malicious_user_days": 1355,
+   "joined_malicious_insiders": 70
+  },
+  "6": {
+   "flagged_days_matched": 891,
+   "matched_by_scenario": {
+    "1": 50,
+    "2": 831,
+    "3": 10
+   },
+   "joined_malicious_user_days": 1334,
+   "joined_malicious_insiders": 68
+  },
+  "7": {
+   "flagged_days_matched": 839,
+   "matched_by_scenario": {
+    "1": 36,
+    "2": 803,
+    "3": 0
+   },
+   "joined_malicious_user_days": 1298,
+   "joined_malicious_insiders": 60
+  }
+ },
+ "best_shift": 5,
+ "currently_joined_days_that_stay_malicious_after_best_shift": 1139,
+ "currently_joined_days": 1309,
+ "true_days_missing_from_current_join": 216
+}
+real 8.67
+user 3.19
+sys 0.23

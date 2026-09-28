@@ -1,0 +1,221 @@
+{
+ "session_day_range": [
+  5,
+  520
+ ],
+ "labelled_malicious_user_days": 99,
+ "labelled_insiders": 5,
+ "flagged_session_days": 34,
+ "flagged_insiders": 5,
+ "flagged_by_scenario": {
+  "1": {
+   "insiders": 1,
+   "session_days": 2
+  },
+  "2": {
+   "insiders": 1,
+   "session_days": 20
+  },
+  "3": {
+   "insiders": 1,
+   "session_days": 2
+  },
+  "4": {
+   "insiders": 1,
+   "session_days": 9
+  },
+  "5": {
+   "insiders": 1,
+   "session_days": 1
+  }
+ },
+ "shift": {
+  "-7": {
+   "flagged_days_matched": 17,
+   "matched_by_scenario": {
+    "1": 0,
+    "2": 10,
+    "3": 0,
+    "4": 7,
+    "5": 0
+   },
+   "joined_malicious_user_days": 70,
+   "joined_malicious_insiders": 4
+  },
+  "-6": {
+   "flagged_days_matched": 18,
+   "matched_by_scenario": {
+    "1": 0,
+    "2": 11,
+    "3": 0,
+    "4": 7,
+    "5": 0
+   },
+   "joined_malicious_user_days": 70,
+   "joined_malicious_insiders": 4
+  },
+  "-5": {
+   "flagged_days_matched": 20,
+   "matched_by_scenario": {
+    "1": 0,
+    "2": 12,
+    "3": 0,
+    "4": 8,
+    "5": 0
+   },
+   "joined_malicious_user_days": 70,
+   "joined_malicious_insiders": 4
+  },
+  "-4": {
+   "flagged_days_matched": 21,
+   "matched_by_scenario": {
+    "1": 0,
+    "2": 13,
+    "3": 0,
+    "4": 8,
+    "5": 0
+   },
+   "joined_malicious_user_days": 69,
+   "joined_malicious_insiders": 4
+  },
+  "-3": {
+   "flagged_days_matched": 22,
+   "matched_by_scenario": {
+    "1": 0,
+    "2": 14,
+    "3": 0,
+    "4": 8,
+    "5": 0
+   },
+   "joined_malicious_user_days": 71,
+   "joined_malicious_insiders": 5
+  },
+  "-2": {
+   "flagged_days_matched": 23,
+   "matched_by_scenario": {
+    "1": 0,
+    "2": 15,
+    "3": 0,
+    "4": 8,
+    "5": 0
+   },
+   "joined_malicious_user_days": 73,
+   "joined_malicious_insiders": 5
+  },
+  "-1": {
+   "flagged_days_matched": 24,
+   "matched_by_scenario": {
+    "1": 1,
+    "2": 15,
+    "3": 0,
+    "4": 8,
+    "5": 0
+   },
+   "joined_malicious_user_days": 72,
+   "joined_malicious_insiders": 5
+  },
+  "0": {
+   "flagged_days_matched": 24,
+   "matched_by_scenario": {
+    "1": 1,
+    "2": 15,
+    "3": 0,
+    "4": 8,
+    "5": 0
+   },
+   "joined_malicious_user_days": 70,
+   "joined_malicious_insiders": 4
+  },
+  "1": {
+   "flagged_days_matched": 25,
+   "matched_by_scenario": {
+    "1": 1,
+    "2": 16,
+    "3": 0,
+    "4": 8,
+    "5": 0
+   },
+   "joined_malicious_user_days": 70,
+   "joined_malicious_insiders": 4
+  },
+  "2": {
+   "flagged_days_matched": 26,
+   "matched_by_scenario": {
+    "1": 1,
+    "2": 17,
+    "3": 0,
+    "4": 8,
+    "5": 0
+   },
+   "joined_malicious_user_days": 70,
+   "joined_malicious_insiders": 4
+  },
+  "3": {
+   "flagged_days_matched": 27,
+   "matched_by_scenario": {
+    "1": 1,
+    "2": 18,
+    "3": 0,
+    "4": 8,
+    "5": 0
+   },
+   "joined_malicious_user_days": 69,
+   "joined_malicious_insiders": 4
+  },
+  "4": {
+   "flagged_days_matched": 28,
+   "matched_by_scenario": {
+    "1": 1,
+    "2": 19,
+    "3": 0,
+    "4": 8,
+    "5": 0
+   },
+   "joined_malicious_user_days": 71,
+   "joined_malicious_insiders": 5
+  },
+  "5": {
+   "flagged_days_matched": 33,
+   "matched_by_scenario": {
+    "1": 2,
+    "2": 20,
+    "3": 1,
+    "4": 9,
+    "5": 1
+   },
+   "joined_malicious_user_days": 73,
+   "joined_malicious_insiders": 5
+  },
+  "6": {
+   "flagged_days_matched": 29,
+   "matched_by_scenario": {
+    "1": 1,
+    "2": 19,
+    "3": 1,
+    "4": 8,
+    "5": 0
+   },
+   "joined_malicious_user_days": 72,
+   "joined_malicious_insiders": 5
+  },
+  "7": {
+   "flagged_days_matched": 27,
+   "matched_by_scenario": {
+    "1": 1,
+    "2": 18,
+    "3": 0,
+    "4": 8,
+    "5": 0
+   },
+   "joined_malicious_user_days": 70,
+   "joined_malicious_insiders": 4
+  }
+ },
+ "best_shift": 5,
+ "currently_joined_days_that_stay_malicious_after_best_shift": 60,
+ "currently_joined_days": 70,
+ "true_days_missing_from_current_join": 13
+}
+real 17.87
+user 16.62
+sys 0.47

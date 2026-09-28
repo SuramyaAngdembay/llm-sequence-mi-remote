@@ -511,3 +511,21 @@ checked against the artifacts; its pooled counts match a recount).
   - The median move is 21% (I2) and 6% (I1) of the full-restoration distance.
   - KKT certificates hold for every accepted token.
 - **Pilot.** Submitted as jobs 20937290 and 20937291, with an atomic lock.
+
+**2026-09-28, DATA-VALIDITY FINDING: the day labels are shifted by five days**
+(`docs/LABEL_ALIGNMENT_2026-09-28.md`).
+
+- **Cause.** `labels_daily` counts days from 2 January 2010, while the session extraction counts
+  from 28 December 2009. Joining on the raw index puts each malicious date's label on the session
+  day five days earlier.
+- **Evidence.** A +5 shift maximizes the overlap with the extraction's own flagged malicious
+  sessions for every scenario of r4.2 (937 of 949 flagged days after the shift, against 842 as
+  joined) and r6.2 (33 of 34, against 24).
+- **r4.2 population as used:** 1,309 days and 60 insiders, including only 1 of the 10
+  scenario-3 insiders.
+- **r4.2 population aligned:** 1,355 days and 70 insiders. Of the days as used, 1,139 of 1,309
+  stay malicious.
+- **r6.2:** 70 days and 4 insiders as used; 73 days and 5 insiders aligned.
+- **Consequence.** Day-level analyses, feature ranking, causal tests, the pilots and H6 all used
+  partly wrong malicious days. User-level scores are unaffected, but the malicious population is
+  not. Nothing has been rerun.
