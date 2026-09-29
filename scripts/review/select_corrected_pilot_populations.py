@@ -14,10 +14,15 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import sys
 from collections import defaultdict
 from pathlib import Path
 
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from cert_calendar_labels import load_label_artifact
+from cert_label_contracts import corrected_cache, eval_index
 
 SALT = 'pilot-calendar-v1-2026-09-28'
 
@@ -37,6 +42,7 @@ def main():
     ap.add_argument('--eval-jsonl', type=Path, required=True)
     ap.add_argument('--score-index', type=Path, required=True)
     ap.add_argument('--metadata', type=Path, required=True, help='corrected metadata (example_id, y, split)')
+    ap.add_argument('--labels', type=Path, required=True, help='verified canonical incident labels')
     ap.add_argument('--confirmation-users', type=Path, required=True)
     ap.add_argument('--insiders', type=Path, required=True)
     ap.add_argument('--per-user', type=int, default=6)
@@ -45,8 +51,11 @@ def main():
     a = ap.parse_args()
     if a.out.exists():
         raise SystemExit(f'refusing to overwrite {a.out}')
-    meta = pd.read_parquet(a.metadata).set_index('example_id')
+    canonical = pd.read_parquet(a.metadata)
     idx = pd.read_parquet(a.score_index).sort_values('example_idx')
+    corrected_cache(idx, canonical, load_label_artifact(a.labels))
+    eval_index(a.eval_jsonl, canonical)
+    meta = canonical.set_index('example_id')
     rows = []
     for i, line in enumerate(a.eval_jsonl.open()):
         r = json.loads(line)

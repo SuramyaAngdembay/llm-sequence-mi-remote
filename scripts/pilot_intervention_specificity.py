@@ -183,6 +183,8 @@ def main() -> None:
     )
 
     t0 = time.time()
+    if args.out_dir.exists():
+        raise ValueError('Use a new output directory; partial runs are not resumable')
     out = ensure_dir(args.out_dir)
     cfg = load_yaml(args.config)
     S = [int(x) for x in args.selected.split(",")]
@@ -203,10 +205,21 @@ def main() -> None:
     pair_of = {a: n for n, (a, b) in enumerate(pairs)} | {b: n for n, (a, b) in enumerate(pairs)}
     ylab = meta["y"].to_dict()
     if args.labels is not None:
-        lab = pd.read_parquet(args.labels).set_index("example_id")["y"]
+        from cert_label_contracts import load_stage_labels
+        if args.insider_file is None:
+            raise ValueError('Corrected pilots require the official insider donor exclusion list')
+        lab = load_stage_labels(args.labels, scores, purpose='target').set_index('example_id')['y']
         ylab = {i: int(lab.loc[meta.loc[i, "example_id"]]) for i in meta.index}
+        label_manifest = json.loads((args.labels.parent / 'labels_manifest.json').read_text())
+        if pops.get('metadata_sha256') != label_manifest.get('metadata_sha256'):
+            raise ValueError('Populations and label bundle use different canonical metadata')
+        if hashlib.sha256((args.data_dir / 'eval.jsonl').read_bytes()).hexdigest() != pops.get('eval_jsonl_sha256'):
+            raise ValueError('Population indices are not bound to this eval JSONL')
+    if not receivers or len(set(receivers)) != len(receivers):
+        raise ValueError('Empty or duplicate pilot receiver')
     for a, b in pairs:
-        assert meta.loc[a, "user_id"] == meta.loc[b, "user_id"] and ylab[a] == 1 and ylab[b] == 0
+        if not (meta.loc[a, "user_id"] == meta.loc[b, "user_id"] and ylab[a] == 1 and ylab[b] == 0):
+            raise ValueError('Receiver pair violates corrected labels or user identity')
     depts = sorted({dept_of(i) for i in receivers})
     donors = {d: [int(x) for x in pops["donor_policy_by_dept"][d]] for d in depts}
     if any(len(v) == 0 for v in donors.values()):
@@ -218,6 +231,8 @@ def main() -> None:
             raise SystemExit(f"donors include official insiders: {bad}")
         if any(ylab[i] != 0 for v in donors.values() for i in v):
             raise SystemExit("a donor day is labelled positive")
+        if any(meta.loc[i, 'split'] != 'val' for v in donors.values() for i in v):
+            raise ValueError('Corrected donor policy requires held-out val users')
 
     cfg_dir = args.frontier_dir / f"layer_{args.layer}" / f"m{args.latent_mult:02d}_k{args.k:02d}"
     ranking = load_ranking(cfg_dir)
@@ -261,6 +276,17 @@ def main() -> None:
         },
         "seed": args.seed,
     }
+    if manifest['conditions'][0] != 'zero' or len(set(manifest['conditions'])) != len(manifest['conditions']):
+        raise ValueError('Conditions must be unique and start with zero')
+    if args.labels is not None:
+        from cert_calendar_labels import VERSION
+        manifest.update(contract='corrected-pilot-v2', label_version=VERSION,
+                        answers_sha256=json.loads((args.labels.parent / 'incident_calendar_labels.manifest.json').read_text())['archive_sha256'],
+                        batch_size=args.batch_size, loss_batch_size=args.loss_batch_size,
+                        balance_semantics='proposed float32 shifts, before hidden-state rounding',
+                        expected_receivers=[{'receiver_idx': int(i), 'receiver_id': meta.loc[i, 'example_id'],
+                                             'user': meta.loc[i, 'user_id'], 'kind': kind[i],
+                                             'pair': pair_of[i], 'y': ylab[i]} for i in receivers])
     (out / "pilot1_manifest.json").write_text(json.dumps(manifest, indent=1) + "\n")
     print(f"[pilot1] {len(pairs)} pairs, {manifest['n_users']} users, depts {depts}", flush=True)
 
@@ -353,8 +379,13 @@ def main() -> None:
         z, delta = Z[i], x[slices[i]]
         if (z[:, S].sum(axis=1) > 0).any():
             recon = dec(z) - delta
-            worst = max(worst, float(np.abs(build("orig_S", i) - (build("rpU_S", i) + recon)).max()))
+            error = float(np.abs(build("orig_S", i) - (build("rpU_S", i) + recon)).max())
+            if not np.isfinite(error):
+                raise ValueError('Nonfinite reconstruction identity residual')
+            worst = max(worst, error)
     validity["orig_equals_residual_plus_reconstruction_max_abs"] = worst
+    if worst > 1e-4:
+        raise ValueError('Reconstruction identity gate failed')
 
     # balance: measured decoded edit sizes and supports, written before any edited scoring
     balance_rows = []
@@ -427,10 +458,13 @@ def main() -> None:
     zero_chk = score_with_token_patches(model, tokenizer, texts[:n_chk], [build("zero", i) for i in receivers[:n_chk]],
                                         class_schema="cert", **kw)[0]
     validity["zero_edit_vs_unhooked_max_abs"] = float(np.abs(np.asarray(zero_chk) - plain).max())
+    alpha_zero = score_with_token_patches(model, tokenizer, texts[:n_chk],
+                                         [build('rpU_S@0', i) for i in receivers[:n_chk]], class_schema='cert', **kw)[0]
+    validity['alpha_zero_vs_unhooked_max_abs'] = float(np.abs(np.asarray(alpha_zero) - plain).max())
     (out / "validity.json").write_text(json.dumps(validity, indent=1) + "\n")
     print(f"[pilot1] validity {json.dumps(validity)}", flush=True)
-    if validity["zero_edit_vs_unhooked_max_abs"] > 1e-5:
-        raise SystemExit("zero edit does not reproduce the unhooked model")
+    from cert_pilot_contracts import validate_validity, complete_run
+    validate_validity(validity, len(receivers))
 
     rows_path = out / "pilot1_rows.csv"
     writer, fh = None, rows_path.open("w", newline="")
@@ -444,10 +478,13 @@ def main() -> None:
         for j, i in enumerate(receivers):
             row = {"condition": cond, "receiver_idx": int(i), "receiver_id": meta.loc[i, "example_id"],
                    "user": meta.loc[i, "user_id"], "kind": kind[i], "pair": pair_of[i], "dept": dept_of(i)}
+            if args.labels is not None:
+                row.update(y=ylab[i], label_version=VERSION)
             for v in VIEWS:
                 row[f"base_{v}"] = float(base_views[v][j])
                 row[f"patched_{v}"] = float(vm[v][j])
                 row[f"delta_{v}"] = float(vm[v][j] - base_views[v][j])
+                row[f'n_targets_{v}'] = int(np.asarray(counts)[j, [names.index(c) for c in tcd.CERT_VIEWS[v]]].sum())
             if writer is None:
                 writer = csv.DictWriter(fh, fieldnames=list(row)); writer.writeheader()
             writer.writerow(row)
@@ -455,6 +492,8 @@ def main() -> None:
         del shifts
         print(f"[pilot1] {cond} done ({time.time() - t0:.0f}s)", flush=True)
     fh.close()
+    if args.labels is not None:
+        complete_run(out)
     print("PILOT1_DONE", flush=True)
 
 

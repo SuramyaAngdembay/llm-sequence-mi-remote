@@ -148,12 +148,8 @@ def main() -> None:
     user_by_example = dict(zip(scores["example_idx"].astype(int), scores["user_id"].astype(str)))
     y_by_example = dict(zip(scores["example_idx"].astype(int), scores["y"].astype(int)))
     if args.labels_override is not None:
-        ov = pd.read_parquet(args.labels_override)
-        if set(ov.example_idx.astype(int)) != set(y_by_example) or ov.example_idx.duplicated().any():
-            raise ValueError("labels override must cover exactly the score index's example_idx values")
-        ids = dict(zip(scores["example_idx"].astype(int), scores["example_id"].astype(str)))
-        if any(ids[int(i)] != str(e) for i, e in zip(ov.example_idx, ov.example_id)):
-            raise ValueError("labels override disagrees with the score index on example_id")
+        from cert_label_contracts import load_stage_labels
+        ov = load_stage_labels(args.labels_override, scores, purpose='target')
         y_by_example = dict(zip(ov.example_idx.astype(int), ov.y.astype(int)))
     negative_users = None
     if args.negative_user_file is not None:

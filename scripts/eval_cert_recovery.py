@@ -54,6 +54,14 @@ def strict_dedup(df: pd.DataFrame):
 
 def score_views(df: pd.DataFrame, kind: str):
     checks = {}
+    numeric = [c for c in df if c.startswith(('loss_sum_', 'n_')) or c.endswith('_nll')]
+    if df.empty or not np.isfinite(df[numeric].to_numpy(float)).all():
+        raise ValueError('Nonfinite score/count input or empty cache')
+    for c in numeric:
+        if c.startswith('n_') and (not df[c].ge(0).all() or not df[c].eq(np.floor(df[c])).all()):
+            raise ValueError(f'Invalid integer count: {c}')
+        if c.startswith('loss_sum_') and not df[c].ge(0).all():
+            raise ValueError(f'Negative loss sum: {c}')
     if kind == 'nll':
         views = {'adapted_nll': df.adapted_nll.to_numpy(float),
                  'base_nll': df.base_nll.to_numpy(float),

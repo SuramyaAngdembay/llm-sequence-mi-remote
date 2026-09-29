@@ -12,6 +12,7 @@ import pandas as pd
 import torch
 
 from remote_common import dump_json, ensure_dir, load_yaml
+from cert_label_contracts import load_stage_labels
 from sae_core import (
     TopKSAE,
     choose_feature_sets,
@@ -57,19 +58,11 @@ def write_benign_only_outputs(cfg_dir: Path, feature_df: pd.DataFrame, eval_stat
 
 
 def override_labels(score_index: pd.DataFrame, path: Path) -> np.ndarray:
-    """Labels used for sampling, from a checked table (example_idx, example_id, y) that covers every example.
+    """Canonical targets from a typed, verified bundle covering the score index.
 
-    Added for the calendar-label review (docs/review/STAGE_B_PROTOCOL_2026-09-28.md): the historical score index
-    keeps its original labels; the override must name exactly the same examples with the same IDs."""
-    ov = pd.read_parquet(path).set_index("example_idx")
-    if set(ov.index) != set(score_index.index) or ov.index.duplicated().any():
-        raise ValueError("labels override must cover exactly the score index's example_idx values")
-    if not (ov.loc[score_index.index, "example_id"].to_numpy() == score_index["example_id"].to_numpy()).all():
-        raise ValueError("labels override disagrees with the score index on example_id")
-    y = ov.loc[score_index.index, "y"].to_numpy(dtype=np.int64)
-    if not np.isin(y, [0, 1]).all():
-        raise ValueError("labels override must be binary")
-    return y
+    Sampling priority has a separate role and cannot enter through this helper.
+    """
+    return load_stage_labels(path, score_index, purpose='target').y.to_numpy(dtype=np.int64)
 
 
 def load_layer_vectors(
@@ -80,11 +73,17 @@ def load_layer_vectors(
     seed: int = 42,
     benign_only: bool = False,
     labels_override: Path | None = None,
+    sampling_policy: bool = False,
 ) -> tuple[np.ndarray, np.ndarray, pd.DataFrame]:
     scores = pd.read_parquet(extract_dir / "example_scores.parquet")
     score_index = scores.sort_values("example_idx").reset_index(drop=True).set_index("example_idx", drop=False)
     if labels_override is not None:
-        score_index["y"] = override_labels(score_index, labels_override)
+        ov = load_stage_labels(labels_override, score_index, purpose='sampling' if sampling_policy else 'target')
+        for c in ('y', 'y_original', 'calendar_date', 'label_version', 'preserve_for_sampling'):
+            if c in ov:
+                score_index[c] = ov[c].to_numpy()
+    if sampling_policy and (labels_override is None or benign_only):
+        raise ValueError('Sampling policy requires its typed bundle and cannot define benign eligibility')
     layer_dir = extract_dir / f"layer_{layer}"
     chunk_paths = sorted(layer_dir.glob("chunk_*.pt"))
     if not chunk_paths:
@@ -116,7 +115,8 @@ def load_layer_vectors(
                 # exclude ALL positive rows: dictionary sees benign users only
                 keep = (labels == 0) & (rng.random(len(idx)) < sample_prob)
             else:
-                keep = (labels > 0) | (rng.random(len(idx)) < sample_prob)
+                preserve = score_index.loc[idx, 'preserve_for_sampling'].to_numpy() if sampling_policy else labels
+                keep = (preserve > 0) | (rng.random(len(idx)) < sample_prob)
             vecs = vecs[keep]
             idx = idx[keep]
             if pos is not None:
@@ -172,8 +172,9 @@ def subsample_rows(
     if max_rows <= 0 or len(x) <= max_rows:
         return x, y, meta
     rng = np.random.default_rng(seed)
-    pos_idx = np.flatnonzero(y > 0)
-    neg_idx = np.flatnonzero(y <= 0)
+    preserve = meta['preserve_for_sampling'].to_numpy() if 'preserve_for_sampling' in meta else y
+    pos_idx = np.flatnonzero(preserve > 0)
+    neg_idx = np.flatnonzero(preserve <= 0)
     if len(pos_idx) >= max_rows:
         chosen = np.sort(rng.choice(pos_idx, size=max_rows, replace=False))
     else:
@@ -265,8 +266,9 @@ def main() -> None:
                     help="train the dictionary on benign rows only (dictionary-level independence)")
     ap.add_argument("--torch-seed", type=int, default=None,
                     help="seed torch (initialisation, shuffling) before each fit; historical runs were unseeded")
+    ap.add_argument('--dictionary-only', action='store_true', help='fit without any label-based ranking; rank separately on discovery')
     ap.add_argument("--labels-override", type=Path, default=None,
-                    help="parquet (example_idx, example_id, y) used instead of the score index's y for sampling")
+                    help="typed target-label bundle replacing historical score labels")
     args = ap.parse_args()
 
     cfg = load_yaml(args.config)
@@ -326,6 +328,19 @@ def main() -> None:
                     epochs=args.epochs,
                     lr=args.lr,
                 )
+                if args.dictionary_only:
+                    cfg_dir = ensure_dir(out_dir / f"layer_{layer}" / f"m{latent_mult:02d}_k{k:02d}")
+                    if (cfg_dir / 'delta_sae_top_features.csv').exists():
+                        raise ValueError('Dictionary-only output has a stale ranking; use a new directory')
+                    torch.save({'state_dict': model.state_dict(), 'layer': layer, 'unit': unit,
+                                'd_in': d_in, 'd_latent': d_latent, 'k': k, 'x_mean': mean, 'x_std': std},
+                               cfg_dir / 'delta_sae_model.pt')
+                    (cfg_dir / RANKING_MARKER_FILE).write_text(json.dumps({
+                        'ranking': 'not_computed', 'reason': 'dictionary-only fit; use discovery-only reselection'}) + '\n')
+                    rows.append({'unit': unit, 'layer': layer, 'latent_mult': latent_mult, 'k': k,
+                                 'n_rows': len(x), 'd_in': d_in, 'd_latent': d_latent,
+                                 'ranking': 'not_computed_dictionary_only', **train_stats})
+                    continue
                 feature_df, eval_stats = evaluate_features(
                     model,
                     x_norm,

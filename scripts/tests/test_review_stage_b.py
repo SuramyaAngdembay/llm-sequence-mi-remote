@@ -20,10 +20,11 @@ def score_index():
         'example_idx', drop=False)
 
 
-def test_override_replaces_labels(tmp_path):
+def test_override_refuses_legacy_unversioned_labels(tmp_path):
     p = tmp_path / 'ov.parquet'
     pd.DataFrame({'example_idx': [2, 0, 1], 'example_id': ['B:1', 'A:1', 'A:2'], 'y': [1, 0, 1]}).to_parquet(p)
-    assert override_labels(score_index(), p).tolist() == [0, 1, 1]
+    with pytest.raises((ValueError, FileNotFoundError)):
+        override_labels(score_index(), p)
 
 
 @pytest.mark.parametrize('frame', [
@@ -34,7 +35,7 @@ def test_override_replaces_labels(tmp_path):
 def test_override_refuses_bad_tables(tmp_path, frame):
     p = tmp_path / 'ov.parquet'
     pd.DataFrame(frame).to_parquet(p)
-    with pytest.raises(ValueError):
+    with pytest.raises((ValueError, FileNotFoundError)):
         override_labels(score_index(), p)
 
 

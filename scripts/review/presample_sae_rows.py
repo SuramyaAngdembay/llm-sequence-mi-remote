@@ -21,7 +21,8 @@ import pandas as pd
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from train_delta_sae_frontier import load_layer_vectors, override_labels, subsample_rows  # noqa: E402
+from train_delta_sae_frontier import load_layer_vectors, subsample_rows  # noqa: E402
+from cert_label_contracts import load_stage_labels
 
 
 def main():
@@ -37,7 +38,8 @@ def main():
         raise SystemExit(f'refusing to overwrite {a.out_dir}')
     t0 = time.time()
     seed = a.seed + a.layer                                   # as the trainer's main()
-    x, y, meta = load_layer_vectors(a.extract_dir, a.layer, max_rows=a.max_rows, seed=seed, labels_override=a.labels_override)
+    x, y, meta = load_layer_vectors(a.extract_dir, a.layer, max_rows=a.max_rows, seed=seed,
+                                  labels_override=a.labels_override, sampling_policy=True)
     n_loaded, pos_loaded = len(x), int((y > 0).sum())
     x, y, meta = subsample_rows(x, y, meta, max_rows=a.max_rows, seed=seed)
     x16 = x.astype(np.float16)
@@ -47,8 +49,9 @@ def main():
     torch.save({'delta': x16, 'example_idx': meta['example_idx'].to_numpy(np.int64),
                 'position': meta['position'].to_numpy(np.int64)}, a.out_dir / f'layer_{a.layer}' / 'chunk_00000.pt')
     scores = pd.read_parquet(a.extract_dir / 'example_scores.parquet').sort_values('example_idx').reset_index(drop=True)
-    si = scores.set_index('example_idx', drop=False)
-    scores['y'] = override_labels(si, a.labels_override)       # the trainer will read these sampling labels
+    ov = load_stage_labels(a.labels_override, scores, purpose='sampling')
+    for c in ('y', 'y_original', 'calendar_date', 'label_version', 'preserve_for_sampling'):
+        scores[c] = ov[c].to_numpy()
     scores.to_parquet(a.out_dir / 'example_scores.parquet', index=False)
     pd.DataFrame([{'layer': a.layer, 'chunk_id': 0, 'path': str(a.out_dir / f'layer_{a.layer}' / 'chunk_00000.pt'),
                    'rows': len(x), 'd_model': x.shape[1], 'unit': 'token'}]).to_csv(a.out_dir / 'chunk_manifest.csv', index=False)

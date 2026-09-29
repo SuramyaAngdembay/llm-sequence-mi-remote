@@ -457,12 +457,16 @@ def load_eval_examples(data_dir: Path, scores: pd.DataFrame) -> pd.DataFrame:
             "text": ex["text"],
         }
         row.update(flatten_context(ex.get("context", {})))
+        if 'label_version' in ex:
+            row['label_version'] = ex['label_version']
         meta_rows.append(row)
     meta = pd.DataFrame(meta_rows).sort_values("example_idx").reset_index(drop=True)
     if not np.array_equal(meta["example_idx"].to_numpy(), scores["example_idx"].to_numpy()):
         raise ValueError("JSONL/example_scores example_idx mismatch")
     if not np.array_equal(meta["example_id"].astype(str).to_numpy(), scores["example_id"].astype(str).to_numpy()):
         raise ValueError("JSONL/example_scores example_id mismatch")
+    from cert_label_contracts import align_eval_label_state
+    meta = align_eval_label_state(meta, scores)
     merged = pd.concat(
         [
             meta,

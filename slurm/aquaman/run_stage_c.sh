@@ -2,18 +2,24 @@
 # Stage B.C + C on Aquaman (protocol amendment A1). Runs after the two extraction shards finish.
 # Each step is timed (/usr/bin/time -v); a failing step or gate stops the chain.
 set -euo pipefail
+# The 2026-09-29 label handoff holds causal execution until cached/live states
+# and realized (post-rounding) edits are checked. Do not remove this guard just
+# because the label tests pass. See docs/review/LABEL_PIPELINE_REPAIR_2026-09-29.md.
+echo 'Stage C held: label repairs do not complete live-state and realized-edit validation.' >&2
+exit 78
 W=/data/suramya/cert_review_20260928
 cd "$W/repo_c"; echo "commit $(cat REVIEW_COMMIT)"
 source ~/cert-venv/bin/activate
 export HF_HOME=/data/suramya/insider_mi/hf_cache HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True TOKENIZERS_PARALLELISM=false CUDA_VISIBLE_DEVICES=${GPU:-0}
-L="$W/labels_v1"; X="$W/aquaman_l26_v1/merged"; F="$W/stage_c/frontier_calendar_v1"; FS="$W/stage_c/frontier_calendar_v1_selected"
+L="$W/labels_v2"; X="$W/aquaman_l26_v1/merged"; F="$W/stage_c/frontier_calendar_v1"; FS="$W/stage_c/frontier_calendar_v1_selected"
 mkdir -p "$W/stage_c"
 step() { echo "=== [$(date -Is)] $1"; }
 T="/usr/bin/time -v"
 
 step "merge shards"
-[ -d "$X" ] || $T python scripts/review/merge_delta_shards.py --shards "$W/aquaman_l26_v1/shard_a" "$W/aquaman_l26_v1/shard_b" --out-dir "$X"
+$T python scripts/review/merge_delta_shards.py --shards "$W/aquaman_l26_v1/shard_a" "$W/aquaman_l26_v1/shard_b" \
+  --eval-jsonl "$W/data_r42/eval.jsonl" --labels "$L/ranking_labels_v1.parquet" --out-dir "$X"
 
 step "presample dictionary rows"
 $T python scripts/review/presample_sae_rows.py --extract-dir "$X" --labels-override "$L/sampling_labels_v1.parquet" \
@@ -22,7 +28,7 @@ $T python scripts/review/presample_sae_rows.py --extract-dir "$X" --labels-overr
 step "dictionary fit (8,192 features, k=4, 20 epochs, seed 42)"
 $T python scripts/train_delta_sae_frontier.py --config configs/token_delta_sae_frontier.yaml \
   --extract-dir "$W/stage_c/presampled_l26" --out-dir "$F" --device cuda --batch-size 4096 --epochs 20 \
-  --layers 26 --max-rows 2000000 --latent-multipliers 2 --topk 4 --seed 42 --torch-seed 42
+  --layers 26 --max-rows 2000000 --latent-multipliers 2 --topk 4 --seed 42 --torch-seed 42 --dictionary-only
 
 step "ranking: discovery positives vs held-out benign negatives"
 $T python scripts/reselect_token_sae_features.py --extract-dir "$X" --data-dir "$W/data_r42" \

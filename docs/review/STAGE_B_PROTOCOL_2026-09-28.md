@@ -1,5 +1,11 @@
 # Stage B/C protocol: corrected scoring reference, coverage repair, dictionary, selection and pilot
 
+**2026-09-29 implementation correction:** see
+[LABEL_PIPELINE_REPAIR_2026-09-29.md](LABEL_PIPELINE_REPAIR_2026-09-29.md).
+The labels-v2 bundle separates true targets from sampling priority, repairs the
+completion writer, and requires complete validated pilot output. Stage C is held
+pending live-state/realized-edit checks. No population split or endpoint changed.
+
 **Frozen 2026-09-28, before building any corrected population or scoring any edit.**
 Code: branch `review/cert-independent-20260928`. The commit hash of this protocol's
 implementation is recorded in each job's manifest. No rule below may change after a result
@@ -77,7 +83,11 @@ It is **not** a test of attack specificity, a complete circuit, or a profile mec
   the first 5 go to discovery and the rest to confirmation.
 - **Exposure disclosure.** The 30 historical confirmation users were inspected in Package 4,
   Pilots 1–4 and H6, so they are **not a fresh scientific holdout**. The 5 new confirmation users
-  are unexposed, and their results are also reported separately (descriptive, 5 users).
+  are **newly included positive users**, and their results are reported separately
+  (descriptive, 5 users). They are not an unexposed holdout: BBS0039, GTD0219 and
+  JLM0364 appeared as historical Pilot 1 donors. Their inputs also entered previous
+  extraction/dictionary work. The new dictionary fit is transductive: it sees
+  confirmation inputs without using their positive labels for preservation/ranking.
 
 ## 5. Feature ranking and controls
 
@@ -137,7 +147,7 @@ bootstrap, 10,000 draws, seed 42):
   - the dose ratio `rpU_S@0.5` / `rpU_S@1`.
 - **Diagnostics, named separately:** full and profile_only deltas for every condition; edit
   norms and supports (`edit_balance.json`); share of receivers with any edit.
-- **Heterogeneity:** per user, by scenario, and fresh vs exposed confirmation users.
+- **Heterogeneity:** per user, by scenario, and newly included positive vs previously positive confirmation users.
 
 **Interpretation rules.**
 - Report every estimate with its interval, including nulls, harmful signs and heterogeneity.
