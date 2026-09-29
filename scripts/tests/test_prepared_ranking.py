@@ -19,12 +19,12 @@ def test_preparation_and_ranking_cli_preserve_features_exactly(tmp_path):
     raw,canonical,_=write_bundle(labels)
     negatives=tmp_path/'negative.txt'; negatives.write_text('BEN0001\n')
     extract=tmp_path/'extract'; (extract/'layer_26').mkdir(parents=True)
-    raw.to_parquet(extract/'example_scores.parquet',index=False)
+    raw.assign(n_tokens=40).to_parquet(extract/'example_scores.parquet',index=False)
     (extract/'COMPLETED.json').write_text('{"status":"complete"}')
     rng=np.random.default_rng(8)
-    for chunk in range(2):
-        idx=np.repeat(np.arange(3),40); pos=np.tile(np.arange(40)+chunk*40,3)
-        torch.save({'delta':rng.normal(size=(120,4)).astype(np.float16),'example_idx':idx,'position':pos},
+    for chunk in range(3):
+        idx=np.full(40,chunk); pos=np.arange(40)
+        torch.save({'delta':rng.normal(size=(40,4)).astype(np.float16),'example_idx':idx,'position':pos},
                    extract/'layer_26'/f'chunk_{chunk:05d}.pt')
     source=tmp_path/'source'; cfg=source/'layer_26/m02_k02'; cfg.mkdir(parents=True)
     torch.manual_seed(3); model=TopKSAE(4,8,2)
@@ -53,3 +53,16 @@ def test_preparation_and_ranking_cli_preserve_features_exactly(tmp_path):
     with pytest.raises(ValueError,match='contract'): load_prepared_rows(prep,{'changed':True})
     with (prep/'y.npy').open('ab') as f: f.write(b'bad')
     with pytest.raises(ValueError,match='checksum'): load_prepared_rows(prep,done['binding'])
+
+
+def test_ranking_retry_keeps_failed_compute_charge_and_rejects_other_failures():
+    sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'review'))
+    from run_validated_causal_phase import resume_charge
+    prior={'status':'failed','state_validation_charged_seconds':348.,'gpu_wall_seconds_charged':4348.,
+           'steps':[{'name':'dictionary','status':'complete','returncode':0,'seconds':2792.},
+                    {'name':'ranking','status':'failed','returncode':124,'seconds':1208.}]}
+    assert resume_charge(prior)==4348.
+    prior['gpu_wall_seconds_charged']-=1208.
+    with pytest.raises(ValueError,match='accounting'): resume_charge(prior)
+    prior['gpu_wall_seconds_charged']=4348.; prior['steps'][1]['returncode']=1
+    with pytest.raises(ValueError,match='eligible'): resume_charge(prior)

@@ -22,6 +22,21 @@ def read(p): return json.loads(Path(p).read_text())
 def write(p, value): Path(p).write_text(json.dumps(value, indent=2, allow_nan=False)+'\n')
 
 
+def resume_charge(prior):
+    """Only reuse a completed dictionary after the known ranking timeout."""
+    import math
+    steps=prior.get('steps',[])
+    if (prior.get('status')!='failed' or [s.get('name') for s in steps]!=['dictionary','ranking']
+            or steps[0].get('status')!='complete' or steps[0].get('returncode')!=0
+            or steps[1].get('status')!='failed' or steps[1].get('returncode')!=124):
+        raise ValueError('This plan is not an eligible dictionary reuse/ranking retry')
+    used=float(prior['gpu_wall_seconds_charged'])
+    recomputed=float(prior['state_validation_charged_seconds'])+sum(float(s['seconds']) for s in steps)
+    if not math.isfinite(used) or not 0<used<8100 or abs(used-recomputed)>1e-6:
+        raise ValueError('Prior compute accounting does not reproduce')
+    return used
+
+
 def gpu_free():
     uuid=subprocess.check_output(['nvidia-smi','-i','0','--query-gpu=uuid','--format=csv,noheader'],text=True).strip()
     rows=subprocess.check_output(['nvidia-smi','--query-compute-apps=gpu_uuid,pid','--format=csv,noheader'],text=True)
@@ -34,6 +49,8 @@ def main():
     ap.add_argument('--work-dir',type=Path,required=True)
     ap.add_argument('--phase-dir',type=Path,required=True)
     ap.add_argument('--run-tag',default='v1',help='new plan name; partial GPU outputs still cannot be resumed')
+    ap.add_argument('--reuse-dictionary-after-plan',type=Path,default=None)
+    ap.add_argument('--prepared-ranking-dir',type=Path,default=None)
     a=ap.parse_args(); w=a.work_dir; p=a.phase_dir
     if not a.run_tag.isalnum(): raise ValueError('run-tag must be alphanumeric')
     repo=Path(__file__).resolve().parents[2]
@@ -41,7 +58,11 @@ def main():
     if plan_path.exists(): raise ValueError('This execution plan already exists; do not resume implicitly')
     live=p/'live_states_b1_v2'; sample=p/'presampled_l26'; x=w/'aquaman_l26_v1/merged_calendar_v2'
     labels=w/'labels_v2'; frontier=p/'frontier_v1'; selected=p/'frontier_selected_v1'
-    for directory in (frontier,selected,p/'engineering_pilot_v1',p/'full_pilot_v1'):
+    reuse=a.reuse_dictionary_after_plan is not None
+    if reuse != (a.prepared_ranking_dir is not None): raise ValueError('Dictionary reuse requires prepared ranking rows')
+    if reuse: selected=p/'frontier_selected_v2'
+    outputs=[selected,p/'engineering_pilot_v1',p/'full_pilot_v1']+([] if reuse else [frontier])
+    for directory in outputs:
         if directory.exists(): raise ValueError(f'Refusing existing output: {directory}')
     verification=read(p/'verify_live_scoring_v1.json')
     comparison=read(p/'cache_comparison_v1/COMPLETED.json')
@@ -52,7 +73,12 @@ def main():
     # Charge 60s conservatively for the failed capture, whose last error log was
     # at 12.3s. Other state checks carry their measured wall times plus startup.
     used=60.+read(live/'COMPLETED.json')['seconds']+verification['seconds']+10.
-    plan={'started_at_epoch':time.time(),'gpu_wall_cap_seconds':8100,'state_validation_charged_seconds':used,
+    state_charge=used
+    if reuse:
+        prior=read(a.reuse_dictionary_after_plan)
+        used=resume_charge(prior)
+    plan={'started_at_epoch':time.time(),'gpu_wall_cap_seconds':8100,'state_validation_charged_seconds':state_charge,
+          'initial_gpu_wall_seconds_charged':used,
           'code_directory':str(repo),'code_sha256':{str(f.relative_to(repo)):file_sha256(f)
           for folder in ('scripts','configs') for f in sorted((repo/folder).rglob('*'))
           if f.is_file() and f.suffix in ('.py','.yaml')},
@@ -62,6 +88,11 @@ def main():
           'caps':{'dictionary':4500,'ranking':1200,'engineering':600,'full':3600},
           'full_budget_rule':'at most 60 minutes, remaining total envelope, and sufficient predicted runtime',
           'steps':[],'status':'waiting_for_preparation'}
+    if reuse:
+        for name,digest in prior['input_sha256'].items():
+            if file_sha256(Path(name))!=digest: raise ValueError(f'Prior phase input changed: {name}')
+        plan.update(prior_plan_sha256=file_sha256(a.reuse_dictionary_after_plan),prior_plan=str(a.reuse_dictionary_after_plan))
+        plan['caps']['ranking']=900
     write(plan_path,plan)
     env=dict(os.environ,CUDA_VISIBLE_DEVICES='0',HF_HOME='/data/suramya/insider_mi/hf_cache',HF_HUB_OFFLINE='1',
              TRANSFORMERS_OFFLINE='1',PYTORCH_CUDA_ALLOC_CONF='expandable_segments:True',TOKENIZERS_PARALLELISM='false',
@@ -75,7 +106,7 @@ def main():
         rec={'name':name,'command':command,'started_at_epoch':time.time(),'wall_cap_seconds':seconds,'status':'running'}
         plan['steps'].append(rec); plan['status']=name; write(plan_path,plan)
         start=time.monotonic()
-        with (p/(name+'.log')).open('x') as log:
+        with (p/(name+('_retry' if reuse and name=='ranking' else '')+'.log')).open('x') as log:
             child=subprocess.Popen(command,cwd=repo,env=env,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
             rec['pid']=child.pid; write(plan_path,plan)
             try: code=child.wait(timeout=seconds)
@@ -102,11 +133,12 @@ def main():
             if file_sha256(sample/name)!=digest: raise ValueError(f'Sampled input checksum failed: {name}')
         if read(sample/'presample_report.json')['rows_written']!=2000000: raise ValueError('Unexpected dictionary size')
         plan['input_sha256'][str(sample/'COMPLETED.json')]=file_sha256(sample/'COMPLETED.json'); write(plan_path,plan)
-        mem={s.split(':')[0]:int(s.split()[1]) for s in Path('/proc/meminfo').read_text().splitlines()}
-        if mem['MemAvailable']<72*1024**2: raise RuntimeError('Less than 72 GiB RAM available for the frozen dictionary fit')
-        step('dictionary',4500,['scripts/train_delta_sae_frontier.py','--config','configs/token_delta_sae_frontier.yaml',
-             '--extract-dir',sample,'--out-dir',frontier,'--device','cuda','--batch-size',4096,'--epochs',20,
-             '--layers',26,'--max-rows',2000000,'--latent-multipliers',2,'--topk',4,'--seed',42,'--torch-seed',42,'--dictionary-only'])
+        if not reuse:
+            mem={s.split(':')[0]:int(s.split()[1]) for s in Path('/proc/meminfo').read_text().splitlines()}
+            if mem['MemAvailable']<72*1024**2: raise RuntimeError('Less than 72 GiB RAM available for the frozen dictionary fit')
+            step('dictionary',4500,['scripts/train_delta_sae_frontier.py','--config','configs/token_delta_sae_frontier.yaml',
+                 '--extract-dir',sample,'--out-dir',frontier,'--device','cuda','--batch-size',4096,'--epochs',20,
+                 '--layers',26,'--max-rows',2000000,'--latent-multipliers',2,'--topk',4,'--seed',42,'--torch-seed',42,'--dictionary-only'])
         import torch
         import numpy as np
         model_path=frontier/'layer_26/m02_k04/delta_sae_model.pt'
@@ -115,13 +147,27 @@ def main():
         if not all(torch.isfinite(v).all() for v in bundle['state_dict'].values()): raise ValueError('Nonfinite SAE weights')
         if not all(np.isfinite(bundle[k]).all() for k in ('x_mean','x_std')): raise ValueError('Nonfinite SAE normalization')
         del bundle
-        write(frontier/'COMPLETED.json',{'status':'complete','model_sha256':file_sha256(model_path),
-              'sample_manifest_sha256':file_sha256(sample/'COMPLETED.json'),'execution_plan':str(plan_path)})
-        step('ranking',1200,['scripts/reselect_token_sae_features.py','--extract-dir',x,'--data-dir',w/'data_r42',
+        if reuse:
+            completed=read(frontier/'COMPLETED.json')
+            if (completed.get('status')!='complete' or completed['model_sha256']!=file_sha256(model_path)
+                    or completed['sample_manifest_sha256']!=file_sha256(sample/'COMPLETED.json')
+                    or completed['execution_plan']!=str(a.reuse_dictionary_after_plan)):
+                raise ValueError('Completed dictionary provenance mismatch')
+            deadline=read(p/'ranking_prepare_v1_launch.json')['started_epoch']+2700
+            while not (a.prepared_ranking_dir/'COMPLETED.json').exists():
+                if time.time()>deadline: raise RuntimeError('CPU ranking preparation exceeded its 45-minute bound')
+                time.sleep(10)
+            plan['input_sha256'][str(a.prepared_ranking_dir/'COMPLETED.json')]=file_sha256(a.prepared_ranking_dir/'COMPLETED.json')
+            write(plan_path,plan)
+        else:
+            write(frontier/'COMPLETED.json',{'status':'complete','model_sha256':file_sha256(model_path),
+                  'sample_manifest_sha256':file_sha256(sample/'COMPLETED.json'),'execution_plan':str(plan_path)})
+        step('ranking',900 if reuse else 1200,['scripts/reselect_token_sae_features.py','--extract-dir',x,'--data-dir',w/'data_r42',
              '--frontier-dir',frontier,'--out-frontier-dir',selected,'--layer',26,'--latent-mult',2,'--k',4,
              '--discovery-user-file',labels/'discovery_users_v1.txt','--negative-user-file',labels/'negative_users_v1.txt',
              '--labels-override',labels/'ranking_labels_v1.parquet','--benign-sample-prob',.25,'--batch-size',8192,
-             '--device','cuda','--seed',42,'--active-control-min-frac',.002])
+             '--device','cuda','--seed',42,'--active-control-min-frac',.002]+
+             (['--prepared-rows-dir',a.prepared_ranking_dir] if reuse else []))
         ranking=read(selected/'layer_26/m02_k04/reselect_summary.json')
         features=ranking['feature_sets']
         if len(features['top5'])!=5 or len(features['control5_active'])!=5: raise ValueError('Missing frozen feature sets')

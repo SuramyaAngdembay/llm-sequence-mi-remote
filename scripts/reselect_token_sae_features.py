@@ -174,6 +174,24 @@ def load_prepared_rows(root, binding):
     return x,y,users,m
 
 
+def validate_prepared_population(root, scores, y_by_example, discovery, negatives, probability, seed):
+    """Independent row-grid/RNG reconstruction from validated token counts."""
+    scores=scores.sort_values('example_idx').reset_index(drop=True)
+    if not np.array_equal(scores.example_idx,np.arange(len(scores))): raise ValueError('Noncontiguous source index')
+    counts=scores.n_tokens.to_numpy(np.int64); offsets=np.r_[0,np.cumsum(counts)]
+    ids=np.repeat(scores.example_idx.to_numpy(),counts)
+    y=np.array([y_by_example[i] for i in scores.example_idx],dtype=np.int8)
+    pos=np.repeat((y>0)&scores.user_id.isin(discovery).to_numpy(),counts)
+    neg=np.repeat((y==0)&scores.user_id.isin(negatives).to_numpy(),counts)
+    if probability<1.: neg &= np.random.default_rng(seed).random(len(ids))<probability
+    chosen=np.flatnonzero(pos|neg)
+    expected_ids=ids[chosen]; expected_positions=chosen-offsets[expected_ids]
+    with np.load(Path(root)/'row_indices.npz') as z:
+        if not np.array_equal(z['example_idx'],expected_ids) or not np.array_equal(z['position'],expected_positions):
+            raise ValueError('Prepared ranking differs from independently reconstructed selection')
+    return {'ordered_row_grid_exact':True,'rows':len(chosen),'positive_rows':int(pos[chosen].sum())}
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--extract-dir", type=Path, required=True)
@@ -245,6 +263,8 @@ def main() -> None:
     binding=prepared_binding(args,src_cfg) if args.prepare_only_dir is not None or args.prepared_rows_dir is not None else None
     if args.prepared_rows_dir is not None:
         x_all,y_all,users_all,prepared=load_prepared_rows(args.prepared_rows_dir,binding)
+        population_audit=validate_prepared_population(args.prepared_rows_dir,scores,y_by_example,
+                            early_positive,early_negative,args.benign_sample_prob,args.seed)
         with np.load(args.prepared_rows_dir/'row_indices.npz') as identities:
             idx=identities['example_idx']
             if (len(idx)!=len(y_all) or not np.array_equal(y_all,[y_by_example[int(i)] for i in idx])
@@ -361,6 +381,7 @@ def main() -> None:
             "feature_sets": {k: [int(i) for i in v] for k, v in feature_sets.items()},
             "feature_set_criteria": criteria,
             'prepared_rows_manifest_sha256':_sha256(args.prepared_rows_dir/'COMPLETED.json') if args.prepared_rows_dir else None,
+            'prepared_population_independent_audit':population_audit if args.prepared_rows_dir else None,
         }
         (dst_cfg / "reselect_summary.json").write_text(json.dumps(summary, indent=2))
         print(f"[fold {fold_file.name}] top5={feature_sets['top5']}", flush=True)
