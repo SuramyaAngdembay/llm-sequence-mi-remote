@@ -92,9 +92,9 @@ def main():
         if code: raise RuntimeError(f'{name} failed with exit {code}; dependent jobs remain held')
 
     try:
-        deadline=read(p/'presample_launch.json')['started_epoch']+2700
+        deadline=read(p/'presample_launch.json')['started_epoch']+3600
         while not (sample/'COMPLETED.json').exists():
-            if time.time()>deadline: raise RuntimeError('CPU preparation exceeded its existing 45-minute bound')
+            if time.time()>deadline: raise RuntimeError('CPU preparation exceeded its amended 60-minute bound')
             time.sleep(10)
         done=read(sample/'COMPLETED.json')
         if done.get('status')!='complete': raise ValueError('Incomplete dictionary sample')

@@ -96,3 +96,17 @@ def test_ranking_early_filter_preserves_original_random_sample(tmp_path):
                         eligible_negative_users={'negative'},load_stats=stats,**kw)
     np.testing.assert_array_equal(a,want); np.testing.assert_array_equal(b,wy)
     assert set(c)=={'discovery','negative'} and stats['positive_rows_dropped']==60
+
+
+def test_pilot_view_aggregation_preserves_float32_class_sum_identity():
+    from pilot_intervention_specificity import view_means
+    from token_class_decomposition import CERT_CLASSES, CERT_VIEWS
+    rng=np.random.default_rng(8)
+    sums=rng.uniform(0,10000,(40,len(CERT_CLASSES))).astype(np.float32)
+    counts=rng.integers(1,400,(40,len(CERT_CLASSES))).astype(np.float32)
+    names=list(CERT_CLASSES)
+    views=view_means(sums,counts,names)
+    n={v:counts[:,[names.index(c) for c in CERT_VIEWS[v]]].astype(np.float64).sum(1)
+       for v in ('full','profile_only','behavior_only')}
+    recombined=(views['profile_only']*n['profile_only']+views['behavior_only']*n['behavior_only'])/n['full']
+    np.testing.assert_allclose(views['full'],recombined,rtol=1e-12,atol=1e-12)

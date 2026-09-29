@@ -46,7 +46,10 @@ in dictionary training: results are exploratory and transductive.
 
 ## Compute envelope for this phase
 
-Aquaman only; one GPU at a time. CPU preparation has a 45-minute wall cap. The
+Aquaman only; one GPU at a time. CPU preparation initially had a 45-minute wall cap;
+it was extended to 60 minutes during serialization after all rows had been selected,
+before any dictionary or intervention outcome. This avoids repeating the source
+read and makes no sampling change. The
 new GPU work has a total 135-minute cap (2.25 RTX GPU-hours), including failures:
 state checks/refresh up to 10 minutes, dictionary fit 75, ranking 20, engineering
 pilot 10, and a gated full pilot 20. Stop dependent work on any failed gate.

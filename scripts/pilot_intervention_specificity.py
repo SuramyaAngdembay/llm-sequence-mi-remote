@@ -133,6 +133,11 @@ def edit_stats(shift: np.ndarray, classes: Sequence[str]) -> Dict[str, float]:
 
 def view_means(sums: np.ndarray, counts: np.ndarray, names: Sequence[str]) -> Dict[str, np.ndarray]:
     import token_class_decomposition as tcd
+    # The scorer accumulates class sums in float32. Aggregate those *same*
+    # values in float64 so profile/behavior/full CSV means retain their exact
+    # weighted identity, rather than adding a second float32 rounding step.
+    sums = np.asarray(sums, dtype=np.float64)
+    counts = np.asarray(counts, dtype=np.float64)
     idx = {n: i for i, n in enumerate(names)}
     out = {}
     for v in VIEWS:
