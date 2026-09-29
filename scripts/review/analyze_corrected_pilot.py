@@ -54,10 +54,18 @@ def main():
     ap.add_argument('--answers', type=Path, required=True, help='official answers.tar.bz2 (scenario per insider)')
     ap.add_argument('--newly-included-users', default='GTD0219,CSC0217,BBS0039,JGT0221,JLM0364')
     ap.add_argument('--out', type=Path, required=True)
+    ap.add_argument('--implementation-diagnostic', action='store_true',
+                    help='Separately named post-run diagnostic; preserves and reports the failed global gate. Does not clear a scientific claim.')
     a = ap.parse_args()
     if a.out.exists():
         raise ValueError('Refusing to overwrite an analysis')
-    rows, man, validity, bal = load_validated_run(a.run_dir)
+    rows, man, validity, bal = load_validated_run(a.run_dir, require_causal_validity=not a.implementation_diagnostic)
+    implementation_audit = None
+    if a.implementation_diagnostic:
+        if man.get('contract') != 'corrected-pilot-v3' or man.get('engineering_only') is not False:
+            raise ValueError('Implementation diagnostics require complete full-cohort v3 measurements')
+        from pilot_endpoint_audit import endpoint_implementation_audit
+        implementation_audit = endpoint_implementation_audit(rows, pd.read_parquet(a.run_dir/'realized_token_edits.parquet'))
     if man.get('answers_sha256') != file_sha256(a.answers):
         raise ValueError('Scenario archive differs from the canonical label source')
     with tarfile.open(a.answers, 'r:bz2') as t:
@@ -85,6 +93,12 @@ def main():
     res = {'run_dir': str(a.run_dir), 'manifest_conditions': conds, 'conditions_missing': missing, 'validity': validity,
            'n_attack_receivers': int(len(att)), 'n_window_negative_receivers': int(len(neg)), 'n_users': len(users),
            'draws': DRAWS, 'seed': SEED, 'endpoints': {}, 'secondary': {}, 'conditions': {}, 'heterogeneity': {}}
+    if implementation_audit is not None:
+        res.update(analysis_class='post-run implementation diagnostic', scientific_claim_cleared=False,
+                   implementation_dependency_audit=implementation_audit,
+                   provenance={'completed_run_sha256': file_sha256(a.run_dir/'COMPLETED.json'),
+                               'analysis_script_sha256': file_sha256(Path(__file__)),
+                               'dependency_audit_script_sha256': file_sha256(Path(__file__).resolve().parents[1]/'pilot_endpoint_audit.py')})
     E = res['endpoints']
     E['primary rpU_S - randI_S (attack)'] = ep(att, lambda f: f['rpU_S'] - f['randI_S'])
     E['co-primary rpU_S - rpU_C (attack)'] = ep(att, lambda f: f['rpU_S'] - f['rpU_C'])
@@ -131,7 +145,14 @@ def main():
     res['scope'] = 'Exploratory transductive analysis; newly included users are not an unexposed holdout. Edit balance measures proposed shifts.'
     if man['contract'] == 'corrected-pilot-v3':
         res['implementation_validation'] = json.loads((a.run_dir/'implementation_validation.json').read_text())
-        res['scope'] += ' Live pre-edit states matched exactly; realized random-control token support matched, with per-token norms within the declared 5% tolerance. This tolerance is not exact dose equivalence.'
+        if implementation_audit is not None:
+            res['scope'] += (' Post-run diagnostic analysis: the original global validity status is retained in '
+                'implementation_validation and the dependency audit. No rows, endpoints, feature sets, '
+                'bootstrap settings or matching tolerances changed. Locally passing dependencies do not '
+                'retroactively pass the original protocol. The failed control remains included and flagged; '
+                'no scientific claim is cleared by this report.')
+        else:
+            res['scope'] += ' Live pre-edit states matched exactly; realized random-control token support matched, with per-token norms within the declared 5% tolerance. This tolerance is not exact dose equivalence.'
     else:
         res['scope'] += ' Live-state/realized-edit validation is separate and is not established by this v2 output.'
     a.out.write_text(json.dumps(res, indent=1, allow_nan=False) + '\n')

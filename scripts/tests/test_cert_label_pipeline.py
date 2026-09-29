@@ -297,6 +297,62 @@ def scenario_archive(path):
         tar.addfile(member, io.BytesIO(data))
 
 
+@pytest.mark.parametrize('engineering,matched', [(False,False),(False,True),(True,False)])
+def test_explicit_diagnostic_keeps_global_failure_and_existing_estimates(tmp_path,engineering,matched):
+    from intervention_audit import check_realized_controls
+    root=Path(__file__).resolve().parents[2]
+    rows,man,val,bal=write_pilot(tmp_path)
+    rows=pd.concat([rows,rows[rows.condition=='randI_C'].assign(condition='randD_C')],ignore_index=True)
+    bal=pd.concat([bal,bal[bal.condition=='randI_C'].assign(condition='randD_C')],ignore_index=True)
+    man['conditions'].append('randD_C')
+    man.update(contract='corrected-pilot-v3',batch_size=1,full_logits_max_gib=0.,
+        live_state_manifest_sha256='a'*64,engineering_only=engineering,realized_control_relative_tolerance=.05)
+    parts=[]
+    for r in rows.itertuples():
+        for position in range(11):
+            n=0. if r.condition=='zero' else 1.
+            if not matched and r.receiver_idx==1 and r.condition=='randD_S' and position==2: n=1.1
+            parts.append(dict(condition=r.condition,receiver_idx=r.receiver_idx,position=position,
+                requested_l2=n,cast_l2=n,realized_l2=n,realization_error_l2=0.,
+                requested_nonzero_coordinates=int(n>0),realized_nonzero_coordinates=int(n>0),requested_dot_realized=n*n))
+    tokens=pd.DataFrame(parts)
+    gate=check_realized_controls(tokens)
+    gate.update(live_pre_edit_states_exact=True,checked_receiver_conditions=len(rows),engineering_only=engineering)
+    tokens.to_parquet(tmp_path/'realized_token_edits.parquet',index=False)
+    (tmp_path/'implementation_validation.json').write_text(json.dumps(gate))
+    answers=tmp_path/'answers.tar.bz2'; scenario_archive(answers)
+    man['answers_sha256']=file_sha256(answers)
+    (tmp_path/'pilot1_manifest.json').write_text(json.dumps(man))
+    rows.to_csv(tmp_path/'pilot1_rows.csv',index=False); bal.to_csv(tmp_path/'edit_balance_rows.csv',index=False)
+    complete_run(tmp_path)
+    common=[sys.executable,str(root/'scripts/review/analyze_corrected_pilot.py'),'--run-dir',str(tmp_path),
+            '--answers',str(answers)]
+    default=tmp_path/'default.json'
+    result=subprocess.run(common+['--out',str(default)],capture_output=True,text=True)
+    assert (result.returncode==0)==(matched and not engineering)
+    out=tmp_path/'diagnostic.json'
+    result=subprocess.run(common+['--out',str(out),'--implementation-diagnostic'],capture_output=True,text=True)
+    if engineering:
+        assert result.returncode!=0 and not out.exists()
+    else:
+        assert result.returncode==0,result.stderr
+        diagnostic=json.loads(out.read_text())
+        assert not diagnostic['scientific_claim_cleared']
+        assert diagnostic['implementation_validation']['passed']==matched
+        audit=diagnostic['implementation_dependency_audit']
+        assert audit['rows_excluded']==0 and audit['original_global_gate_passed']==matched
+        assert diagnostic['endpoints']['primary rpU_S - randI_S (attack)']['estimate']==0.
+        if matched:
+            normal=json.loads(default.read_text())
+            for field in ('endpoints','secondary','conditions','heterogeneity'):
+                assert diagnostic[field]==normal[field]
+        # Even explicitly requested diagnostics must reject a modified score file.
+        rows.iloc[:-1].to_csv(tmp_path/'pilot1_rows.csv',index=False)
+        bad=tmp_path/'corrupt.json'
+        result=subprocess.run(common+['--out',str(bad),'--implementation-diagnostic'],capture_output=True,text=True)
+        assert result.returncode!=0 and not bad.exists()
+
+
 def test_analyzer_cli_rejects_lost_control_and_handles_zero_dose(tmp_path):
     root = Path(__file__).resolve().parents[2]
     write_pilot(tmp_path)
