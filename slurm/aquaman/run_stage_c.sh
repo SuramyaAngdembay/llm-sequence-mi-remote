@@ -3,7 +3,7 @@
 # Each step is timed (/usr/bin/time -v); a failing step or gate stops the chain.
 set -euo pipefail
 W=/data/suramya/cert_review_20260928
-cd "$W/repo"; echo "commit $(cat REVIEW_COMMIT)"
+cd "$W/repo_c"; echo "commit $(cat REVIEW_COMMIT)"
 source ~/cert-venv/bin/activate
 export HF_HOME=/data/suramya/insider_mi/hf_cache HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True TOKENIZERS_PARALLELISM=false CUDA_VISIBLE_DEVICES=${GPU:-0}
