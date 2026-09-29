@@ -72,6 +72,40 @@ The explicitly restricted class-score artifact has 40,519 rows, 1,343 positive
 days and 60 positive users. Its 1,949 missing rows include 19 positive days and
 10 positive users. It is **not** a complete C32 result.
 
+### Completed scoring and extraction, later in this repair session
+
+Anvil job `20956714` subsequently completed successfully (exit 0, wall time
+7m28s, one allocated GPU). The 256-row bridge matches exactly, including all 29
+non-local-index columns when compared directly against the historical full cache.
+The 1,949-row extension passed the strengthened identity, provenance and partition
+gates. The new complete C32 artifact covers **42,468 rows, 1,362 positive days and
+70 positive users**. It preserves both label versions and canonical indices.
+
+An independent sklearn calculation, including the subtraction identity for the
+behavior score, reproduced **840 scalar fold metrics**, maximum absolute error
+2.23e-16. Results use 70 equal-weight held-out-positive-user folds, each with all
+79 held-out negative users. These are the batch-1 class-decomposition score pass.
+
+| Score | Fold-mean day AUROC | Fold-mean day AP | Fold-mean user AUROC |
+|---|---:|---:|---:|
+| Full | 0.539588 | 0.004859 | 0.588969 |
+| Behavior only | 0.819505 | 0.025238 | 0.824955 |
+| Profile only | 0.482322 | 0.001353 | 0.475769 |
+
+The mean fold prevalence is 0.000714; pooled prevalence is a different population
+quantity, 0.032071. Behavior-minus-full day AUROC is **0.279918**, paired user-fold
+bootstrap 95% interval **[0.203587, 0.356702]**. On the ten newly included positive
+users, mean day AUROC is 0.828720 for behavior versus 0.126702 for full. This
+supports score mitigation on the complete cohort. It does not establish removal
+of internal profile use, a causal feature mechanism, or an unexposed holdout.
+
+The Aquaman merge also passed: **83 chunks, 11,860,673 token rows, 42,468 examples**.
+Its corrected score index contains all 1,362 positives and preserves 407 changed
+labels. All chunk hashes are recorded in `aquaman_merge_report.json`. A separate
+post-publication check verified the completion hashes and exercised the actual
+causal JSONL loader: it retains corrected labels when reading historical text.
+Remote output: `aquaman_l26_v1/merged_calendar_v2`.
+
 ## Validation evidence
 
 Regression tests exercise the actual completion-writer and pilot-analysis CLIs,
@@ -91,12 +125,13 @@ shared model environment.
 - The historical LM adapters remain reusable for this label failure. This repair
   neither trains nor modifies adapters. Dictionary refitting/reselection and
   corrected causal experiments are separate work.
-- Both Aquaman activation shards completed successfully. Validate and merge them
-  with the new script; do not infer completion from directory existence.
-- Anvil job `20956714` is the already-submitted batch-1 bridge and 1,949-row class
-  extension. At the last check it was pending unavailable/reserved nodes. Preserve
-  the job and original inputs; do not submit a duplicate. Run the corrected writer
-  only after its outputs and bridge checks exist.
+- Both Aquaman activation shards and the checked merge are complete. Preserve
+  the merged output and original chunks; do not rebuild solely because the driver
+  is held. A future resumed driver must verify this completed output before use.
+- Anvil job `20956714`, the bridge, the 1,949-row extension and corrected complete
+  C32 evaluation are complete. Do not resubmit or overwrite them. The command
+  `complete_c32_when_ready.sh` remains as the exact reproducible invocation and
+  intentionally refuses to overwrite the now-completed result.
 - Automatic Stage C is held (exit 78). The original remote driver is backed up in
   `codex_label_handoff_20260929/run_stage_c.original.sh`. The source driver also
   documents and enforces the hold. This is an implementation gate, not a request
