@@ -52,18 +52,18 @@ VIEWS = ("full", "profile_only", "behavior_only", "behavior_ses_only", "psy_only
 
 
 # ------------------------------------------------------------------ pure helpers (unit-tested)
-def edited_codes(Z: np.ndarray, feats: Sequence[int], proto: np.ndarray, mode: str) -> np.ndarray:
-    """Return z' with the listed coordinates moved to the prototype (alpha = 1)."""
+def edited_codes(Z: np.ndarray, feats: Sequence[int], proto: np.ndarray, mode: str, alpha: float = 1.0) -> np.ndarray:
+    """Return z' with the listed coordinates moved a fraction alpha toward the prototype (alpha = 1: set to it)."""
     Zp = np.array(Z, copy=True)
     feats = list(feats)
     if mode == "union":
         active = Z[:, feats].sum(axis=1) > 0
         for j, f in enumerate(feats):
-            Zp[active, f] = proto[j]
+            Zp[active, f] = Z[active, f] + alpha * (proto[j] - Z[active, f]) if alpha != 1.0 else proto[j]
     elif mode == "own":
         for j, f in enumerate(feats):
             rows = Z[:, f] > 0
-            Zp[rows, f] = proto[j]
+            Zp[rows, f] = Z[rows, f] + alpha * (proto[j] - Z[rows, f]) if alpha != 1.0 else proto[j]
     else:
         raise ValueError(mode)
     return Zp
@@ -91,9 +91,9 @@ def load_delta_cache(path: Path, keep) -> tuple:
     return d["delta"][mask].astype(np.float32), idx[mask]
 
 
-def shift_residual(Z, feats, proto, decode: Callable, mode: str, d: int) -> np.ndarray:
+def shift_residual(Z, feats, proto, decode: Callable, mode: str, d: int, alpha: float = 1.0) -> np.ndarray:
     """h + dec(z') - dec(z): computed only on rows whose code changed (exact zero elsewhere)."""
-    Zp = edited_codes(Z, feats, proto, mode)
+    Zp = edited_codes(Z, feats, proto, mode, alpha)
     out = np.zeros((Z.shape[0], d), dtype=np.float32)
     rows = np.flatnonzero((Zp != Z).any(axis=1))
     if rows.size:
@@ -162,6 +162,12 @@ def main() -> None:
     ap.add_argument("--loss-batch-size", type=int, default=4)
     ap.add_argument("--seed", type=int, default=20260925)
     ap.add_argument("--dry-run", action="store_true", help="stop before loading the language model")
+    ap.add_argument("--labels", type=Path, default=None,
+                    help="parquet (example_id, y) of corrected labels for the receiver/matched-day assertions; "
+                         "default: the eval.jsonl labels (historical behaviour)")
+    ap.add_argument("--insider-file", type=Path, default=None, help="official insiders; donors must not be among them")
+    ap.add_argument("--conditions", default="", help="comma-separated condition list overriding the default order")
+    ap.add_argument("--hf-dtype-kw", default="torch_dtype", help="keyword for the model dtype (dtype on newer transformers)")
     ap.add_argument("--limit-pairs", type=int, default=0)
     args = ap.parse_args()
 
@@ -190,14 +196,28 @@ def main() -> None:
     if args.limit_pairs:
         pairs = pairs[: args.limit_pairs]
     receivers = [i for pair in pairs for i in pair]            # (malicious, benign) adjacent: same batches
-    kind = {a: "malicious" for a, _ in pairs} | {b: "benign" for _, b in pairs}
+    if args.labels is not None:      # corrected labels: the matched day is a window-negative day, not benign activity
+        kind = {a: "attack" for a, _ in pairs} | {b: "window_negative" for _, b in pairs}
+    else:
+        kind = {a: "malicious" for a, _ in pairs} | {b: "benign" for _, b in pairs}
     pair_of = {a: n for n, (a, b) in enumerate(pairs)} | {b: n for n, (a, b) in enumerate(pairs)}
+    ylab = meta["y"].to_dict()
+    if args.labels is not None:
+        lab = pd.read_parquet(args.labels).set_index("example_id")["y"]
+        ylab = {i: int(lab.loc[meta.loc[i, "example_id"]]) for i in meta.index}
     for a, b in pairs:
-        assert meta.loc[a, "user_id"] == meta.loc[b, "user_id"] and meta.loc[a, "y"] == 1 and meta.loc[b, "y"] == 0
+        assert meta.loc[a, "user_id"] == meta.loc[b, "user_id"] and ylab[a] == 1 and ylab[b] == 0
     depts = sorted({dept_of(i) for i in receivers})
     donors = {d: [int(x) for x in pops["donor_policy_by_dept"][d]] for d in depts}
     if any(len(v) == 0 for v in donors.values()):
         raise SystemExit(f"a receiver department has no donor: {donors}")
+    if args.insider_file is not None:
+        insiders = {l.strip() for l in args.insider_file.read_text().splitlines() if l.strip()}
+        bad = sorted({meta.loc[i, "user_id"] for v in donors.values() for i in v} & insiders)
+        if bad:
+            raise SystemExit(f"donors include official insiders: {bad}")
+        if any(ylab[i] != 0 for v in donors.values() for i in v):
+            raise SystemExit("a donor day is labelled positive")
 
     cfg_dir = args.frontier_dir / f"layer_{args.layer}" / f"m{args.latent_mult:02d}_k{args.k:02d}"
     ranking = load_ranking(cfg_dir)
@@ -219,8 +239,11 @@ def main() -> None:
         "random_dictionary_pool_size": len(pool),
         "views": list(VIEWS),
         # scored in this order, so that a timeout loses the least important conditions
-        "conditions": ["zero", "rpU_S", "randI_S", "randD_S", "rpU_C", "randI_C", "randD_C",
-                       "recon_S", "recon_C", "orig_S", "orig_C", "rpO_S", "rpO_C"] + [f"single_{f}" for f in S],
+        "conditions": ([c for c in args.conditions.split(",") if c] if args.conditions else
+                       ["zero", "rpU_S", "randI_S", "randD_S", "rpU_C", "randI_C", "randD_C",
+                        "recon_S", "recon_C", "orig_S", "orig_C", "rpO_S", "rpO_C"] + [f"single_{f}" for f in S]),
+        "labels": str(args.labels) if args.labels else "eval.jsonl y",
+        "labels_sha256": hashlib.sha256(args.labels.read_bytes()).hexdigest() if args.labels else None,
         "donor_prototype_rule": "per department, mean over the fixed donors of the package-4 prototype (mean over donor "
                                 "tokens where any feature of the set is active); the same prototype for every support",
         "aggregation": "per receiver: mean patched-minus-zero loss over the view's target tokens; receivers whose edit is "
@@ -298,6 +321,12 @@ def main() -> None:
         d = dept_of(i)
         if cond == "zero":
             return np.zeros_like(delta, dtype=np.float32)
+        alpha = 1.0
+        if "@" in cond:
+            cond, a_txt = cond.split("@")
+            alpha = float(a_txt)
+            if not cond.startswith("rpU_"):
+                raise ValueError("alpha < 1 is declared only for rpU conditions")
         base, arm = cond.rsplit("_", 1)
         if base == "single":
             f = int(arm)
@@ -308,7 +337,7 @@ def main() -> None:
         if base == "recon":
             return shift_recon(z, delta, feats, dec)
         if base == "rpU":
-            return shift_residual(z, feats, p, dec, "union", delta.shape[1])
+            return shift_residual(z, feats, p, dec, "union", delta.shape[1], alpha)
         if base == "rpO":
             return shift_residual(z, feats, p, dec, "own", delta.shape[1])
         ref = shift_residual(z, feats, p, dec, "union", delta.shape[1])
@@ -376,7 +405,7 @@ def main() -> None:
             load_in_4bit=bool(q["load_in_4bit"]), bnb_4bit_quant_type=str(q["bnb_4bit_quant_type"]),
             bnb_4bit_compute_dtype=getattr(torch, str(q["bnb_4bit_compute_dtype"])),
             bnb_4bit_use_double_quant=bool(q["bnb_4bit_use_double_quant"])),
-        torch_dtype=torch.bfloat16, device_map="auto")
+        **{args.hf_dtype_kw: torch.bfloat16}, device_map="auto")
     model = PeftModel.from_pretrained(model, args.adapter_dir)
     model.config.use_cache = False
     model.eval()

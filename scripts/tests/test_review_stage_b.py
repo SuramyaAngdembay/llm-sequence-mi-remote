@@ -49,3 +49,17 @@ def test_negatives_only_from_listed_users():
     # default behaviour unchanged
     _, ys_default, _ = fold_view(x, y, users, {'disc'})
     assert ys_default.tolist() == [1, 0, 0, 0, 0]
+
+
+def test_pilot_alpha_edits():
+    import importlib
+    pis = importlib.import_module('pilot_intervention_specificity')
+    Z = np.array([[0.0, 2.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 3.0]])
+    proto = np.array([4.0, 6.0])
+    full = pis.edited_codes(Z, [0, 1], proto, 'union')
+    assert np.array_equal(full, pis.edited_codes(Z, [0, 1], proto, 'union', 1.0))
+    assert np.array_equal(pis.edited_codes(Z, [0, 1], proto, 'union', 0.0), Z)          # alpha 0 is a no-op
+    half = pis.edited_codes(Z, [0, 1], proto, 'union', 0.5)
+    assert np.allclose(half[:2], (Z[:2] + full[:2]) / 2) and np.array_equal(half[2], Z[2])  # untouched row stays
+    own = pis.edited_codes(Z, [0, 1], proto, 'own', 0.5)
+    assert own[0, 0] == 0.0 and own[0, 1] == 4.0 and own[1, 0] == 2.5                    # no writes into zeros
