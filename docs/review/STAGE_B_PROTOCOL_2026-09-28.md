@@ -188,3 +188,12 @@ versioned layer-26 token-delta cache, `aquaman-l26-v1`**:
 - **Consequences, recorded as such.** Costs are measured on RTX 3070s and projected to A100 from
   the historical A100 rates. The new cache is compared descriptively with the historical A100
   cache (per-example NLL agreement, and deltas where available). It is not claimed to equal it.
+
+**A1 addendum (21:50 CDT, still before any result).** A fixed batch of 4 ran out of memory on a
+long day, on an 8 GB card. The extraction therefore uses deterministic length-aware batches:
+- at most 4 examples and at most 1,600 padded tokens per batch;
+- a longer example is scored alone;
+- batches never cross a 512-example chunk boundary.
+
+The rule depends only on token lengths. The batch-size counts are recorded in each shard's
+`extract_summary.json`.

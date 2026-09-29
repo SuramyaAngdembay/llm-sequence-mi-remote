@@ -65,6 +65,9 @@ def main() -> None:
                     help="score the base model by disabling the adapter on the one loaded model (fits 8 GB GPUs)")
     ap.add_argument("--start-index", type=int, default=0, help="first example (global index) of this shard")
     ap.add_argument("--end-index", type=int, default=0, help="end (exclusive) of this shard; 0 = all")
+    ap.add_argument("--max-batch-tokens", type=int, default=0,
+                    help="if > 0: deterministic length-aware batches of at most --batch-size examples and at most this many "
+                         "padded tokens, never crossing a --chunk-examples boundary (a longer example is scored alone)")
     args = ap.parse_args()
 
     cfg = load_yaml(args.config)
@@ -160,8 +163,23 @@ def main() -> None:
         current_example_count = 0
         chunk_id += 1
 
-    for start in range(0, len(examples), args.batch_size):
-        batch = examples[start : start + args.batch_size]
+    if args.max_batch_tokens > 0:
+        lengths = [len(ids) for ids in tokenizer([ex["text"] for ex in examples], truncation=True,
+                                                   max_length=max_seq_len)["input_ids"]]
+        spans, i = [], 0
+        while i < len(examples):
+            block_end = min(len(examples), ((shard_start + i) // args.chunk_examples + 1) * args.chunk_examples - shard_start)
+            j, longest = i, 0
+            while j < block_end and j - i < args.batch_size and (j - i + 1) * max(longest, lengths[j]) <= args.max_batch_tokens:
+                longest = max(longest, lengths[j]); j += 1
+            j = max(j, i + 1)
+            spans.append((i, j)); i = j
+    else:
+        spans = [(st, min(st + args.batch_size, len(examples))) for st in range(0, len(examples), args.batch_size)]
+    batch_sizes_used = {}
+    for start, stop in spans:
+        batch = examples[start:stop]
+        batch_sizes_used[len(batch)] = batch_sizes_used.get(len(batch), 0) + 1
         texts = [ex["text"] for ex in batch]
         tok = tokenizer(
             texts,
@@ -248,6 +266,8 @@ def main() -> None:
         "base_via_disable_adapter": bool(args.base_via_disable_adapter),
         "start_index": shard_start,
         "batch_size": int(args.batch_size),
+        "max_batch_tokens": int(args.max_batch_tokens),
+        "batch_sizes_used": {str(k): v for k, v in sorted(batch_sizes_used.items())},
     }
     dump_json(out_dir / "extract_summary.json", summary)
     print(json.dumps(summary, indent=2))
