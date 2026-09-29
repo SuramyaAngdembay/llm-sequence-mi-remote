@@ -161,3 +161,30 @@ prevents duplicate execution.
 
 If any gate fails, the dependent jobs are not submitted, and the failure is reported with its
 evidence.
+
+## Amendment A1 (2026-09-28 21:40 CDT, before any Stage B/C result exists)
+
+**Why.** The collaborator's Anvil queues:
+- **gpu and ai partitions:** estimated starts of 2026-10-15 to 2026-10-18.
+- **CPU shared:** 2026-12-26.
+- **gpu-debug and CPU debug:** 10–19 hours per job, one running job per user.
+- **Moving the cached deltas instead:** the 2M presampled rows are 16 GB, and the
+  Anvil→laptop→Aquaman route measures about 1.5 MB/s.
+
+**Change.** Sections 3 and 5–7 run on Aquaman (2× RTX 3070 8 GB, `cert-venv`: torch
+2.5.1+cu121, transformers 5.14.1, peft 0.19.1, bitsandbytes 0.49.2). They run on a **separately
+versioned layer-26 token-delta cache, `aquaman-l26-v1`**:
+- **Inputs.** The same adapter (sha256 `e0bf5112…`) and the same r4.2 `eval.jsonl` (sha256
+  `9266ae43…`), 42,468 examples.
+- **Extractor settings.** `scripts/extract_adapter_deltas.py` with the base pass through
+  `disable_adapter()` (one model copy); layer 26 only; token unit; chunks of 512 examples; batch
+  size fixed by the smoke test before the full run; two GPU shards at chunk-aligned global indices.
+- **Downstream.** The dictionary refit, ranking, pilot delta cache and pilot all use this one
+  cache and this machine, so the pilot's codes, edits and live model come from one configuration.
+- **Unchanged.** Every rule of sections 3–7: sampling, seeds, discovery/confirmation, negatives,
+  populations, conditions, endpoints, interpretation.
+- **B1** (the A100 bridge and class-cache extension) stays queued on Anvil. It cannot move,
+  because the bridge is defined as bit-exact on the A100 configuration.
+- **Consequences, recorded as such.** Costs are measured on RTX 3070s and projected to A100 from
+  the historical A100 rates. The new cache is compared descriptively with the historical A100
+  cache (per-example NLL agreement, and deltas where available). It is not claimed to equal it.

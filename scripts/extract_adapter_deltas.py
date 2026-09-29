@@ -61,6 +61,10 @@ def main() -> None:
     ap.add_argument("--chunk-examples", type=int, default=4096)
     ap.add_argument("--pool-unit", choices=["mean", "token"], default=None)
     ap.add_argument("--layers", default="", help="optional comma-separated hidden-state layers to extract")
+    ap.add_argument("--base-via-disable-adapter", action="store_true",
+                    help="score the base model by disabling the adapter on the one loaded model (fits 8 GB GPUs)")
+    ap.add_argument("--start-index", type=int, default=0, help="first example (global index) of this shard")
+    ap.add_argument("--end-index", type=int, default=0, help="end (exclusive) of this shard; 0 = all")
     args = ap.parse_args()
 
     cfg = load_yaml(args.config)
@@ -81,6 +85,10 @@ def main() -> None:
     examples = list(read_jsonl(split_path))
     if args.max_examples > 0:
         examples = examples[: args.max_examples]
+    shard_start = int(args.start_index)
+    if shard_start % int(args.chunk_examples):
+        raise ValueError("--start-index must be a multiple of --chunk-examples so chunk ids stay global")
+    examples = examples[shard_start: (args.end_index or len(examples))]
     if not examples:
         raise RuntimeError(f"No examples found in {split_path}")
 
@@ -108,17 +116,22 @@ def main() -> None:
         torch_dtype=torch.bfloat16 if bool(cfg["training"].get("bf16", True)) else torch.float16,
         device_map="auto",
     )
-    base_model = AutoModelForCausalLM.from_pretrained(model_name, **common_kwargs)
     adapted_backbone = AutoModelForCausalLM.from_pretrained(model_name, **common_kwargs)
     adapted_model = PeftModel.from_pretrained(adapted_backbone, args.adapter_dir)
-    base_model.eval()
     adapted_model.eval()
+    if args.base_via_disable_adapter:
+        base_model = adapted_model
+    else:
+        base_model = AutoModelForCausalLM.from_pretrained(model_name, **common_kwargs)
+        base_model.eval()
+    from contextlib import nullcontext
+    base_context = adapted_model.disable_adapter if args.base_via_disable_adapter else nullcontext
 
     chunk_meta: List[Dict[str, Any]] = []
     scores_rows: List[Dict[str, Any]] = []
     current: Dict[int, Dict[str, List[np.ndarray]]] = {layer: {"delta": [], "example_idx": [], "position": []} for layer in layers}
     current_example_count = 0
-    chunk_id = 0
+    chunk_id = shard_start // int(args.chunk_examples)
 
     def maybe_flush() -> None:
         nonlocal chunk_id, current_example_count, current
@@ -161,7 +174,8 @@ def main() -> None:
         # Sequential forwards: never hold two full logits/hidden-state sets at
         # once (8GB-GPU constraint). Harvest NLL + needed layers, then free.
         with torch.no_grad():
-            base_out = base_model(**tok, output_hidden_states=True, return_dict=True)
+            with base_context():
+                base_out = base_model(**tok, output_hidden_states=True, return_dict=True)
             base_nll = per_example_nll(base_out.logits, tok["input_ids"], tok["attention_mask"]).cpu().numpy()
             base_hidden = {layer: base_out.hidden_states[layer].detach().clone() for layer in layers}
             del base_out
@@ -176,7 +190,7 @@ def main() -> None:
         attn = tok["attention_mask"]
 
         for bi, ex in enumerate(batch):
-            example_index = start + bi
+            example_index = shard_start + start + bi
             scores_rows.append(
                 {
                     "example_idx": example_index,
@@ -201,14 +215,14 @@ def main() -> None:
             if pool_unit == "mean":
                 pooled = mean_pool(delta, attn).cpu().numpy()
                 current[layer]["delta"].append(pooled)
-                current[layer]["example_idx"].append(np.arange(start, start + len(batch), dtype=np.int64))
+                current[layer]["example_idx"].append(np.arange(shard_start + start, shard_start + start + len(batch), dtype=np.int64))
             else:
                 for bi in range(delta.shape[0]):
                     valid = attn[bi].bool()
                     vecs = delta[bi, valid].cpu().numpy()
                     pos = np.arange(vecs.shape[0], dtype=np.int32)
                     current[layer]["delta"].append(vecs)
-                    current[layer]["example_idx"].append(np.full((vecs.shape[0],), start + bi, dtype=np.int64))
+                    current[layer]["example_idx"].append(np.full((vecs.shape[0],), shard_start + start + bi, dtype=np.int64))
                     current[layer]["position"].append(pos)
 
         del base_hidden, adapted_hidden
@@ -231,6 +245,9 @@ def main() -> None:
         "chunk_examples": int(args.chunk_examples),
         "adapter_dir": str(args.adapter_dir),
         "model_name_or_path": model_name,
+        "base_via_disable_adapter": bool(args.base_via_disable_adapter),
+        "start_index": shard_start,
+        "batch_size": int(args.batch_size),
     }
     dump_json(out_dir / "extract_summary.json", summary)
     print(json.dumps(summary, indent=2))
