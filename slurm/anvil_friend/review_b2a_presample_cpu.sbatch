@@ -7,7 +7,7 @@
 #SBATCH --error=/anvil/scratch/x-bbhusal1/cert_review_20260928/logs/%x-%j.err
 #SBATCH --nodes=1 --ntasks=1 --cpus-per-task=32 --mem=200G
 #SBATCH --time=01:30:00
-#SBATCH -A tra250034 -p shared
+#SBATCH -A tra250034 -p debug
 set -euo pipefail
 W=/anvil/scratch/x-bbhusal1/cert_review_20260928
 mkdir "$W/lock_b2a" 2>/dev/null || { echo "B2a already ran or is running (lock present); exiting"; exit 0; }
