@@ -191,7 +191,7 @@ versioned layer-26 token-delta cache, `aquaman-l26-v1`**:
 
 **A1 addendum (21:50 CDT, still before any result).** A fixed batch of 4 ran out of memory on a
 long day, on an 8 GB card. The extraction therefore uses deterministic length-aware batches:
-- at most 4 examples and at most 1,600 padded tokens per batch;
+- at most 4 examples and at most 1,200 padded tokens per batch (fp32 cross-entropy sequence chunk 64, which affects only the sanity-check NLL);
 - a longer example is scored alone;
 - batches never cross a 512-example chunk boundary.
 

@@ -14,13 +14,16 @@ import torch.nn.functional as F
 from remote_common import dump_json, ensure_dir, load_yaml, read_jsonl
 
 
+CE_SEQ_CHUNK = 256          # overridable by --ce-seq-chunk (memory only; float32 sums in a different grouping)
+
+
 def per_example_nll(logits: torch.Tensor, input_ids: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
     """Sequence-chunked CE: bounds the fp32 logits workspace on small GPUs
     (same approach as score_adapter_examples.per_example_nll)."""
     shift_labels = input_ids[:, 1:].contiguous()
     shift_mask = attention_mask[:, 1:].contiguous().float()
     seq_len = shift_labels.shape[1]
-    seq_chunk = 256
+    seq_chunk = CE_SEQ_CHUNK
     loss_sum = torch.zeros(shift_labels.shape[0], device=logits.device, dtype=torch.float32)
     for s0 in range(0, seq_len, seq_chunk):
         s1 = min(s0 + seq_chunk, seq_len)
@@ -65,10 +68,13 @@ def main() -> None:
                     help="score the base model by disabling the adapter on the one loaded model (fits 8 GB GPUs)")
     ap.add_argument("--start-index", type=int, default=0, help="first example (global index) of this shard")
     ap.add_argument("--end-index", type=int, default=0, help="end (exclusive) of this shard; 0 = all")
+    ap.add_argument("--ce-seq-chunk", type=int, default=256, help="sequence chunk of the fp32 cross-entropy workspace")
     ap.add_argument("--max-batch-tokens", type=int, default=0,
                     help="if > 0: deterministic length-aware batches of at most --batch-size examples and at most this many "
                          "padded tokens, never crossing a --chunk-examples boundary (a longer example is scored alone)")
     args = ap.parse_args()
+    global CE_SEQ_CHUNK
+    CE_SEQ_CHUNK = int(args.ce_seq_chunk)
 
     cfg = load_yaml(args.config)
     try:
@@ -267,6 +273,7 @@ def main() -> None:
         "start_index": shard_start,
         "batch_size": int(args.batch_size),
         "max_batch_tokens": int(args.max_batch_tokens),
+        "ce_seq_chunk": int(args.ce_seq_chunk),
         "batch_sizes_used": {str(k): v for k, v in sorted(batch_sizes_used.items())},
     }
     dump_json(out_dir / "extract_summary.json", summary)
