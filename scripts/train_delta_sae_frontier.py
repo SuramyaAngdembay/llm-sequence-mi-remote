@@ -263,6 +263,8 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--benign-only", action="store_true",
                     help="train the dictionary on benign rows only (dictionary-level independence)")
+    ap.add_argument("--torch-seed", type=int, default=None,
+                    help="seed torch (initialisation, shuffling) before each fit; historical runs were unseeded")
     ap.add_argument("--labels-override", type=Path, default=None,
                     help="parquet (example_idx, example_id, y) used instead of the score index's y for sampling")
     args = ap.parse_args()
@@ -313,6 +315,8 @@ def main() -> None:
             d_latent = d_in * latent_mult
             for k in ks:
                 print(f"[frontier] layer={layer} d_in={d_in} d_latent={d_latent} k={k}", flush=True)
+                if args.torch_seed is not None:
+                    torch.manual_seed(int(args.torch_seed) + layer)
                 model, train_stats = train_sae(
                     x_norm,
                     device=device,

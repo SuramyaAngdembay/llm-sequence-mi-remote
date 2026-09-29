@@ -197,3 +197,8 @@ long day, on an 8 GB card. The extraction therefore uses deterministic length-aw
 
 The rule depends only on token lengths. The batch-size counts are recorded in each shard's
 `extract_summary.json`.
+
+**A1 addendum 2 (still before any result).** `train_sae` never seeded torch, so historical
+dictionary initialisation and minibatch order were unseeded. The corrected fit passes
+`--torch-seed 42`, seeding torch with 42 + layer before the fit. CUDA kernels may still be
+nondeterministic.
