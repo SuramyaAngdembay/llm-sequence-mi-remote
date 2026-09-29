@@ -8,11 +8,13 @@ set -euo pipefail
 echo 'Stage C held: label repairs do not complete live-state and realized-edit validation.' >&2
 exit 78
 W=/data/suramya/cert_review_20260928
-cd "$W/repo_c"; echo "commit $(cat REVIEW_COMMIT)"
+REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
+cd "$REPO_ROOT"
+echo "code directory $REPO_ROOT (commit recorded in active_handoff.json)"
 source ~/cert-venv/bin/activate
 export HF_HOME=/data/suramya/insider_mi/hf_cache HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True TOKENIZERS_PARALLELISM=false CUDA_VISIBLE_DEVICES=${GPU:-0}
-L="$W/labels_v2"; X="$W/aquaman_l26_v1/merged"; F="$W/stage_c/frontier_calendar_v1"; FS="$W/stage_c/frontier_calendar_v1_selected"
+L="$W/labels_v2"; X="$W/aquaman_l26_v1/merged_calendar_v2"; F="$W/stage_c/frontier_calendar_v1"; FS="$W/stage_c/frontier_calendar_v1_selected"
 mkdir -p "$W/stage_c"
 step() { echo "=== [$(date -Is)] $1"; }
 T="/usr/bin/time -v"
