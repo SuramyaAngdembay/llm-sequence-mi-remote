@@ -149,6 +149,9 @@ def main() -> None:
     ap.add_argument("--adapter-dir", type=Path, required=True)
     ap.add_argument("--extract-dir", type=Path, required=True)
     ap.add_argument("--delta-cache", type=Path, default=None, help="npz from pilot_cache_deltas.py")
+    ap.add_argument('--live-state-dir', type=Path, default=None, help='verified batch-1 states; mandatory for new corrected pilots')
+    ap.add_argument('--pair-indices', default='', help='predeclared indices into the frozen receiver-pair list')
+    ap.add_argument('--engineering-only', action='store_true', help='diagnostic cohort; not a scientific effect estimate')
     ap.add_argument("--frontier-dir", type=Path, required=True)
     ap.add_argument("--populations", type=Path, required=True)
     ap.add_argument("--out-dir", type=Path, required=True)
@@ -170,6 +173,10 @@ def main() -> None:
     ap.add_argument("--hf-dtype-kw", default="torch_dtype", help="keyword for the model dtype (dtype on newer transformers)")
     ap.add_argument("--limit-pairs", type=int, default=0)
     args = ap.parse_args()
+    if args.labels is not None and (args.live_state_dir is None or args.batch_size != 1 or args.delta_cache is not None):
+        raise ValueError('Corrected pilot execution requires verified batch-1 live states and no legacy delta cache')
+    if args.pair_indices and args.limit_pairs:
+        raise ValueError('Choose explicit pair indices or limit-pairs, not both')
 
     import pandas as pd
     import torch
@@ -189,12 +196,20 @@ def main() -> None:
     cfg = load_yaml(args.config)
     S = [int(x) for x in args.selected.split(",")]
     C = [int(x) for x in args.control.split(",")]
+    if len(set(S)) != len(S) or len(set(C)) != len(C) or set(S) & set(C):
+        raise ValueError('Selected and control feature sets must be unique and disjoint')
     pops = json.loads(args.populations.read_text())
     scores = pd.read_parquet(args.extract_dir / "example_scores.parquet").sort_values("example_idx").reset_index(drop=True)
     meta = load_eval_examples(args.data_dir, scores)
     dept_of = lambda i: dict(kv.split("=", 1) for kv in meta.loc[i, "text"].split("\n", 1)[0][4:].split())["dept"]
     excluded = set(args.exclude_users.split(",")) if args.exclude_users else set()
-    pairs = [(a, b) for a, b in pops["receiver_pairs"] if meta.loc[a, "user_id"] not in excluded]
+    pairs = pops['receiver_pairs']
+    if args.pair_indices:
+        chosen = [int(i) for i in args.pair_indices.split(',')]
+        if len(set(chosen)) != len(chosen) or any(i < 0 or i >= len(pairs) for i in chosen):
+            raise ValueError('Invalid explicit pair indices')
+        pairs = [pairs[i] for i in chosen]
+    pairs = [(a, b) for a, b in pairs if meta.loc[a, 'user_id'] not in excluded]
     if args.limit_pairs:
         pairs = pairs[: args.limit_pairs]
     receivers = [i for pair in pairs for i in pair]            # (malicious, benign) adjacent: same batches
@@ -239,6 +254,8 @@ def main() -> None:
     bundle = torch.load(cfg_dir / "delta_sae_model.pt", map_location="cpu", weights_only=False)
     active = ranking.set_index("feature_id")["row_active_frac"]
     pool = [int(f) for f in active.index if active[f] >= 0.002 and f not in set(S) | set(C)]
+    if not pool or any(f < 0 or f >= int(bundle['d_latent']) for f in S+C):
+        raise ValueError('Invalid feature sets or empty random-dictionary pool')
     manifest = {
         "exploratory": True,
         "written_before_scoring": True,
@@ -280,18 +297,32 @@ def main() -> None:
         raise ValueError('Conditions must be unique and start with zero')
     if args.labels is not None:
         from cert_calendar_labels import VERSION
-        manifest.update(contract='corrected-pilot-v2', label_version=VERSION,
+        manifest.update(contract='corrected-pilot-v3', label_version=VERSION,
                         answers_sha256=json.loads((args.labels.parent / 'incident_calendar_labels.manifest.json').read_text())['archive_sha256'],
                         batch_size=args.batch_size, loss_batch_size=args.loss_batch_size,
                         balance_semantics='proposed float32 shifts, before hidden-state rounding',
                         expected_receivers=[{'receiver_idx': int(i), 'receiver_id': meta.loc[i, 'example_id'],
                                              'user': meta.loc[i, 'user_id'], 'kind': kind[i],
                                              'pair': pair_of[i], 'y': ylab[i]} for i in receivers])
+        from pilot_live_states import validate_live_manifest
+        live = validate_live_manifest(args.live_state_dir, populations=args.populations, labels=args.labels,
+                adapter_dir=args.adapter_dir, config=args.config, layer=args.layer, eval_jsonl=args.data_dir/'eval.jsonl')
+        manifest.update(live_state_dir=str(args.live_state_dir),
+                        live_state_manifest_sha256=hashlib.sha256((args.live_state_dir/'COMPLETED.json').read_bytes()).hexdigest(),
+                        engineering_only=args.engineering_only, pair_indices=args.pair_indices,
+                        realized_control_relative_tolerance=0.05,
+                        full_logits_max_gib=0., max_logit_elements=4194304,
+                        code_sha256={p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in
+                            [Path(__file__), SCRIPTS/'eval_token_delta_sae_causal.py', SCRIPTS/'intervention_audit.py',
+                             SCRIPTS/'pilot_live_states.py', SCRIPTS/'cert_pilot_contracts.py']})
     (out / "pilot1_manifest.json").write_text(json.dumps(manifest, indent=1) + "\n")
     print(f"[pilot1] {len(pairs)} pairs, {manifest['n_users']} users, depts {depts}", flush=True)
 
     needed = set(receivers) | {i for v in donors.values() for i in v}
-    if args.delta_cache is not None:
+    if args.live_state_dir is not None:
+        from pilot_live_states import load_live_arrays
+        x, token_idx = load_live_arrays(args.live_state_dir, live, needed)
+    elif args.delta_cache is not None:
         x, token_idx = load_delta_cache(args.delta_cache, needed)
     else:
         x, token_idx, _ = load_token_layer_vectors(args.extract_dir, args.layer, keep_examples=needed, delta_dtype="float32")
@@ -308,7 +339,10 @@ def main() -> None:
                                              device=device, batch_size=2048)
     W = sae.decoder.weight.detach().cpu().numpy() * x_std.reshape(-1, 1)          # residual-unit decoder columns
     dirs = W[:, pool].T
-    dirs = (dirs / np.linalg.norm(dirs, axis=1, keepdims=True)).astype(np.float32)
+    norms = np.linalg.norm(dirs, axis=1, keepdims=True)
+    if not np.isfinite(norms).all() or (norms <= 0).any():
+        raise ValueError('Undefined random-dictionary directions')
+    dirs = (dirs / norms).astype(np.float32)
 
     proto = {}
     for d, idxs in donors.items():
@@ -329,6 +363,10 @@ def main() -> None:
     for i in receivers:
         text = meta.loc[i, "text"]
         enc = tokenizer(text, truncation=True, max_length=max_len, return_offsets_mapping=True)
+        if args.live_state_dir is not None:
+            with np.load(args.live_state_dir/f'example_{i:05d}.npz') as state:
+                if not np.array_equal(state['input_ids'], enc['input_ids']):
+                    raise ValueError(f'Live-state token IDs changed for receiver {i}')
         cls, _ = tcd.classify_tokens([tuple(o) for o in enc["offset_mapping"]], tcd.cert_class_spans(text))
         classes[i] = cls
         n_rows = slices[i].stop - slices[i].start
@@ -442,24 +480,33 @@ def main() -> None:
     model.eval()
     texts = [meta.loc[i, "text"] for i in receivers]
     kw = dict(layer=args.layer, max_seq_len=max_len, batch_size=args.batch_size, loss_batch_size=args.loss_batch_size)
+    if args.live_state_dir is not None:
+        kw.update(full_logits_max_gib=0., max_logit_elements=4194304, strict_patch_shapes=True)
+    from intervention_audit import realized_token_stats, check_realized_controls
+    from pilot_live_states import check_live_before
+    checked = set()
+    realized_parts = []
+    def observer_for(condition, *, record=True):
+        def observer(j, before, proposed, cast, after):
+            i = receivers[j]
+            check_live_before(args.live_state_dir, i, before)
+            checked.add((condition, i))
+            if record:
+                st = realized_token_stats(before, proposed, cast, after)
+                realized_parts.append(pd.DataFrame(dict(condition=condition, receiver_idx=i,
+                    position=np.arange(len(proposed)), token_class=classes[i], **st)))
+        return observer
 
     # validity 3: a true zero edit reproduces the unhooked model
     n_chk = min(24, len(texts))
-    plain = []
-    for s0 in range(0, n_chk, args.batch_size):
-        tok = tokenizer(texts[s0:min(s0 + args.batch_size, n_chk)], return_tensors="pt", padding=True,
-                        truncation=True, max_length=max_len)
-        tok = {k: v.to(model.device) for k, v in tok.items()}
-        with torch.no_grad():
-            o = model(**tok, return_dict=True)
-        plain.append(per_example_nll(o.logits, tok["input_ids"], tok["attention_mask"],
-                                     loss_batch_size=args.loss_batch_size).float().cpu().numpy())
-    plain = np.concatenate(plain)
+    plain = score_with_token_patches(model, tokenizer, texts[:n_chk], None, class_schema='cert', **kw)[0]
     zero_chk = score_with_token_patches(model, tokenizer, texts[:n_chk], [build("zero", i) for i in receivers[:n_chk]],
+                                        patch_observer=observer_for('zero_check', record=False) if args.live_state_dir else None,
                                         class_schema="cert", **kw)[0]
     validity["zero_edit_vs_unhooked_max_abs"] = float(np.abs(np.asarray(zero_chk) - plain).max())
     alpha_zero = score_with_token_patches(model, tokenizer, texts[:n_chk],
-                                         [build('rpU_S@0', i) for i in receivers[:n_chk]], class_schema='cert', **kw)[0]
+                                         [build('rpU_S@0', i) for i in receivers[:n_chk]], class_schema='cert',
+                                         patch_observer=observer_for('alpha_zero_check', record=False) if args.live_state_dir else None, **kw)[0]
     validity['alpha_zero_vs_unhooked_max_abs'] = float(np.abs(np.asarray(alpha_zero) - plain).max())
     (out / "validity.json").write_text(json.dumps(validity, indent=1) + "\n")
     print(f"[pilot1] validity {json.dumps(validity)}", flush=True)
@@ -471,7 +518,8 @@ def main() -> None:
     base_views = None
     for cond in manifest["conditions"]:
         shifts = [build(cond, i) for i in receivers]
-        sc, sums, counts, names = score_with_token_patches(model, tokenizer, texts, shifts, class_schema="cert", **kw)
+        sc, sums, counts, names = score_with_token_patches(model, tokenizer, texts, shifts, class_schema="cert",
+                patch_observer=observer_for(cond) if args.live_state_dir else None, **kw)
         vm = view_means(np.asarray(sums), np.asarray(counts), names)
         if cond == "zero":
             base_views = vm
@@ -489,9 +537,19 @@ def main() -> None:
                 writer = csv.DictWriter(fh, fieldnames=list(row)); writer.writeheader()
             writer.writerow(row)
         fh.flush()
+        if args.live_state_dir is not None:
+            pd.concat(realized_parts, ignore_index=True).to_parquet(out/'realized_token_edits.parquet', index=False)
         del shifts
         print(f"[pilot1] {cond} done ({time.time() - t0:.0f}s)", flush=True)
     fh.close()
+    if args.live_state_dir is not None:
+        realized = pd.concat(realized_parts, ignore_index=True)
+        gate = check_realized_controls(realized, relative_tolerance=manifest['realized_control_relative_tolerance'])
+        gate.update(live_pre_edit_states_exact=True,
+                    checked_receiver_conditions=sum((c, i) in checked for c in manifest['conditions'] for i in receivers),
+                    engineering_only=args.engineering_only)
+        (out/'implementation_validation.json').write_text(json.dumps(gate, indent=2, allow_nan=False)+'\n')
+        print(f"[pilot1] realized control gate: {gate['passed']}", flush=True)
     if args.labels is not None:
         complete_run(out)
     print("PILOT1_DONE", flush=True)

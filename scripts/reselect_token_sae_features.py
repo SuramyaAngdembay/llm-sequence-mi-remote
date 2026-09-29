@@ -50,6 +50,9 @@ def load_rows_base(
     y_by_example: dict[int, int],
     benign_sample_prob: float,
     seed: int,
+    eligible_positive_users: set[str] | None = None,
+    eligible_negative_users: set[str] | None = None,
+    load_stats: dict | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Load ALL positive rows plus a benign sample once; returns (x, y, users)."""
     layer_dir = extract_dir / f"layer_{layer}"
@@ -62,7 +65,7 @@ def load_rows_base(
     user_parts: List[np.ndarray] = []
     for path in chunk_paths:
         obj = torch.load(path, map_location="cpu", weights_only=False)
-        vecs = np.asarray(obj["delta"], dtype=np.float32)
+        vecs = np.asarray(obj["delta"])
         idx = np.asarray(obj["example_idx"], dtype=np.int64)
         y = np.asarray([y_by_example.get(int(i), 0) for i in idx], dtype=np.int64)
         users = np.asarray([user_by_example.get(int(i), "") for i in idx])
@@ -71,7 +74,17 @@ def load_rows_base(
         if benign_sample_prob < 1.0:
             benign_mask = benign_mask & (rng.random(len(idx)) < benign_sample_prob)
         keep = pos_mask | benign_mask
-        vec_parts.append(vecs[keep])
+        if eligible_positive_users is not None or eligible_negative_users is not None:
+            if eligible_positive_users is None or eligible_negative_users is None:
+                raise ValueError('Early eligibility requires both user sets')
+            eligible = (pos_mask & np.isin(users, list(eligible_positive_users))) | (benign_mask & np.isin(users, list(eligible_negative_users)))
+            if load_stats is not None:
+                for key, mask in [('positive_rows_dropped', pos_mask), ('negative_rows_dropped', ~pos_mask)]:
+                    load_stats[key] = load_stats.get(key, 0) + int((keep & ~eligible & mask).sum())
+            keep &= eligible
+        # Draw on the original full chunk before filtering: the retained rows
+        # and their order are exactly the historical load-then-fold population.
+        vec_parts.append(np.asarray(vecs[keep], dtype=np.float32))
         y_parts.append(y[keep])
         user_parts.append(users[keep])
     return (
@@ -170,6 +183,12 @@ def main() -> None:
     else:
         folds = [args.discovery_user_file]
 
+    early_positive = None
+    early_negative = None
+    if args.louo_splits_dir is None and negative_users is not None:
+        early_positive = {s.strip() for s in args.discovery_user_file.read_text().splitlines() if s.strip()}
+        early_negative = negative_users
+    load_stats = {}
     x_all, y_all, users_all = load_rows_base(
         args.extract_dir,
         args.layer,
@@ -177,6 +196,9 @@ def main() -> None:
         y_by_example=y_by_example,
         benign_sample_prob=args.benign_sample_prob,
         seed=args.seed,
+        eligible_positive_users=early_positive,
+        eligible_negative_users=early_negative,
+        load_stats=load_stats,
     )
     print(f"[base] rows={len(y_all)} positives={int((y_all > 0).sum())}", flush=True)
 
@@ -202,6 +224,8 @@ def main() -> None:
         if negative_users is not None and negative_users & discovery_users:
             raise RankingUndefinedError("negative users and discovery users overlap")
         x, y, stats = fold_view(x_all, y_all, users_all, discovery_users, exclude_benign, negative_users)
+        stats['n_positive_rows_dropped_confirmation'] += load_stats.get('positive_rows_dropped', 0)
+        stats['n_benign_rows_dropped_excluded_users'] += load_stats.get('negative_rows_dropped', 0)
         total_pos = stats["n_positive_rows_kept"] + stats["n_positive_rows_dropped_confirmation"]
         if total_pos == 0:
             raise RankingUndefinedError(

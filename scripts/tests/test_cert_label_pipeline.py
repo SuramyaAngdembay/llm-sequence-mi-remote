@@ -178,6 +178,41 @@ def test_pilot_completion_required_and_bound_to_bytes(tmp_path):
     with pytest.raises(ValueError, match='checksum'): load_validated_run(tmp_path)
 
 
+@pytest.mark.parametrize('engineering,matched', [(False,True),(True,True),(False,False)])
+def test_v3_complete_diagnostics_cannot_become_causal_results(tmp_path, engineering, matched):
+    pytest.importorskip('torch')
+    from intervention_audit import check_realized_controls
+    rows, man, val, bal=write_pilot(tmp_path)
+    keep=['zero','rpU_S','randI_S','randD_S']
+    rows=rows[rows.condition.isin(keep)]; bal=bal[bal.condition.isin(keep)]
+    man.update(contract='corrected-pilot-v3',conditions=keep,batch_size=1,full_logits_max_gib=0.,
+               live_state_manifest_sha256='a'*64,engineering_only=engineering,realized_control_relative_tolerance=.05)
+    parts=[]
+    for r in rows.itertuples():
+        for p in range(11):
+            n=0. if r.condition=='zero' else 1.
+            if not matched and r.condition=='randI_S': n*=2
+            parts.append(dict(condition=r.condition,receiver_idx=r.receiver_idx,position=p,
+                requested_l2=n,cast_l2=n,realized_l2=n,realization_error_l2=0.,
+                requested_nonzero_coordinates=int(n>0),realized_nonzero_coordinates=int(n>0),requested_dot_realized=n*n))
+    tok=pd.DataFrame(parts)
+    report=check_realized_controls(tok)
+    report.update(live_pre_edit_states_exact=True,checked_receiver_conditions=len(rows),engineering_only=engineering)
+    tok.to_parquet(tmp_path/'realized_token_edits.parquet',index=False)
+    (tmp_path/'implementation_validation.json').write_text(json.dumps(report))
+    (tmp_path/'pilot1_manifest.json').write_text(json.dumps(man))
+    rows.to_csv(tmp_path/'pilot1_rows.csv',index=False); bal.to_csv(tmp_path/'edit_balance_rows.csv',index=False)
+    complete_run(tmp_path)
+    load_validated_run(tmp_path,require_causal_validity=False)
+    if engineering or not matched:
+        with pytest.raises(ValueError,match='Diagnostic'): load_validated_run(tmp_path)
+    else: load_validated_run(tmp_path)
+    tok=tok.iloc[:-1]
+    tok.to_parquet(tmp_path/'realized_token_edits.parquet',index=False)
+    with pytest.raises(ValueError,match='grid'):
+        load_validated_run(tmp_path,require_completion=False,require_causal_validity=False)
+
+
 @pytest.mark.parametrize('problem', ['missing_row', 'missing_user', 'duplicate', 'nan', 'wrong_label', 'wrong_user',
                                   'failed_gate', 'nan_gate', 'bad_baseline', 'bad_count', 'missing_balance', 'wrong_plan'])
 def test_pilot_rejects_invalid_results(problem):
@@ -235,10 +270,13 @@ def test_presampling_and_dictionary_only_cpu_roundtrip(tmp_path):
     (extract / 'extract_summary.json').write_text(json.dumps({'layers': [26], 'pool_unit': 'token'}))
     sampled = tmp_path / 'presampled'
     cmd = [sys.executable, str(root / 'scripts/review/presample_sae_rows.py'), '--extract-dir', str(extract),
-           '--labels-override', str(labels_dir / 'sampling_labels_v1.parquet'), '--max-rows', '6', '--out-dir', str(sampled)]
+           '--labels-override', str(labels_dir / 'sampling_labels_v1.parquet'), '--max-rows', '6',
+           '--chunk-rows', '2', '--out-dir', str(sampled)]
     subprocess.run(cmd, check=True, capture_output=True, text=True)
     scores = pd.read_parquet(sampled / 'example_scores.parquet')
     assert scores.y.tolist() == [0, 1, 0] and scores.preserve_for_sampling.tolist() == [0, 0, 0]
+    assert len(list((sampled / 'layer_26').glob('chunk_*.pt'))) == 3
+    assert (sampled / 'COMPLETED.json').is_file()
     config = tmp_path / 'config.yaml'
     config.write_text('sweep:\n  latent_multipliers: [2]\n  topk: [1]\n')
     trained = tmp_path / 'trained'

@@ -128,7 +128,12 @@ def main():
         res['heterogeneity'][f'scenario {key}'] = {c: float(g[c].mean()) for c in ['primary', 'co_primary', 'specificity']} | {'n_users': len(g)}
     for key, g in pu.groupby('newly_included_positive_user'):
         res['heterogeneity'][f'newly_included_positive_user={key}'] = {c: float(g[c].mean()) for c in ['primary', 'co_primary', 'specificity']} | {'n_users': len(g)}
-    res['scope'] = 'Exploratory transductive analysis; newly included users are not an unexposed holdout. Edit balance measures proposed shifts; live-state/realized-edit validation is separate.'
+    res['scope'] = 'Exploratory transductive analysis; newly included users are not an unexposed holdout. Edit balance measures proposed shifts.'
+    if man['contract'] == 'corrected-pilot-v3':
+        res['implementation_validation'] = json.loads((a.run_dir/'implementation_validation.json').read_text())
+        res['scope'] += ' Live pre-edit states matched exactly; realized random-control token support matched, with per-token norms within the declared 5% tolerance. This tolerance is not exact dose equivalence.'
+    else:
+        res['scope'] += ' Live-state/realized-edit validation is separate and is not established by this v2 output.'
     a.out.write_text(json.dumps(res, indent=1, allow_nan=False) + '\n')
     for k, v in list(E.items()) + list(S.items()):
         print(f'{k}: {v}')

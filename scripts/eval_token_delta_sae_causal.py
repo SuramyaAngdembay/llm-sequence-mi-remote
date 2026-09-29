@@ -767,7 +767,7 @@ def score_with_token_patches(
     model: Any,
     tokenizer: Any,
     texts: Sequence[str],
-    patch_shifts: Sequence[np.ndarray],
+    patch_shifts: Sequence[np.ndarray] | None,
     *,
     layer: int,
     max_seq_len: int,
@@ -776,6 +776,8 @@ def score_with_token_patches(
     full_logits_max_gib: float = 28.0,
     max_logit_elements: int = 536_870_912,
     class_schema: str | None = None,
+    strict_patch_shapes: bool = False,
+    patch_observer: Any = None,
 ) -> Any:
     """Score `texts` with per-token hidden-state patches applied at `layer`.
 
@@ -786,6 +788,8 @@ def score_with_token_patches(
     asserted per batch rather than assumed.
     """
     layer_module = get_layer_module(model, layer)
+    if patch_shifts is not None and len(patch_shifts) != len(texts):
+        raise ValueError('Every text must have exactly one patch')
     device = next(model.parameters()).device
     out_scores: List[np.ndarray] = []
     out_sums: List[np.ndarray] = []
@@ -798,7 +802,7 @@ def score_with_token_patches(
 
     for start in range(0, len(texts), batch_size):
         batch_texts = list(texts[start : start + batch_size])
-        batch_patch = list(patch_shifts[start : start + batch_size])
+        batch_patch = list(patch_shifts[start : start + batch_size]) if patch_shifts is not None else None
         tok = tokenizer(
             batch_texts,
             return_tensors="pt",
@@ -821,18 +825,14 @@ def score_with_token_patches(
             else:
                 hs = output
                 rest = None
-            patch = torch.zeros_like(hs)
-            for bi, mat in enumerate(batch_patch):
-                valid = int(attn[bi].sum().item())
-                take = min(valid, int(mat.shape[0]))
-                if take > 0:
-                    patch[bi, :take, :] = torch.from_numpy(mat[:take]).to(device=device, dtype=hs.dtype)
-            hs = hs + patch
+            from intervention_audit import apply_token_shift
+            hs = apply_token_shift(hs, batch_patch, attn, strict=strict_patch_shapes,
+                                   observer=patch_observer, offset=start)
             if rest is None:
                 return hs
             return (hs, *rest)
 
-        handle = layer_module.register_forward_hook(hook)
+        handle = layer_module.register_forward_hook(hook) if batch_patch is not None else None
         try:
             full_logits_gib = estimate_full_logits_gib(model, tok["input_ids"])
             if full_logits_gib <= float(full_logits_max_gib):
@@ -883,7 +883,8 @@ def score_with_token_patches(
                     )
                 del out, hidden_states
         finally:
-            handle.remove()
+            if handle is not None:
+                handle.remove()
         nll = nll_t.cpu().numpy()
         out_scores.append(nll)
         if class_ids is not None:
@@ -894,7 +895,7 @@ def score_with_token_patches(
             # misalignment fails at the source instead of moving a result.
             recon = cs.sum(axis=1) / np.maximum(cc.sum(axis=1), 1.0)
             worst = float(np.abs(recon - nll).max()) if len(nll) else 0.0
-            if worst > 1e-4:
+            if not np.isfinite(worst) or worst > 1e-4:
                 raise RuntimeError(
                     f"per-class sums do not reconstruct the scalar NLL (max abs diff {worst:.3e})"
                 )

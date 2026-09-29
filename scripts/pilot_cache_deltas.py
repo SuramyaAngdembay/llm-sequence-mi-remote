@@ -28,6 +28,8 @@ def main() -> None:
     ap.add_argument("--populations", type=Path, required=True)
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
+    if args.out.exists() or args.out.with_suffix('.json').exists():
+        raise ValueError('Refusing to overwrite a pilot cache')
 
     pops = json.loads(args.populations.read_text())
     keep = sorted(set(pops["malicious_receivers"]) | set(pops["matched_benign_receivers"])
@@ -51,8 +53,9 @@ def main() -> None:
                 raise SystemExit(f"example {i}: positions are not 0..n-1")
             if hi - lo != int(scores.loc[i, "n_tokens"]):
                 raise SystemExit(f"example {i}: {hi - lo} rows but n_tokens={scores.loc[i, 'n_tokens']}")
-            parts.append(np.asarray(obj["delta"][lo:hi], dtype=np.float16))
-            idx_parts.append(ex[lo:hi]); pos_parts.append(pos[lo:hi])
+            # Own the small slices; views would keep each entire ~1GB chunk alive.
+            parts.append(np.array(obj["delta"][lo:hi], dtype=np.float16, copy=True))
+            idx_parts.append(ex[lo:hi].copy()); pos_parts.append(pos[lo:hi].copy())
         sources.append({"chunk": path.name, "bytes": path.stat().st_size})
         del obj
         print(f"[cache] chunk {cid} done", flush=True)

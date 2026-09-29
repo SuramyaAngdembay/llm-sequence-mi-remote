@@ -11,6 +11,7 @@ from cert_calendar_labels import VERSION, file_sha256
 
 VIEWS = ('full', 'profile_only', 'behavior_only')
 FILES = ('pilot1_rows.csv', 'pilot1_manifest.json', 'validity.json', 'edit_balance_rows.csv')
+V3_FILES = FILES + ('realized_token_edits.parquet', 'implementation_validation.json')
 LIMITS = {'orig_equals_residual_plus_reconstruction_max_abs': 1e-4,
           'zero_edit_vs_unhooked_max_abs': 1e-5, 'alpha_zero_vs_unhooked_max_abs': 1e-5}
 
@@ -26,7 +27,7 @@ def validate_validity(validity, n_receivers):
 
 
 def validate_tables(rows, man, validity, balance):
-    if man.get('label_version') != VERSION or man.get('contract') != 'corrected-pilot-v2':
+    if man.get('label_version') != VERSION or man.get('contract') not in ('corrected-pilot-v2', 'corrected-pilot-v3'):
         raise ValueError('Pilot lacks the corrected label/output contract')
     expected = pd.DataFrame(man['expected_receivers'])
     cols = ['receiver_idx', 'receiver_id', 'user', 'kind', 'pair', 'y']
@@ -93,22 +94,61 @@ def validate_tables(rows, man, validity, balance):
     validate_validity(validity, len(expected))
 
 
-def load_validated_run(run_dir, *, require_completion=True):
+def validate_implementation(root, man, rows):
+    from intervention_audit import check_realized_controls
+    tokens = pd.read_parquet(root/'realized_token_edits.parquet')
+    impl = json.loads((root/'implementation_validation.json').read_text())
+    if (man.get('batch_size') != 1 or man.get('full_logits_max_gib') != 0.
+            or not man.get('live_state_manifest_sha256') or impl.get('live_pre_edit_states_exact') is not True):
+        raise ValueError('Missing live-state implementation evidence')
+    if impl.get('checked_receiver_conditions') != len(rows):
+        raise ValueError('Incomplete pre-edit state checks')
+    keys = ['condition', 'receiver_idx', 'position']
+    numeric = ['requested_l2', 'cast_l2', 'realized_l2', 'realization_error_l2',
+               'requested_nonzero_coordinates', 'realized_nonzero_coordinates', 'requested_dot_realized']
+    if (not set(keys+numeric) <= set(tokens) or tokens[keys].isna().any().any()
+            or tokens.duplicated(keys).any() or not np.isfinite(tokens[numeric].to_numpy(float)).all()):
+        raise ValueError('Invalid realized-edit measurements')
+    if (tokens[numeric[:-1]] < 0).any().any():
+        raise ValueError('Negative norm/count measurement')
+    measured = {(c, int(i)): group.position.tolist() for (c, i), group in tokens.groupby(keys[:2])}
+    expected = {(r.condition, int(r.receiver_idx)): list(range(int(r.n_targets_full)+1)) for r in rows.itertuples()}
+    if measured != expected:
+        raise ValueError('Incomplete realized-edit token grid')
+    zero = tokens[tokens.condition == 'zero']
+    if (zero[numeric] != 0).any().any():
+        raise ValueError('Zero condition changed hidden states')
+    if man.get('realized_control_relative_tolerance') != 0.05:
+        raise ValueError('Changed predeclared matching tolerance')
+    gate = check_realized_controls(tokens, relative_tolerance=0.05)
+    if any(impl.get(k) != v for k, v in gate.items()):
+        raise ValueError('Realized control gate does not reproduce')
+    if impl.get('engineering_only') != man.get('engineering_only'):
+        raise ValueError('Engineering/scientific cohort classification differs')
+    return impl
+
+
+def load_validated_run(run_dir, *, require_completion=True, require_causal_validity=True):
     root = Path(run_dir)
+    man = json.loads((root / FILES[1]).read_text())
+    files = V3_FILES if man.get('contract') == 'corrected-pilot-v3' else FILES
     if require_completion:
         done = json.loads((root / 'COMPLETED.json').read_text())
-        if done.get('status') != 'complete' or done.get('contract') != 'corrected-pilot-v2':
+        if done.get('status') != 'complete' or done.get('contract') != man.get('contract'):
             raise ValueError('Pilot did not complete')
-        if set(done.get('files', {})) != set(FILES):
+        if set(done.get('files', {})) != set(files):
             raise ValueError('Pilot completion manifest is incomplete')
-        for name in FILES:
+        for name in files:
             if done['files'][name] != file_sha256(root / name):
                 raise ValueError(f'Pilot completion checksum mismatch: {name}')
     rows = pd.read_csv(root / FILES[0])
-    man = json.loads((root / FILES[1]).read_text())
     validity = json.loads((root / FILES[2]).read_text())
     balance = pd.read_csv(root / FILES[3])
     validate_tables(rows, man, validity, balance)
+    if man.get('contract') == 'corrected-pilot-v3':
+        impl = validate_implementation(root, man, rows)
+        if require_causal_validity and (not impl['passed'] or impl['engineering_only']):
+            raise ValueError('Diagnostic/unmatched-dose pilot cannot enter the causal-effect analyzer')
     return rows, man, validity, balance
 
 
@@ -116,9 +156,10 @@ def complete_run(run_dir):
     root = Path(run_dir)
     if (root / 'COMPLETED.json').exists():
         raise ValueError('Refusing to overwrite a completed pilot')
-    load_validated_run(root, require_completion=False)
-    done = {'status': 'complete', 'contract': 'corrected-pilot-v2',
-            'files': {name: file_sha256(root / name) for name in FILES}}
+    _, man, _, _ = load_validated_run(root, require_completion=False, require_causal_validity=False)
+    files = V3_FILES if man['contract'] == 'corrected-pilot-v3' else FILES
+    done = {'status': 'complete', 'contract': man['contract'],
+            'files': {name: file_sha256(root / name) for name in files}}
     temp = root / 'COMPLETED.partial'
     temp.write_text(json.dumps(done, indent=2, allow_nan=False) + '\n')
     temp.rename(root / 'COMPLETED.json')
