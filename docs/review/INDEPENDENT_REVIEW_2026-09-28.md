@@ -48,6 +48,14 @@ No causal, dictionary or comparison-model claim is cleared by this review.
 | F6 | disclosure | Time-series gates pass as reported. **w7 PROFILE uses 99.5% of its tolerance.** I reran all three checkpoints on Aquaman at 4 and 1 threads: identical errors, deterministic. A tolerance pass is not bitwise equality, as Codex states. | `timeseries_gate_rerun/` |
 | F7 | provenance | Coverage of the r4.2 class cache reproduces: 40,519 of 42,468 unseen days; 1,949 missing days, 10 users, 19 corrected positives, 0 old positives, users missing entirely rather than partly. The factorial adapters remain separate from the headline adapters, and their training-byte provenance is weaker (metadata-level). I did not strengthen it. | `independent_metrics.py` coverage block |
 
+**Findings added during Stage B preparation (before any new effect was computed):**
+
+| # | severity | finding | evidence |
+|---|---|---|---|
+| F8 | reproducibility | `train_sae` never seeds torch, so no historical dictionary can be refit bit-for-bit. Its `--seed` only controls row sampling, which confounds the C18/C19 seed study with initialisation noise. Fixed on the branch with an optional `--torch-seed` (default unchanged). | `scripts/train_delta_sae_frontier.py`, `sae_core.train_sae` (unseeded DataLoader shuffle and initialisation) |
+| F9 | **eligibility error in historical interventions** (C15, C25, C35) | The historical donor pools treated every day labelled 0 as a benign donor, including official insiders' days. **Package 4:** 19,619 "benign" donor days from 136 users, of whom **65 are official insiders**: 7,932 days, of which 7,798 are window-negative and 134 positive, making up **43% of benign-donor rows**. **Pilot 1:** 7 of 46 donor days came from insiders (departments 12 and 21), and 80 of its 197 pairs remain label-valid. **Under corrected eligibility (non-insider donors only), 225,888 of Package 4's 530,792 candidate rows are invalid.** No historical tuple is exactly reusable for the corrected claim, because the dictionary is refit. | `tuple_inventory.json`, `pkg4_benign_donor_breakdown.json`, `historical_pilot1_eligibility.json` |
+| F10 | provenance | The repaired-3B delta indices are **label-selected subsamples** (5,396 r4.2 / 7,074 r6.2 rows per seed). The audit's missing counts reproduce: 211 r4.2 and 11 r6.2 corrected positives per seed. Their negative pools were drawn with the old labels, so corrected replication (C22) needs a re-drawn pool, not only an extension. | `repaired3b_coverage_recheck.json` |
+
 Targeted tests at `c31efcf`: `test_cert_calendar_recovery.py` 18 passed;
 `test_eval_metrics_core.py` all checks passed (`targeted_tests_at_c31efcf.txt`).
 
