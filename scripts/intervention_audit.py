@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 import numpy as np
-import torch
 
 
 def apply_token_shift(hidden, shifts, attention_mask, *, strict=False, observer=None, offset=0):
     """Apply the historical dtype-cast/add path and optionally observe its result."""
+    import torch
     if len(shifts) != hidden.shape[0]:
         raise ValueError('Patch batch size mismatch')
     patch = torch.zeros_like(hidden)

@@ -180,7 +180,6 @@ def test_pilot_completion_required_and_bound_to_bytes(tmp_path):
 
 @pytest.mark.parametrize('engineering,matched', [(False,True),(True,True),(False,False)])
 def test_v3_complete_diagnostics_cannot_become_causal_results(tmp_path, engineering, matched):
-    pytest.importorskip('torch')
     from intervention_audit import check_realized_controls
     rows, man, val, bal=write_pilot(tmp_path)
     keep=['zero','rpU_S','randI_S','randD_S']
