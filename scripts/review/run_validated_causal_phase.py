@@ -33,9 +33,11 @@ def main():
     ap=argparse.ArgumentParser()
     ap.add_argument('--work-dir',type=Path,required=True)
     ap.add_argument('--phase-dir',type=Path,required=True)
+    ap.add_argument('--run-tag',default='v1',help='new plan name; partial GPU outputs still cannot be resumed')
     a=ap.parse_args(); w=a.work_dir; p=a.phase_dir
+    if not a.run_tag.isalnum(): raise ValueError('run-tag must be alphanumeric')
     repo=Path(__file__).resolve().parents[2]
-    plan_path=p/'execution_plan_v1.json'
+    plan_path=p/f'execution_plan_{a.run_tag}.json'
     if plan_path.exists(): raise ValueError('This execution plan already exists; do not resume implicitly')
     live=p/'live_states_b1_v2'; sample=p/'presampled_l26'; x=w/'aquaman_l26_v1/merged_calendar_v2'
     labels=w/'labels_v2'; frontier=p/'frontier_v1'; selected=p/'frontier_selected_v1'
@@ -90,7 +92,7 @@ def main():
         if code: raise RuntimeError(f'{name} failed with exit {code}; dependent jobs remain held')
 
     try:
-        deadline=read(p/'presample_launch.json')['launched_at_epoch']+2700
+        deadline=read(p/'presample_launch.json')['started_epoch']+2700
         while not (sample/'COMPLETED.json').exists():
             if time.time()>deadline: raise RuntimeError('CPU preparation exceeded its existing 45-minute bound')
             time.sleep(10)
