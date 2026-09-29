@@ -87,6 +87,7 @@ def fold_view(
     users: np.ndarray,
     keep_positive_users: set[str],
     exclude_benign_users: set[str] | None = None,
+    negative_users: set[str] | None = None,
 ) -> tuple[np.ndarray, np.ndarray, dict]:
     pos_mask = y > 0
     pos_keep = pos_mask & np.isin(users, list(keep_positive_users))
@@ -95,6 +96,10 @@ def fold_view(
         # strict separation: held-out users contribute nothing to the ranking,
         # not even their benign rows
         benign_keep = benign_keep & ~np.isin(users, list(exclude_benign_users))
+    if negative_users is not None:
+        # negatives only from the listed users (e.g. held-out benign users, so that an insider's
+        # window-negative days are never treated as benign activity)
+        benign_keep = benign_keep & np.isin(users, list(negative_users))
     keep = pos_keep | benign_keep
     stats = {
         "n_rows": int(keep.sum()),
@@ -128,6 +133,10 @@ def main() -> None:
                     help="distinct discovery users that must contribute positive rows")
     ap.add_argument("--active-control-min-frac", type=float, default=0.002,
                     help="threshold used to record control{n}_active in the manifest")
+    ap.add_argument("--labels-override", type=Path, default=None,
+                    help="parquet (example_idx, example_id, y) replacing the score index's labels")
+    ap.add_argument("--negative-user-file", type=Path, default=None,
+                    help="if given, negative rows come only from these users")
     args = ap.parse_args()
 
     cfg_rel = Path(f"layer_{args.layer}") / f"m{args.latent_mult:02d}_k{args.k:02d}"
@@ -138,6 +147,17 @@ def main() -> None:
     scores = pd.read_parquet(args.extract_dir / "example_scores.parquet")
     user_by_example = dict(zip(scores["example_idx"].astype(int), scores["user_id"].astype(str)))
     y_by_example = dict(zip(scores["example_idx"].astype(int), scores["y"].astype(int)))
+    if args.labels_override is not None:
+        ov = pd.read_parquet(args.labels_override)
+        if set(ov.example_idx.astype(int)) != set(y_by_example) or ov.example_idx.duplicated().any():
+            raise ValueError("labels override must cover exactly the score index's example_idx values")
+        ids = dict(zip(scores["example_idx"].astype(int), scores["example_id"].astype(str)))
+        if any(ids[int(i)] != str(e) for i, e in zip(ov.example_idx, ov.example_id)):
+            raise ValueError("labels override disagrees with the score index on example_id")
+        y_by_example = dict(zip(ov.example_idx.astype(int), ov.y.astype(int)))
+    negative_users = None
+    if args.negative_user_file is not None:
+        negative_users = {ln.strip() for ln in args.negative_user_file.read_text().splitlines() if ln.strip()}
 
     bundle = torch.load(src_cfg / "delta_sae_model.pt", map_location="cpu", weights_only=False)
     device = torch.device(args.device if torch.cuda.is_available() or args.device == "cpu" else "cpu")
@@ -183,7 +203,9 @@ def main() -> None:
             overlap = sorted(exclude_benign & discovery_users)
             if overlap:
                 raise RankingUndefinedError(f"users both in discovery and excluded: {overlap[:5]}")
-        x, y, stats = fold_view(x_all, y_all, users_all, discovery_users, exclude_benign)
+        if negative_users is not None and negative_users & discovery_users:
+            raise RankingUndefinedError("negative users and discovery users overlap")
+        x, y, stats = fold_view(x_all, y_all, users_all, discovery_users, exclude_benign, negative_users)
         total_pos = stats["n_positive_rows_kept"] + stats["n_positive_rows_dropped_confirmation"]
         if total_pos == 0:
             raise RankingUndefinedError(
@@ -240,6 +262,10 @@ def main() -> None:
             "exclude_benign_user_file": str(args.exclude_benign_user_file) if args.exclude_benign_user_file else None,
             "n_exclude_benign_users": len(exclude_benign) if exclude_benign else 0,
             "seed": args.seed,
+            "labels_override": str(args.labels_override) if args.labels_override else None,
+            "labels_override_sha256": _sha256(args.labels_override) if args.labels_override else None,
+            "negative_user_file": str(args.negative_user_file) if args.negative_user_file else None,
+            "n_negative_users": len(negative_users) if negative_users is not None else None,
             "row_stats": stats,
             "eval_stats": {k: float(v) for k, v in eval_stats.items()},
             "ranking_file_sha256": _sha256(dst_cfg / "delta_sae_top_features.csv"),

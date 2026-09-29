@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -55,6 +56,22 @@ def write_benign_only_outputs(cfg_dir: Path, feature_df: pd.DataFrame, eval_stat
     (cfg_dir / RANKING_MARKER_FILE).write_text(json.dumps(marker, indent=2) + "\n")
 
 
+def override_labels(score_index: pd.DataFrame, path: Path) -> np.ndarray:
+    """Labels used for sampling, from a checked table (example_idx, example_id, y) that covers every example.
+
+    Added for the calendar-label review (docs/review/STAGE_B_PROTOCOL_2026-09-28.md): the historical score index
+    keeps its original labels; the override must name exactly the same examples with the same IDs."""
+    ov = pd.read_parquet(path).set_index("example_idx")
+    if set(ov.index) != set(score_index.index) or ov.index.duplicated().any():
+        raise ValueError("labels override must cover exactly the score index's example_idx values")
+    if not (ov.loc[score_index.index, "example_id"].to_numpy() == score_index["example_id"].to_numpy()).all():
+        raise ValueError("labels override disagrees with the score index on example_id")
+    y = ov.loc[score_index.index, "y"].to_numpy(dtype=np.int64)
+    if not np.isin(y, [0, 1]).all():
+        raise ValueError("labels override must be binary")
+    return y
+
+
 def load_layer_vectors(
     extract_dir: Path,
     layer: int,
@@ -62,9 +79,12 @@ def load_layer_vectors(
     max_rows: int = 0,
     seed: int = 42,
     benign_only: bool = False,
+    labels_override: Path | None = None,
 ) -> tuple[np.ndarray, np.ndarray, pd.DataFrame]:
     scores = pd.read_parquet(extract_dir / "example_scores.parquet")
     score_index = scores.sort_values("example_idx").reset_index(drop=True).set_index("example_idx", drop=False)
+    if labels_override is not None:
+        score_index["y"] = override_labels(score_index, labels_override)
     layer_dir = extract_dir / f"layer_{layer}"
     chunk_paths = sorted(layer_dir.glob("chunk_*.pt"))
     if not chunk_paths:
@@ -243,6 +263,8 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--benign-only", action="store_true",
                     help="train the dictionary on benign rows only (dictionary-level independence)")
+    ap.add_argument("--labels-override", type=Path, default=None,
+                    help="parquet (example_idx, example_id, y) used instead of the score index's y for sampling")
     args = ap.parse_args()
 
     cfg = load_yaml(args.config)
@@ -273,7 +295,13 @@ def main() -> None:
             max_rows=args.max_rows,
             seed=args.seed + layer,
             benign_only=bool(args.benign_only),
+            labels_override=args.labels_override,
         )
+        if args.labels_override is not None:
+            (out_dir / f"labels_override_layer{layer}.json").write_text(json.dumps({
+                "labels_override": str(args.labels_override),
+                "labels_override_sha256": hashlib.sha256(args.labels_override.read_bytes()).hexdigest(),
+                "rows_loaded": int(len(y)), "positive_rows_loaded": int((y > 0).sum())}, indent=1) + "\n")
         x, y, scores = subsample_rows(x, y, scores, max_rows=args.max_rows, seed=args.seed + layer)
         mean, std = tensor_stats(x)
         x -= mean
