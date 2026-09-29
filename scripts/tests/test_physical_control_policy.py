@@ -1,4 +1,5 @@
 import sys
+import json
 from pathlib import Path
 import numpy as np
 import pytest
@@ -18,6 +19,7 @@ def arrays():
 def test_replaces_only_failed_draw_deterministically_and_preserves_zero_support():
     a=arrays(); kw=dict(seed=42,receiver=3,condition='randD_S')
     result,log=match_dictionary_control(*a,**kw)
+    assert json.loads(json.dumps(log))==log
     again,log2=match_dictionary_control(*a,**kw)
     np.testing.assert_array_equal(result,again); assert log==log2
     assert log['changed_positions']==[0]

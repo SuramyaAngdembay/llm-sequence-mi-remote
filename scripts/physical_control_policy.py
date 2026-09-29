@@ -60,7 +60,7 @@ def match_dictionary_control(before, reference, original, directions, *, seed, r
             candidate = directions[index] * np.linalg.norm(reference[pos])
             norm = float(np.linalg.norm(realized_bfloat16(before[pos:pos+1], candidate[None,:])[0]))
             error = abs(norm-target[pos])/target[pos]
-            accepted = norm > 0 and error <= tolerance
+            accepted = bool(norm > 0 and error <= tolerance)
             log.append(dict(position=int(pos), attempt=attempt, direction_pool_index=index,
                 realized_norm=norm, target_realized_norm=float(target[pos]), relative_error=float(error), accepted=accepted))
             if accepted:
