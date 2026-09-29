@@ -139,3 +139,20 @@ inputs, conditions and gates. The original Stage C driver stays held.
 Evidence is archived at
 `/Users/suramya/Documents/mi-paper-causal-validation-2026-09-29/REPORT.md` and
 `/data/suramya/cert_review_20260928/causal_validation_20260929/`.
+
+## User-authorized full-run budget extension
+
+After reviewing the compute stop, the user explicitly instructed: "run it anyway
+even if the budget is overboard unless it is not possible to run it" and then
+"continue". The full pilot now has a separate 5,400-second (90-minute) allowance.
+The previous 8,100-second phase cap and 3,600-second full-run subcap are superseded
+for this authorized continuation; all previously charged time remains recorded.
+
+`run_authorized_full_pilot.py` in the phase artifact directory launches the exact
+previously proposed command: 316 receivers, 158 pairs, 34 users, 15 conditions.
+It verifies prior evidence/code/input hashes, the engineering gates, the SAE and
+ranking, and the cached base-model files before launch. Runtime intervention code
+remains commit `b5242cd`; no scientific setting or validity tolerance changes.
+After completion it checks full-cohort validity and runs the prespecified analysis
+only if the realized-control gate passes. Output completeness alone does not
+clear a causal claim. Execution status is recorded in `execution_full_v1.json`.
