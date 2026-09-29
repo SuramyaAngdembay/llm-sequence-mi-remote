@@ -57,3 +57,30 @@ Evidence: `control_rounding_diagnostic_v1/diagnostic.json`,
 `control_rounding_diagnostic_v1/scalar_feasibility.json`, and
 `full_completion_check_v1.json` under
 `/data/suramya/cert_review_20260928/causal_validation_20260929/`.
+
+## Completed diagnostic estimates and separate remedy test
+
+The explicit diagnostic mode retained all 4,740 rows and original equations.
+An independent CSV-based calculation reproduced 95 estimate/interval sets (285
+numbers) within 9.33e-15. The primary selected-versus-isotropic contrast is
++0.005433 [0.002277, 0.009191]; the co-primary selected-versus-control-feature
+policy contrast is +0.004373 [0.001384, 0.007859]. The specificity contrast is
+−0.003864 [−0.008807, 0.000146]. These are behavior-token NLL contrasts with
+95% user-bootstrap intervals, from a post-run diagnostic, not a retrospective
+original-protocol pass. Attack specificity is not established.
+
+Under the separately declared [physical-control policy](PHYSICAL_CONTROL_POLICY_V1.md),
+the first replacement candidate (feature 4528) produced a 1.84502% norm mismatch,
+passing the unchanged 5% rule. Before scoring it, an independent model load
+exactly reproduced all six score views and counts for the original baseline,
+reference and original control. Live states/edit measurements and CPU/GPU
+realization matched exactly. Only token 95's requested direction changed. The
+replacement is stored separately, not merged into the original full run.
+
+The probe finished in 33.42 seconds. Its first attempt failed before LM loading
+after 8.10 seconds because a NumPy boolean could not be serialized as JSON; the
+attempt is preserved and a targeted regression test now covers serialization.
+The relevant suite passed 45 tests; the three physical-policy tests passed again
+after that fix. Source full-run checksums remain unchanged. No adapter/SAE
+retraining or full causal rerun was required for this diagnosis and feasibility
+test. No paper claim is newly cleared.
