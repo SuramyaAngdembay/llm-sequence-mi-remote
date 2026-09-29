@@ -104,3 +104,38 @@ comparison that changed batches, hardware, or loss arithmetic.
   Transformers version lacks `hf_device_map`. The corrected check inspects actual
   parameter devices. Preserve that failed attempt and include its time in the
   compute accounting.
+
+## Completed engineering validation
+
+Execution plan v4 completed the CPU-prepared ranking retry in 741.94 seconds and
+the fixed eight-pair engineering pilot in 416.36 seconds. Ranking used 1,956,099
+rows, including 171,917 positive rows from all 35 discovery users, and negatives
+from the 79 declared users. Every ordered row identity independently reproduced.
+Selected features are `[3843, 3230, 3199, 3975, 1394]`; active low-gap controls are
+`[1087, 3632, 1319, 3127, 72]`. The completed dictionary was reused.
+
+All 240 receiver-condition outputs and 173,115 token-condition measurements are
+complete. Live pre-edit states matched exactly throughout. Zero and alpha-zero
+NLL differences are exactly zero. Reconstruction-identity residual is
+3.814697265625e-6. All four random-control comparisons have identical token support
+and no per-token norm error above 5%; the largest error is 0.581711%. A separate
+CPU audit reproduced feature selection, corrected receiver labels and identities,
+donor eligibility, complete grids, score-view arithmetic, and physical matching.
+The scientific analyzer correctly rejects this engineering-only cohort.
+
+Selected and control-feature arms edit 32 and 124 token positions respectively
+out of 11,541. Matching applies to random controls within each arm; it does not
+make selected-versus-control-feature effects equal-dose comparisons. These checks
+establish implementation behavior on the engineering cohort, not anomaly
+specificity, mediation, or validity on every full-cohort token.
+
+The phase stopped at its compute gate without launching the full pilot. Charged
+stage wall time is 5,504.51 seconds, including the failed ranking attempt.
+Full-run prediction is 4,100.88 seconds, versus 2,580 seconds available and a
+separate 3,600-second subcap. Do not describe the full pilot as running or complete.
+A separate continuation needs a suitable new budget and must preserve all frozen
+inputs, conditions and gates. The original Stage C driver stays held.
+
+Evidence is archived at
+`/Users/suramya/Documents/mi-paper-causal-validation-2026-09-29/REPORT.md` and
+`/data/suramya/cert_review_20260928/causal_validation_20260929/`.
