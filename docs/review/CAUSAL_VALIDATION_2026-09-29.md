@@ -64,6 +64,25 @@ total. Estimate full runtime from engineering throughput and frozen token counts
 do not launch it if the remaining envelope is insufficient. This changes no
 scientific sample, feature selection, endpoint, or validity tolerance.
 
+### Ranking preparation amendment (after dictionary completion, before rankings)
+
+The dictionary completed all 20 epochs (MSE 0.0895962054; checkpoint SHA256
+`aa0fd14f3d7bd6e25db6a3c619fa6c223616e673ee06a351d78caa97129bcae1`).
+The first ranking attempt hit its 1,200-second cap after loading 1,956,099 rows
+(171,917 positives) and before writing a ranking. It produced no selected features
+or intervention outcomes. Its full 1,206.1-second wall time remains charged.
+
+Prepare and normalize the exact same ranking rows in a separate CPU-only job,
+capped at 45 minutes. Preserve row identities, label roles, seed, order and
+normalization operations in a checksummed artifact. Read the normalized matrix
+with a memory map for the existing GPU evaluator, keeping its 8,192-row batches
+and accumulation code. Test direct versus prepared evaluation for exact agreement
+in feature scores, statistics and selected sets before launching the real job.
+Do not refit the completed dictionary. The retry, engineering pilot and any full
+pilot must fit the remaining 3,753.8 seconds of the original GPU-stage envelope;
+the already failed attempt is not refunded. This is a resource correction, not a
+change to the scientific ranking policy or an outcome-based selection.
+
 On an 8GB card, score token losses in bounded chunks and use the same scoring
 path for unhooked, zero, and edited runs. Do not infer a noise floor from a
 comparison that changed batches, hardware, or loss arithmetic.

@@ -53,6 +53,7 @@ def load_rows_base(
     eligible_positive_users: set[str] | None = None,
     eligible_negative_users: set[str] | None = None,
     load_stats: dict | None = None,
+    row_index_parts: list | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Load ALL positive rows plus a benign sample once; returns (x, y, users)."""
     layer_dir = extract_dir / f"layer_{layer}"
@@ -87,6 +88,9 @@ def load_rows_base(
         vec_parts.append(np.asarray(vecs[keep], dtype=np.float32))
         y_parts.append(y[keep])
         user_parts.append(users[keep])
+        if row_index_parts is not None:
+            row_index_parts.append((idx[keep], np.asarray(obj['position'], dtype=np.int64)[keep]))
+        print(f'[rows] {path.name}: kept {int(keep.sum())}', flush=True)
     return (
         np.concatenate(vec_parts, axis=0),
         np.concatenate(y_parts, axis=0),
@@ -101,6 +105,7 @@ def fold_view(
     keep_positive_users: set[str],
     exclude_benign_users: set[str] | None = None,
     negative_users: set[str] | None = None,
+    copy_rows: bool = True,
 ) -> tuple[np.ndarray, np.ndarray, dict]:
     pos_mask = y > 0
     pos_keep = pos_mask & np.isin(users, list(keep_positive_users))
@@ -121,7 +126,52 @@ def fold_view(
         "n_benign_rows": int(benign_keep.sum()),
         "n_benign_rows_dropped_excluded_users": int((~pos_mask & ~benign_keep).sum()),
     }
+    if not copy_rows and keep.all():
+        return x, y, stats
     return x[keep], y[keep], stats
+
+
+def prepared_binding(args, src_cfg):
+    from cert_calendar_labels import file_sha256
+    paths={'model':src_cfg/'delta_sae_model.pt','source':args.extract_dir/'COMPLETED.json',
+           'labels':args.labels_override,'discovery':args.discovery_user_file,'negative':args.negative_user_file}
+    if any(p is None for p in paths.values()) or args.louo_splits_dir is not None or args.exclude_benign_user_file is not None:
+        raise ValueError('Prepared ranking requires the single fixed discovery/negative split and typed labels')
+    return {'hashes':{k:file_sha256(p) for k,p in paths.items()},'layer':args.layer,
+            'seed':args.seed,'benign_sample_prob':args.benign_sample_prob,'normalization':'float32 subtract mean, then divide std'}
+
+
+def save_prepared_rows(root, x, y, users, row_index_parts, stats, binding):
+    from cert_calendar_labels import file_sha256
+    root=Path(root)
+    if root.exists(): raise ValueError('Use a new prepared-ranking directory')
+    if len(x)!=len(y) or len(users)!=len(y) or sum(len(v[0]) for v in row_index_parts)!=len(y):
+        raise ValueError('Prepared row identities do not align')
+    root.mkdir(parents=True)
+    np.save(root/'x_normalized.npy',x)
+    np.save(root/'y.npy',y); np.save(root/'users.npy',users)
+    np.savez(root/'row_indices.npz',example_idx=np.concatenate([v[0] for v in row_index_parts]),
+             position=np.concatenate([v[1] for v in row_index_parts]))
+    names=['x_normalized.npy','y.npy','users.npy','row_indices.npz']
+    m={'status':'complete','contract':'prepared-discovery-ranking-v1','binding':binding,'row_stats':stats,
+       'rows':len(y),'d_in':x.shape[1],'files':{n:file_sha256(root/n) for n in names}}
+    temporary=root/'COMPLETED.partial'
+    temporary.write_text(json.dumps(m,indent=2,allow_nan=False)+'\n')
+    temporary.rename(root/'COMPLETED.json')
+
+
+def load_prepared_rows(root, binding):
+    from cert_calendar_labels import file_sha256
+    root=Path(root); m=json.loads((root/'COMPLETED.json').read_text())
+    if m.get('status')!='complete' or m.get('contract')!='prepared-discovery-ranking-v1' or m.get('binding')!=binding:
+        raise ValueError('Prepared ranking input contract changed')
+    names={'x_normalized.npy','y.npy','users.npy','row_indices.npz'}
+    if set(m['files'])!=names or any(file_sha256(root/n)!=m['files'][n] for n in names):
+        raise ValueError('Prepared ranking checksum mismatch')
+    x=np.load(root/'x_normalized.npy',mmap_mode='c'); y=np.load(root/'y.npy'); users=np.load(root/'users.npy')
+    if x.shape!=(m['rows'],m['d_in']) or len(y)!=len(x) or len(users)!=len(x) or x.dtype!=np.float32:
+        raise ValueError('Prepared ranking shape mismatch')
+    return x,y,users,m
 
 
 def main() -> None:
@@ -150,7 +200,11 @@ def main() -> None:
                     help="parquet (example_idx, example_id, y) replacing the score index's labels")
     ap.add_argument("--negative-user-file", type=Path, default=None,
                     help="if given, negative rows come only from these users")
+    ap.add_argument('--prepare-only-dir',type=Path,default=None,help='CPU-only normalized row preparation; no GPU model loaded')
+    ap.add_argument('--prepared-rows-dir',type=Path,default=None,help='verified normalized rows, preserving original order and batches')
     args = ap.parse_args()
+    if args.prepare_only_dir is not None and args.prepared_rows_dir is not None:
+        raise ValueError('Choose preparation or prepared evaluation')
 
     cfg_rel = Path(f"layer_{args.layer}") / f"m{args.latent_mult:02d}_k{args.k:02d}"
     src_cfg = args.frontier_dir / cfg_rel
@@ -170,9 +224,7 @@ def main() -> None:
 
     bundle = torch.load(src_cfg / "delta_sae_model.pt", map_location="cpu", weights_only=False)
     device = torch.device(args.device if torch.cuda.is_available() or args.device == "cpu" else "cpu")
-    model = TopKSAE(d_in=int(bundle["d_in"]), d_latent=int(bundle["d_latent"]), k=int(bundle["k"])).to(device)
-    model.load_state_dict(bundle["state_dict"])
-    model.eval()
+    model = None
     x_mean = np.asarray(bundle["x_mean"], dtype=np.float32)
     x_std = np.asarray(bundle["x_std"], dtype=np.float32)
 
@@ -189,17 +241,24 @@ def main() -> None:
         early_positive = {s.strip() for s in args.discovery_user_file.read_text().splitlines() if s.strip()}
         early_negative = negative_users
     load_stats = {}
-    x_all, y_all, users_all = load_rows_base(
-        args.extract_dir,
-        args.layer,
-        user_by_example=user_by_example,
-        y_by_example=y_by_example,
-        benign_sample_prob=args.benign_sample_prob,
-        seed=args.seed,
-        eligible_positive_users=early_positive,
-        eligible_negative_users=early_negative,
-        load_stats=load_stats,
-    )
+    row_index_parts=[] if args.prepare_only_dir is not None else None
+    binding=prepared_binding(args,src_cfg) if args.prepare_only_dir is not None or args.prepared_rows_dir is not None else None
+    if args.prepared_rows_dir is not None:
+        x_all,y_all,users_all,prepared=load_prepared_rows(args.prepared_rows_dir,binding)
+        with np.load(args.prepared_rows_dir/'row_indices.npz') as identities:
+            idx=identities['example_idx']
+            if (len(idx)!=len(y_all) or not np.array_equal(y_all,[y_by_example[int(i)] for i in idx])
+                    or not np.array_equal(users_all,[user_by_example[int(i)] for i in idx])):
+                raise ValueError('Prepared row targets/users disagree with canonical example identities')
+        load_stats={'positive_rows_dropped':prepared['row_stats']['n_positive_rows_dropped_confirmation'],
+                    'negative_rows_dropped':prepared['row_stats']['n_benign_rows_dropped_excluded_users']}
+    else:
+        x_all, y_all, users_all = load_rows_base(
+            args.extract_dir, args.layer, user_by_example=user_by_example,
+            y_by_example=y_by_example, benign_sample_prob=args.benign_sample_prob,
+            seed=args.seed, eligible_positive_users=early_positive,
+            eligible_negative_users=early_negative, load_stats=load_stats,
+            row_index_parts=row_index_parts)
     print(f"[base] rows={len(y_all)} positives={int((y_all > 0).sum())}", flush=True)
 
     for fold_file in folds:
@@ -211,7 +270,6 @@ def main() -> None:
             dst_cfg = args.out_frontier_dir / f"louo_{held_out}" / cfg_rel
         else:
             dst_cfg = args.out_frontier_dir / cfg_rel
-        dst_cfg.mkdir(parents=True, exist_ok=True)
 
         exclude_benign = None
         if args.exclude_benign_user_file is not None:
@@ -223,7 +281,8 @@ def main() -> None:
                 raise RankingUndefinedError(f"users both in discovery and excluded: {overlap[:5]}")
         if negative_users is not None and negative_users & discovery_users:
             raise RankingUndefinedError("negative users and discovery users overlap")
-        x, y, stats = fold_view(x_all, y_all, users_all, discovery_users, exclude_benign, negative_users)
+        x, y, stats = fold_view(x_all, y_all, users_all, discovery_users, exclude_benign, negative_users,
+                                copy_rows=len(folds)!=1)
         stats['n_positive_rows_dropped_confirmation'] += load_stats.get('positive_rows_dropped', 0)
         stats['n_benign_rows_dropped_excluded_users'] += load_stats.get('negative_rows_dropped', 0)
         total_pos = stats["n_positive_rows_kept"] + stats["n_positive_rows_dropped_confirmation"]
@@ -250,8 +309,18 @@ def main() -> None:
                 f"rows (need >= {args.min_positive_users}); unknown discovery ids: {unknown_discovery[:5]}"
             )
         validate_ranking_population(y, context=f"{fold_file.name}: ")
-        x -= x_mean
-        x /= x_std
+        if args.prepared_rows_dir is None:
+            print('[rows] normalizing fixed discovery rows',flush=True)
+            x -= x_mean
+            x /= x_std
+        if args.prepare_only_dir is not None:
+            save_prepared_rows(args.prepare_only_dir,x,y,users_all,row_index_parts,stats,binding)
+            print('[rows] preparation complete; no feature ranking evaluated',flush=True)
+            return
+        if model is None:
+            model=TopKSAE(d_in=int(bundle['d_in']),d_latent=int(bundle['d_latent']),k=int(bundle['k'])).to(device)
+            model.load_state_dict(bundle['state_dict']); model.eval()
+        dst_cfg.mkdir(parents=True,exist_ok=True)
         feature_df, eval_stats = evaluate_features(model, x, y, device=device, batch_size=args.batch_size)
         validate_ranking(feature_df, context=f"{fold_file.name}: ")
         feature_sets = choose_feature_sets(feature_df)
@@ -291,6 +360,7 @@ def main() -> None:
             "ranking_file_sha256": _sha256(dst_cfg / "delta_sae_top_features.csv"),
             "feature_sets": {k: [int(i) for i in v] for k, v in feature_sets.items()},
             "feature_set_criteria": criteria,
+            'prepared_rows_manifest_sha256':_sha256(args.prepared_rows_dir/'COMPLETED.json') if args.prepared_rows_dir else None,
         }
         (dst_cfg / "reselect_summary.json").write_text(json.dumps(summary, indent=2))
         print(f"[fold {fold_file.name}] top5={feature_sets['top5']}", flush=True)
