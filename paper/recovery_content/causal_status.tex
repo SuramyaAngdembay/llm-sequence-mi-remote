@@ -1,0 +1,57 @@
+\section{What the causal evidence currently establishes}
+\label{sec:causal-status}
+% claims: C10 C11 C12 C13 C14 C15 C16 C17 C18 C20 C21 C22 C23 C24 C25 C26 C29 C35 C36 C37 C39
+\subsection{The corrected pilot is an implementation diagnostic}
+A corrected r4.2 pilot refit the sparse dictionary, reranked features using the
+corrected discovery labels, and scored 158 incident-window/window-negative
+pairs from 34 users under 15 conditions. The dictionary uses layer 26, 8,192
+latents, and top-$k=4$; its sample, fit, and feature selection are recorded.
+Live batch-size-one reference states and losses were recomputed. All 4,740
+condition rows completed and the zero-edit controls reproduced the references.
+
+One dictionary-direction control failed the predeclared 5\% realized-norm
+matching tolerance at one window-negative token (6.42\% mismatch). Consequently
+the original global gate remains failed. The following results are explicitly
+\emph{post-run diagnostics}, with the original failed gate and all rows retained:
+\begin{center}\input{\evidenceroot/tables/recovery_diagnostic.tex}\end{center}
+The first two contrasts show larger behavior-loss increases for selected edits
+than for their specified controls on incident-window receivers, but the
+specificity contrast does not establish a
+larger attack-specific response. These estimates do not reinstate the earlier
+causal headline. Endpoint-local checks do not retroactively pass the global
+protocol. A separate control-policy feasibility probe fixes the failing case
+under a new sampling rule; it is not a replacement full experiment or a theorem
+of scientific novelty.
+
+\subsection{Saved responses retain a narrower meaning}
+The historical Pilot 2 profile-swap measurements were relabeled on CPU. Of its
+414 receivers, 129 change class; 86 have an ineligible partner in at least one
+scored swap condition. The adapted model remains more sensitive than the base
+model to the specified profile swaps in the frozen cohort. This measures input
+sensitivity. Corrected class contrasts and eligible-partner subsets are post-hoc
+descriptions; they do not restore the original matching or identify harm,
+mediation, or a complete circuit.
+
+The H6 direct-intervention pilot retains 1,320 scored rows for 120 receivers.
+Forty-eight receiver labels change, and 44 receivers have at least one official
+insider among their nominally benign profile partners. Its previously reported
+small pooled mean effects reproduce. Small means for two specified lifts do not
+establish equivalence of all feasible implementations or all users. The
+corrected class summaries are likewise limited to the historical inputs and
+selected dictionary.
+
+The earlier input-swap experiment retains 723 eligible fixed r4.2 pairs and 60
+r6.2 pairs after receiver and donor checks. There are 230 and 13 corrected
+positive days absent from those original receiver caches, respectively. In
+r4.2, some other cached receivers also need replacement donors. An extension
+covering missing positives alone would therefore be incomplete.
+
+\subsection{Historical claims awaiting dependency repair}
+The old sparse-feature attribution percentages, repair/ablation estimates,
+cross-dataset transfer, seed robustness, benign-only dictionary replication,
+and smaller-model mechanistic replication are not presented as corrected
+findings. Their dictionaries, ranking, negative pools, receivers, or donors can
+depend on the faulty labels. For the repaired-3B study in particular, correcting
+missing positive examples is insufficient: its label-selected negative sample
+must also be redrawn. Historical artifacts are preserved for exact reuse checks,
+not discarded; reuse requires the same complete intervention definition.

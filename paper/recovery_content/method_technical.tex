@@ -1,0 +1,112 @@
+\section{Technical specification of the mechanistic audit}
+\label{sec:technical}
+% claims: C02 C11 C12 C13 C14 C15 C17 C19 C24 C35 C38 C43
+\subsection{Adaptation and representation}
+The main adapter configuration uses Qwen3-8B, NF4 four-bit base weights with
+double quantization, bfloat16 computation, and rank-16 LoRA updates with scaling
+32 and dropout 0.05 on attention and MLP projections. The declared adaptation
+configuration uses maximum length 2,048, effective batch size eight, one epoch,
+learning rate $1.5\times10^{-4}$, cosine decay, and 3\% warmup. Base and adapted
+passes use the same input and tokenizer. Training configurations and artifact
+hashes belong to each run; factorial adapters cannot be substituted for the
+main adapters merely because their architecture is the same.
+
+Let $\delta_t=h^{\mathrm{ada}}_t-h^{\mathrm{base}}_t$ at audited layer $\ell$.
+With fitted location and scale vectors $\mu,\sigma$, the SAE minimizes
+\begin{equation}
+ \frac{1}{|\mathcal T|}\sum_{t\in\mathcal T}
+ \left\|(\delta_t-\mu)\oslash\sigma-
+       \bigl(D\operatorname{TopK}(\operatorname{ReLU}(E q_t+b_e))+b_d\bigr)\right\|_2^2,
+ \qquad q_t=(\delta_t-\mu)\oslash\sigma.
+\end{equation}
+Both token sampling and optimization randomness must be recorded. The historical
+SAE seed argument did not seed torch initialization; earlier across-seed changes
+therefore mix sampling and optimization variability. The corrected fit records
+both. A dictionary fitted on evaluation examples is transductive even if feature
+ranking uses separate discovery users. It must not be described as a dictionary
+learned independently of every evaluation user.
+
+\subsection{Selection, attribution, and eligibility}
+A mean activation-gap screen proposes a feature set,
+\begin{equation}
+ g_f=\mathbb E[z_f\mid y=1,\mathrm{discovery}]
+       -\mathbb E[z_f\mid\mathrm{declared\ reference}],
+ \qquad S=\operatorname{TopFive}(g).
+\end{equation}
+The reference population must be explicit: a window-negative insider day is not
+interchangeable with a non-insider day. Active controls avoid inert features but
+do not automatically match perturbation size. Token-weighted and equal-user
+summaries also answer different questions. Attribution mass describes the stated
+selected dictionary, token positions, and example set; changing any of these
+requires recomputation. Physical dictionary directions are
+$v_f=\operatorname{diag}(\sigma)D_{:,f}$, not standardized decoder columns alone.
+
+\subsection{Two distinct intervention implementations}
+Write $\widehat\delta_t=\mu+\sigma\odot(Dz_t+b_d)$ and choose a modified code
+$z'_t$. A residual-preserving additive edit is
+\begin{equation}
+ h'_t=h^{\mathrm{ada}}_t+\sigma\odot D(z'_t-z_t).
+\label{eq:additive}
+\end{equation}
+A reconstruction-replacement edit instead sets
+\begin{equation}
+ h'_t=h^{\mathrm{base}}_t+\mu+\sigma\odot(Dz'_t+b_d).
+\label{eq:replacement}
+\end{equation}
+Their difference includes the original SAE reconstruction residual. Even if two
+arms share replacement, downstream nonlinear responses need not cancel that
+residual's effects. Unchanged coefficients, unedited tokens, and the code bias
+must be handled consistently with the chosen implementation. Joint edits write
+the declared coefficients over a declared union of token positions; their
+interpretation is not a sum of proven single-feature effects.
+
+For an output functional $s_V$ on declared targets $V$, define
+$e_S(x)=s_V(x;I_S)-s_V(x;I_0)$, where $I_0$ is a live, same-configuration
+reference. A selected-versus-control contrast is
+$\mathbb E_u[\overline e_S(u)-\overline e_C(u)]$. An attack-specificity contrast
+compares this within-user difference across incident-window and matched
+window-negative receivers. Positive or negative signs must be interpreted using
+this output definition; an increased NLL is not automatically better anomaly
+ranking or successful mitigation.
+
+Historical searched-donor repair used
+\begin{equation}
+ \tau=(\overline\Delta^S_{\rm anomalous}-\overline\Delta^S_{\rm noninsider})
+       -(\overline\Delta^C_{\rm anomalous}-\overline\Delta^C_{\rm noninsider}),
+\end{equation}
+with the best signed score change retained over searched donors and strengths.
+That defines a best-of-search estimand. A typical donor effect, a frozen
+intervention policy, and detector AP after intervention require separate
+measurements. The historical estimates are not reinstated in this edition.
+
+\subsection{Realized perturbations and numerical consistency}
+Let $r_t$ be the requested float32 update and $h_t$ the live low-precision state.
+The realized perturbation is
+\begin{equation}
+ \widetilde r_t=operatorname{float32}
+     (\operatorname{cast}(h_t+r_t))-operatorname{float32}(h_t).
+\end{equation}
+Matching $\|r_t\|$ does not guarantee matching $\|\widetilde r_t\|$. The corrected
+pilot checks edited support and realized norm per token at a fixed 5\% relative
+tolerance, alongside no-op identity and loss-partition checks. Norm matching is
+one nuisance control; it does not make random directions semantically equivalent
+to selected features.
+
+The historical scoring passes differed with batch shape and cross-entropy
+precision. Their per-example NLL variation, about 0.01 nats in the controlled
+checks, can exceed the intervention contrasts of interest. The new reference
+uses batch size one and float32 cross entropy. Cached hidden states are not
+silently assumed equal to freshly computed states. Before reusing an effect,
+check adapter, tokenizer/text, dictionary and normalization, feature set,
+receiver, donor, token support, edit rule, score targets, and numerical
+configuration. A change in any of these can invalidate exact reuse.
+
+\subsection{Frozen cohorts and conditional mathematics}
+Fixed-input reanalysis retains the originally measured responses and changes
+only group labels. Post-hoc eligible-partner subsets have a different population
+from the original sample. Within-user contrasts use users with both corrected
+classes and do not recover the historical day pairing. All such estimates are
+exploratory. No coefficient-feasibility statement alone proves output mediation:
+a code-space target, its physically realizable hidden-state lift, and the model's
+behavior under that lift are distinct objects. The mathematical branch remains
+available for later work after these empirical dependencies are repaired.

@@ -1,0 +1,66 @@
+\section{Opening the model}
+\label{sec:method}
+% claims: C02 C11 C12 C13 C14 C17 C19 C35 C38 C43
+The interpretability method remains part of the work. Its purpose is to connect
+an internal change to a measured output effect, while checking what the edit
+actually changed. Its historical empirical claims require the repairs listed
+later; the procedure itself does not depend on a favorable result.
+
+\subsection{Adapt the model, then hold it fixed}
+We adapt Qwen3-8B on non-insider user-days using QLoRA
+\citep{qwen3,hu2022lora,dettmers2023qlora}. The base weights are frozen and
+quantized; small low-rank matrices supply the learned updates. For a projection
+matrix, the adapted weight is $W'=W+(\alpha/r)BA$. This makes it practical to
+compare the same model with adapters enabled and disabled. The model is frozen
+while we audit it. QLoRA supplies an accessible adaptation difference; it does
+not establish that an LM is the best detector for these data.
+
+\subsection{Isolate the adaptation difference}
+At token position $t$ and layer $\ell$, compare the adapted and base states:
+\begin{equation}
+ \delta_t=h^{(\ell),\mathrm{ada}}_t-h^{(\ell),\mathrm{base}}_t.
+\end{equation}
+This is the representation difference induced by adaptation on that input.
+It is not automatically a unique causal decomposition of the network.
+
+\subsection{Find a sparse approximation}
+Standardize each coordinate of $\delta_t$ and fit a sparse autoencoder (SAE):
+\begin{equation}
+ q_t=(\delta_t-\mu)\oslash\sigma,\qquad
+ z_t=\operatorname{TopK}(\operatorname{ReLU}(Eq_t+b_e)),\qquad
+ \widehat q_t=Dz_t+b_d.
+\end{equation}
+Only a few coefficients of $z_t$ are retained. The dictionary columns of $D$
+are candidate directions of change, learned to reconstruct the observed deltas
+\citep{cunningham2023sparse,gao2024scaling}. Sparse approximation is not a proof
+that these directions are unique concepts. Any cross-dictionary comparison must
+account for normalization: physical directions are $\sigma\odot D_{:,f}$.
+
+\subsection{Select candidates, edit, and measure}
+An activation difference between incident-window and reference examples can
+rank candidate features. Selection is a hypothesis-generating step: labels,
+reference-user eligibility, and the dictionary sample all affect the answer.
+To test a selected set, edit its coefficients, continue the forward pass, and
+measure the change in a declared output such as behavior-target NLL. Compare
+against active features and random directions with the same edited support and
+matched realized perturbation size. Keep a same-configuration unedited forward
+pass as the reference. We measure both the requested edit and the change that
+actually survives low-precision rounding.
+
+A change in output establishes sensitivity to that specified edit. It does not
+by itself prove that the features encode maliciousness, that the edit improves
+anomaly ranking, or that the selected set is strictly necessary. Best-of-search
+edits also differ from an intervention policy chosen before seeing its outcome.
+
+\subsection{Locate activation without overinterpreting it}
+For a fixed set of examples, activation mass at input class $c$ is
+\begin{equation}
+ m_f(c)=\frac{\sum_{x,t:\,\mathrm{class}(t)=c}z_{t,f}(x)}
+                 {\sum_{x,t}z_{t,f}(x)}.
+\end{equation}
+This describes where a feature activates. A session-position hidden state can
+use an earlier profile. High profile-position mass in selected features is
+neither a complete account of the detector nor proof of a profile-only causal
+mechanism. Corrected attribution must use the corrected selected features and
+example population. The earlier profile-versus-behavior headline is pending
+that recovery.

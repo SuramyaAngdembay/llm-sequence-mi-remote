@@ -1,78 +1,27 @@
-# TMLR Draft Package
+# Paper: corrected evidence working editions
 
-This directory is a self-contained first-draft TMLR submission package for the
-current CERT-focused `llm-sequence-mi-remote` paper.
+The calendar-label recovery is reflected in **all three current editions**:
 
-## What it is
+- `main.tex` → `build/main.pdf`: research edition, technical specification in the body.
+- `companion/readable_full.tex` → `companion/build/readable_full.pdf`: the same evidence and technical content, with a linear explanation and technical appendix.
+- `companion/plain_summary.tex` → `companion/build/plain_summary.pdf`: short summary and current limits.
 
-- anonymized submission-style LaTeX draft
-- official TMLR style files (`tmlr.sty`, `tmlr.bst`, `fancyhdr.sty`) vendored locally
-- generated tables sourced from the current paper-safe CERT artifacts
-- simple TikZ figures so the draft is not text-only
+The main labels and reported LM score results are repaired. Historical causal and comparison-model claims are **not all repaired**. These are recovery working editions, not submission-ready replacements claiming every historical result survived. The original texts remain in Git at `e0ad1a3`; external source snapshots also have a hash manifest.
 
-## What it is not
+## Source of truth
 
-- not yet a polished final submission
-- not yet a camera-ready package
-- not yet a complete artifact appendix
+`data/recovery_registry.json` binds 46 claim families to exact evidence and source hashes. `CLAIM_MAP.md` and `data/claim_manuscript_map.json` locate every family in every edition. Shared prose is in `recovery_content/`. Generated current tables start with `recovery_`; the current figure is `recovery_score_mitigation.pdf`. Other old tables/figures and other manuscript variants are historical and are not included by these builds.
 
-## Current scientific scope
+See `../docs/review/RECOVERY_CLOSEOUT_2026-09-29.md` for the audit and `../docs/review/TARGETED_RERUNS_2026-09-29.md` for remaining experiments. The thesis is outside this work.
 
-The draft follows the current paper-safe claim discipline:
+## Build all three
 
-- benign-trained session LLMs recover benchmark-specific causal structure on
-  CERT insider-threat benchmarks
-- direct token-mechanism transfer can fail
-- native rediscovery can succeed
+Use Python with matplotlib and Tectonic (or pdfLaTeX/BibTeX):
 
-It does **not** claim strong detector superiority on CERT.
-
-## Build
-
-From the repo root:
-
-```bash
-bash paper/scripts/build_paper.sh
+```sh
+PYTHON=/path/to/python TECTONIC=/path/to/tectonic bash scripts/build_paper.sh
 ```
 
-This will:
+Alternatively `make pdf PYTHON=/path/to/python` finds an installed TeX engine. Each edition has its own build log. `build/recovery_build_manifest.json` records the PDF and result-registry hashes. `make overleaf` packages only the current main manuscript inputs.
 
-1. regenerate the draft tables
-2. compile `paper/main.tex`
-3. place outputs in `paper/build/`
-
-The build script prefers `latexmk`. If `latexmk` is unavailable, it falls back
-to repeated `pdflatex`/`bibtex`.
-
-## Main output
-
-- PDF: `paper/build/main.pdf`
-
-## Important draft note
-
-The repaired same-user-excluded causal rows should be interpreted using the
-complete receiver-level top-vs-control contrast that matches the bootstrap
-estimand. The paper generator follows that repaired bundle convention.
-
-## Overleaf
-
-The package compiles on Overleaf with:
-
-- compiler: `pdfLaTeX`
-- bibliography: `BibTeX`
-- main document: `main.tex`
-
-Two ways to get it there:
-
-1. **Zip upload (recommended):** run `make overleaf` from `paper/`, then in
-   Overleaf use *New Project -> Upload Project* with `build/overleaf.zip`.
-   The zip contains only what Overleaf needs (`main.tex`, `tmlr.sty`,
-   `tmlr.bst`, `fancyhdr.sty`, `references.bib`, `figures/`, `tables/`).
-2. **GitHub import:** import the repo and set `paper/main.tex` as the main
-   document (Menu -> Settings -> Main document).
-
-Data figures (`figures/*.pdf`) are pre-generated vector PDFs produced by
-`scripts/generate_figures.py` (matplotlib) from the tracked result bundles;
-Overleaf does not run Python, so regenerate them locally (`make figures`)
-and re-upload if the numbers change. The pipeline diagram stays TikZ and
-compiles natively on Overleaf.
+After changing the registry, regenerate tables/figures and run `scripts/review/map_recovery_claims.py` from the repository root. Do not edit generated values or copy stale historical figures into the current sources.

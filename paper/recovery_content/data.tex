@@ -1,0 +1,49 @@
+\section{Data, labels, and populations}
+\label{sec:data}
+% claims: C01 C02 C03 C04
+We study serialized employee activity from CERT r4.2 and r6.2
+\citep{certdataset,glasser2013bridging,le2020analyzing}. CERT is a synthetic
+insider-threat benchmark. A record is one user's observed day, assembled from
+extracted sessions. The \texttt{DAY} line contains week and organizational
+fields, \texttt{PSY} contains simulated personality scores, and \texttt{SES}
+lines contain session activity counts. \texttt{SESCOUNT} records the number of
+sessions. These are structured measurements written as text.
+
+Our primary target is membership in the official master's incident window:
+a day is positive if its recorded calendar interval intersects the user's
+half-open incident interval $[\mathrm{start},\mathrm{end})$. Evaluation is
+restricted to days with extracted sessions. This labels an \emph{incident-window
+day}, not every action on that day. An insider's other days are called
+\emph{window-negative}; they are not verified benign activity.
+
+An audit found an incorrect calendar join in the previous evaluation labels.
+The corrected day-index origin is December 28, 2009. Independent enumeration
+reproduced every corrected label, and the original texts, ordering, and splits
+were preserved. The resulting observed populations are:
+\begin{center}\input{\evidenceroot/tables/recovery_populations.tex}\end{center}
+The r4.2 changes comprise 177 positive-to-negative and 230 negative-to-positive
+labels; r6.2 has 10 and 13, respectively. The master windows include 530 r4.2
+and 26 r6.2 additional days with no extracted session, which are outside this
+observation domain. Named malicious-event days define a different target; they
+are retained as sensitivity labels and are not silently substituted for the
+master-window target. The r6.2 master/detail discrepancies and one repaired
+malformed master date are documented in the label audit.
+
+\paragraph{Training exposure.}
+The main LM adapters remain usable: their actual training and validation
+user lists exclude all 70 r4.2 and all 5 r6.2 official insiders. This was
+checked independently of the faulty day-label join. The main training/validation
+counts are 851/79 non-insider users for r4.2 and 3,590/405 for r6.2. The
+unseen-user evaluation pools contain all official insiders plus those validation
+users: 42,468 days from 149 users and 142,072 days from 410 users.
+``Unseen'' means absent from adaptation; these repeatedly analyzed validation
+users are not a newly untouched test set. The factorial and smaller-model
+adapters are separate training runs, with their own provenance qualifications.
+
+\paragraph{Why labels affect more than a metric.}
+Correcting labels can change a feature's rank, the sample used to fit a sparse
+dictionary, or which user is eligible as a normal donor. In those cases the
+historical intervention remains a measurement of its original inputs, but it
+is not the experiment the corrected procedure would have selected. Model
+training is reusable only when its actual inputs and fitting membership are
+unchanged. We apply this distinction throughout.

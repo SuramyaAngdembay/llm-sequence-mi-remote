@@ -1,0 +1,1560 @@
+{
+  "C01": {
+    "claim": "Dataset populations and positive-day counts",
+    "disposition": "verified_with_scope_limits",
+    "historical_location": "All three versions: data and evaluation sections",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/data.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/data.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 37
+        }
+      ]
+    }
+  },
+  "C02": {
+    "claim": "Headline 8B QLoRA adapters use benign-user training",
+    "disposition": "verified_with_scope_limits",
+    "historical_location": "main Methods; readable \u00a7\u00a72\u20133; plain training explanation",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/data.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/data.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 37
+        }
+      ]
+    }
+  },
+  "C03": {
+    "claim": "Factorial and target-mask adapters use benign-user training",
+    "disposition": "provenance_qualified",
+    "historical_location": "main train-matched factorial; readable \u00a710; score-decomposition phase C",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/data.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 48
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/data.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 48
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 37
+        }
+      ]
+    }
+  },
+  "C04": {
+    "claim": "Repaired serializer 3B adapter-seed training",
+    "disposition": "provenance_qualified",
+    "historical_location": "main robustness; readable \u00a76",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/data.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/data.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 37
+        }
+      ]
+    }
+  },
+  "C05": {
+    "claim": "r6.2 detector ROC/AP and comparisons",
+    "disposition": "verified_with_scope_limits",
+    "historical_location": "main detection table; readable \u00a73, appendix B; plain detector results",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/evaluation.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 4
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/evaluation.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 4
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 49
+        }
+      ]
+    }
+  },
+  "C06": {
+    "claim": "r4.2 detector ROC/AP and comparisons",
+    "disposition": "verified_with_scope_limits",
+    "historical_location": "main detection table; readable \u00a73, appendix B; plain detector results",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/evaluation.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 4
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/evaluation.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 4
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 49
+        }
+      ]
+    }
+  },
+  "C07": {
+    "claim": "Seen/unseen-user collapse and exposure imbalance",
+    "disposition": "verified_with_scope_limits",
+    "historical_location": "main detection; readable \u00a75.2; plain collapse narrative",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/evaluation.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 4
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/evaluation.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 4
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 49
+        }
+      ]
+    }
+  },
+  "C08": {
+    "claim": "Within-user discrimination",
+    "disposition": "verified_with_scope_limits",
+    "historical_location": "main detection; readable \u00a75.2, appendix B.2",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/evaluation.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 4
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/evaluation.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 4
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 49
+        }
+      ]
+    }
+  },
+  "C09": {
+    "claim": "Inference-time profile/personality masking improves detection",
+    "disposition": "verified_with_scope_limits",
+    "historical_location": "main counterfactuals; readable \u00a7\u00a75\u20136",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/evaluation.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 48
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/evaluation.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 48
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 49
+        }
+      ]
+    }
+  },
+  "C10": {
+    "claim": "Input profile/behavior swaps on attack days",
+    "disposition": "fixed_input_only",
+    "historical_location": "main counterfactuals; readable \u00a7\u00a75\u20136",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C11": {
+    "claim": "r6.2 sparse profile-feature patching effect",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "main mechanistic results; readable \u00a75.1; plain mechanism",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 78
+        }
+      ]
+    }
+  },
+  "C12": {
+    "claim": "r6.2 ablation dependence / necessity",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "main mechanism; readable \u00a75.1 and D.2",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 78
+        }
+      ]
+    }
+  },
+  "C13": {
+    "claim": "r4.2 native sparse behavioral-feature patching effect",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "main mechanism; readable \u00a75.1; plain mechanism",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 78
+        }
+      ]
+    }
+  },
+  "C14": {
+    "claim": "r4.2 ablation dependence",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "main mechanism; readable \u00a75.1 and D.2",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 78
+        }
+      ]
+    }
+  },
+  "C15": {
+    "claim": "Best-candidate repair versus average-donor repair; held-out confirmation",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "main robustness and claim map; readable \u00a7\u00a74,6",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C16": {
+    "claim": "Literal cross-benchmark feature transfer fails",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "main transfer; readable \u00a75.3; plain transfer narrative",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C17": {
+    "claim": "r6.2 profile / r4.2 behavior attribution dissociation",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "main attribution; readable \u00a74.4, \u00a75; plain central story",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 78
+        }
+      ]
+    }
+  },
+  "C18": {
+    "claim": "SAE-seed robustness of attribution and interventions",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "main seed stability; readable \u00a76",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C19": {
+    "claim": "Fixed-dictionary alignment / non-identifiability geometry",
+    "disposition": "conditional_only",
+    "historical_location": "main transfer controls; readable \u00a76, D.1",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 78
+        }
+      ]
+    }
+  },
+  "C20": {
+    "claim": "Positive-population size alone does not explain dissociation",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "main population robustness; readable \u00a76, D.3",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C21": {
+    "claim": "Benign-only dictionaries reproduce dissociation / ablation",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "main dictionary robustness; readable \u00a76",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C22": {
+    "claim": "Mechanistic replication across repaired 3B adapters and seeds",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "main robustness; readable \u00a76",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C23": {
+    "claim": "Secondary r6.2 behavioral feature family and LOUO",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "main robustness; readable \u00a76, D.3",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C24": {
+    "claim": "Norm, dose, active-control and median-donor robustness",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "main methods/results; readable \u00a74, appendix C",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C25": {
+    "claim": "Package 4 selected edits change behavior-token predictions",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "main package-4 appendix and claim map; readable intervention caveats",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C26": {
+    "claim": "Behavior-specific rather than profile-specific or attack-specific mechanism",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "main claim-status table; readable conclusions",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C27": {
+    "claim": "Classical one-class detectors establish architecture-specific profile capture",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "main classical probe; readable \u00a79, F.1",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C28": {
+    "claim": "Train-matched 8B profile removal restores user detection; small 3B effect",
+    "disposition": "verified_with_scope_limits",
+    "historical_location": "main factorial; readable \u00a710; later summary narrative",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 48
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 48
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 49
+        }
+      ]
+    }
+  },
+  "C29": {
+    "claim": "Factorial full/shuffle adapters preserve profile attribution",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "main factorial; readable \u00a710, F.2",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C30": {
+    "claim": "Personality novelty explains user-level failure ordering",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "main factorial discussion; readable \u00a710",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C31": {
+    "claim": "r6.2 behavior-only score mitigation and target-mask training contrast",
+    "disposition": "verified_with_scope_limits",
+    "historical_location": "research score decomposition; readable successor direction",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/evaluation.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 48
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/evaluation.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 48
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 49
+        }
+      ]
+    }
+  },
+  "C32": {
+    "claim": "r4.2 behavior-only score mitigation",
+    "disposition": "verified_with_scope_limits",
+    "historical_location": "research score decomposition r42 headline",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/evaluation.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 20
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/evaluation.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 20
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 49
+        }
+      ]
+    }
+  },
+  "C33": {
+    "claim": "Time-series autoencoder/forecaster comparison",
+    "disposition": "verified_with_scope_limits",
+    "historical_location": "results/timeseries_probe/",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/evaluation.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 75
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/evaluation.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 75
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 49
+        }
+      ]
+    }
+  },
+  "C34": {
+    "claim": "Same-LM history/profile-copying experiment",
+    "disposition": "verified_with_scope_limits",
+    "historical_location": "results/history_prefix/",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/evaluation.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 75
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/evaluation.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/findings.tex",
+          "line": 75
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 49
+        }
+      ]
+    }
+  },
+  "C35": {
+    "claim": "Pilot 1 anomaly specificity",
+    "disposition": "diagnostic_only",
+    "historical_location": "results/pilots_2026_09_25/pilot1/",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 78
+        }
+      ]
+    }
+  },
+  "C36": {
+    "claim": "Pilot 2 adaptation increases profile-conditioned behavior prediction",
+    "disposition": "fixed_input_only",
+    "historical_location": "results/pilots_2026_09_25/pilot2/",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C37": {
+    "claim": "Pilot 3/4 feature associations and alternative-direction controls",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "results/pilots_2026_09_25/",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C38": {
+    "claim": "H6 saved-state feasibility and implementation diagnostics",
+    "disposition": "conditional_only",
+    "historical_location": "research/imperfect_interventions_2026-09-27/h6_states/",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 78
+        }
+      ]
+    }
+  },
+  "C39": {
+    "claim": "H6 direct ideal-intervention pilot / negligible average rescue",
+    "disposition": "fixed_input_only",
+    "historical_location": "research H6 pilot_out, latest 120-receiver run",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/causal_status.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C40": {
+    "claim": "TWOS behavioral attribution / early token-class replication",
+    "disposition": "outside_label_repair",
+    "historical_location": "main TWOS; readable \u00a77; plain real-data replication",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C41": {
+    "claim": "Corrected held-out TWOS intervention is inconclusive",
+    "disposition": "outside_label_repair",
+    "historical_location": "results/twos_corrected_bounded/",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C42": {
+    "claim": "LANL generalization and host shortcut",
+    "disposition": "outside_label_repair",
+    "historical_location": "main LANL; readable \u00a78; claim map",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C43": {
+    "claim": "Full-code fibre geometry, feasible lifts, synthetic error-bound results",
+    "disposition": "conditional_only",
+    "historical_location": "research/imperfect_interventions_2026-09-27/METHOD_STATUS.md",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/method_readable.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/method_technical.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 78
+        }
+      ]
+    }
+  },
+  "C44": {
+    "claim": "Claim status, abstracts, figures and conclusions are synchronized",
+    "disposition": "synchronized_recovery_editions",
+    "historical_location": "main.pdf; readable_full.pdf; plain_summary.pdf",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C45": {
+    "claim": "Deep SVDD, GRU AE, LSTM AE and Isolation Forest benchmark rows",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "paper/tables/cert_detector_comparison.tex; readable appendix B; detector comparison prose",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  },
+  "C46": {
+    "claim": "Local session-autoencoder mechanistic repair comparator",
+    "disposition": "pending_dependency_repair",
+    "historical_location": "paper/tables/cert_mechanistic_summary.tex; main transfer discussion; readable appendix D.1",
+    "editions": {
+      "main.tex": [
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/readable_full.tex": [
+        {
+          "file": "paper/recovery_content/discussion.tex",
+          "line": 3
+        },
+        {
+          "file": "paper/recovery_content/appendix.tex",
+          "line": 3
+        }
+      ],
+      "companion/plain_summary.tex": [
+        {
+          "file": "paper/companion/plain_summary.tex",
+          "line": 93
+        }
+      ]
+    }
+  }
+}

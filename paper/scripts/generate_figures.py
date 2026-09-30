@@ -1,236 +1,26 @@
 #!/usr/bin/env python3
-"""Generate the paper's data figures as vector PDFs.
-
-Mechanistic CIs are USER-LEVEL cluster bootstrap intervals
-(results/*/same_user_recovery/*/cluster_bootstrap/).
-
-Numbers are transcribed from the final tracked result bundles:
-- results/qwen3_8b_token_causal/same_user_recovery/RESULTS.md
-- results/qwen3_8b_token_necessity/same_user_recovery/RESULTS.md
-- results/qwen3_8b_r42_token_causal/same_user_recovery/RESULTS.md
-- results/qwen3_8b_r42_token_necessity/same_user_recovery/RESULTS.md
-- results/*/detector_metrics_fold_aligned/FOLD_ALIGNED_DETECTOR_REPORT.md
-- strict_compare *_no_same_user REMOTE_VS_LOCAL_DAYLEVEL_REPORT.md (local refs)
-"""
-from __future__ import annotations
-
-from pathlib import Path
-
+"""Generate the current shared score-mitigation figure from the registry."""
 import matplotlib
-
-matplotlib.use("Agg")
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-
-ROOT = Path(__file__).resolve().parents[1]
-FIGS = ROOT / "figures"
-
-ACCENT = "#2F5FA5"      # session-LM / effect marks
-MUTED = "#98A0AA"       # baseline marks
-INK = "#1F2937"         # primary text
-INK_2 = "#6B7280"       # secondary text
-GRID = "#E5E7EB"
-
-plt.rcParams.update(
-    {
-        "font.size": 8,
-        "axes.titlesize": 8.5,
-        "axes.labelsize": 8,
-        "xtick.labelsize": 7.5,
-        "ytick.labelsize": 8,
-        "axes.edgecolor": INK_2,
-        "axes.linewidth": 0.6,
-        "xtick.color": INK_2,
-        "ytick.color": INK_2,
-        "text.color": INK,
-        "axes.labelcolor": INK,
-        "pdf.fonttype": 42,
-        "figure.dpi": 150,
-    }
-)
-
-# (label, estimate, lo, hi) — order top-to-bottom as displayed.
-MECH = {
-    ("r6.2", "Causal patching"): [
-        ("role", 0.006848, 0.000092, 0.009996),
-        ("dept x role", 0.006818, -0.000230, 0.009955),
-        ("project x role", 0.004201, -0.000058, 0.005892),
-    ],
-    ("r6.2", "Necessity ablation"): [
-        ("project x role", 0.065188, 0.026059, 0.082920),
-        ("role", 0.062167, 0.016480, 0.082691),
-        ("dept x role", 0.056603, -0.001859, 0.077447),
-        ("team", 0.052234, -0.018468, 0.070531),
-    ],
-    ("r4.2", "Causal patching"): [
-        ("team", 0.001418, 0.000967, 0.001863),
-        ("role", 0.001112, 0.000638, 0.001541),
-        ("dept x role", 0.001067, 0.000656, 0.001467),
-        ("dept", 0.000982, 0.000583, 0.001360),
-    ],
-    ("r4.2", "Necessity ablation"): [
-        ("dept x role", 0.002922, 0.000911, 0.005005),
-        ("role", 0.002075, 0.000133, 0.004192),
-        ("dept", 0.001155, -0.000943, 0.003196),
-        ("team", 0.000662, -0.001316, 0.002761),
-    ],
-}
-
-DETECTOR = {
-    "r6.2": [
-        ("Qwen3-8B session LM", 0.000754631, 0.953157),
-        ("Deep SVDD", 0.0115455, 0.627919),
-        ("GRU AE", 0.00572239, 0.765776),
-        ("LSTM AE", 0.00206543, 0.767738),
-        ("Isolation Forest", 0.000210794, 0.712505),
-    ],
-    "r4.2": [
-        ("Qwen3-8B session LM", 0.0134474, 0.964124),
-        ("Deep SVDD", 0.0337171, 0.742914),
-        ("GRU AE", 0.0254413, 0.695754),
-        ("LSTM AE", 0.0236354, 0.714125),
-        ("Isolation Forest", 0.000254408, 0.714632),
-    ],
-}
+from recovery_data import ROOT, REGISTRY as R
 
 
-def style_axis(ax):
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    ax.grid(axis="x", color=GRID, linewidth=0.5)
-    ax.set_axisbelow(True)
-
-
-def mech_effects() -> None:
-    order = [
-        ("r6.2", "Causal patching"),
-        ("r6.2", "Necessity ablation"),
-        ("r4.2", "Causal patching"),
-        ("r4.2", "Necessity ablation"),
-    ]
-    fig, axes = plt.subplots(2, 2, figsize=(6.0, 3.5))
-    for ax, key in zip(axes.flat, order):
-        dataset, estimand = key
-        rows = MECH[key]
-        ys = range(len(rows), 0, -1)
-        for y, (label, est, lo, hi) in zip(ys, rows):
-            crosses = lo <= 0.0 <= hi
-            est, lo, hi = est * 1e3, lo * 1e3, hi * 1e3
-            ax.plot([lo, hi], [y, y], color=ACCENT, linewidth=1.4,
-                    solid_capstyle="round", zorder=2)
-            ax.plot(
-                est, y,
-                marker="o", markersize=4.6,
-                markerfacecolor="white" if crosses else ACCENT,
-                markeredgecolor=ACCENT, markeredgewidth=1.1, zorder=3,
-            )
-        ax.axvline(0.0, color=INK_2, linewidth=0.7, zorder=1)
-        ax.set_yticks(list(ys))
-        ax.set_yticklabels([r[0] for r in rows])
-        ax.set_ylim(0.4, len(rows) + 0.6)
-        ax.set_title(f"{dataset} — {estimand.lower()}", loc="left",
-                     fontweight="bold", color=INK)
-        style_axis(ax)
-    axes[1][0].set_xlabel(r"top-vs-control contrast ($\times 10^{-3}$)")
-    axes[1][1].set_xlabel(r"top-vs-control contrast ($\times 10^{-3}$)")
-    fig.subplots_adjust(left=0.14, right=0.985, top=0.93, bottom=0.13,
-                        hspace=0.75, wspace=0.42)
-    fig.savefig(FIGS / "mech_effects.pdf")
-    fig.savefig(FIGS / "mech_effects_preview.png", dpi=200)
+def main():
+    plt.rcParams.update({'font.size':9,'pdf.fonttype':42})
+    fig,axes=plt.subplots(1,2,figsize=(6.1,2.5))
+    for ax,metric,title in zip(axes,('day_roc','day_ap'),('Mean fold day ROC-AUC','Mean fold day AP')):
+        vals=[R['c32']['fold_mean'][v][metric] for v in ('full','behavior_only','profile_only')]
+        ax.barh(['Full score','Behavior targets','Profile targets'],vals,color=['#738296','#2f5fa5','#b6bdc5'])
+        ax.invert_yaxis();ax.set_title(title,loc='left',fontsize=10)
+        ax.spines[['top','right']].set_visible(False)
+        ax.set_xlim(0,1 if metric=='day_roc' else max(vals)*1.27)
+        for i,v in enumerate(vals):ax.text(v+.01 if metric=='day_roc' else v+.0005,i,f'{v:.3f}' if metric=='day_roc' else f'{v:.4f}',va='center',fontsize=8)
+    fig.suptitle('r4.2: same model and inputs; only scored targets change',fontsize=10)
+    fig.tight_layout();(ROOT/'figures').mkdir(exist_ok=True)
+    fig.savefig(ROOT/'figures/recovery_score_mitigation.pdf')
+    fig.savefig(ROOT/'figures/recovery_score_mitigation.png',dpi=160)
     plt.close(fig)
 
 
-COLLAPSE = {  # day-level ROC on the full evaluation pool: all-benign -> val-only benign
-    "r6.2": (0.954, 0.545),
-    "r4.2": (0.959, 0.668),
-}
-
-
-def detector_dissociation() -> None:
-    fig, axes = plt.subplots(
-        1, 3, figsize=(6.0, 2.5),
-        gridspec_kw={"width_ratios": [1.0, 1.0, 0.62]},
-    )
-    axes[1].sharey(axes[0])
-    plt.setp(axes[1].get_yticklabels(), visible=False)
-    # Per-panel label nudges (points): keep short labels clear of the marks.
-    offsets = {
-        ("r6.2", "Qwen3-8B session LM"): (0, 7),
-        ("r6.2", "Deep SVDD"): (0, 7),
-        ("r6.2", "GRU AE"): (16, 7),
-        ("r6.2", "LSTM AE"): (-16, 7),
-        ("r6.2", "Isolation Forest"): (2, 7),
-        ("r4.2", "Qwen3-8B session LM"): (0, 7),
-        ("r4.2", "Deep SVDD"): (-8, 7),
-        ("r4.2", "GRU AE"): (-24, 2),
-        ("r4.2", "LSTM AE"): (14, -10),
-        ("r4.2", "Isolation Forest"): (6, 7),
-    }
-    for ax, dataset in zip(axes[:2], ["r6.2", "r4.2"]):
-        for name, pr, roc in DETECTOR[dataset]:
-            remote = name.startswith("Qwen")
-            ax.plot(
-                pr, roc, marker="o",
-                markersize=5.5 if remote else 4.5,
-                markerfacecolor=ACCENT if remote else MUTED,
-                markeredgecolor="white", markeredgewidth=0.8, zorder=3,
-            )
-            dx, dy = offsets[(dataset, name)]
-            ax.annotate(
-                name, (pr, roc), textcoords="offset points", xytext=(dx, dy),
-                ha="center", fontsize=6.8,
-                color=INK if remote else INK_2,
-                fontweight="bold" if remote else "normal",
-            )
-        ax.set_xscale("log")
-        ax.set_xlim(1e-4, 6e-2)
-        ax.set_ylim(0.55, 1.03)
-        ax.set_title(dataset, loc="left", fontweight="bold", color=INK)
-        ax.set_xlabel("day-level PR-AUC (log scale)")
-        style_axis(ax)
-        ax.grid(axis="y", color=GRID, linewidth=0.5)
-    axes[0].set_ylabel("day-level ROC-AUC")
-
-    # Third panel: the collapse when benign comparisons are restricted to
-    # never-trained users (same statistic, full evaluation pool).
-    ax = axes[2]
-    for dataset in ["r6.2", "r4.2"]:
-        seen, unseen = COLLAPSE[dataset]
-        ax.annotate(
-            "", xy=(1, unseen), xytext=(0, seen),
-            arrowprops=dict(arrowstyle="-|>", color=ACCENT, linewidth=1.3,
-                            shrinkA=4, shrinkB=4),
-        )
-        ax.plot(0, seen, marker="o", markersize=5, markerfacecolor=ACCENT,
-                markeredgecolor="white", markeredgewidth=0.8, zorder=3)
-        ax.plot(1, unseen, marker="o", markersize=5, markerfacecolor="white",
-                markeredgecolor=ACCENT, markeredgewidth=1.1, zorder=3)
-        ax.annotate(f"{dataset}: {unseen:.2f}", (1, unseen),
-                    textcoords="offset points", xytext=(-3, -12),
-                    ha="right", fontsize=6.8, color=INK, fontweight="bold")
-    ax.annotate("0.95\u20130.96", (0, 0.957), textcoords="offset points",
-                xytext=(6, 6), fontsize=6.8, color=INK, fontweight="bold")
-    ax.axhline(0.5, color=INK_2, linewidth=0.6, linestyle=(0, (3, 2)))
-    ax.annotate("chance", (-0.26, 0.508), ha="left", fontsize=6.2, color=INK_2)
-    ax.set_xlim(-0.3, 1.3)
-    ax.set_ylim(0.40, 1.03)
-    ax.set_xticks([0, 1])
-    ax.set_xticklabels(["seen\nbenign", "unseen\nbenign"], fontsize=7)
-    ax.set_title("ROC collapse", loc="left", fontweight="bold",
-                 color=INK, fontsize=7.6)
-    style_axis(ax)
-    ax.grid(axis="y", color=GRID, linewidth=0.5)
-    fig.subplots_adjust(left=0.09, right=0.99, top=0.90, bottom=0.22, wspace=0.24)
-    fig.savefig(FIGS / "detector_dissociation.pdf")
-    fig.savefig(FIGS / "detector_dissociation_preview.png", dpi=200)
-    plt.close(fig)
-
-
-def main() -> None:
-    FIGS.mkdir(exist_ok=True)
-    mech_effects()
-    detector_dissociation()
-    print("Wrote:", FIGS / "mech_effects.pdf", "and", FIGS / "detector_dissociation.pdf")
-
-
-if __name__ == "__main__":
-    main()
+if __name__=='__main__':main()

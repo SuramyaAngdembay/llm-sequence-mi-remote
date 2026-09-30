@@ -1,0 +1,85 @@
+\section{Results supported after label correction}
+\label{sec:findings}
+\subsection{The comparison population changes the apparent detector quality}
+% claims: C05 C06 C07 C08
+\begin{center}\input{\evidenceroot/tables/recovery_detector.tex}\end{center}
+The main-adapter day ROC changes from \rv{r42.all_users.day_roc} to
+\rv{r42.unseen_users.day_roc} on r4.2 and from \rv{r62.all_users.day_roc} to
+\rv{r62.unseen_users.day_roc} on r6.2 when negatives are restricted to unseen
+users. This is a population/exposure comparison, not a controlled intervention
+that identifies the sole cause of the gap. In r4.2, nine of the ten insiders
+newly included by the label repair are scenario-3 users, and their full scores
+rank incident-window days poorly. Their inclusion materially changes the main
+result; recovery cannot stop at the previously covered 60 users.
+
+The historical Deep SVDD, recurrent-autoencoder, and Isolation Forest rows are
+not included as corrected comparisons. Their fitting populations need repair.
+The corrected LM measurements do not establish a detector leaderboard ordering.
+
+\subsection{Behavior-target scoring improves the complete r4.2 evaluation}
+% claims: C32
+\begin{center}\input{\evidenceroot/tables/recovery_behavior.tex}\end{center}
+This separate, batch-size-one score decomposition covers all 42,468 unseen-pool
+days, all 1,362 positive days, and all 70 insiders. A 256-example bridge exactly
+reproduced the existing class-score pass before the missing users were scored.
+Class losses reconstruct the total score, and an independent check reproduced
+840 reported fold metrics to floating-point precision.
+
+With the model and input held fixed, changing the average from all targets to
+behavior targets raises mean fold day ROC from \rv{c32.full.day_roc} to
+\rv{c32.behavior_only.day_roc}. The paired gain is \rv{c32.gain}, with a
+descriptive 95\% user-bootstrap interval \rv{c32.gain.ci}. AP changes from
+\rv{c32.full.day_ap} to \rv{c32.behavior_only.day_ap}. This supports a
+\emph{score mitigation} for this model and population. It does not show that
+profile information has stopped influencing behavior predictions.
+
+Mean fold prevalence is \rv{c32.fold.prevalence}; pooled prevalence is
+\rv{c32.pooled.prevalence}. The fold AP belongs with the former evaluation
+construction, not the pooled prevalence. Neither AP value is the percentage
+of alerts that would be correct at an operational threshold.
+\begin{figure}[ht]
+\centering\includegraphics[width=.94\textwidth]{\evidenceroot/figures/recovery_score_mitigation.pdf}
+\caption{Complete r4.2 score decomposition. All three views retain the same input
+and frozen model. The figure reports fold means, not pooled metrics.}
+\label{fig:mitigation}
+\end{figure}
+
+\subsection{Training changes and score changes must stay separate}
+% claims: C03 C09 C28 C31
+The next table concerns separate r6.2 factorial adapters, not the main adapters
+in the first table. Each input condition changes both adaptation and evaluation
+content, with one adapter seed per condition.
+\begin{center}\input{\evidenceroot/tables/recovery_factorial.tex}\end{center}
+Removing all profile content improves ranking in both audited model families.
+The 3B change is substantial in point estimate; the earlier description of a
+uniformly tiny 3B effect is not supported. These are run-specific comparisons
+on five insiders, not a general model-capacity law. Their training-byte
+provenance is weaker than the main-adapter audit and remains explicitly qualified.
+
+Scoring behavior targets while retaining the full input yields another comparison:
+\begin{center}\input{\evidenceroot/tables/recovery_r62_behavior.tex}\end{center}
+The 3B target-mask adapter omits profile targets from its training objective
+while retaining profile context. Relative to behavior scoring of its full-training
+counterpart, its day-ROC gain is about 0.006, with a descriptive interval crossing
+zero, while AP decreases. This does not establish an additional mitigation gain.
+
+Input masking of frozen main adapters is yet another experiment. Removing
+personality input improves the cached day-ROC point estimates, but removing
+all profile input does not have the same effect. Those arms used different
+batch/hardware/cross-entropy configurations; the large personality-removal
+contrast exceeds the observed metric sensitivity, while small differences
+cannot be read at fine numerical precision. These findings are compatible with
+several mechanisms and do not identify one by themselves.
+
+\subsection{Temporal models provide a bounded comparison}
+% claims: C33 C34
+The corrected cached numeric-model comparison uses a common population of
+141,662 history-eligible unseen-user days:
+\begin{center}\input{\evidenceroot/tables/recovery_timeseries.tex}\end{center}
+These are \emph{pooled} metrics. The seven-observation reconstruction includes
+the target day; the forecast uses preceding observations only. Histories are
+previous available observations, not necessarily consecutive calendar days.
+All three checkpoint reloads passed the declared numerical tolerances, although
+the seven-observation profile score used 99.5\% of its tolerance. That is a
+tolerance pass, not bitwise equality. History-shuffle and broader copying or
+mechanistic claims remain pending.

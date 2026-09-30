@@ -1,0 +1,45 @@
+\section{What the score measures}
+\label{sec:evaluation}
+% claims: C05 C06 C07 C08 C09 C31 C32 C33 C34
+For tokens $x_1,\ldots,x_n$, the adapted LM assigns the anomaly score
+\begin{equation}
+ s(x)=-\frac{1}{n-1}\sum_{t=2}^{n}\log p_{\mathrm{ada}}(x_t\mid x_{<t}).
+\end{equation}
+The first token is context, padding is excluded, and losses are assigned to the
+\emph{predicted target token}. A larger score means the observed day was less
+predictable under the model of the adaptation corpus.
+
+We separate two questions. In the general-population comparison, the negative
+user pool includes users seen during adaptation. In the unseen-user comparison,
+negative users are restricted to validation users absent from adaptation. Each
+fold contains one official insider and a fixed sampled negative-user cohort;
+metrics are averaged equally over insiders. The general comparison uses 800
+non-insider users per fold; the unseen comparison uses all 79 or 405 validation
+users. An insider's window-negative days are negatives for day metrics. User
+scores are the maximum over each user's full scored history. The model stays
+fixed across these evaluation folds.
+
+ROC-AUC measures the probability that a positive example outranks a negative
+one, with half credit for ties. Average precision (AP) summarizes precision
+across recall levels. It is not precision at a chosen alert threshold. A fold
+average and a pooled metric have different weighting and prevalence: neither
+can be substituted for the other. Unless explicitly labeled pooled, the tables
+below report equal-insider fold means. Bootstrap intervals resample users and
+are descriptive conditional on fixed models, settings, and negative cohorts;
+five r6.2 insiders provide particularly limited uncertainty information.
+
+\paragraph{Changing scored targets.}
+For a target-token class $c$, let $L_c(x)$ be its summed loss and $N_c(x)$ its
+number of scored targets. Then
+\begin{equation}
+ s(x)=\frac{\sum_c L_c(x)}{\sum_c N_c(x)},\qquad
+ s_B(x)=\frac{\sum_{c\in B}L_c(x)}{\sum_{c\in B}N_c(x)}.
+\label{eq:behavior-score}
+\end{equation}
+Our behavior view includes \texttt{SESCOUNT}, \texttt{SES}, and any residual
+non-profile target classes; the profile view includes \texttt{DAY} and
+\texttt{PSY}. In this score-only comparison the full original input remains
+visible to the model. A behavior target can therefore still be predicted from
+profile information. Removing profile targets from an average, removing profile
+\emph{input}, and retraining without profile content are three different
+interventions.

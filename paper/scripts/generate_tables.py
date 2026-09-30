@@ -1,214 +1,77 @@
 #!/usr/bin/env python3
-from __future__ import annotations
-
+"""Render all current paper numbers from the checksum-bound recovery registry."""
 from pathlib import Path
+from recovery_data import ROOT, REGISTRY as R, select, value
 
 
-ROOT = Path(__file__).resolve().parents[1]
-TABLES = ROOT / "tables"
+def table(name, header, rows):
+    content = '\\begin{tabular}{' + 'l' + 'r' * (len(header)-1) + '}\n\\toprule\n'
+    content += ' & '.join(header) + ' \\\\\n\\midrule\n'
+    content += ''.join(' & '.join(map(str, row)) + ' \\\\\n' for row in rows)
+    content += '\\bottomrule\n\\end{tabular}\n'
+    (ROOT / 'tables' / name).write_text(content)
 
 
-def write_table(path: Path, caption: str, label: str, colspec: str, header: list[str], rows: list[list[str]], size: str = r"\small", colsep: str | None = None) -> None:
-    lines = [
-        r"\begin{table}[htbp]",
-        rf"\caption{{{caption}}}",
-        rf"\label{{{label}}}",
-        r"\centering",
-        size,
-    ]
-    if colsep:
-        lines.append(rf"\setlength{{\tabcolsep}}{{{colsep}}}")
-    lines += [
-        rf"\begin{{tabular}}{{{colspec}}}",
-        r"\toprule",
-        " & ".join(header) + r" \\",
-        r"\midrule",
-    ]
-    for row in rows:
-        if row == ["---"]:
-            lines.append(r"\midrule")
-        else:
-            lines.append(" & ".join(row) + r" \\")
-    lines.extend(
-        [
-            r"\bottomrule",
-            r"\end{tabular}",
-            r"\end{table}",
-        ]
-    )
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+def main():
+    (ROOT / 'tables').mkdir(exist_ok=True)
+    macros = {}
+    rows = []
+    for ds in ('r42', 'r62'):
+        p = R['populations'][ds]
+        rows.append([ds.replace('r4', 'r4.').replace('r6', 'r6.'), f"{p['rows']:,}",
+                     f"{p['my_positive_days']:,}", p['my_positive_users'], p['changed_rows']])
+        for key in ('rows','my_positive_days','my_positive_users','changed_rows'):
+            macros[f'{ds}.{key}'] = f'{p[key]:,}'
+        for pop in ('all_users', 'unseen_users'):
+            for metric in ('day_roc', 'day_ap', 'user_roc'):
+                v = value(ds+'_main', 'adapted_nll', metric, pop)
+                macros[f'{ds}.{pop}.{metric}'] = f'{v:.3f}' if metric != 'day_ap' else f'{v:.6f}'
+    table('recovery_populations.tex', ['Dataset','Observed days','Positive days','Insiders','Changed labels'], rows)
+    rows = []
+    for ds in ('r42', 'r62'):
+        for pop in ('all_users', 'unseen_users'):
+            rows.append([('r4.2' if ds=='r42' else 'r6.2')+' / '+('general' if pop=='all_users' else 'unseen'),
+                         *[macros[f'{ds}.{pop}.{m}'] for m in ('day_roc','day_ap','user_roc')]])
+    table('recovery_detector.tex', ['Dataset / negatives','Day ROC','Day AP','User ROC'], rows)
+    rows=[]
+    for view,label in [('full','Full score'),('behavior_only','Behavior targets'),('profile_only','Profile targets')]:
+        vals=R['c32']['fold_mean'][view]
+        rows.append([label,f"{vals['day_roc']:.3f}",f"{vals['day_ap']:.6f}",f"{vals['user_roc']:.3f}"])
+        for m in ('day_roc','day_ap','user_roc'):
+            macros[f'c32.{view}.{m}']=f'{vals[m]:.6f}' if m=='day_ap' else f'{vals[m]:.3f}'
+    table('recovery_behavior.tex',['r4.2 score','Day ROC','Day AP','User ROC'],rows)
+    gain=R['c32']['behavior_minus_full_day_roc']
+    macros['c32.gain']=f"{gain['estimate']:.3f}"
+    macros['c32.gain.ci']=f"[{gain['ci95'][0]:.3f}, {gain['ci95'][1]:.3f}]"
+    macros['c32.fold.prevalence']=f"{R['c32']['fold_mean']['full']['prevalence']:.6f}"
+    macros['c32.pooled.prevalence']=f"{R['c32']['pooled_prevalence']:.6f}"
+    rows=[]
+    for scale in ('3b','8b'):
+        for view,label in [('full','Full'),('no_psy','No personality'),('no_profile','No profile'),('shuffle_profile','Shuffled profile')]:
+            run='r62_factorial_'+scale
+            vals=[value(run,view,m) for m in ('day_roc','user_roc')]
+            rows.append([scale.upper()+' / '+label,*[f'{v:.3f}' for v in vals]])
+            for m,v in zip(('day_roc','user_roc'),vals):macros[f'factorial.{scale}.{view}.{m}']=f'{v:.3f}'
+    table('recovery_factorial.tex',['r6.2 adapter / input','Day ROC','User ROC'],rows)
+    rows=[]
+    for scale,run in [('3B full training','r62_classes_3b_full'),('3B target-mask training','r62_classes_3b_targetmask'),('8B full training','r62_classes_8b_full')]:
+        rows.append([scale,f"{value(run,'full'):.3f}",f"{value(run,'behavior_only'):.3f}",f"{value(run,'behavior_only','day_ap'):.6f}"])
+    table('recovery_r62_behavior.tex',['Separate r6.2 adapters','Full ROC','Behavior ROC','Behavior AP'],rows)
+    rows=[]
+    for suffix,label in [('w1','One observation'),('w7','Seven incl. target'),('fc7','Forecast (past only)')]:
+        row=select('pooled',run='r62_timeseries_'+suffix,population='common_history_unseen',view='full')
+        rows.append([label,*[f"{row[m]:.6f}" if m=='day_ap' else f"{row[m]:.3f}" for m in ('day_roc','day_ap','user_roc')]])
+    table('recovery_timeseries.tex',['r6.2 numeric model','Pooled day ROC','Pooled AP','User ROC'],rows)
+    rows=[]
+    for endpoint,label in [('primary rpU_S - randI_S (attack)','Selected minus isotropic'),('co-primary rpU_S - rpU_C (attack)','Selected minus active'),('specificity [rpU_S - rpU_C](attack) - (window-negative)','Attack specificity')]:
+        row=R['pilot_diagnostic']['endpoints'][endpoint]
+        rows.append([label,f"{row['estimate']:+.6f}",f"[{row['ci95'][0]:+.6f}, {row['ci95'][1]:+.6f}]"])
+    table('recovery_diagnostic.tex',['Post-run diagnostic','Effect','95\\% interval'],rows)
+    for c in R['claims']:
+        macros['claim.'+c['id']]=c['current_disposition'].replace('_', ' ')
+    (ROOT/'tables/recovery_values.tex').write_text('% Generated; do not edit.\n'+''.join(
+        '\\expandafter\\def\\csname rv@'+k+'\\endcsname{'+v+'}\n' for k,v in sorted(macros.items())))
+    print('Generated seven scoped result tables and shared values.')
 
 
-def fmt(x: float, digits: int = 4) -> str:
-    return f"{x:.{digits}f}"
-
-
-def write_detector_table() -> None:
-    rows = [
-        ["r6.2", "Session LM (adapted NLL)", "0.0008", r"\textbf{0.953}", "0.054", "0.970", r"\textbf{24.0}"],
-        ["", "Deep SVDD", r"\textbf{0.0115}", "0.628", r"\textbf{0.211}", "--", "83.2"],
-        ["", "GRU AE", "0.0057", "0.766", "0.081", "--", "24.8"],
-        ["", "LSTM AE", "0.0021", "0.768", "0.057", "--", "24.2"],
-        ["", "Isolation Forest", "0.0002", "0.713", "0.013", "--", "153.0"],
-        ["", r"\emph{Session LM, user-disjoint benign}", "0.0005", "0.545", "0.013", "0.546", "--"],
-        ["---"],
-        ["r4.2", "Session LM (adapted NLL)", "0.0134", r"\textbf{0.964}", "0.101", "0.969", r"\textbf{26.4}"],
-        ["", "Deep SVDD", r"\textbf{0.0337}", "0.743", r"\textbf{0.382}", "--", "53.4"],
-        ["", "GRU AE", "0.0254", "0.696", "0.124", "--", "86.6"],
-        ["", "LSTM AE", "0.0236", "0.714", "0.120", "--", "92.1"],
-        ["", "Isolation Forest", "0.0003", "0.715", "0.008", "--", "186.4"],
-        ["", r"\emph{Session LM, user-disjoint benign}", "0.1023", "0.668", "0.521", "0.565", "--"],
-    ]
-    write_table(
-        TABLES / "cert_detector_comparison.tex",
-        "Detector comparison on CERT under two protocols. Fold-aligned rows follow the baselines' protocol, in which the session LM (trained once on ~90 percent of benign users) faces mostly training-seen benign test users while baselines exclude test users from training; bold marks the best fold-aligned value per metric (held-out rank: lower is better). The italicized user-disjoint rows restrict the LM's benign comparison population to never-trained validation users and are the fairer generalization test for the LM: its ranking advantage largely disappears (day ROC 0.954 to 0.545 on r6.2 and 0.959 to 0.668 on r4.2 computed on the full evaluation pool; the fold-aligned column uses the baselines' per-fold test populations, hence its slightly different 0.953/0.964), showing the fold-aligned strength is mostly a seen-versus-unseen-user effect; under the user-disjoint protocol the LM's day ROC falls at or below every baseline's fold-aligned value. User-disjoint PR values are computed at a very different prevalence (60 malicious versus 79 benign users on r4.2) and are not comparable to the fold-aligned column; the informative cross-protocol comparison is the ROC collapse. Baseline user-level ROC is not reported by the fold-aligned benchmark harness.",
-        "tab:cert_detector",
-        "llccccc",
-        ["Dataset", "Method", "Day PR-AUC", "Day ROC-AUC", "User PR-AUC", "User ROC-AUC", "Held-out rank"],
-        rows,
-        size=r"\footnotesize",
-        colsep="3pt",
-    )
-
-
-def write_mech_table() -> None:
-    rows = [
-        ["r6.2", "Token-SAE causal", "role", "0.006848", "[0.000092, 0.009996]", "4/4 users positive"],
-        ["r6.2", "Token-SAE necessity", "project$\\times$role", "0.065188", "[0.026059, 0.082920]", "4/4 users positive"],
-        ["---"],
-        ["r4.2", "Transferred causal", "multiple", "$<0$", "all audited configs $<0$", "direct transfer fails"],
-        ["r4.2", "Native token-SAE causal", "team", "0.001418", "[0.000967, 0.001863]", "all contexts positive"],
-        ["r4.2", "Native token-SAE necessity", "dept$\\times$role", "0.002922", "[0.000911, 0.005005]", "necessity partial"],
-    ]
-    write_table(
-        TABLES / "cert_mechanistic_summary.tex",
-        "Mechanistic summary (best context mode per estimand). All rows use the "
-        "same-user-excluded protocol with active-control feature sets; the "
-        "transferred row applies the r6.2 layer-18 configuration to r4.2 without "
-        "re-fitting. Effects are paired complete-case top-versus-control "
-        "contrasts; intervals are the prespecified user-level cluster bootstrap "
-        "(10,000 draws, malicious user as resampling unit; descriptive for "
-        "r6.2's four clusters).",
-        "tab:cert_mechanistic",
-        "lllccl",
-        ["Dataset", "Estimand", "Context", "Effect", "95\\% CI", "Note"],
-        rows,
-        colsep="5pt",
-    )
-
-
-def write_claims_table() -> None:
-    rows = [
-        ["Benign-only QLoRA training is valid one-class training", "Supported"],
-        ["Fold-aligned detector strength reflects behavioral discrimination", "Rejected (seen-vs-unseen-user effect)"],
-        ["r6.2 contains a sparse feature family active on profile tokens whose edits pass the audited estimands", "Supported descriptively (best-candidate patching and necessity); held-out replication concentrates on the dominant user; necessity significant against proxy-matched controls (methods appendix)"],
-        ["r4.2 contains a sparse feature family active mainly on behavior tokens whose edits pass patching and ablation", "Partly: the best-candidate patch contrast is positive (significant against proxy-matched controls), but on held-out users the mean over donors is negative; ablation replication persists under a benign-only dictionary and across 3B adapter seeds, patch-repair replication does not"],
-        ["Editing the selected r4.2 features changes behavior-token predictions more than editing controls", "Supported for the joint edit under the SAE replacement procedure at strengths 0.75--1 on held-out users; not shown to exceed an equal-size perturbation at the same positions, or to be specific to anomalous days"],
-        ["The selected r4.2 edits act on behavior but not profile predictions", "Not established: the profile effect is uncertain and the preregistered direct comparison is inconclusive"],
-        ["Editing features toward a benign colleague repairs malicious days", "Not established: only the searched best candidate is positive; the mean over donors has the opposite sign"],
-        ["Configuration-independent r4.2 confirmation", "Not established"],
-        ["Literal feature transfer across benchmarks succeeds", "Rejected"],
-        ["Transfer failure is explained by SAE seed non-identifiability", "Rejected (alignment controls)"],
-        ["Positive-population size alone explains the feature-selection dissociation (conditional on the fixed r4.2 dictionary)", "Rejected at the selection stage (subsampling)"],
-        ["The profile/behavior attribution dissociation requires positive-shaped dictionaries", "Rejected: benign-only SAE retrain reproduces it (r4.2 top-5 $\\geq$94\\% behavioral; r6.2 $\\geq$99\\% profile-bound in all LOUO folds)"],
-        ["The dissociation is particular to the 8B run, the serializer defect, or one adapter seed", "Rejected: 3B repaired-serializer rerun reproduces attribution across two adapter seeds per benchmark, and r4.2 ablation dependence replicates across 3B seeds"],
-        ["The behavioral pole is an artifact of synthetic data or simulated psychometrics", "Rejected: TWOS (real users, real Big-Five) yields ~100\\% behavioral attribution across two adapter seeds at 50\\% malicious prevalence, as the population account predicts"],
-        ["Profile capture is a generic dataset property that any detector class inherits", "Rejected at attribution level: classical one-class detectors on the same r6.2 features place 4--7\\% importance on profile, select no profile feature in any top-5, and lose nothing when profile is removed"],
-        ["The shortcut is an artifact of CERT's injected profile", "Not tested cleanly (corrected 2026-09-24): on LANL, user sampling and fold assignment shared a hash, so the unseen pool is 23 red-team users with no negative-only user and the seen pool adds 988 negative-only users; the AUCs ($0.95$ seen, $0.50$ unseen; host-anonymized $0.88$, $0.63$) describe those pools only; a corrected split is pending"],
-        ["Profile content is merely correlated with the unseen-user collapse", "Rejected in the audited 8B run: removing profile content from adaptation and scoring restores fold-aligned unseen-user ROC $0.53\\to0.90$ (descriptive paired bootstrap interval excluding zero); small and non-significant in the audited 3B run (one adapter seed per arm)"],
-    ]
-    write_table(
-        TABLES / "claim_status.tex",
-        "Audit claim map: what the evidence supports, rejects, and fails to support.",
-        "tab:claim_status",
-        "p{7.6cm}p{5.6cm}",
-        ["Claim", "Status"],
-        rows,
-    )
-
-
-def write_dictionary_robustness_table() -> None:
-    rows = [
-        ["r6.2", "Full-pool", "Profile-bound (99.8--100\\%)", "Dominant-user concentrated", "User-specific (negative on dominant fold)"],
-        ["r6.2", "Benign-only", "$\\geq$99\\% profile-bound, all folds", "Positive on one held-out fold", "Positive on dominant-user fold"],
-        ["---"],
-        ["r4.2", "Full-pool", "4/5 behavioral", "Directional; one context significant", "Partial"],
-        ["r4.2", "Benign-only", "$\\geq$94\\% behavioral", "Does not replicate", "Replicates in all four contexts"],
-    ]
-    write_table(
-        TABLES / "dictionary_robustness.tex",
-        "Dictionary-independence summary. Attribution (where the selected features are active) reproduces under SAE dictionaries retrained on benign rows only, while held-out replication of the intervention estimands is estimand- and dictionary-dependent.",
-        "tab:dict_robustness",
-        "llp{3.4cm}p{3.6cm}p{3.6cm}",
-        ["Dataset", "Dictionary", "Attribution", "Held-out patching", "Held-out ablation"],
-        rows,
-        size=r"\footnotesize",
-    )
-
-
-def write_attribution_table() -> None:
-    rows = [
-        ["r6.2", "14358", "0.998", "0.000", "0.002", "13.4$\\times$", "psychometric values"],
-        ["r6.2", "12848", "0.999", "0.000", "0.001", "13.4$\\times$", "psychometric values"],
-        ["r6.2", "4196", "1.000", "0.000", "0.000", "13.4$\\times$", "psychometric values"],
-        ["r6.2", "13580", "0.000", "0.999", "0.001", "$\\approx$0", "org header"],
-        ["r6.2", "11292", "1.000", "0.000", "0.000", "13.4$\\times$", "psychometric values"],
-        ["---"],
-        ["r4.2", "4596", "0.001", "0.000", "0.999", "$\\approx$0", "session values"],
-        ["r4.2", "3673", "0.000", "0.000", "1.000", "$\\approx$0", "session durations"],
-        ["r4.2", "2302", "0.001", "0.998", "0.001", "$\\approx$0", "org header"],
-        ["r4.2", "3455", "0.000", "0.000", "1.000", "$\\approx$0", "session values"],
-        ["r4.2", "1268", "0.000", "0.000", "1.000", "$\\approx$0", "session values"],
-    ]
-    write_table(
-        TABLES / "attribution.tex",
-        "Token attribution of the top-5 selected features (positive examples). "
-        "Columns are activation-mass fractions by serialization line class; PSY enrich "
-        "is mass fraction over token share for the psychometric line. r6.2 features are "
-        "profile-bound; four of five r4.2 features are behavioral (SES enrichment 1.33x "
-        "over a 0.75 token share).",
-        "tab:attribution",
-        "llccccl",
-        ["Bench", "Feature", "PSY mass", "DAY mass", "SES mass", "PSY enrich", "Top tokens"],
-        rows,
-        size=r"\footnotesize",
-        colsep="3pt",
-    )
-
-
-def write_alignment_table() -> None:
-    rows = [
-        ["within r6.2 (3 seed pairs)", "0.807--0.856", "0.720--0.750"],
-        ["within r4.2 (3 seed pairs)", "0.837--0.946", "0.814--0.818"],
-        ["across benchmarks, native layers (18 vs 26)", "0.218--0.236", "0.224--0.405"],
-        ["across benchmarks, matched layer 18", "0.295--0.652", "0.370--0.963"],
-    ]
-    write_table(
-        TABLES / "alignment.tex",
-        "Feature alignment in residual-stream coordinates (decoder columns mapped "
-        "back through each SAE's per-coordinate standardization before "
-        "normalization). Best-match $|\\cos|$ of each source SAE's top-5 features "
-        "into a target dictionary, versus the whole-dictionary median (empirical "
-        "null). Within-benchmark cross-seed alignment exceeds the null; "
-        "cross-benchmark top-5 alignment sits at or below its null---at matched "
-        "layer the top features align worse than typical dictionary features "
-        "despite substantially shared overall geometry.",
-        "tab:alignment",
-        "lcc",
-        ["Comparison", "Top-5 best-match $|\\cos|$", "Empirical null baseline"],
-        rows,
-    )
-
-
-def main() -> None:
-    TABLES.mkdir(parents=True, exist_ok=True)
-    write_detector_table()
-    write_mech_table()
-    write_claims_table()
-    write_dictionary_robustness_table()
-    write_attribution_table()
-    write_alignment_table()
-
-
-if __name__ == "__main__":
-    main()
+if __name__=='__main__':main()
