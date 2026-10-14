@@ -12,6 +12,9 @@ checked copy for GitHub. The older `thesis_mechinterp_preview.pdf` is historical
 - Corrected r4.2 scores, attribution and residual-preserving ablation replace
   the pre-correction numerical claims. PCA uses its existing all-70-user result.
 - Seven original PCA figures are included under `figures/`.
+- Chapter III now introduces the workflow, examples, and evaluation terms before
+  the formal details, retaining its six sections and numerical results. The matching
+  full draft is 51 pages.
 - Chapter I and personal/front-matter fields still contain author placeholders.
 
 See `REVISION_NOTES_20261014.md` for the old-to-new section map, evidence changes

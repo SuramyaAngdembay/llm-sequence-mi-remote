@@ -55,6 +55,29 @@ artifacts were checked against the current recovery registry before reuse. This 
 revision and source-consistency check, not a fresh independent revalidation of the underlying
 model experiments. Original recovery reviews retain their own scopes and qualifications.
 
+## Chapter III readability pass
+
+A second October 14 pass expands the explanations for a general reader while keeping
+the six-section structure, equations, worked examples, and numerical results.
+
+- Preserves the author's opening comparison with PCA, using prediction difficulty
+  for the language model and reconstruction error for PCA. Benign-only training
+  explicitly refers to fine-tuning, not the model's original pretraining.
+- Adds a brief workflow overview and places the text-record example before the
+  dataset split details.
+- Explains observed-token prediction, surprisal, softmax, maximum likelihood,
+  low-rank adaptation, and quantization before or alongside the formal notation.
+- Defines user/day evaluation, folds, AUC, precision, recall, AP, prevalence, and
+  bootstrap uncertainty. Clarifies that folds reuse the same frozen model and
+  that the bootstrap keeps the benign comparison cohort fixed.
+- Keeps the distinction between excluding profile targets from the score and
+  removing profile information from the model's input.
+
+Only Chapter III of the thesis source changes in this pass. The abstract and other
+chapters are unchanged. The full compiled draft is now 51 pages. Local before/after
+sources and validation records are in
+`/Users/suramya/Documents/thesis-chapter3-readability-2026-10-14/`.
+
 ## Files, build, and remaining work
 
 - Editable source: `thesis_mechinterp.tex`.
