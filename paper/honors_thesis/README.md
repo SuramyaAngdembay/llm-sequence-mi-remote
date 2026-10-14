@@ -1,4 +1,40 @@
-# Honors thesis: dimensionality reduction approaches to insider threat detection
+# Honors thesis: current October 14 revision
+
+The October 7 meeting-note changes are applied in
+[`thesis_mechinterp.tex`](thesis_mechinterp.tex). Read
+**[`thesis_mechinterp.pdf`](thesis_mechinterp.pdf)** for the matching updated draft.
+Local compilation writes `build/thesis_mechinterp.pdf`; the root-level PDF is its
+checked copy for GitHub. The older `thesis_mechinterp_preview.pdf` is historical.
+
+- Abstract: 151 words, high-level conclusion, no LoRA detail.
+- Four chapters: Introduction; PCA with its data and experiment; language-model
+  scoring with its data and evaluation; sparse-feature interpretation.
+- Corrected r4.2 scores, attribution and residual-preserving ablation replace
+  the pre-correction numerical claims. PCA uses its existing all-70-user result.
+- Seven original PCA figures are included under `figures/`.
+- Chapter I and personal/front-matter fields still contain author placeholders.
+
+See `REVISION_NOTES_20261014.md` for the old-to-new section map, evidence changes
+and remaining work. `revision_evidence.json` records reused values and source hashes.
+
+From this directory, the tested local build is:
+
+```sh
+tectonic --keep-logs --keep-intermediates --outdir build thesis_mechinterp.tex
+```
+
+Tectonic 0.17.0 was used for this revision. The source retains its standard LaTeX
+packages and inline bibliography. The earlier source and README are preserved at
+`/Users/suramya/Documents/thesis-meeting-update-2026-10-14/` and in Git history.
+
+---
+
+## Historical September 28 handoff (superseded)
+
+The material below describes the **older** thesis and pre-correction evidence.
+It is retained for provenance, not as the current result or completion status.
+
+### Honors thesis: dimensionality reduction approaches to insider threat detection
 
 `thesis_mechinterp.tex` is the honors thesis, reframed around dimensionality
 reduction, with the language-model and interpretability work added. Its title is
