@@ -658,58 +658,433 @@ a different model of normal activity and asks which parts of its score help dist
 \label{ch:lm}
 
 \section{From Reconstruction to Prediction}
-\chref{ch:pca} scored an observation by the reconstruction error of a low-dimensional linear
-model. This chapter scores a user-day, one user's activity on one day, by how difficult its
-text record is for a large language model, fine-tuned (further trained) only on benign activity,
-to predict. Both scores ask the same question: how badly
-does a model of normal behavior account for this observation? Two ideas from \chref{ch:pca}
-carry over. The fine-tuning changes each adapted weight matrix only by a low-rank correction (Section~\ref{sec:lm-train}),
-and \chref{ch:mech} decomposes the model's internal change with a sparse relative of PCA.
-Scoring activity by how poorly a model trained on normal activity predicts it follows earlier
-work on log and insider-threat data \cite{du2017deeplog,tuor2017deep}.
+\chref{ch:pca} scored an observation by the reconstruction error of a low-dimensional
+linear model. This chapter scores a user-day, one user's activity on one day, by how
+difficult its text record is for a large language model to predict. The language model
+is fine-tuned, or further trained, only on benign activity. Both scores ask the same
+question: how badly does a model of normal behavior account for this observation?
+Scoring activity by how poorly a model trained on normal activity predicts it follows
+earlier work on log and insider-threat data \cite{du2017deeplog,tuor2017deep}.
 
-The new contribution of this chapter is to take the score apart. We show that it splits
-exactly into a part describing \emph{who} the user is and a part describing \emph{what} the
-user did, and examine how counting those predictions changes the ranking of insiders.
+To make the prediction task concrete, consider two fields from an activity record:
+\begin{center}
+\begin{tabular}{ll}
+\texttt{dept=15} & the employee's department code, \\
+\texttt{n\_email=3} & the number of emails recorded for the session.
+\end{tabular}
+\end{center}
+After reading the text up to \texttt{n\_email=}, the model assigns probabilities to
+possible next pieces of text. We look up the probability it assigned to the piece
+actually observed, here the digit \texttt{3}. We repeat this prediction at successive
+positions in the record. Predictions that assign little probability to the observed
+text contribute more to the anomaly score.
 
-The approach starts with a \emph{pretrained} model that has already learned to predict text.
-We adapt it to records from benign employees, then keep its parameters fixed during evaluation.
-Each day's record is broken into small text pieces called \emph{tokens}. Given the actual
-preceding tokens, the model assigns a probability to the next observed token. Low probabilities
-give larger scores, which we average over the day. This measures how unusual the record is
-under the model; it is not a probability that the employee is malicious. Finally, we compare
-the score for all tokens with a score that counts only predictions about behavior, while
-leaving the input unchanged.
+This approach needs two ingredients: a network that assigns probabilities to text,
+and training that makes those probabilities reflect patterns in benign activity.
+We start with a pretrained language model, which has already learned to predict text
+from a large corpus. We adapt it to benign employee records, then keep its learned
+weights fixed while scoring evaluation records. An unusual record receives a high
+score, but unusualness alone does not establish malicious intent.
 
-%%%%% CHANGED (2026-09-28, advisor feedback): mini headings and step-by-step details removed;
-%%%%% all definitions, derivations and results kept.
+The contribution of this chapter is to take that score apart. The record describes
+both \emph{who} the employee is and \emph{what} the employee did. We show that its
+average prediction loss splits exactly into contributions from those two kinds of
+text, and examine how counting those predictions changes the ranking of insiders.
+We first build the prediction and scoring machinery, then describe the experiment
+that tests this separation. The connection to dimensionality reduction returns when
+we restrict the changes made during training, and again in \chref{ch:mech}, where
+we examine changes in the network's internal representations.
 
-\section{Data Preparation and Text Representation}
-\label{sec:lm-data}
-We use CERT release 4.2, a synthetic dataset of employee activity containing ordinary work
-and scripted insider incidents. The language model reads activity grouped into \emph{sessions}, each running from a logon to the
-matching logoff on one computer, with features following the extraction of Le et al.
-\cite{le2020analyzing}: time of day, duration, computer, and counts of logon, device, file, email
-and web events. We write these measurements as text so that the language model can read them.
-For example, a session lasting 489 minutes with 3 emails is represented by fields such as
-\texttt{duration=489} and \texttt{n\_email=3}. The model receives these activity summaries,
-rather than the employees' email messages.
+\section{How a Neural Network Predicts the Next Token}
+\label{sec:lm-softmax}
+A neural network computes with numbers. Its basic operations combine input values
+using adjustable \emph{weights}, then transform the result. Before considering a
+language model, take a single unit with two numerical inputs, named $z_1$ and $z_2$.
+Let $w_1$ and $w_2$ be their connection weights, and let $b$ be an added offset,
+called a \emph{bias}. The unit's output is called its \emph{activation}, here $h$.
+For this teaching example, use the rectified linear unit (ReLU): keep a positive
+weighted sum and replace a negative one with zero. Writing $\max$ for the larger
+of its arguments gives
+\begin{equation}
+h=\max\{0,\;w_1z_1+w_2z_2+b\}.
+\label{eq:lm-neuron}
+\end{equation}
+For inputs $z_1=1$ and $z_2=2$, weights $w_1=2$ and $w_2=-1$, and bias $b=1$,
+the weighted sum is $2(1)-1(2)+1=1$, so $h=1$. Keeping those weights fixed but
+changing the second input to $z_2=4$ makes the sum $-1$ and the activation zero.
+Thus the activation depends on the current input even when the weights do not change.
+These numbers illustrate a computation; they are not measurements from our model.
 
-Each user-day $D$ is written as the text
+A layer performs this calculation with several units. To write it compactly, let
+$d_{\mathrm{in}}$ be the number of input values and $d_{\mathrm{out}}$ the number
+of units. The column vector $\mathbf z$ contains the $d_{\mathrm{in}}$ inputs.
+The matrix $W$ has $d_{\mathrm{out}}$ rows and $d_{\mathrm{in}}$ columns: each row
+contains one unit's connection weights. The vector $\mathbf b$ contains its
+$d_{\mathrm{out}}$ biases, and $\mathbf h$ contains the resulting activations.
+Finally, let $\phi$ mean applying ReLU to each entry. The entire layer is
+\begin{equation}
+\mathbf h=\phi(W\mathbf z+\mathbf b).
+\label{eq:lm-dense-layer}
+\end{equation}
+Matrix multiplication $W\mathbf z$ forms the weighted sum for every unit at once.
+A \emph{multilayer perceptron} (MLP) passes the outputs of one layer into another.
+The nonlinear activation matters: without it, a succession of linear transformations
+and biases could be replaced by one transformation of the same kind.
+Figure~\ref{fig:lm-mlp} shows two inputs and three hidden activations,
+$h_1,h_2,h_3$, whose subscripts identify the units.
+
+\begin{figure}[!htbp]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,every node/.style={font=\small}]
+  \node[draw,circle,minimum size=0.85cm] (i1) at (0,1.0) {$z_1$};
+  \node[draw,circle,minimum size=0.85cm] (i2) at (0,-1.0) {$z_2$};
+  \node[draw,circle,minimum size=0.85cm] (h1) at (3,1.3) {$h_1$};
+  \node[draw,circle,minimum size=0.85cm] (h2) at (3,0) {$h_2$};
+  \node[draw,circle,minimum size=0.85cm] (h3) at (3,-1.3) {$h_3$};
+  \node[draw,rounded corners,align=center,minimum width=2.1cm,minimum height=1cm]
+    (out) at (6.5,0) {next layer\\or output scores};
+  \foreach \i in {i1,i2}
+    \foreach \j in {h1,h2,h3} \draw[->] (\i) -- (\j);
+  \foreach \j in {h1,h2,h3} \draw[->] (\j) -- (out);
+  \node at (0,2.15) {input values};
+  \node at (3,2.15) {hidden activations};
+\end{tikzpicture}
+\caption[A small feedforward network]{A small feedforward network. The two inputs
+$z_1,z_2$ feed three hidden units, whose activations are $h_1,h_2,h_3$; the subscripts
+identify the units. Each incoming arrow has a weight. Each hidden unit also has a
+bias, omitted from the drawing, and applies the operation in
+\eqref{eq:lm-neuron}. The activations become inputs to the next calculation.}
+\label{fig:lm-mlp}
+\end{figure}
+
+We use the symbol $\theta$ for the collection of stored numerical parameters that
+govern a network's computation. For the single unit above, this collection is
+$\theta=(w_1,w_2,b)=(2,-1,1)$. The inputs $z_1,z_2$ and the computed activation
+$h$ are not part of $\theta$. For the layer in \eqref{eq:lm-dense-layer}, the
+parameters are the entries of $W$ and $\mathbf b$. For a complete language model, the
+collection also includes parameters in its input representations, attention
+operations, and output layer. Training changes the trainable members of this
+collection. By contrast, activations are computed afresh from each input.
+This distinction is essential: a frozen model has fixed parameters, but different
+records still produce different internal activations.
+
+To apply a network to text, a \emph{tokenizer} divides the text into pieces called
+\emph{tokens}. These may be words, parts of words, digits, or punctuation. Write
+the tokens of one record as $x_1,\ldots,x_n$, where $n$ is the number of tokens
+and a subscript identifies a position. The symbol $x_t$ denotes the token actually
+observed at position $t$; for a scored prediction, $t$ is an integer from 2 to $n$.
+Its preceding text is abbreviated
+$x_{<t}=(x_1,\ldots,x_{t-1})$; the notation $<t$ means all positions before $t$.
+For example, if $x_t$ is the digit \texttt{3} in \texttt{n\_email=3}, its preceding
+tokens include the field name and equals sign.
+
+The model first looks up a learned numerical vector for each token, called an
+\emph{embedding}. These vectors enter a transformer network \cite{vaswani2017attention}.
+Attention combines information from the available token positions; MLP blocks
+transform the resulting vectors at each position. In next-token prediction, the
+attention pattern prevents a prediction from using the target token or later
+tokens. Position information, normalization of intermediate values, and connections
+that add a block's input to its output also form part of the computation.
+
+Our model, Qwen3-8B, has 36 transformer layers and represents each position with
+4,096 numbers \cite{qwen3,qwen3config}. Its MLP blocks use a gated nonlinear
+operation, called SwiGLU, which multiplies one transformed branch by another.
+The small ReLU network above introduces the roles of weights and activations;
+it is not the exact formula for a Qwen block. Both the attention and MLP
+computations contribute to the representations used for prediction.
+
+For the prediction at position $t$, call the final normalized vector at position
+$t-1$ $\mathbf h_{t-1}$, and let $d=4096$ be its number of coordinates.
+The set $\mathcal V$ contains all candidate output tokens and is called the
+\emph{vocabulary}. Write $V=|\mathcal V|$ for its size; vertical bars around a set
+mean the number of its members. A lowercase $v$ denotes one candidate token,
+which need not equal the observed token $x_t$.
+
+Each candidate $v$ has a learned output-weight vector $\mathbf w_v$ with $d$
+coordinates. Its output score, or \emph{logit}, is $o_v$. Let $i$ count coordinates
+from 1 to $d$, so $w_{v,i}$ and $h_{t-1,i}$ are the corresponding entries of
+the two vectors. The superscript $\top$ transposes a column into a row,
+and $\sum$ means to add the indicated terms. Their dot product is
+\begin{equation}
+o_v=\mathbf w_v^\top\mathbf h_{t-1}
+   =\sum_{i=1}^{d}w_{v,i}h_{t-1,i}.
+\label{eq:lm-logit}
+\end{equation}
+Collecting the row vectors into a matrix $W_{\mathrm{out}}$
+with $V$ rows and $d$ columns gives all logits at once:
+$\mathbf o=W_{\mathrm{out}}\mathbf h_{t-1}$, where $\mathbf o$ is the vector of
+$V$ logits and the subscript \emph{out} identifies the output layer.
+
+Logits can be negative and need not add to one. The \emph{softmax} operation
+converts them into probabilities. Let $p_\theta(x_t=v\mid x_{<t})$ mean the
+probability, under the model with parameters $\theta$, of candidate $v$ occurring
+at position $t$, given the preceding tokens. The vertical bar $\mid$ means
+\emph{given}. In the denominator below, $v'$ is a second candidate name used to
+sum over the entire vocabulary; its prime does not indicate a derivative.
+The symbol $\in$ means \emph{belongs to}. Using $e$ for the base of the
+natural exponential,
+\begin{equation}
+p_\theta(x_t=v\mid x_{<t})
+ =\frac{e^{o_v}}{\sum_{v'\in\mathcal V}e^{o_{v'}}}.
+\label{eq:softmax}
+\end{equation}
+Each exponentiated logit is positive for finite logits, and dividing by their
+sum makes the probabilities add to one.
+
+For a numerical illustration, let the earlier unit's activation $h=1$ feed a toy
+output layer with just three candidate tokens: \texttt{0}, \texttt{3}, and
+\texttt{8}. Throughout this chapter, $\log$ and $\ln$ both mean the natural
+logarithm, the inverse of the exponential with base $e$. Suppose those candidates'
+output weights are $0$, $\log 8$, and $0$. Multiplying each weight by the
+activation gives logits $0$, $\log 8$, and $0$. Exponentiation gives $1$, $8$,
+and $1$; their sum is 10. Softmax therefore gives probabilities $0.1$, $0.8$,
+and $0.1$. If the observed token is \texttt{3}, we use its probability $0.8$.
+If the input instead makes the activation zero, all three logits become zero
+and each candidate receives probability $1/3$. This connects the earlier
+neural-network calculation to the prediction probabilities. The actual Qwen
+vocabulary is much larger; these are illustrative values, not outputs measured
+in the experiment.
+
+We can now follow the complete calculation: preceding text becomes token vectors,
+the network computes an internal representation, the output layer assigns candidate
+logits, and softmax produces probabilities. The next step is to measure how much
+probability the model gave to the observation that actually occurred.
+
+\section{Learning Normal Activity Through Prediction}
+\label{sec:lm-train}
+We need a prediction penalty that is small when the observed token receives high
+probability and large when it receives low probability. For position $t$, call this
+penalty $\ell_t$. Abbreviate the probability assigned to the actual observation by
+$p_\theta(x_t\mid x_{<t})$: this is the probability from \eqref{eq:softmax} after
+choosing the candidate $v$ to be the observed $x_t$. Its \emph{surprisal} is
+\begin{equation}
+\ell_t=-\log p_\theta(x_t\mid x_{<t}).
+\label{eq:lm-surprisal}
+\end{equation}
+The minus sign makes the value nonnegative because a probability is at most one.
+Using $\approx$ to mean approximately equal, the illustrative probability
+$0.8$ gives $-\log(0.8)\approx0.223$; probability $0.01$ gives
+$-\log(0.01)\approx4.605$. These values are measured in \emph{nats}, the information unit obtained
+with a natural logarithm. A large surprisal means the model assigned little
+probability to what occurred.
+
+Why use a logarithm? It turns a product of conditional probabilities into a sum
+of penalties. The probability assigned to a sequence is built from the
+probability of each successive observation given the preceding ones. For the
+record $x_1,\ldots,x_n$, we leave the first token unscored and condition on it.
+The probability $p_\theta(x_2,\ldots,x_n\mid x_1)$ is the model's probability of
+all remaining tokens in their observed order. The chain rule of probability gives
+\begin{equation}
+-\log p_\theta(x_2,\ldots,x_n\mid x_1)
+ =\sum_{t=2}^{n}-\log p_\theta(x_t\mid x_{<t})
+ =\sum_{t=2}^{n}\ell_t.
+\label{eq:lm-chain-rule}
+\end{equation}
+Here the summation adds positions 2 through $n$. No independence between successive
+tokens is assumed: each probability depends on the preceding text. The resulting
+sum is the record's \emph{negative log-likelihood}, a measure of how poorly the
+model predicts that observed record. Appendix~\ref{app:lm-math} gives the
+additional justification for the logarithm and its relation to the logits.
+
+This same penalty provides a training objective. Let $\mathcal B$ be the set of
+benign training days, and let $D$ denote one day in that set. Its record has
+$n_D$ tokens. Write $x_t^{(D)}$ for its token at position $t$ and
+$x_{<t}^{(D)}$ for its preceding tokens; the superscript $(D)$ identifies the
+record and is not a power. Let $J(\theta)$ be the total training loss for model
+parameters $\theta$. Then
+\begin{equation}
+J(\theta)=
+\sum_{D\in\mathcal B}\sum_{t=2}^{n_D}
+-\log p_\theta\bigl(x_t^{(D)}\mid x_{<t}^{(D)}\bigr).
+\label{eq:lm-objective}
+\end{equation}
+The inner sum adds prediction losses within one day; the outer sum adds across
+training days. Minimizing this loss is \emph{maximum-likelihood training}: it
+seeks to increase the probability of the observed benign text. Training estimates
+how small changes to the trainable parameters affect the loss, then repeatedly
+updates them using gradient-based optimization. Neither a decrease at every
+individual update nor a globally best solution is guaranteed.
+
+A simple frequency model helps explain the objective. If a token occurs 80 times
+among 100 observations, a model that ignores context minimizes its loss by assigning
+that token probability $0.8$. Appendix~\ref{sec:lm-mle-proof} derives this result.
+The language model learns a more flexible rule: its probabilities depend on the
+preceding record. Learning from benign activity motivates using low probability
+as an anomaly signal, but an unfamiliar legitimate activity can also be improbable.
+
+We do not learn the whole network from scratch. Qwen3-8B already has parameters
+learned from a broad text corpus \cite{qwen3}. Our further training, called
+\emph{fine-tuning} or \emph{adaptation}, uses only benign employees' activity
+records. Thus benign-only describes our adaptation data, not all data used
+in the model's earlier development.
+
+To limit the number of parameters that must be trained, we use \emph{low-rank
+adaptation} (LoRA) \cite{hu2022lora}. Consider one selected weight matrix $W$,
+with $d_{\mathrm{in}}$ input coordinates and $d_{\mathrm{out}}$ output coordinates,
+as in \eqref{eq:lm-dense-layer}. Keep $W$ fixed and add the product of two
+smaller trainable matrices. Let $r$ be the chosen rank limit, $G$ a matrix with
+$d_{\mathrm{out}}$ rows and $r$ columns, and $H$ a matrix with $r$ rows and
+$d_{\mathrm{in}}$ columns. The effective matrix $W'$ used after adaptation is
+\begin{equation}
+W'=W+GH,\qquad r=16.
+\label{eq:lm-lora}
+\end{equation}
+The prime identifies the adapted matrix. These added trainable factors are
+called adapters. A fixed LoRA scaling factor is absorbed into $G$ in this
+notation. The formula describes evaluation, when dropout, the random masking
+of adapter inputs used during training, is disabled.
+The product $GH$ can change the output only along combinations of the
+$r$ columns of $G$. Its rank, the number of independent output directions, is
+therefore at most $r$. This is the connection to low-dimensional structure:
+each adapted matrix receives a restricted correction.
+
+The two factors contain $r(d_{\mathrm{in}}+d_{\mathrm{out}})$ trainable entries
+instead of the $d_{\mathrm{in}}d_{\mathrm{out}}$ entries of the full matrix.
+For a 4,096-by-4,096 matrix, the rank-16 factors contain 131,072 entries, about
+$0.78\%$ of the original 16,777,216. This restriction applies to each adapted
+matrix separately. Because the full network combines many matrices and nonlinear
+operations, its change in hidden activations need not lie in a 16-dimensional space.
+
+The quantized version, QLoRA \cite{dettmers2023qlora}, stores the frozen base
+weights in a 4-bit representation to reduce memory use while learning these
+corrections. In \eqref{eq:lm-objective}, only the adapter parameters are allowed
+to change; the base parameters remain fixed. Once adaptation finishes, we also
+freeze the adapters. Training and evaluation then have distinct roles: training
+uses surprisal to update parameters, while evaluation uses surprisal to score
+records without updating them.
+
+\section{From Token Surprisal to an Anomaly Score}
+\label{sec:lm-score}
+One token's surprisal measures one prediction. To compare entire days, we need
+to combine the predictions in each record. Fix a day $D$ with $n$ tokens, and
+let $\mathcal T=\{2,\ldots,n\}$ be its set of scored positions. There are
+$N=|\mathcal T|=n-1$ such positions, since the first token has no preceding
+token in the record and is not scored. We use records with at least two tokens.
+Define the day's anomaly score $\bar\ell(D)$ as the average token surprisal;
+the bar indicates an average:
+\begin{equation}
+\bar\ell(D)=\frac{1}{N}\sum_{t\in\mathcal T}\ell_t.
+\label{eq:lm-day-score}
+\end{equation}
+This divides the sum of prediction penalties by the number of predictions.
+Averaging prevents a longer record from receiving a larger score simply because
+more terms were added. A large value means the adapted model found the day's
+text difficult to predict; it is not a probability that the user is malicious.
+
+For user-level evaluation, let $u$ identify an employee and let $\mathcal D_u$
+be the set of that employee's observed days. We define the user score
+$\bar\ell(u)$ by the largest daily score:
+\begin{equation}
+\bar\ell(u)=\max_{D\in\mathcal D_u}\bar\ell(D).
+\label{eq:lm-user-score}
+\end{equation}
+The maximum selects the most unusual observed day. This is a choice of summary
+rule: users with longer histories have more opportunities to receive a high score.
+When we change which token predictions contribute to a daily score, we also
+recalculate each user's maximum using that score.
+
+\label{sec:lm-decomp}
+Now return to the two fields that introduced the chapter. Predicting
+\texttt{dept=15} concerns the profile; predicting \texttt{n\_email=3} concerns
+activity. A rare department can be hard to predict even on an ordinary workday.
+Because both predictions contribute to the full score, unusual profile text
+could affect the ranking independently of unusual activity text.
+
+In our records, lines headed \texttt{DAY} and \texttt{PSY} contain organizational
+and personality information, while \texttt{SESSIONS} and \texttt{SES} give the
+session count and activity measurements. Call their two token groups profile
+($P$) and behavior ($B$). This is an operational grouping by text position.
+The \texttt{DAY} line also includes a week field, so the profile group is not
+composed entirely of identity attributes. The full format appears in the next section.
+
+Let $\mathcal T_P$ and $\mathcal T_B$ be the profile and behavior subsets of
+the scored positions. They do not overlap, and together they contain every
+scored position: $\mathcal T=\mathcal T_P\cup\mathcal T_B$, where $\cup$ means
+the union of two sets. Let $N_P=|\mathcal T_P|$ and $N_B=|\mathcal T_B|$ count
+their positions, so $N=N_P+N_B$. Define the summed losses $L_P$ and $L_B$ by
 \[
-T(D) \;=\; \texttt{DAY} \;\Vert\; \texttt{PSY} \;\Vert\; \texttt{SESSIONS} \;\Vert\;
-\texttt{SES}_1 \;\Vert\; \cdots \;\Vert\; \texttt{SES}_k ,
+L_P=\sum_{t\in\mathcal T_P}\ell_t,\qquad
+L_B=\sum_{t\in\mathcal T_B}\ell_t.
 \]
-lines joined by newlines: the organizational attributes (\texttt{DAY}), the personality scores
-(\texttt{PSY}), the number of sessions (\texttt{SESSIONS}) and one line of \texttt{key=value}
-features per session; $\Vert$ denotes joining the lines. Days have between one and nine
-sessions (two thirds have one), and the longest texts have about 1,300 tokens, within the
-model's limit.
+Their sum $L=L_P+L_B$ is the full record's total loss. Both classes are nonempty
+in our scored records, so their average losses are
+$\bar\ell_P=L_P/N_P$ and $\bar\ell_B=L_B/N_B$. We temporarily omit the day
+argument $(D)$ because all these quantities refer to this one record.
+Substituting the class totals into the full average gives
+\begin{equation}
+\bar\ell=\frac{L_P+L_B}{N}
+ =\frac{N_P}{N}\bar\ell_P+\frac{N_B}{N}\bar\ell_B.
+\label{eq:lm-decomp}
+\end{equation}
+The fractions $N_P/N$ and $N_B/N$ are the classes' shares of scored tokens.
+The identity follows just from partitioning a sum; it makes no assumption
+that profile and behavior predictions are independent.
 
-The record below is
-a real benign day from CERT release 4.2 (user \texttt{AAF0535}, day 7). The session line is a
-single line in the actual text; it is wrapped here only to fit the page.
-{\small
+To score only behavior predictions, we remove the profile contribution from
+both the loss total and the token count:
+\begin{equation}
+\bar\ell_B=\frac{L_B}{N_B}=\frac{L-L_P}{N-N_P}.
+\label{eq:lm-behavior}
+\end{equation}
+The model and its input stay the same. A \emph{target} is the token being
+predicted, and the target's group decides whether its loss is counted.
+Profile text still precedes the activity text and can influence its predictions.
+Thus behavior-only scoring changes the average, without removing profile
+information from the model.
+
+Consider two illustrative days with five scored tokens each: one profile token
+and four behavior tokens. Their profile and behavior shares are therefore
+$1/5=0.2$ and $4/5=0.8$. Day A belongs to a malicious user with a common profile
+and unusual behavior; Day B belongs to a benign user with a rare profile and
+routine behavior. Table~\ref{tab:lm-example} gives example class losses in nats.
+These values are chosen to explain the calculation, not drawn from the experiment.
+\begin{table}[H]
+\centering
+\caption[An illustrative profile--behavior ranking change]{Class means and
+scores for two illustrative days. The full score weights profile loss by
+0.2 and behavior loss by 0.8.}
+\label{tab:lm-example}
+\begin{tabular}{lrrrr}
+\toprule
+day & $\bar\ell_P$ & $\bar\ell_B$ & full $\bar\ell$ & behavior only \\
+\midrule
+A (malicious) & 0.1054 & 0.9324 & 0.7670 & 0.9324 \\
+B (benign) & 2.9957 & 0.4125 & 0.9291 & 0.4125 \\
+\bottomrule
+\end{tabular}
+\end{table}
+The full score places benign Day B above malicious Day A. Its weighted profile
+contribution favors B by about $0.578$, outweighing a weighted behavior contribution
+that favors A by about $0.416$. Counting only behavior predictions reverses that
+ordering. Whether this helps on the dataset is an empirical question, answered
+below. Simply subtracting the two class means is a different calculation;
+Appendix~\ref{sec:lm-naive-proof} shows why it does not recover the behavior score.
+
+\section{Experimental Design and Activity Records}
+\label{sec:lm-data}
+\label{sec:design}
+The method now specifies what we need from the experiment: activity records,
+benign users for adaptation, separate users for evaluation, and labels with
+which to assess the scores. We use CERT release 4.2, a synthetic dataset of
+ordinary employee activity and scripted insider incidents. Section~\ref{sec:cert}
+describes the incident scenarios and calendar-label rule.
+
+The language model reads activity grouped into \emph{sessions}, each running
+from a logon to its matching logoff on one computer. Features follow the
+extraction of Le et al.\ \cite{le2020analyzing}: time of day, duration, computer,
+and counts of logon, device, file, email, and web events. We write these
+measurements as text to provide a consistent input to the pretrained model.
+It receives activity summaries, not employees' email message bodies.
+
+Each day starts with a \texttt{DAY} line of organizational attributes and a
+\texttt{PSY} line of personality scores. A \texttt{SESSIONS} line gives the
+session count, followed by one \texttt{SES} line of measurements per session.
+The following is a complete benign record from the dataset, for user
+\texttt{AAF0535} on day 7. The session line is wrapped here to fit the page;
+in the actual input it is one line.
+\par\medskip
+\noindent\begin{minipage}{\linewidth}
+\small
 \begin{verbatim}
 DAY week=1 project=na role=39 b_unit=0 f_unit=4 dept=15 team=11 itadmin=0
 PSY O=17 C=21 E=36 A=33 N=31
@@ -721,58 +1096,50 @@ SES idx=0 pc=0 isworkhour=1 isafterhour=0 isweekend=0 isweekendafterhour=0
     email_mean_n_atts=1.333 n_http=29 http_n_jobf=0 http_n_cloudf=0
     http_n_leakf=0 http_n_hackf=0
 \end{verbatim}
-}
-\noindent This user had one working-hours session on their usual computer, lasting 489 minutes,
-with 3 emails and 29 web requests. The lines fall into two classes. The \textbf{profile lines}
-($P$), \texttt{DAY} and \texttt{PSY}, describe \emph{who} the user is: organizational attributes
-and Big-Five personality scores, rather than the session activity counts.
-The \textbf{behavior lines} ($B$), \texttt{SESSIONS} and \texttt{SES}, describe \emph{what the
-user did} that day. The profile group also contains the week field on the \texttt{DAY}
-line: this is a grouping by text location, not a claim that every field in it is an identity attribute.
+\end{minipage}
+\par\medskip
+\noindent This employee had one working-hours session on their usual computer,
+lasting 489 minutes, with 3 emails and 29 web requests. The two fields used
+earlier are part of this record. The organizational fields are encoded
+categories; the letters \texttt{O}, \texttt{C}, \texttt{E}, \texttt{A}, and
+\texttt{N} denote openness, conscientiousness, extraversion, agreeableness,
+and neuroticism, the five personality scores.
 
-The model reads \emph{tokens} $x_1,\dots,x_n$, short pieces of text in which numbers are split
-into single digits, so \texttt{dept=15} is the four tokens \texttt{dept}, \texttt{=}, \texttt{1},
-\texttt{5}. A token's class is the class of the line it lies on,
-\[
-c(x_t) \;=\;
-\begin{cases}
-P & \text{if } x_t \text{ lies on a \texttt{DAY} or \texttt{PSY} line,} \\
-B & \text{otherwise (session count, session activity, or residual text),}
-\end{cases}
-\]
-so the class is decided by where a token sits, not by what it is: the digit \texttt{1} is a
-profile token in \texttt{team=11} and a behavior token in \texttt{n\_logon=1}. The record above
-has $N = 212$ scored tokens, of which $N_P = 54$ are profile tokens and $N_B = 158$ behavior
-tokens. The profile share varies between days. Each token's surprisal is counted in the class of the token being predicted, while the
-model still reads the whole preceding text as context: the split decides which predictions are
-\emph{counted}, not what the model \emph{sees}.
+For this representation and tokenizer, numbers are split into individual digits.
+For example, \texttt{dept=15} becomes \texttt{dept}, \texttt{=}, \texttt{1},
+and \texttt{5}. The complete record has $N=212$ scored positions, with
+$N_P=54$ profile positions and $N_B=158$ behavior positions. A position is
+assigned to the profile group if it falls on a \texttt{DAY} or \texttt{PSY}
+line; remaining positions, including session lines and residual text, belong
+to the behavior group. The digit \texttt{1} can therefore be a profile token
+in \texttt{team=11} and a behavior token in \texttt{n\_logon=1}.
+The class of the target token determines the class of its prediction loss.
 
+The historical conversion program omitted four hyphenated file fields:
+\path{file_n-to_usb1}, \path{file_n-from_usb1}, \path{file_n-file_act3}, and
+\path{file_n-disk1}. If a missing field appears as a zero in the text, it is
+a default inserted during conversion, not a measured absence of activity.
+The findings concern this recorded representation.
 
-The program that converts measurements into text omitted four hyphenated file fields:
-\path{file_n-to_usb1},
-\path{file_n-from_usb1}, \path{file_n-file_act3}, and \path{file_n-disk1}.
-If a missing field appears as a zero in the text, that zero is a serialization default,
-not a measured absence of activity. The results concern this recorded representation.
+Release 4.2 supplies 470,611 extracted sessions on 330,295 user-days.
+A day without an extracted session has no text and is outside this experiment.
+Days have between one and nine sessions, with two thirds having one.
+The longest records contain about 1,300 tokens, within the model's input limit.
+We evaluate each recorded day's predictability from its own preceding tokens;
+we do not forecast the next day or generate replacement activity.
 
-Release 4.2 supplies 470,611 sessions on 330,295 user-days. A day without an extracted session
-has no text and is outside this experiment. For evaluation, an \emph{incident-window day}
-is a day overlapping an insider's recorded incident period. An insider's other days are
-\emph{window-negative}; this does not verify that all their activity was benign.
-Section~\ref{sec:cert} gives the precise calendar rule. The corrected evaluation labels cover
-all 1,362 observed incident-window days from the 70 official insiders.
-
-To evaluate employees excluded from adaptation, we split the data by user, keeping all days
-of a user together. The three groups are training users, held-out benign users, and insiders,
-written as $\mathcal{U}_{\mathrm{train}}$, $\mathcal{U}_{\mathrm{val}}$, and
-$\mathcal{U}_{\mathrm{ins}}$. All official insiders belong to the last group. Among the other
-users, a fixed hash of each identifier assigns about one tenth to the held-out group and the
-rest to training; the hash makes the assignment repeatable (Table~\ref{tab:splits}).
-\emph{Held out} here means excluded from fine-tuning. The evaluation users have been examined
-during research development, so they are not a newly untouched test set.
-
-\begin{table}[H]
+We split by user so that all days of one employee stay together.
+Let $\mathcal U_{\mathrm{train}}$ denote the training users,
+$\mathcal U_{\mathrm{val}}$ the held-out benign users, and
+$\mathcal U_{\mathrm{ins}}$ the official insiders. The subscripts name the
+three groups; \emph{val} is the historical name of the held-out group.
+All 70 official insiders enter the last group. A fixed hash, a repeatable
+numerical mapping of each remaining user's identifier, assigns about one
+tenth of those users to the held-out group and the rest to training.
+\begin{table}[!htbp]
 \centering
-\caption{User-disjoint splits of CERT release 4.2: no user belongs to more than one group.}
+\caption{User-disjoint splits of CERT release 4.2: no user belongs to more than
+one group.}
 \label{tab:splits}
 \begin{tabular}{lrrr}
 \toprule
@@ -784,291 +1151,64 @@ $\mathcal{U}_{\mathrm{ins}}$ (insiders) & 70 & 15,442 & 1,362 \\
 \bottomrule
 \end{tabular}
 \end{table}
+QLoRA adaptation makes one pass over the 287,827 days of the 851 training
+users. No insider or held-out benign user enters adaptation. Here
+\emph{held out} means excluded from fine-tuning: these evaluation users have
+been examined during research development and are not a newly untouched test set.
 
-The evaluation pool contains every observed session-day of the 70 insiders and the 79
-held-out benign users: 42,468 days from 149 users. The calendar-label correction changed
-evaluation labels and score coverage; the model and its benign training membership remain
-unchanged.
+The evaluation pool contains all 42,468 observed session-days of the 70
+insiders and 79 held-out benign users. An \emph{incident-window day} overlaps
+an insider's recorded incident period under the corrected calendar rule;
+there are 1,362 such observed days. The insider's other days are
+\emph{window-negative}, which does not establish that every activity on them
+was benign. The label correction changed evaluation labels and score coverage;
+the adapted model and its benign training membership remain unchanged.
 
-\section{Next-Token Probability and Surprisal}
-\label{sec:lm-softmax}
-A token that the model assigns probability $0.8$ is less surprising than one assigned
-probability $0.01$. We measure this difference with \emph{surprisal}, the negative natural
-logarithm of the assigned probability: these examples give approximately $0.223$ and $4.605$.
-Lower probabilities therefore contribute more to the anomaly score.
+\label{sec:lm-auc}
+Evaluation asks two distinct questions: do insider users rank above benign
+users, and do incident-window days rank above negative days? User comparisons
+use each user's maximum daily score; day comparisons use the individual
+daily scores. Success on one question does not guarantee success on the other.
 
-We score the text that was actually observed. At position $t$, the model uses only the preceding
-tokens $x_{<t}=(x_1,\ldots,x_{t-1})$ to predict $x_t$. The evaluator knows the whole record,
-but the model's prediction at that position cannot use the target token or later tokens.
-This evaluates a recorded day's predictability; it does not generate a new activity record or
-forecast the next day.
+A score threshold flags records above it. As that threshold changes, the
+receiver operating characteristic (ROC) curve plots the fraction of positives
+flagged against the fraction of negatives flagged. Its area, ROC-AUC or
+simply AUC, has a useful ranking interpretation: the fraction of
+positive--negative pairs in which the positive has the higher score, with
+half credit for ties. An AUC of 1 means perfect ranking; 0.5 is chance-level
+ranking. The user-level calculation and its connection to fold averaging
+are written out in Appendix~\ref{sec:lm-auc-proof}.
 
-The probabilities come from the model's internal representation of that preceding text.
-Its 36 processing layers produce a \emph{context vector}
-$\mathbf{h}_{t-1}\in\mathbb{R}^{4096}$, a list of numbers summarizing the text for the next
-prediction \cite{vaswani2017attention}. Each possible token $v$ in the vocabulary $\mathcal{V}$
-has a learned vector $\mathbf{w}_v$. Their dot product gives a score, or \emph{logit},
-$o_v=\mathbf{w}_v^\top\mathbf{h}_{t-1}$; collecting these scores gives
-$\mathbf{o}=W_{\mathrm{out}}\mathbf{h}_{t-1}$. The \emph{softmax} converts the scores into
-probabilities by exponentiating each score and dividing by the sum over all possible tokens:
-\begin{equation}
-p_\theta(x_t = v \mid x_{<t}) \;=\; \frac{e^{o_v}}{\sum_{v' \in \mathcal{V}} e^{o_{v'}}} ,
-\label{eq:softmax}
-\end{equation}
-where $\theta$ denotes the model's learned parameters. For finite logits, these probabilities
-are positive and sum to 1. Only differences between logits matter: for two tokens $a$ and $b$,
-$p(a)/p(b)=e^{o_a-o_b}$.
+For the day-level evaluation, a comparison called a \emph{fold} contains
+all days of one insider and all days of the same 79 held-out benign users.
+The insider's incident-window days are positive; their window-negative
+days and the benign-user days are negative. We calculate the metrics in
+each of the 70 folds and average them equally. The model stays fixed
+throughout: these folds do not train 70 separate models. Each user-level
+fold instead compares that insider's maximum with the 79 benign maxima.
 
-The \emph{surprisal} of the actual token is
-\begin{equation}
-\ell_t \;=\; -\log p_\theta(x_t \mid x_{<t})
-\;=\; \mathrm{LSE}(\mathbf{o}) \;-\; o_{x_t},
-\qquad \mathrm{LSE}(\mathbf{o}) = \log\sum_{v} e^{o_v},
-\label{eq:lse-surprisal}
-\end{equation}
-where the log-sum-exp satisfies $o_{\max} \le \mathrm{LSE}(\mathbf{o}) \le o_{\max} + \log|\mathcal{V}|$.
-The log-sum-exp term combines the scores of all possible tokens into one value. Subtracting
-the observed token's logit gives its surprisal. Thus the measure depends on the probability
-assigned to the observed token, including how strongly other tokens compete with it.
+We also report \emph{average precision} (AP). At a threshold, precision is
+the fraction of flagged cases that are positive, and recall is the fraction
+of all positive cases that are flagged. AP adds precision values across
+successive score thresholds, weighting each by the increase in recall.
+It summarizes a ranking rather than precision at one chosen alert threshold.
+AP depends on \emph{prevalence}, the fraction of cases that are positive.
+Mean day-level fold prevalence is about $0.0714\%$ because each fold
+contains only one insider alongside all 79 benign users. Pooling the
+42,468 days instead gives $3.21\%$ positive days. The reported day metrics
+are fold means, not metrics computed once on that pooled population.
 
-%%%%% MOVED here from the removed CTMC chapter (why -log p measures surprise)
-
-\label{sec:why-log}
-Why use the negative logarithm? Besides assigning larger values to rarer events, it turns a
-product of probabilities into a sum of scores. This lets us add the surprises of successive
-predictions. More formally, two requirements on a measure of surprise $S(p)$ leave
-only the logarithm, the measure of information introduced by Shannon \cite{shannon1948}. First,
-rarer events are more surprising, so $S$ decreases in $p$. Second, the surprises of independent
-events add, and since $P(A \text{ and } B) = P(A)P(B)$ this means
-\begin{equation}
-S(pq) \;=\; S(p) + S(q) \qquad \text{for all } p, q \in (0, 1].
-\label{eq:surprise-additive}
-\end{equation}
-Writing $p = e^{-x}$ and $g(x) = S(e^{-x})$ turns \eqref{eq:surprise-additive} into
-$g(x+y)=g(x)+g(y)$: adding two inputs adds their outputs. This is Cauchy's functional
-equation, whose only increasing solutions are $g(x)=c\,x$. Hence
-\begin{equation}
-S(p) \;=\; -c \ln p, \qquad c > 0,
-\label{eq:surprise-log}
-\end{equation}
-where $c$ only fixes the unit; using the natural logarithm with $c=1$ measures surprise in
-\emph{nats}. A certain event carries
-no surprise, an event thought impossible would be infinitely surprising, and every tenfold drop in
-probability adds the same $\ln 10$ nats.
-
-For a single observed event, the surprisal is also its \emph{negative log-likelihood}. By the
-chain rule of probability, the probability of a day's text is the product of each token's
-probability given the tokens before it, so
-\begin{equation}
--\log p_\theta(x_2, \dots, x_n \mid x_1)
-\;=\; \sum_{t=2}^{n} -\log p_\theta(x_t \mid x_{<t})
-\;=\; \sum_{t=2}^{n} \ell_t :
-\label{eq:lm-chain-rule}
-\end{equation}
-the total surprisal of a day is the negative log-likelihood of its text. This chain rule uses
-conditional probabilities and does not assume that successive tokens are independent.
-Because days differ in
-length, the anomaly score of Section~\ref{sec:lm-score} divides this
-total by the number of scored tokens.
-
-\section{Learning From Benign Days Only}
-\label{sec:lm-train}
-Our starting model is Qwen3-8B \cite{qwen3}, a language model already trained on a large text
-corpus. \emph{Fine-tuning}, also called adaptation, is further training that makes it better
-at predicting our activity records. Only this further training is restricted to benign
-employees. Once adaptation finishes, we freeze the model: scoring evaluation records does
-not update its parameters.
-
-During adaptation, the model predicts each training token from its preceding text. The
-training objective adds up the resulting surprisal, or prediction \emph{loss}. Reducing this
-loss encourages the model to assign higher probabilities to the benign records it sees.
-Formally, we seek parameters that minimize
-\begin{equation}
-\theta^\star \;=\; \arg\min_{\theta}\; \sum_{D \in \mathcal{B}} \;\sum_{t=2}^{n_D}\;
--\log p_\theta\bigl(x^{(D)}_t \mid x^{(D)}_{<t}\bigr),
-\label{eq:lm-objective}
-\end{equation}
-where $\mathcal{B}$ is the set of benign training days and $x^{(D)}$ is the text of day $D$,
-with $n_D$ tokens. This is \emph{maximum-likelihood estimation}: choosing parameters that
-make the observed training text more probable. Iterative training seeks a low-loss solution;
-the notation does not claim that we find a global minimum.
-
-A simple frequency model illustrates the idea. Suppose it assigns one probability $p_j$
-to each of $K$ tokens, without considering preceding text. If token $j$ occurs $N_j$ times
-among $N$ training tokens, minimizing $\sum_j N_j(-\log p_j)$ subject to $\sum_j p_j=1$
-with a Lagrange multiplier gives
-\begin{equation}
-\hat{p}_j \;=\; \frac{N_j}{N},
-\label{eq:lm-mle}
-\end{equation}
-the observed token frequencies. A token appearing in 80 of 100 observations receives
-probability $0.8$ in this simple model. The language model instead learns probabilities that
-depend on the preceding text. It reduces its loss by \emph{gradient descent}, repeatedly
-adjusting trainable parameters in a direction that lowers training loss. This motivates
-using surprisal to detect unusual records, but rarity alone does not establish malicious intent.
-
-We restrict which parameters can change using \emph{low-rank adaptation} (LoRA)
-\cite{hu2022lora}. The original weight matrices stay fixed, and selected matrices receive a
-trainable correction. For a square matrix, this has the form $W'=W+GH$, with
-$G\in\mathbb{R}^{d\times r}$, $H\in\mathbb{R}^{r\times d}$, and $r=16$.
-The two smaller matrices provide the correction while using far fewer trainable
-parameters.\footnote{For a $4096\times4096$ matrix, the two rank-16 factors contain 131,072
-parameters, about $0.78\%$ of the 16,777,216 entries in the original matrix. Rectangular
-weight matrices use the corresponding input and output dimensions.}
-For any input $\mathbf{x}$, the change $GH\mathbf{x}$ lies in the span of the 16 columns of
-$G$. This gives a limited connection to PCA: each adapted matrix changes its output along
-at most 16 directions. The composed nonlinear network's hidden-state difference need not
-lie in a 16-dimensional subspace.
-
-The quantized version, QLoRA \cite{dettmers2023qlora}, stores the fixed base weights in a
-4-bit representation to reduce memory use, while learning the low-rank corrections.
-Our adaptation makes one pass over the 287,827 benign user-days from the 851 training users
-in Table~\ref{tab:splits}. No insider records enter this training objective.
-
-\section{Anomaly Scores and Their Decomposition}
-\label{sec:lm-score}
-The previous sections explain how the model assigns a score to each predicted token.
-To compare whole days, we average those scores. Averaging prevents a longer record from
-receiving a larger score simply because it contains more terms in the sum.
-Let $\mathcal{T}$ be the set of scored positions of a day (every token except the first, which
-has nothing before it) and $N = |\mathcal{T}|$. The anomaly score of the day is its average
-token surprisal,
-\begin{equation}
-\bar{\ell} \;=\; \frac{1}{N}\sum_{t\in\mathcal{T}} \ell_t .
-\label{eq:lm-day-score}
-\end{equation}
-A high $\bar{\ell}$ means that the model adapted on benign days found this day hard to
-predict. A user's score is the score of their most unusual day,
-\[
-\bar{\ell}(u) \;=\; \max_{D \in \mathcal{D}_u} \bar{\ell}(D),
-\]
-where $\mathcal{D}_u$ is the set of that user's observed days. This maximum asks whether the
-user has any particularly unusual day. It is a chosen summary rule, so users with longer
-observed histories have more opportunities to receive a high score.
-
-
-\label{sec:lm-decomp}
-The full average includes predictions about both the user's profile and their activity.
-A rare profile can therefore raise the score even when the activity is ordinary. We examine
-this contribution by adding the losses in each token class separately.
-Divide the scored positions into profile and behavior positions,
-$\mathcal{T} = \mathcal{T}_P \cup \mathcal{T}_B$, with $N = N_P + N_B$.
-Let $L_P=\sum_{t\in\mathcal{T}_P}\ell_t$ and
-$L_B=\sum_{t\in\mathcal{T}_B}\ell_t$ be their summed losses, and let $L=L_P+L_B$.
-For nonempty classes, the class means are $\bar{\ell}_P=L_P/N_P$ and
-$\bar{\ell}_B=L_B/N_B$. Then
-\begin{equation}
-\bar{\ell}
-\;=\; \frac{1}{N}\bigl(L_P + L_B\bigr)
-\;=\; \frac{N_P}{N}\,\bar{\ell}_P \;+\; \frac{N_B}{N}\,\bar{\ell}_B :
-\label{eq:lm-decomp}
-\end{equation}
-the day's score is exactly a weighted average of the profile mean and the behavior mean, weighted
-by their shares of the tokens. The behavior-only score
-\begin{equation}
-\bar{\ell}_B \;=\; \frac{L_B}{N_B} \;=\; \frac{L - L_P}{N - N_P}
-\label{eq:lm-behavior}
-\end{equation}
-uses the same model with no retraining. It adds only behavior-target losses and divides by
-the number of those targets. Profile text still precedes the activity text, so it can still
-influence the predictions. A \emph{target} here is the token being predicted.
-
-To remove a class from an average, both its summed loss and its token count must be removed.
-Simply subtracting the profile mean gives a different quantity:
-\begin{equation}
-\bar{\ell} - \bar{\ell}_P \;=\; \frac{N_B}{N}\bigl(\bar{\ell}_B - \bar{\ell}_P\bigr) :
-\label{eq:lm-naive}
-\end{equation}
-this measures how much harder the behavior was to predict than the profile, not how hard the behavior
-was to predict, and it can reverse the order of two days.
-
-
-For a numerical illustration, two user-days each have five scored tokens, one profile token and four behavior tokens, so
-$N_P/N = 0.2$. Day A belongs to a malicious user with a common profile and unusual behavior; Day B
-to a benign user with a rare profile and routine behavior.
-
-\begin{table}[H]
-\centering
-\caption{Class means and scores of the two example days.}
-\label{tab:lm-example}
-\begin{tabular}{lcccc}
-\toprule
-day & $\bar{\ell}_P$ & $\bar{\ell}_B$ & full score $\bar{\ell} = 0.2\,\bar{\ell}_P + 0.8\,\bar{\ell}_B$ & behavior-only score \\
-\midrule
-A (malicious) & 0.1054 & 0.9324 & 0.7670 & 0.9324 \\
-B (benign) & 2.9957 & 0.4125 & 0.9292 & 0.4125 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\noindent The full score ranks the benign Day B above the malicious Day A: its profile part favors
-Day B by $0.578$ and outweighs a behavior part that favors Day A by $0.416$. The behavior-only
-score restores the correct order. The naive subtraction can fail as well: for a Day C with
-$\bar{\ell}_P = 3.0$, $\bar{\ell}_B = 1.2$ and a Day D with $\bar{\ell}_P = 0.2$,
-$\bar{\ell}_B = 0.8$, equation \eqref{eq:lm-naive} gives $0.8(1.2 - 3.0) = -1.44$ and
-$0.8(0.8 - 0.2) = 0.48$, ranking D above C although C's behavior is less predictable.
-
-\section{Evaluation and Corrected Results}
-\label{sec:design}
-
-\label{sec:lm-auc} %%%%% NEW label (2026-09-28), cited from Chapter III
-Evaluation asks whether larger scores belong to the cases we want to find. There are two
-questions: do insider \emph{users} rank above benign users, and do incident-window \emph{days}
-rank above negative days? The first uses each user's maximum daily score; the second uses
-individual day scores. Success on one does not guarantee success on the other.
-
-The receiver operating characteristic (ROC) curve records the fraction of positives found
-and the fraction of negatives flagged as a score threshold varies. Its area, ROC-AUC or
-simply AUC, also has a direct ranking interpretation: the share of positive--negative pairs
-in which the positive has the larger score, with half credit for ties. A value of 1 means
-perfect ranking; 0.5 is chance-level ranking. A value below 0.5 means that the observed
-ranking favors negatives more often than positives. Establishing whether a small departure
-from 0.5 is reliable requires a separate uncertainty assessment.
-
-With one malicious user $m$ compared against $n_-$ benign users $u_1,\dots,u_{n_-}$, the
-area under the ROC curve for $m$ is the fraction of benign users that $m$ outranks,
-\begin{equation}
-\mathrm{AUC}_m \;=\; \frac{1}{n_-}\sum_{j=1}^{n_-}\left(\mathbb{I}[\bar{\ell}(m)>\bar{\ell}(u_j)]
-+\tfrac12\mathbb{I}[\bar{\ell}(m)=\bar{\ell}(u_j)]\right),
-\label{eq:auc}
-\end{equation}
-where $\mathbb{I}[\cdot]$ is 1 when the condition holds and 0 otherwise. Averaging over $M$ malicious users gives $\mathrm{AUC} = \frac{1}{M}\sum_m
-\mathrm{AUC}_m$. Because every malicious user is compared with the same benign users, this
-average equals the pooled AUC over all $M \times n_-$ malicious--benign pairs:
-\[
-\frac{1}{M}\sum_{m}\frac{1}{n_-}\sum_{j} w_{mj}
-\;=\; \frac{1}{M\,n_-}\sum_{m}\sum_{j} w_{mj},
-\]
-where $w_{mj}$ is 1, $\tfrac12$, or 0 for a win, tie, or loss.
-
-For example, suppose four benign users have full scores $(0.93,\;0.70,\;0.85,\;0.60)$ and a
-malicious user has full score $0.77$. The malicious user outranks $0.70$ and $0.60$, so
-$\mathrm{AUC}_m = 2/4 = 0.50$. If the behavior-only scores are $(0.41,\;0.55,\;0.70,\;0.48)$
-for the benign users and $0.93$ for the malicious user, it outranks all four, and
-$\mathrm{AUC}_m = 4/4 = 1.00$.
-
-
+\section{Results and the Question of Internal Mechanism}
 \label{sec:lm-finding}
-For the day-level evaluation, we repeat the comparison once for each insider. Each comparison,
-called a \emph{fold}, contains all observed days of that insider and all days of the same
-79 held-out benign users. Incident-window days are positive; the insider's window-negative
-days and all benign-user days are negative. We calculate each fold's metrics and average
-them equally across the 70 insiders. The model stays fixed across folds; we do not train
-a different model for each comparison. Unlike the user-AUC identity above, averaging
-day-metric folds need not equal pooling all days into one calculation.
-
-We also report \emph{average precision} (AP). At a given threshold, \emph{precision} is the
-fraction of flagged cases that are positive, while \emph{recall} is the fraction of all
-positive cases that are flagged. Lowering the threshold flags more cases and changes both
-fractions. AP summarizes precision over the increases in recall; it is not the precision
-at one chosen alert threshold. Table~\ref{tab:lm-views} compares the full, behavior-only and
-profile-only scores from the same frozen model and input.
-
+Table~\ref{tab:lm-views} compares three ways to count predictions from
+the same frozen model and input: all tokens, behavior tokens, and profile
+tokens. All three use the same corrected population and evaluation procedure.
 \begin{table}[!htbp]
 \centering
-\caption[Corrected language-model score decomposition]{Corrected CERT r4.2 score decomposition: 42,468 days, including 1,362
-incident-window days, from 70 insiders and 79 held-out benign users. All views retain the
-same input and model. AUC and AP columns are equal-insider fold means.}
+\caption[Corrected language-model score decomposition]{Corrected CERT r4.2
+score decomposition: 42,468 days, including 1,362 incident-window days, from
+70 insiders and 79 held-out benign users. All views retain the same input
+and model. AUC and AP columns are equal-insider fold means.}
 \label{tab:lm-views}
 \begin{tabular}{lrrr}
 \toprule
@@ -1080,41 +1220,49 @@ Profile tokens & 0.482 & 0.001353 & 0.476 \\
 \bottomrule
 \end{tabular}
 \end{table}
+User AUC rises from 0.589 to 0.825 when only behavior-target losses enter
+the daily average. With half credit for ties, insiders then rank above
+benign users in about $82.5\%$ of evaluated user pairs, compared with
+$58.9\%$ for the full score. These are ranking proportions, not percentages
+of users correctly classified at a particular alert threshold.
 
-The user AUC rises from 0.589 to 0.825 when we count only behavior targets. This means that,
-with half credit for ties, an insider ranks above a benign user in about $82.5\%$ of the
-evaluated user pairs, compared with $58.9\%$ for the full score. These are ranking results,
-not percentages of users correctly classified at an alert threshold.
+To describe uncertainty in the change, we use a \emph{user bootstrap}:
+repeatedly sample the 70 insiders with replacement and recalculate the
+mean gain, keeping each insider's full-score and behavior-only AUCs
+paired. Sampling with replacement allows the same insider to appear
+more than once in a resampled group. The estimated user-AUC gain is
+$0.236$, with a descriptive 95\% user-bootstrap interval $[0.185,0.289]$;
+the brackets give its lower and upper endpoints. The model and the
+benign comparison cohort stay fixed, so this interval does not measure
+variation across independently trained models.
 
-To describe uncertainty in the change, we use a \emph{user bootstrap}: repeatedly sample
-the 70 insiders with replacement and recalculate the mean gain, keeping each insider's
-full-score and behavior-only AUCs paired. Counting only behavior targets raises user AUC by $0.236$, with a descriptive
-95\% user-bootstrap interval $[0.185,0.289]$. This resampling keeps the model and benign
-comparison cohort fixed; it does not measure variation across independently trained models.
-The improvement comes from changing which prediction losses enter the score.
-The profile-only point estimate
-is near chance and slightly below it; that alone does not establish a systematic reversed
-ranking. The paired score comparison is the direct evidence for the benefit of behavior-only
-scoring in this experiment.
+Behavior-only scoring also improves the displayed day metrics. Their
+AP values must be read with the small fold prevalence described above,
+not the larger pooled prevalence. The profile-only user-AUC estimate
+is slightly below chance, but that point estimate alone does not
+establish a reliable reversed ranking. The paired comparison directly
+supports the benefit of changing which predictions are counted in this
+experiment.
 
-AP depends on how common positives are in the comparison population. That fraction is called
-\emph{prevalence}. Each fold includes only one insider alongside all 79 benign users, so its
-positive days are especially rare: mean fold prevalence is about $0.0714\%$. Pooling all
-42,468 days instead includes every insider together and gives $3.21\%$ positive days.
-The reported AP values average the individual folds and must be interpreted using that
-comparison, rather than the pooled fraction.
+The scope of the conclusion is specific. We changed score composition,
+not the model, its input, or its learned representations. Profile text
+can still affect behavior predictions even when its own prediction
+losses are excluded from the average. The result applies to this model,
+representation, and synthetic benchmark, whose evaluation users were
+repeatedly examined during development. Better user ranking also does
+not establish that a user's highest-scoring day is their incident day.
 
-This result separates score composition from internal information use. Profile predictions
-can dilute the ranking even though the behavior predictions may depend on the preceding
-profile text. Excluding those profile predictions from an average does not remove that context.
-The result applies to this model, text representation and benchmark, whose evaluation users
-were repeatedly examined during development. Better user ranking also does not establish
-that the highest-scoring day is the day of the incident. The main conclusion is that
-changing the composition of an anomaly score can improve ranking without changing the
-model. Explaining how the model uses the information in its input requires a different test;
-the next chapter investigates that question by editing internal features.
+We have therefore answered a question about the model's output: which
+predictions should contribute to the anomaly score? The next question
+concerns the computation producing those predictions. The hidden
+activations introduced in Section~\ref{sec:lm-softmax} provide a place
+to investigate it. \chref{ch:mech} compares those activations before
+and after adaptation, describes their differences with sparse features,
+and tests what happens to prediction loss when selected contributions
+are removed.
 
 \FloatBarrier
+
 \chapter{Interpretable Dimensionality Reduction of the Fine-Tuned Model}
 \label{ch:mech}
 
@@ -1358,6 +1506,228 @@ reported in this thesis; the earlier donor-search result is not carried forward 
 evidence after label correction.
 
 \FloatBarrier
+\appendix
+\titleformat{\chapter}[display]
+  {\normalfont\bfseries\center}
+  {Appendix \thechapter}
+  {0pt}
+  {\Large}
+\chapter{Supporting Mathematics for Language-Model Scoring}
+\label{app:lm-math}
+This appendix supplies the derivations supporting \chref{ch:lm}. The main
+chapter develops the prediction task and its scoring rule; the arguments
+below explain why the logarithm is useful, how it relates to the output
+scores, and how the evaluation averages are constructed. All logarithms
+here are natural logarithms.
+
+\section{Why Additive Surprise Has a Logarithmic Form}
+\label{sec:why-log}
+Let $p$ be an event's probability, with $0<p\leq1$, and let $S(p)$ be
+the amount of surprise assigned to it. Require that $S$ strictly decreases
+as $p$ increases: rarer events are more surprising. Let $q$ be the
+probability of a second, independent event, with $0<q\leq1$.
+Independence makes the probability of both events $pq$. Requiring their
+surprises to add gives
+\begin{equation}
+S(pq)=S(p)+S(q).
+\label{eq:surprise-additive}
+\end{equation}
+This is a requirement on the surprise measure for independent events;
+it does not assert that successive text tokens are independent.
+
+To find its form, introduce nonnegative real numbers $x=-\ln p$ and
+$y=-\ln q$, so $p=e^{-x}$ and $q=e^{-y}$. Here $e$ is the base of the
+natural exponential. Define a new function $g(x)=S(e^{-x})$.
+Equation~\eqref{eq:surprise-additive} becomes
+\[
+g(x+y)=g(x)+g(y).
+\]
+The function $g$ is increasing because $e^{-x}$ decreases with $x$
+and $S$ decreases with probability. This additive relation is Cauchy's
+functional equation. Its increasing solutions on nonnegative real
+numbers have the form $g(x)=cx$, where $c$ is a positive constant.
+Substitution therefore gives
+\begin{equation}
+S(p)=-c\ln p,\qquad c>0.
+\label{eq:surprise-log}
+\end{equation}
+The constant $c$ sets the measurement unit. Choosing $c=1$ gives
+surprisal in nats, as used in \chref{ch:lm} \cite{shannon1948}.
+A certain event, with $p=1$, has zero surprise. As $p$ approaches zero,
+surprise grows without bound. Every tenfold decrease in probability
+adds $\ln 10$ nats. Applying the logarithm to the chain of conditional
+token probabilities gives \eqref{eq:lm-chain-rule} without requiring
+independent tokens.
+
+\section{Surprisal Written in Terms of Logits}
+Fix one prediction position $t$, where $x_t$ is the observed token
+and $x_{<t}$ is the preceding sequence. Let $\theta$ denote the fixed
+model parameters and $\mathcal V$ its vocabulary. Its size is
+$V=|\mathcal V|$, where the bars count members of the set. For each
+candidate token $v$ in the vocabulary, let $o_v$ be its output logit,
+and let $\mathbf o$ collect all those logits. Define the
+\emph{log-sum-exp} function, abbreviated $\mathrm{LSE}$, by taking
+the logarithm of the sum of exponentiated logits. Substituting
+softmax into the observed token's surprisal $\ell_t$ gives
+\begin{equation}
+\begin{split}
+\ell_t
+ &=-\log p_\theta(x_t\mid x_{<t})
+   =\mathrm{LSE}(\mathbf o)-o_{x_t},\\
+\mathrm{LSE}(\mathbf o)
+ &=\log\sum_{v\in\mathcal V}e^{o_v}.
+\end{split}
+\label{eq:lse-surprisal}
+\end{equation}
+The subscript $x_t$ selects the logit of the observed token.
+The summation adds over all vocabulary members, and $e$ is the
+natural exponential base.
+
+Let $o_{\max}=\max_{v\in\mathcal V}o_v$ be the largest logit.
+The sum of exponentials includes at least one term $e^{o_{\max}}$,
+and none of its $V$ terms is larger than that term. Thus
+\[
+e^{o_{\max}}\leq\sum_{v\in\mathcal V}e^{o_v}
+             \leq V e^{o_{\max}}.
+\]
+Taking logarithms, which preserve these inequalities, gives
+\[
+o_{\max}\leq\mathrm{LSE}(\mathbf o)
+          \leq o_{\max}+\log V.
+\]
+For two candidate tokens $a$ and $b$, the common softmax
+denominator cancels in their probability ratio:
+\[
+\frac{p_\theta(x_t=a\mid x_{<t})}
+     {p_\theta(x_t=b\mid x_{<t})}=e^{o_a-o_b}.
+\]
+Only logit differences determine the probabilities. Having the
+largest logit alone does not guarantee a small surprisal: many
+other candidates may have similar logits and share the probability.
+
+\section{Maximum Likelihood in a Frequency Model}
+\label{sec:lm-mle-proof}
+Consider a model that assigns a fixed probability to each of
+$K$ token types, regardless of preceding text. Let $j$ index
+those types from 1 to $K$, let $N_j$ count occurrences of type
+$j$ in the training observations, and let
+$N=\sum_{j=1}^{K}N_j$ be the total count. Write $p_j$ for the
+probability assigned to type $j$ and $\mathbf p=(p_1,\ldots,p_K)$
+for their collection. For the interior calculation, suppose each
+$N_j$ is positive and each $p_j$ is positive.
+
+The summed negative log-likelihood is
+$-\sum_{j=1}^{K}N_j\log p_j$, subject to the probabilities adding
+to one. Introduce a real number $\lambda$, the Lagrange multiplier,
+which enforces this constraint. Define the Lagrangian
+$\mathcal L(\mathbf p,\lambda)$ to be the objective plus
+$\lambda$ times the constraint residual:
+\[
+\mathcal L(\mathbf p,\lambda)
+ =-\sum_{j=1}^{K}N_j\log p_j
+  +\lambda\left(\sum_{j=1}^{K}p_j-1\right).
+\]
+The parenthesized expression is zero exactly when the probabilities
+sum to one. Differentiating with respect to each $p_j$ while holding
+the other quantities fixed, and setting the derivative to zero,
+gives
+\[
+\frac{\partial\mathcal L}{\partial p_j}
+ =-\frac{N_j}{p_j}+\lambda=0,
+\qquad p_j=\frac{N_j}{\lambda}.
+\]
+The symbol $\partial$ denotes this partial derivative. Summing
+the last equality over token types and imposing a total probability
+of one gives $\lambda=N$. Hence the minimizing probabilities are
+\begin{equation}
+\widehat p_j=\frac{N_j}{N},\qquad j=1,\ldots,K.
+\label{eq:lm-mle}
+\end{equation}
+The hat marks a fitted value. The objective is convex: along a
+straight segment between two positive probability vectors,
+its value lies at or below the line joining the endpoint values.
+Thus this stationary point gives the minimum under the
+constraint. If additional types have zero
+observed count, the optimum in the unrestricted frequency model
+assigns them zero probability. This frequency calculation
+illustrates the objective; a contextual language model with
+shared parameters and finite softmax logits is a different
+model and need not reproduce these exact frequencies.
+
+\section{Why Subtracting Class Means Gives a Different Score}
+\label{sec:lm-naive-proof}
+For one day, let $N_P$ and $N_B$ count scored profile and
+behavior tokens, and let $N=N_P+N_B$ be their total. Assume
+both classes are nonempty. Let $\bar\ell_P$ and $\bar\ell_B$
+be their average surprisals, and let $\bar\ell$ be the
+average across all scored tokens. From \eqref{eq:lm-decomp},
+\begin{equation}
+\begin{split}
+\bar\ell-\bar\ell_P
+ &=\frac{N_P}{N}\bar\ell_P+\frac{N_B}{N}\bar\ell_B-\bar\ell_P\\
+ &=\frac{N_B}{N}\bigl(\bar\ell_B-\bar\ell_P\bigr).
+\end{split}
+\label{eq:lm-naive}
+\end{equation}
+The result is a scaled difference between class means, not
+the behavior mean. For a numerical illustration, take two days,
+named C and D, each with behavior-token share $N_B/N=0.8$.
+Give Day C profile mean 3.0 and behavior mean 1.2, and Day D
+profile mean 0.2 and behavior mean 0.8. Subtracting means gives
+$0.8(1.2-3.0)=-1.44$ for C and $0.8(0.8-0.2)=0.48$ for D.
+It ranks D above C even though C's behavior has higher surprisal.
+Removing a token class from an average requires removing both
+its summed loss and its token count, as in \eqref{eq:lm-behavior}.
+
+\section{User AUC and Equal-Insider Fold Averages}
+\label{sec:lm-auc-proof}
+Fix one scoring rule. Let $M$ be the number of insider users
+and $n_-$ the number of benign comparison users, both positive.
+The minus subscript labels the negative class; it does not
+mean subtraction. Let $m$ index insiders from 1 to $M$ and
+$j$ index benign users from 1 to $n_-$. Write $s_m^+$ for
+insider $m$'s maximum daily score and $s_j^-$ for benign
+user $j$'s maximum daily score. The superscripts $+$ and $-$
+label positive and negative classes, not powers.
+
+Define the indicator $\mathbb I[\text{condition}]$ to be
+1 when the enclosed condition is true and 0 otherwise.
+The user AUC for the fold containing insider $m$ is
+\begin{equation}
+\mathrm{AUC}_m=\frac{1}{n_-}\sum_{j=1}^{n_-}
+\left(\mathbb I[s_m^+>s_j^-]
+ +\tfrac12\mathbb I[s_m^+=s_j^-]\right).
+\label{eq:auc}
+\end{equation}
+Each comparison contributes 1 if the insider outranks the
+benign user, one half for a tie, and 0 otherwise. Let
+$a_{mj}$ name that contribution for pair $(m,j)$.
+The overall equal-insider mean, denoted $\mathrm{AUC}$,
+therefore satisfies
+\[
+\mathrm{AUC}
+ =\frac{1}{M}\sum_{m=1}^{M}\mathrm{AUC}_m
+ =\frac{1}{M}\sum_{m=1}^{M}
+     \frac{1}{n_-}\sum_{j=1}^{n_-}a_{mj}
+ =\frac{1}{Mn_-}\sum_{m=1}^{M}\sum_{j=1}^{n_-}a_{mj}.
+\]
+Every insider is compared with the same benign users,
+so this is also the pooled user AUC over all $Mn_-$ pairs.
+That identity does not establish an analogous equality for
+day-level fold averages or AP, whose comparison populations
+and weights differ.
+
+For illustration, let four benign users have full scores
+$(0.93,0.70,0.85,0.60)$ and one insider have score $0.77$.
+The insider outranks two benign users, giving AUC $2/4=0.50$.
+If the behavior-only scores of those users are
+$(0.41,0.55,0.70,0.48)$ and the insider's is $0.93$,
+the insider outranks all four, giving AUC $4/4=1.00$.
+These examples explain the calculation and are not reported
+experimental observations.
+
+\FloatBarrier
+
 \chapter*{REFERENCES}
 \addcontentsline{toc}{chapter}{REFERENCES}
 
@@ -1450,6 +1820,12 @@ In \textit{Advances in Neural Information Processing Systems}.
 Qwen Team. (2025).
 \textit{Qwen3 technical report}.
 arXiv preprint arXiv:2505.09388.
+
+\bibitem{qwen3config}
+Qwen Team. (2025).
+\textit{Qwen3-8B model configuration}.
+\url{https://huggingface.co/Qwen/Qwen3-8B/blob/main/config.json}.
+Accessed October 14, 2026.
 
 \bibitem{bricken2023monosemanticity}
 Bricken, T., Templeton, A., Batson, J., Chen, B., Jermyn, A., Conerly, T., Turner, N. L., et al. (2023).

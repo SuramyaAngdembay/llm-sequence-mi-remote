@@ -8,13 +8,16 @@ checked copy for GitHub. The older `thesis_mechinterp_preview.pdf` is historical
 
 - Abstract: 151 words, high-level conclusion, no LoRA detail.
 - Four chapters: Introduction; PCA with its data and experiment; language-model
-  scoring with its data and evaluation; sparse-feature interpretation.
+  scoring with its data and evaluation; sparse-feature interpretation. Appendix A
+  holds the supporting mathematics for Chapter III.
 - Corrected r4.2 scores, attribution and residual-preserving ablation replace
   the pre-correction numerical claims. PCA uses its existing all-70-user result.
 - Seven original PCA figures are included under `figures/`.
-- Chapter III now introduces the workflow, examples, and evaluation terms before
-  the formal details, retaining its six sections and numerical results. The matching
-  full draft is 51 pages.
+- Chapter III is rebuilt around neural-network prediction, surprisal, benign-only
+  adaptation, and score decomposition, followed by the experimental setup and results.
+  Symbols, dimensions, and operators are introduced alongside the calculations.
+  An inline TikZ diagram and connected numerical example explain weights,
+  activations, logits, and probabilities. The matching full draft is 61 pages.
 - Chapter I and personal/front-matter fields still contain author placeholders.
 
 See `REVISION_NOTES_20261014.md` for the old-to-new section map, evidence changes

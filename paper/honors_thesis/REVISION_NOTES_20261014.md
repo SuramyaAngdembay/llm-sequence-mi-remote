@@ -55,7 +55,7 @@ artifacts were checked against the current recovery registry before reuse. This 
 revision and source-consistency check, not a fresh independent revalidation of the underlying
 model experiments. Original recovery reviews retain their own scopes and qualifications.
 
-## Chapter III readability pass
+## Chapter III readability pass (superseded by the rebuild below)
 
 A second October 14 pass expands the explanations for a general reader while keeping
 the six-section structure, equations, worked examples, and numerical results.
@@ -77,6 +77,49 @@ Only Chapter III of the thesis source changes in this pass. The abstract and oth
 chapters are unchanged. The full compiled draft is now 51 pages. Local before/after
 sources and validation records are in
 `/Users/suramya/Documents/thesis-chapter3-readability-2026-10-14/`.
+
+## Chapter III rebuild (current)
+
+Following the author's feedback that the initial readability pass was still
+disconnected, Chapter III is rewritten around the computation and its purpose.
+The full compiled draft now has 61 pages, including the supporting appendix.
+
+| Section | Role in the explanation |
+|---|---|
+| 3.1 From Reconstruction to Prediction | Motivate prediction with two concrete activity fields and retain the opening connection to PCA. |
+| 3.2 How a Neural Network Predicts the Next Token | Introduce a neuron, MLP, weights versus activations, token representations, the transformer, logits, and softmax. |
+| 3.3 Learning Normal Activity Through Prediction | Explain surprisal, sequence likelihood, the benign training objective, pretraining, and LoRA/QLoRA. |
+| 3.4 From Token Surprisal to an Anomaly Score | Construct day and user scores, then derive profile/behavior decomposition and behavior-only scoring. |
+| 3.5 Experimental Design and Activity Records | Present the full CERT record, representation caveats, populations, labels, folds, and evaluation measures after the method is understood. |
+| 3.6 Results and the Question of Internal Mechanism | Interpret the corrected results and connect the computed hidden activations to Chapter IV. |
+
+The definitions specify what each mathematical symbol represents, including vector
+and matrix dimensions, indices, candidate versus observed tokens, conditioning,
+summation, transpose, set membership, and averaging. The parameter collection
+theta is illustrated with actual toy weights; the same example feeds a toy output
+layer and softmax before its probability becomes a surprisal. The ReLU teaching
+network is explicitly distinguished from Qwen's transformer and gated MLP.
+The Qwen configuration reference is added to the bibliography.
+
+Appendix A retains and explains the logarithmic-surprise argument, log-sum-exp
+identity and bounds, frequency-model maximum likelihood, class-mean subtraction,
+and user-AUC fold identity. Existing equation labels are preserved, with fuller
+notation for the moved calculations. Chapter III has 12 numbered equations and
+the appendix has six. The training objective is now written as a loss function
+with its restricted trainable parameters explained, rather than an unexplained
+argmin over all model parameters.
+
+All empirical table values are unchanged. The illustrative Day B full score is
+corrected from 0.9292 to 0.9291: 0.2 times 2.9957 plus 0.8 times 0.4125 is 0.92914.
+The abstract, Chapters I, II, and IV, and the frozen evidence file are unchanged.
+The new MLP figure is drawn within the LaTeX source, so no additional image asset
+is needed for Overleaf. The complete activity record is kept on a single page.
+
+The review checks reference resolution, evidence consistency, retained source
+material, illustrative arithmetic, and PDF layout. It is an editorial and
+mathematical-exposition review, not a rerun of the experiments. The before/after
+sources and review records are in
+/Users/suramya/Documents/thesis-chapter3-rebuild-2026-10-14/.
 
 ## Files, build, and remaining work
 
