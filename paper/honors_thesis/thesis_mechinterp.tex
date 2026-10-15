@@ -659,385 +659,314 @@ a different model of normal activity and asks which parts of its score help dist
 
 \section{From Reconstruction to Prediction}
 \chref{ch:pca} scored an observation by the reconstruction error of a low-dimensional
-linear model. This chapter scores a user-day, one user's activity on one day, by how
-difficult its text record is for a large language model to predict. The language model
-is fine-tuned, or further trained, only on benign activity. Both scores ask the same
-question: how badly does a model of normal behavior account for this observation?
-Scoring activity by how poorly a model trained on normal activity predicts it follows
-earlier work on log and insider-threat data \cite{du2017deeplog,tuor2017deep}.
+linear model. This chapter scores a user-day by how difficult its text record is
+for a language model, fine-tuned only on benign activity, to predict. Both scores
+ask how badly a model of normal behavior accounts for an observation
+\cite{du2017deeplog,tuor2017deep}. We then separate the prediction losses for
+\emph{who} the employee is from those for \emph{what} the employee did.
 
-To make the prediction task concrete, consider two fields from an activity record:
-\begin{center}
-\begin{tabular}{ll}
-\texttt{dept=15} & the employee's department code, \\
-\texttt{n\_email=3} & the number of emails recorded for the session.
-\end{tabular}
-\end{center}
-After reading the text up to \texttt{n\_email=}, the model assigns probabilities to
-possible next pieces of text. We look up the probability it assigned to the piece
-actually observed, here the digit \texttt{3}. We repeat this prediction at successive
-positions in the record. Predictions that assign little probability to the observed
-text contribute more to the anomaly score.
+Figure~\ref{fig:lm-architecture} locates the computations used in this chapter and
+the intervention studied in \chref{ch:mech}. The model predicts successive pieces
+of the observed record; it does not predict whether the employee is malicious.
+For example, after \texttt{n\_email=}, we score the probability assigned to the
+observed digit \texttt{3}. The equations below follow that prediction from the
+network's activations to the final anomaly score.
 
-This approach needs two ingredients: a network that assigns probabilities to text,
-and training that makes those probabilities reflect patterns in benign activity.
-We start with a pretrained language model, which has already learned to predict text
-from a large corpus. We adapt it to benign employee records, then keep its learned
-weights fixed while scoring evaluation records. An unusual record receives a high
-score, but unusualness alone does not establish malicious intent.
-
-The contribution of this chapter is to take that score apart. The record describes
-both \emph{who} the employee is and \emph{what} the employee did. We show that its
-average prediction loss splits exactly into contributions from those two kinds of
-text, and examine how counting those predictions changes the ranking of insiders.
-We first build the prediction and scoring machinery, then describe the experiment
-that tests this separation. The connection to dimensionality reduction returns when
-we restrict the changes made during training, and again in \chref{ch:mech}, where
-we examine changes in the network's internal representations.
-
-\section{How a Neural Network Predicts the Next Token}
-\label{sec:lm-softmax}
-A neural network computes with numbers. Its basic operations combine input values
-using adjustable \emph{weights}, then transform the result. Before considering a
-language model, take a single unit with two numerical inputs, named $z_1$ and $z_2$.
-Let $w_1$ and $w_2$ be their connection weights, and let $b$ be an added offset,
-called a \emph{bias}. The unit's output is called its \emph{activation}, here $h$.
-For this teaching example, use the rectified linear unit (ReLU): keep a positive
-weighted sum and replace a negative one with zero. Writing $\max$ for the larger
-of its arguments gives
-\begin{equation}
-h=\max\{0,\;w_1z_1+w_2z_2+b\}.
-\label{eq:lm-neuron}
-\end{equation}
-For inputs $z_1=1$ and $z_2=2$, weights $w_1=2$ and $w_2=-1$, and bias $b=1$,
-the weighted sum is $2(1)-1(2)+1=1$, so $h=1$. Keeping those weights fixed but
-changing the second input to $z_2=4$ makes the sum $-1$ and the activation zero.
-Thus the activation depends on the current input even when the weights do not change.
-These numbers illustrate a computation; they are not measurements from our model.
-
-A layer performs this calculation with several units. To write it compactly, let
-$d_{\mathrm{in}}$ be the number of input values and $d_{\mathrm{out}}$ the number
-of units. The column vector $\mathbf z$ contains the $d_{\mathrm{in}}$ inputs.
-The matrix $W$ has $d_{\mathrm{out}}$ rows and $d_{\mathrm{in}}$ columns: each row
-contains one unit's connection weights. The vector $\mathbf b$ contains its
-$d_{\mathrm{out}}$ biases, and $\mathbf h$ contains the resulting activations.
-Finally, let $\phi$ mean applying ReLU to each entry. The entire layer is
-\begin{equation}
-\mathbf h=\phi(W\mathbf z+\mathbf b).
-\label{eq:lm-dense-layer}
-\end{equation}
-Matrix multiplication $W\mathbf z$ forms the weighted sum for every unit at once.
-A \emph{multilayer perceptron} (MLP) passes the outputs of one layer into another.
-The nonlinear activation matters: without it, a succession of linear transformations
-and biases could be replaced by one transformation of the same kind.
-Figure~\ref{fig:lm-mlp} shows two inputs and three hidden activations,
-$h_1,h_2,h_3$, whose subscripts identify the units.
-
-\begin{figure}[!htbp]
+\begin{figure}[p]
 \centering
-\begin{tikzpicture}[x=1cm,y=1cm,every node/.style={font=\small}]
-  \node[draw,circle,minimum size=0.85cm] (i1) at (0,1.0) {$z_1$};
-  \node[draw,circle,minimum size=0.85cm] (i2) at (0,-1.0) {$z_2$};
-  \node[draw,circle,minimum size=0.85cm] (h1) at (3,1.3) {$h_1$};
-  \node[draw,circle,minimum size=0.85cm] (h2) at (3,0) {$h_2$};
-  \node[draw,circle,minimum size=0.85cm] (h3) at (3,-1.3) {$h_3$};
-  \node[draw,rounded corners,align=center,minimum width=2.1cm,minimum height=1cm]
-    (out) at (6.5,0) {next layer\\or output scores};
-  \foreach \i in {i1,i2}
-    \foreach \j in {h1,h2,h3} \draw[->] (\i) -- (\j);
-  \foreach \j in {h1,h2,h3} \draw[->] (\j) -- (out);
-  \node at (0,2.15) {input values};
-  \node at (3,2.15) {hidden activations};
+\setstretch{1}
+\begin{tikzpicture}[
+  x=1cm,y=1cm,
+  every node/.style={font=\small,align=center,inner sep=4pt},
+  box/.style={draw,rounded corners,minimum height=0.65cm,minimum width=4.7cm},
+  part/.style={draw,minimum height=0.48cm,minimum width=4.2cm},
+  add/.style={draw,circle,inner sep=1.5pt},
+  flow/.style={->,thick},
+  side/.style={->,dashed,thick}
+]
+\node[font=\small\bfseries] at (0,0.8) {Prediction and scoring};
+\node[box] (record) at (0,0) {observed activity record};
+\node[box] (embed) at (0,-1.1) {token IDs $\to$ embeddings};
+\node[box] (early) at (0,-2.3) {decoder blocks through\\the selected layer};
+\node[box] (state) at (0,-3.5) {adapted hidden activations};
+\node[box] (edit) at (0,-4.7) {retain state, or apply\\the specified intervention};
+\node[box] (late) at (0,-5.9) {remaining decoder blocks};
+\node[box] (readout) at (0,-7.1) {final normalization\\and linear output layer};
+\node[box] (prob) at (0,-8.3) {softmax probabilities};
+\node[box] (loss) at (0,-9.4) {observed-target surprisal};
+\node[box] (score) at (0,-10.5) {full or behavior-only average\\then maximum across days};
+\foreach \a/\b in {record/embed,embed/early,early/state,state/edit,edit/late,late/readout,readout/prob,prob/loss,loss/score}
+  \draw[flow] (\a) -- (\b);
+
+\node[font=\small\bfseries] at (7.4,0.8) {Inside each decoder block};
+\coordinate (bin) at (7.4,0.15);
+\node[part] (n1) at (7.4,-0.55) {RMS normalization};
+\node[part] (attn) at (7.4,-1.55) {causal attention\\with position information};
+\node[add] (a1) at (7.4,-2.5) {$+$};
+\node[part] (n2) at (7.4,-3.2) {RMS normalization};
+\node[part] (mlp) at (7.4,-4.05) {gated MLP};
+\node[add] (a2) at (7.4,-4.9) {$+$};
+\coordinate (bout) at (7.4,-5.35);
+\draw[flow] (bin) -- (n1);
+\draw[flow] (n1) -- (attn);
+\draw[flow] (attn) -- (a1);
+\draw[flow] (a1) -- (n2);
+\draw[flow] (n2) -- (mlp);
+\draw[flow] (mlp) -- (a2);
+\draw[flow] (a2) -- (bout);
+\draw[flow] (bin) -- (4.85,0.15) |- (a1.west);
+\draw[flow] (a1.south) -- (7.4,-2.85) -- (9.95,-2.85) |- (a2.east);
+\node[font=\footnotesize,rotate=90] at (4.55,-1.2) {residual connection};
+\node[font=\footnotesize,rotate=90] at (10.25,-3.85) {residual connection};
+\draw[dotted] (4.15,0.4) rectangle (10.65,-5.55);
+
+\node[font=\small\bfseries] at (7.4,-6.05) {Sparse-feature analysis};
+\node[part] (base) at (7.4,-6.85) {base-model activations\\same record and layer};
+\node[part] (delta) at (7.4,-8.05) {adapted minus base};
+\node[part] (sae) at (7.4,-9.15) {standardize and encode\\with the sparse autoencoder};
+\node[part] (contribution) at (7.4,-10.5) {decode selected features\\and restore model scale};
+\draw[side] (base) -- (delta);
+\draw[side] (delta) -- (sae);
+\draw[side] (sae) -- (contribution);
+\draw[side] (state.east) -- (3.4,-3.5) -- (3.4,-8.05) -- (delta.west);
+\draw[side] (contribution.west) -- (2.9,-10.5) -- (2.9,-4.7) -- (edit.east);
 \end{tikzpicture}
-\caption[A small feedforward network]{A small feedforward network. The two inputs
-$z_1,z_2$ feed three hidden units, whose activations are $h_1,h_2,h_3$; the subscripts
-identify the units. Each incoming arrow has a weight. Each hidden unit also has a
-bias, omitted from the drawing, and applies the operation in
-\eqref{eq:lm-neuron}. The activations become inputs to the next calculation.}
+\caption[Prediction architecture and intervention location]{The prediction
+path, decoder-block structure, and sparse-feature intervention path.
+The 36 decoder blocks contain attention, gated MLPs, and residual additions.
+Solid arrows carry the scored forward pass; dashed arrows describe the
+analysis and edit used in \chref{ch:mech}. Ordinary scoring retains the
+state at the intervention site. The base activations come from a separate
+pass on the same input.}
+\label{fig:lm-architecture}
 \label{fig:lm-mlp}
 \end{figure}
+\clearpage
 
-We use the symbol $\theta$ for the collection of stored numerical parameters that
-govern a network's computation. For the single unit above, this collection is
-$\theta=(w_1,w_2,b)=(2,-1,1)$. The inputs $z_1,z_2$ and the computed activation
-$h$ are not part of $\theta$. For the layer in \eqref{eq:lm-dense-layer}, the
-parameters are the entries of $W$ and $\mathbf b$. For a complete language model, the
-collection also includes parameters in its input representations, attention
-operations, and output layer. Training changes the trainable members of this
-collection. By contrast, activations are computed afresh from each input.
-This distinction is essential: a frozen model has fixed parameters, but different
-records still produce different internal activations.
-
-To apply a network to text, a \emph{tokenizer} divides the text into pieces called
-\emph{tokens}. These may be words, parts of words, digits, or punctuation. Write
-the tokens of one record as $x_1,\ldots,x_n$, where $n$ is the number of tokens
-and a subscript identifies a position. The symbol $x_t$ denotes the token actually
-observed at position $t$; for a scored prediction, $t$ is an integer from 2 to $n$.
-Its preceding text is abbreviated
-$x_{<t}=(x_1,\ldots,x_{t-1})$; the notation $<t$ means all positions before $t$.
-For example, if $x_t$ is the digit \texttt{3} in \texttt{n\_email=3}, its preceding
-tokens include the field name and equals sign.
-
-The model first looks up a learned numerical vector for each token, called an
-\emph{embedding}. These vectors enter a transformer network \cite{vaswani2017attention}.
-Attention combines information from the available token positions; MLP blocks
-transform the resulting vectors at each position. In next-token prediction, the
-attention pattern prevents a prediction from using the target token or later
-tokens. Position information, normalization of intermediate values, and connections
-that add a block's input to its output also form part of the computation.
-
-Our model, Qwen3-8B, has 36 transformer layers and represents each position with
-4,096 numbers \cite{qwen3,qwen3config}. Its MLP blocks use a gated nonlinear
-operation, called SwiGLU, which multiplies one transformed branch by another.
-The small ReLU network above introduces the roles of weights and activations;
-it is not the exact formula for a Qwen block. Both the attention and MLP
-computations contribute to the representations used for prediction.
-
-For the prediction at position $t$, call the final normalized vector at position
-$t-1$ $\mathbf h_{t-1}$, and let $d=4096$ be its number of coordinates.
-The set $\mathcal V$ contains all candidate output tokens and is called the
-\emph{vocabulary}. Write $V=|\mathcal V|$ for its size; vertical bars around a set
-mean the number of its members. A lowercase $v$ denotes one candidate token,
-which need not equal the observed token $x_t$.
-
-Each candidate $v$ has a learned output-weight vector $\mathbf w_v$ with $d$
-coordinates. Its output score, or \emph{logit}, is $o_v$. Let $i$ count coordinates
-from 1 to $d$, so $w_{v,i}$ and $h_{t-1,i}$ are the corresponding entries of
-the two vectors. The superscript $\top$ transposes a column into a row,
-and $\sum$ means to add the indicated terms. Their dot product is
+\section{From Activations to Token Probabilities}
+\label{sec:lm-softmax}
+An activation is a computed value. For a single unit, the calculation is
 \begin{equation}
-o_v=\mathbf w_v^\top\mathbf h_{t-1}
-   =\sum_{i=1}^{d}w_{v,i}h_{t-1,i}.
+s=w_1z_1+w_2z_2+b,\qquad h=\phi(s),\qquad
+\phi(s)=\max(0,s).
+\label{eq:lm-neuron}
+\end{equation}
+\noindent
+\begin{tabular}{@{}ll@{}}
+$z_1,z_2$: input values & $w_1,w_2$: connection weights \\
+$b$: bias (added offset) & $s$: weighted sum; $h$: activation \\
+$\phi$: ReLU, which clips negative inputs to zero & $\max$: the larger argument
+\end{tabular}
+
+\noindent With fixed weights and bias, two inputs give
+\[
+\begin{array}{c}
+(w_1,w_2,b)=(2,-1,1)\\[2pt]
+(z_1,z_2)=(1,2)\ \Longrightarrow\ s=1\ \Longrightarrow\ h=1,\\
+(z_1,z_2)=(1,4)\ \Longrightarrow\ s=-1\ \Longrightarrow\ h=0.
+\end{array}
+\]
+Thus changing an activation does not require changing a weight.
+For a layer with $m$ inputs and $q$ units, the same computation is
+\begin{equation}
+\mathbf h=\phi(W\mathbf z+\mathbf b),\qquad
+W\in\mathbb R^{q\times m},\quad
+\mathbf z\in\mathbb R^m,\quad \mathbf b,\mathbf h\in\mathbb R^q.
+\label{eq:lm-dense-layer}
+\end{equation}
+Here $\mathbb R^m$ means a column of $m$ real numbers; the matrix dimensions
+give rows by columns. Bold letters collect the scalar values above, and
+$\phi$ acts on each entry. An MLP composes such layers. The stored weights
+and biases form its parameters, denoted $\theta$; its activations depend
+on the input. The ReLU calculation is a teaching example.
+
+For the language model, let $x_1,\ldots,x_n$ be a record's $n$ tokens.
+Position $t$ has observed token $x_t$ and prefix $x_{<t}=(x_1,\ldots,x_{t-1})$.
+The embedding map $E$ assigns each token a vector of width $d$:
+\[
+\mathbf h_j^{(0)}=E(x_j)\in\mathbb R^d,\qquad j=1,\ldots,n.
+\]
+The index $j$ locates a token; the superscript $k$ below counts completed
+transformer blocks. Let $H^{(k)}$ be the matrix whose row $j$ is
+$(\mathbf h_j^{(k)})^\top$, where $\top$ means transpose.
+Qwen3-8B uses $L=36$ blocks and width $d=4096$ \cite{qwen3,qwen3config}.
+One block computes
+\begin{equation}
+\begin{aligned}
+U^{(k)}
+ &=H^{(k-1)}+\mathcal A_k\!\left(\mathcal N_{k,1}(H^{(k-1)})\right),\\
+H^{(k)}
+ &=U^{(k)}+\mathcal M_k\!\left(\mathcal N_{k,2}(U^{(k)})\right),
+ \qquad k=1,\ldots,L.
+\end{aligned}
+\label{eq:lm-block}
+\end{equation}
+\noindent
+\begin{tabular}{@{}ll@{}}
+$H^{(k)},U^{(k)}\in\mathbb R^{n\times d}$ & full-block and intermediate activations \\
+$\mathcal A_k$ & causal attention: position $j$ reads positions at most $j$ \\
+$\mathcal N_{k,1},\mathcal N_{k,2}$ & row-wise RMS normalization before each branch \\
+$\mathcal M_k$ & gated MLP, applied separately at each position
+\end{tabular}
+
+The additions retain the incoming state and add each branch's contribution;
+these are the residual connections. Qwen's MLP uses a gated activation:
+for an input column $\mathbf u\in\mathbb R^d$,
+\begin{equation}
+\begin{aligned}
+\mathcal M_k(\mathbf u)
+ &=W_{\mathrm{down}}
+   \left[\operatorname{SiLU}(W_{\mathrm{gate}}\mathbf u)
+                    \odot(W_{\mathrm{up}}\mathbf u)\right],\\
+\operatorname{SiLU}(a)&=\frac{a}{1+e^{-a}}.
+\end{aligned}
+\label{eq:lm-gated-mlp}
+\end{equation}
+Here $a$ is a scalar, $e$ is the natural exponential base, and $\odot$
+multiplies corresponding entries. SiLU acts entry by entry.
+The gate and up matrices have dimensions $d_{\mathrm{ff}}\times d$;
+the down matrix has dimensions $d\times d_{\mathrm{ff}}$, with
+$d_{\mathrm{ff}}=12288$. Their block index is suppressed.
+Appendix~\ref{sec:lm-block-details} gives the normalization and causal
+attention calculations. The parameters $\theta$ now collect all stored
+model weights, including embeddings, attention, MLPs, and output weights.
+
+For each candidate output token $v$ in the vocabulary $\mathcal V$,
+the output layer produces a logit:
+\begin{equation}
+o_{t,v}=\mathbf w_v^\top
+              \mathcal N_f(\mathbf h_{t-1}^{(L)}).
 \label{eq:lm-logit}
 \end{equation}
-Collecting the row vectors into a matrix $W_{\mathrm{out}}$
-with $V$ rows and $d$ columns gives all logits at once:
-$\mathbf o=W_{\mathrm{out}}\mathbf h_{t-1}$, where $\mathbf o$ is the vector of
-$V$ logits and the subscript \emph{out} identifies the output layer.
-
-Logits can be negative and need not add to one. The \emph{softmax} operation
-converts them into probabilities. Let $p_\theta(x_t=v\mid x_{<t})$ mean the
-probability, under the model with parameters $\theta$, of candidate $v$ occurring
-at position $t$, given the preceding tokens. The vertical bar $\mid$ means
-\emph{given}. In the denominator below, $v'$ is a second candidate name used to
-sum over the entire vocabulary; its prime does not indicate a derivative.
-The symbol $\in$ means \emph{belongs to}. Using $e$ for the base of the
-natural exponential,
+Here $\mathbf w_v\in\mathbb R^d$ is the candidate's output-weight vector
+and $\mathcal N_f$ is the final normalization. The state at $t-1$
+predicts token $t$, so it cannot use that token or later ones.
+Softmax converts the logits into probabilities:
 \begin{equation}
-p_\theta(x_t=v\mid x_{<t})
- =\frac{e^{o_v}}{\sum_{v'\in\mathcal V}e^{o_{v'}}}.
+p_{t,v}
+ :=p_\theta(x_t=v\mid x_{<t})
+ =\frac{\exp(o_{t,v})}{\sum_{v'\in\mathcal V}\exp(o_{t,v'})}.
 \label{eq:softmax}
 \end{equation}
-Each exponentiated logit is positive for finite logits, and dividing by their
-sum makes the probabilities add to one.
+The notation $:=$ defines a quantity; $\mid$ means given; $\exp(a)=e^a$.
+The sum includes every vocabulary member $v'$, including $v$.
+Thus $v$ is a candidate, while $x_t$ is the observation whose probability
+we will score.
 
-For a numerical illustration, let the earlier unit's activation $h=1$ feed a toy
-output layer with just three candidate tokens: \texttt{0}, \texttt{3}, and
-\texttt{8}. Throughout this chapter, $\log$ and $\ln$ both mean the natural
-logarithm, the inverse of the exponential with base $e$. Suppose those candidates'
-output weights are $0$, $\log 8$, and $0$. Multiplying each weight by the
-activation gives logits $0$, $\log 8$, and $0$. Exponentiation gives $1$, $8$,
-and $1$; their sum is 10. Softmax therefore gives probabilities $0.1$, $0.8$,
-and $0.1$. If the observed token is \texttt{3}, we use its probability $0.8$.
-If the input instead makes the activation zero, all three logits become zero
-and each candidate receives probability $1/3$. This connects the earlier
-neural-network calculation to the prediction probabilities. The actual Qwen
-vocabulary is much larger; these are illustrative values, not outputs measured
-in the experiment.
-
-We can now follow the complete calculation: preceding text becomes token vectors,
-the network computes an internal representation, the output layer assigns candidate
-logits, and softmax produces probabilities. The next step is to measure how much
-probability the model gave to the observation that actually occurred.
-
-\section{Learning Normal Activity Through Prediction}
+\section{Surprisal and Benign-Only Adaptation}
 \label{sec:lm-train}
-We need a prediction penalty that is small when the observed token receives high
-probability and large when it receives low probability. For position $t$, call this
-penalty $\ell_t$. Abbreviate the probability assigned to the actual observation by
-$p_\theta(x_t\mid x_{<t})$: this is the probability from \eqref{eq:softmax} after
-choosing the candidate $v$ to be the observed $x_t$. Its \emph{surprisal} is
+The observed-token loss, or \emph{surprisal}, is
 \begin{equation}
-\ell_t=-\log p_\theta(x_t\mid x_{<t}).
+\ell_t=-\log p_{t,x_t}.
 \label{eq:lm-surprisal}
 \end{equation}
-The minus sign makes the value nonnegative because a probability is at most one.
-Using $\approx$ to mean approximately equal, the illustrative probability
-$0.8$ gives $-\log(0.8)\approx0.223$; probability $0.01$ gives
-$-\log(0.01)\approx4.605$. These values are measured in \emph{nats}, the information unit obtained
-with a natural logarithm. A large surprisal means the model assigned little
-probability to what occurred.
-
-Why use a logarithm? It turns a product of conditional probabilities into a sum
-of penalties. The probability assigned to a sequence is built from the
-probability of each successive observation given the preceding ones. For the
-record $x_1,\ldots,x_n$, we leave the first token unscored and condition on it.
-The probability $p_\theta(x_2,\ldots,x_n\mid x_1)$ is the model's probability of
-all remaining tokens in their observed order. The chain rule of probability gives
+All logarithms are natural, giving losses in nats. For an illustrative
+vocabulary $(\texttt{0},\texttt{3},\texttt{8})$,
+\[
+(o_{t,v})_v=(0,\log 8,0)
+\ \Longrightarrow\ (p_{t,v})_v=(0.1,0.8,0.1)
+\ \Longrightarrow\ \ell_t=-\log(0.8)\approx0.223
+\quad\text{if }x_t=\texttt{3}.
+\]
+The subscript $v$ outside parentheses collects the candidates' entries,
+and $\approx$ means approximately equal.
+A less probable observation, with probability $0.01$, has loss $4.605$.
+The logarithm makes successive prediction losses additive:
 \begin{equation}
 -\log p_\theta(x_2,\ldots,x_n\mid x_1)
  =\sum_{t=2}^{n}-\log p_\theta(x_t\mid x_{<t})
  =\sum_{t=2}^{n}\ell_t.
 \label{eq:lm-chain-rule}
 \end{equation}
-Here the summation adds positions 2 through $n$. No independence between successive
-tokens is assumed: each probability depends on the preceding text. The resulting
-sum is the record's \emph{negative log-likelihood}, a measure of how poorly the
-model predicts that observed record. Appendix~\ref{app:lm-math} gives the
-additional justification for the logarithm and its relation to the logits.
+This is the chain rule of probability, conditioning on the first token.
+It does not assume token independence. The sum is the negative
+log-likelihood of the remaining observed sequence.
 
-This same penalty provides a training objective. Let $\mathcal B$ be the set of
-benign training days, and let $D$ denote one day in that set. Its record has
-$n_D$ tokens. Write $x_t^{(D)}$ for its token at position $t$ and
-$x_{<t}^{(D)}$ for its preceding tokens; the superscript $(D)$ identifies the
-record and is not a power. Let $J(\theta)$ be the total training loss for model
-parameters $\theta$. Then
+We adapt pretrained Qwen3-8B on benign records using LoRA corrections:
 \begin{equation}
-J(\theta)=
-\sum_{D\in\mathcal B}\sum_{t=2}^{n_D}
--\log p_\theta\bigl(x_t^{(D)}\mid x_{<t}^{(D)}\bigr).
-\label{eq:lm-objective}
-\end{equation}
-The inner sum adds prediction losses within one day; the outer sum adds across
-training days. Minimizing this loss is \emph{maximum-likelihood training}: it
-seeks to increase the probability of the observed benign text. Training estimates
-how small changes to the trainable parameters affect the loss, then repeatedly
-updates them using gradient-based optimization. Neither a decrease at every
-individual update nor a globally best solution is guaranteed.
-
-A simple frequency model helps explain the objective. If a token occurs 80 times
-among 100 observations, a model that ignores context minimizes its loss by assigning
-that token probability $0.8$. Appendix~\ref{sec:lm-mle-proof} derives this result.
-The language model learns a more flexible rule: its probabilities depend on the
-preceding record. Learning from benign activity motivates using low probability
-as an anomaly signal, but an unfamiliar legitimate activity can also be improbable.
-
-We do not learn the whole network from scratch. Qwen3-8B already has parameters
-learned from a broad text corpus \cite{qwen3}. Our further training, called
-\emph{fine-tuning} or \emph{adaptation}, uses only benign employees' activity
-records. Thus benign-only describes our adaptation data, not all data used
-in the model's earlier development.
-
-To limit the number of parameters that must be trained, we use \emph{low-rank
-adaptation} (LoRA) \cite{hu2022lora}. Consider one selected weight matrix $W$,
-with $d_{\mathrm{in}}$ input coordinates and $d_{\mathrm{out}}$ output coordinates,
-as in \eqref{eq:lm-dense-layer}. Keep $W$ fixed and add the product of two
-smaller trainable matrices. Let $r$ be the chosen rank limit, $G$ a matrix with
-$d_{\mathrm{out}}$ rows and $r$ columns, and $H$ a matrix with $r$ rows and
-$d_{\mathrm{in}}$ columns. The effective matrix $W'$ used after adaptation is
-\begin{equation}
-W'=W+GH,\qquad r=16.
+W'=W+GH,\qquad
+G\in\mathbb R^{d_{\mathrm{out}}\times r},\quad
+H\in\mathbb R^{r\times d_{\mathrm{in}}},\qquad r=16.
 \label{eq:lm-lora}
 \end{equation}
-The prime identifies the adapted matrix. These added trainable factors are
-called adapters. A fixed LoRA scaling factor is absorbed into $G$ in this
-notation. The formula describes evaluation, when dropout, the random masking
-of adapter inputs used during training, is disabled.
-The product $GH$ can change the output only along combinations of the
-$r$ columns of $G$. Its rank, the number of independent output directions, is
-therefore at most $r$. This is the connection to low-dimensional structure:
-each adapted matrix receives a restricted correction.
+Here $W$ is a selected frozen matrix with $d_{\mathrm{in}}$ inputs
+and $d_{\mathrm{out}}$ outputs; $W'$ is its adapted value and
+$r$ limits the correction's rank.
+Only the factors $G,H$ are trained. The fixed LoRA scale is absorbed
+into $G$, and the equation describes evaluation with training dropout
+(random masking of adapter inputs) disabled.
+The correction's output lies in the span of $G$'s $r$ columns.
+This rank bound applies to each matrix, not the full nonlinear network.
 
-The two factors contain $r(d_{\mathrm{in}}+d_{\mathrm{out}})$ trainable entries
-instead of the $d_{\mathrm{in}}d_{\mathrm{out}}$ entries of the full matrix.
-For a 4,096-by-4,096 matrix, the rank-16 factors contain 131,072 entries, about
-$0.78\%$ of the original 16,777,216. This restriction applies to each adapted
-matrix separately. Because the full network combines many matrices and nonlinear
-operations, its change in hidden activations need not lie in a 16-dimensional space.
-
-The quantized version, QLoRA \cite{dettmers2023qlora}, stores the frozen base
-weights in a 4-bit representation to reduce memory use while learning these
-corrections. In \eqref{eq:lm-objective}, only the adapter parameters are allowed
-to change; the base parameters remain fixed. Once adaptation finishes, we also
-freeze the adapters. Training and evaluation then have distinct roles: training
-uses surprisal to update parameters, while evaluation uses surprisal to score
-records without updating them.
-
-\section{From Token Surprisal to an Anomaly Score}
-\label{sec:lm-score}
-One token's surprisal measures one prediction. To compare entire days, we need
-to combine the predictions in each record. Fix a day $D$ with $n$ tokens, and
-let $\mathcal T=\{2,\ldots,n\}$ be its set of scored positions. There are
-$N=|\mathcal T|=n-1$ such positions, since the first token has no preceding
-token in the record and is not scored. We use records with at least two tokens.
-Define the day's anomaly score $\bar\ell(D)$ as the average token surprisal;
-the bar indicates an average:
+Let $\theta_0$ denote the frozen base parameters and $\eta$ collect
+the trainable factors, so $\theta=(\theta_0,\eta)$. Adaptation minimizes
 \begin{equation}
-\bar\ell(D)=\frac{1}{N}\sum_{t\in\mathcal T}\ell_t.
+J(\theta_0,\eta)=
+\sum_{D\in\mathcal B}\sum_{t=2}^{n_D}
+-\log p_{\theta_0,\eta}\bigl(x_t^{(D)}\mid x_{<t}^{(D)}\bigr).
+\label{eq:lm-objective}
+\end{equation}
+The set $\mathcal B$ contains benign training days; $D$ identifies a
+record, $n_D$ its token count, and $(D)$ marks its tokens.
+$J$ sums their prediction losses. QLoRA stores the frozen base weights
+in 4-bit form to reduce memory use \cite{hu2022lora,dettmers2023qlora}.
+The factor count is $r(d_{\mathrm{in}}+d_{\mathrm{out}})$ rather than
+$d_{\mathrm{in}}d_{\mathrm{out}}$: 131,072 instead of 16,777,216 for
+a 4,096-by-4,096 matrix, or about $0.78\%$.
+
+Benign-only refers to this adaptation, not Qwen's original pretraining.
+After adaptation, both $\theta_0$ and $\eta$ stay fixed. Evaluation
+measures loss without updating either.
+
+\section{Day Scores and the Profile--Behavior Decomposition}
+\label{sec:lm-score}
+For one day $D$, define its scored positions and average loss by
+\begin{equation}
+\mathcal T=\{2,\ldots,n\},\qquad N=|\mathcal T|=n-1,\qquad
+\bar\ell(D)=\frac1N\sum_{t\in\mathcal T}\ell_t.
 \label{eq:lm-day-score}
 \end{equation}
-This divides the sum of prediction penalties by the number of predictions.
-Averaging prevents a longer record from receiving a larger score simply because
-more terms were added. A large value means the adapted model found the day's
-text difficult to predict; it is not a probability that the user is malicious.
-
-For user-level evaluation, let $u$ identify an employee and let $\mathcal D_u$
-be the set of that employee's observed days. We define the user score
-$\bar\ell(u)$ by the largest daily score:
+Here $n\geq2$ is the record length, $|\mathcal T|$ counts its scored
+positions, and the bar denotes an average. The first token is unscored.
+For employee $u$ with observed-day set $\mathcal D_u$, the user score is
 \begin{equation}
 \bar\ell(u)=\max_{D\in\mathcal D_u}\bar\ell(D).
 \label{eq:lm-user-score}
 \end{equation}
-The maximum selects the most unusual observed day. This is a choice of summary
-rule: users with longer histories have more opportunities to receive a high score.
-When we change which token predictions contribute to a daily score, we also
-recalculate each user's maximum using that score.
+This selects their most unusual day. Longer histories provide more
+opportunities for a high maximum; a high score alone does not establish malice.
 
 \label{sec:lm-decomp}
-Now return to the two fields that introduced the chapter. Predicting
-\texttt{dept=15} concerns the profile; predicting \texttt{n\_email=3} concerns
-activity. A rare department can be hard to predict even on an ordinary workday.
-Because both predictions contribute to the full score, unusual profile text
-could affect the ranking independently of unusual activity text.
-
-In our records, lines headed \texttt{DAY} and \texttt{PSY} contain organizational
-and personality information, while \texttt{SESSIONS} and \texttt{SES} give the
-session count and activity measurements. Call their two token groups profile
-($P$) and behavior ($B$). This is an operational grouping by text position.
-The \texttt{DAY} line also includes a week field, so the profile group is not
-composed entirely of identity attributes. The full format appears in the next section.
-
-Let $\mathcal T_P$ and $\mathcal T_B$ be the profile and behavior subsets of
-the scored positions. They do not overlap, and together they contain every
-scored position: $\mathcal T=\mathcal T_P\cup\mathcal T_B$, where $\cup$ means
-the union of two sets. Let $N_P=|\mathcal T_P|$ and $N_B=|\mathcal T_B|$ count
-their positions, so $N=N_P+N_B$. Define the summed losses $L_P$ and $L_B$ by
+Partition the scored positions into profile ($P$) and behavior ($B$):
 \[
-L_P=\sum_{t\in\mathcal T_P}\ell_t,\qquad
-L_B=\sum_{t\in\mathcal T_B}\ell_t.
+\mathcal T=\mathcal T_P\cup\mathcal T_B,\qquad
+\mathcal T_P\cap\mathcal T_B=\varnothing.
 \]
-Their sum $L=L_P+L_B$ is the full record's total loss. Both classes are nonempty
-in our scored records, so their average losses are
-$\bar\ell_P=L_P/N_P$ and $\bar\ell_B=L_B/N_B$. We temporarily omit the day
-argument $(D)$ because all these quantities refer to this one record.
-Substituting the class totals into the full average gives
+The union $\cup$ includes both groups; the intersection $\cap$ is empty
+($\varnothing$), so no position belongs to both. For class $c\in\{P,B\}$,
+\[
+N_c=|\mathcal T_c|,\qquad
+L_c=\sum_{t\in\mathcal T_c}\ell_t,\qquad
+\bar\ell_c=\frac{L_c}{N_c}.
+\]
+These are its count, total loss, and mean loss. Both classes are nonempty.
+Suppressing the day argument, put $N=N_P+N_B$ and $L=L_P+L_B$. Then
 \begin{equation}
-\bar\ell=\frac{L_P+L_B}{N}
- =\frac{N_P}{N}\bar\ell_P+\frac{N_B}{N}\bar\ell_B.
+\bar\ell=\frac{L}{N}
+        =\frac{N_P}{N}\bar\ell_P+\frac{N_B}{N}\bar\ell_B,
 \label{eq:lm-decomp}
 \end{equation}
-The fractions $N_P/N$ and $N_B/N$ are the classes' shares of scored tokens.
-The identity follows just from partitioning a sum; it makes no assumption
-that profile and behavior predictions are independent.
-
-To score only behavior predictions, we remove the profile contribution from
-both the loss total and the token count:
+and removing profile predictions from the score gives
 \begin{equation}
 \bar\ell_B=\frac{L_B}{N_B}=\frac{L-L_P}{N-N_P}.
 \label{eq:lm-behavior}
 \end{equation}
-The model and its input stay the same. A \emph{target} is the token being
-predicted, and the target's group decides whether its loss is counted.
-Profile text still precedes the activity text and can influence its predictions.
-Thus behavior-only scoring changes the average, without removing profile
-information from the model.
+Both the loss and token count are removed. The input is unchanged:
+behavior predictions can still depend on preceding profile text.
+For each score view, user maxima are recalculated using that daily score.
 
-Consider two illustrative days with five scored tokens each: one profile token
-and four behavior tokens. Their profile and behavior shares are therefore
-$1/5=0.2$ and $4/5=0.8$. Day A belongs to a malicious user with a common profile
-and unusual behavior; Day B belongs to a benign user with a rare profile and
-routine behavior. Table~\ref{tab:lm-example} gives example class losses in nats.
-These values are chosen to explain the calculation, not drawn from the experiment.
+For an illustration, let both days have one profile and four behavior
+targets, giving weights 0.2 and 0.8:
 \begin{table}[H]
 \centering
 \caption[An illustrative profile--behavior ranking change]{Class means and
@@ -1053,89 +982,38 @@ B (benign) & 2.9957 & 0.4125 & 0.9291 & 0.4125 \\
 \bottomrule
 \end{tabular}
 \end{table}
-The full score places benign Day B above malicious Day A. Its weighted profile
-contribution favors B by about $0.578$, outweighing a weighted behavior contribution
-that favors A by about $0.416$. Counting only behavior predictions reverses that
-ordering. Whether this helps on the dataset is an empirical question, answered
-below. Simply subtracting the two class means is a different calculation;
-Appendix~\ref{sec:lm-naive-proof} shows why it does not recover the behavior score.
+The profile contribution reverses the ordering under the full score;
+behavior-only scoring restores it. These are illustrative values.
+Appendix~\ref{sec:lm-naive-proof} shows why subtracting class means
+does not produce the behavior-only score.
 
-\section{Experimental Design and Activity Records}
+\section{Experimental Design}
 \label{sec:lm-data}
 \label{sec:design}
-The method now specifies what we need from the experiment: activity records,
-benign users for adaptation, separate users for evaluation, and labels with
-which to assess the scores. We use CERT release 4.2, a synthetic dataset of
-ordinary employee activity and scripted insider incidents. Section~\ref{sec:cert}
-describes the incident scenarios and calendar-label rule.
+We use CERT r4.2 sessions, extracted from logon to logoff on one computer
+\cite{le2020analyzing}. Each user's daily sessions are written as activity
+measurements in text, rather than email message bodies:
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+line & content & scored class \\
+\midrule
+\texttt{DAY}, \texttt{PSY} & organization and personality & profile ($P$) \\
+\texttt{SESSIONS}, \texttt{SES} & session count and activity & behavior ($B$) \\
+\bottomrule
+\end{tabular}
+\end{center}
+Class follows the target token's text location; residual text belongs
+to behavior. The profile group includes the week field, so it is not
+purely an identity category. Appendix~\ref{sec:lm-record-details}
+contains the full record, tokenizer example, and representation caveats.
 
-The language model reads activity grouped into \emph{sessions}, each running
-from a logon to its matching logoff on one computer. Features follow the
-extraction of Le et al.\ \cite{le2020analyzing}: time of day, duration, computer,
-and counts of logon, device, file, email, and web events. We write these
-measurements as text to provide a consistent input to the pretrained model.
-It receives activity summaries, not employees' email message bodies.
-
-Each day starts with a \texttt{DAY} line of organizational attributes and a
-\texttt{PSY} line of personality scores. A \texttt{SESSIONS} line gives the
-session count, followed by one \texttt{SES} line of measurements per session.
-The following is a complete benign record from the dataset, for user
-\texttt{AAF0535} on day 7. The session line is wrapped here to fit the page;
-in the actual input it is one line.
-\par\medskip
-\noindent\begin{minipage}{\linewidth}
-\small
-\begin{verbatim}
-DAY week=1 project=na role=39 b_unit=0 f_unit=4 dept=15 team=11 itadmin=0
-PSY O=17 C=21 E=36 A=33 N=31
-SESSIONS total=1 kept=1
-SES idx=0 pc=0 isworkhour=1 isafterhour=0 isweekend=0 isweekendafterhour=0
-    duration=489 n_concurrent_sessions=1 start_with=1 end_with=1
-    ses_start=8.933 ses_end=17.083 n_allact=34 n_logon=1 n_usb=0
-    usb_mean_usb_dur=0 n_file=0 file_n-disk1=0 file_n_exef=0 n_email=3
-    email_mean_n_atts=1.333 n_http=29 http_n_jobf=0 http_n_cloudf=0
-    http_n_leakf=0 http_n_hackf=0
-\end{verbatim}
-\end{minipage}
-\par\medskip
-\noindent This employee had one working-hours session on their usual computer,
-lasting 489 minutes, with 3 emails and 29 web requests. The two fields used
-earlier are part of this record. The organizational fields are encoded
-categories; the letters \texttt{O}, \texttt{C}, \texttt{E}, \texttt{A}, and
-\texttt{N} denote openness, conscientiousness, extraversion, agreeableness,
-and neuroticism, the five personality scores.
-
-For this representation and tokenizer, numbers are split into individual digits.
-For example, \texttt{dept=15} becomes \texttt{dept}, \texttt{=}, \texttt{1},
-and \texttt{5}. The complete record has $N=212$ scored positions, with
-$N_P=54$ profile positions and $N_B=158$ behavior positions. A position is
-assigned to the profile group if it falls on a \texttt{DAY} or \texttt{PSY}
-line; remaining positions, including session lines and residual text, belong
-to the behavior group. The digit \texttt{1} can therefore be a profile token
-in \texttt{team=11} and a behavior token in \texttt{n\_logon=1}.
-The class of the target token determines the class of its prediction loss.
-
-The historical conversion program omitted four hyphenated file fields:
-\path{file_n-to_usb1}, \path{file_n-from_usb1}, \path{file_n-file_act3}, and
-\path{file_n-disk1}. If a missing field appears as a zero in the text, it is
-a default inserted during conversion, not a measured absence of activity.
-The findings concern this recorded representation.
-
-Release 4.2 supplies 470,611 extracted sessions on 330,295 user-days.
-A day without an extracted session has no text and is outside this experiment.
-Days have between one and nine sessions, with two thirds having one.
-The longest records contain about 1,300 tokens, within the model's input limit.
-We evaluate each recorded day's predictability from its own preceding tokens;
-we do not forecast the next day or generate replacement activity.
-
-We split by user so that all days of one employee stay together.
-Let $\mathcal U_{\mathrm{train}}$ denote the training users,
-$\mathcal U_{\mathrm{val}}$ the held-out benign users, and
-$\mathcal U_{\mathrm{ins}}$ the official insiders. The subscripts name the
-three groups; \emph{val} is the historical name of the held-out group.
-All 70 official insiders enter the last group. A fixed hash, a repeatable
-numerical mapping of each remaining user's identifier, assigns about one
-tenth of those users to the held-out group and the rest to training.
+There are 470,611 sessions on 330,295 observed user-days.
+Days without extracted sessions are outside this experiment.
+All days of a user stay in the same group. Let
+$\mathcal U_{\mathrm{train}}$, $\mathcal U_{\mathrm{val}}$, and
+$\mathcal U_{\mathrm{ins}}$ denote training users, held-out benign
+users, and official insiders:
 \begin{table}[!htbp]
 \centering
 \caption{User-disjoint splits of CERT release 4.2: no user belongs to more than
@@ -1151,58 +1029,40 @@ $\mathcal{U}_{\mathrm{ins}}$ (insiders) & 70 & 15,442 & 1,362 \\
 \bottomrule
 \end{tabular}
 \end{table}
-QLoRA adaptation makes one pass over the 287,827 days of the 851 training
-users. No insider or held-out benign user enters adaptation. Here
-\emph{held out} means excluded from fine-tuning: these evaluation users have
-been examined during research development and are not a newly untouched test set.
+All insiders enter the last group. A fixed hash of each other user's
+identifier assigns about one tenth to the held-out group. Adaptation
+makes one pass over the 851 training users' 287,827 days.
+Held-out means excluded from adaptation; evaluation users were
+examined during research development and are not an untouched test set.
 
-The evaluation pool contains all 42,468 observed session-days of the 70
-insiders and 79 held-out benign users. An \emph{incident-window day} overlaps
-an insider's recorded incident period under the corrected calendar rule;
-there are 1,362 such observed days. The insider's other days are
-\emph{window-negative}, which does not establish that every activity on them
-was benign. The label correction changed evaluation labels and score coverage;
-the adapted model and its benign training membership remain unchanged.
+The evaluation pool has 42,468 days from 149 users, including 1,362
+incident-window days under the calendar rule in Section~\ref{sec:cert}.
+An insider's other days are window-negative, not verified benign.
+The correction changed evaluation labels and score coverage, not
+the model or its benign training membership.
 
 \label{sec:lm-auc}
-Evaluation asks two distinct questions: do insider users rank above benign
-users, and do incident-window days rank above negative days? User comparisons
-use each user's maximum daily score; day comparisons use the individual
-daily scores. Success on one question does not guarantee success on the other.
+Each of 70 evaluation folds compares one insider with the same
+79 benign users. Day labels distinguish incident-window days from
+the remaining days in that fold; user labels distinguish insiders
+from benign employees. The model stays fixed across folds.
+The reported metrics are equal-insider fold means:
+\begin{itemize}
+\item \emph{ROC-AUC}: the share of positive--negative pairs correctly
+ordered, with half credit for ties. One is perfect ranking; 0.5 is
+chance-level ranking. Its threshold curve plots the fraction of positives
+flagged against the fraction of negatives flagged.
+\item \emph{Average precision (AP)}: precision weighted by increases
+in recall as the score threshold is lowered. Precision is the positive
+fraction of flagged cases; recall is the fraction of positives found.
+\end{itemize}
+Mean fold day prevalence is $0.0714\%$, versus $3.21\%$ when all days
+are pooled. AP must be interpreted using its fold populations.
+Appendix~\ref{sec:lm-auc-proof} gives the user-AUC identity; it does not
+extend to the day metrics.
 
-A score threshold flags records above it. As that threshold changes, the
-receiver operating characteristic (ROC) curve plots the fraction of positives
-flagged against the fraction of negatives flagged. Its area, ROC-AUC or
-simply AUC, has a useful ranking interpretation: the fraction of
-positive--negative pairs in which the positive has the higher score, with
-half credit for ties. An AUC of 1 means perfect ranking; 0.5 is chance-level
-ranking. The user-level calculation and its connection to fold averaging
-are written out in Appendix~\ref{sec:lm-auc-proof}.
-
-For the day-level evaluation, a comparison called a \emph{fold} contains
-all days of one insider and all days of the same 79 held-out benign users.
-The insider's incident-window days are positive; their window-negative
-days and the benign-user days are negative. We calculate the metrics in
-each of the 70 folds and average them equally. The model stays fixed
-throughout: these folds do not train 70 separate models. Each user-level
-fold instead compares that insider's maximum with the 79 benign maxima.
-
-We also report \emph{average precision} (AP). At a threshold, precision is
-the fraction of flagged cases that are positive, and recall is the fraction
-of all positive cases that are flagged. AP adds precision values across
-successive score thresholds, weighting each by the increase in recall.
-It summarizes a ranking rather than precision at one chosen alert threshold.
-AP depends on \emph{prevalence}, the fraction of cases that are positive.
-Mean day-level fold prevalence is about $0.0714\%$ because each fold
-contains only one insider alongside all 79 benign users. Pooling the
-42,468 days instead gives $3.21\%$ positive days. The reported day metrics
-are fold means, not metrics computed once on that pooled population.
-
-\section{Results and the Question of Internal Mechanism}
+\section{Results and the Connection to Interventions}
 \label{sec:lm-finding}
-Table~\ref{tab:lm-views} compares three ways to count predictions from
-the same frozen model and input: all tokens, behavior tokens, and profile
-tokens. All three use the same corrected population and evaluation procedure.
 \begin{table}[!htbp]
 \centering
 \caption[Corrected language-model score decomposition]{Corrected CERT r4.2
@@ -1220,46 +1080,45 @@ Profile tokens & 0.482 & 0.001353 & 0.476 \\
 \bottomrule
 \end{tabular}
 \end{table}
-User AUC rises from 0.589 to 0.825 when only behavior-target losses enter
-the daily average. With half credit for ties, insiders then rank above
-benign users in about $82.5\%$ of evaluated user pairs, compared with
-$58.9\%$ for the full score. These are ranking proportions, not percentages
-of users correctly classified at a particular alert threshold.
+Behavior-only scoring raises user AUC from 0.589 to 0.825: insiders
+outrank benign users in about $82.5\%$ rather than $58.9\%$ of
+pairs, counting ties by halves. This is a ranking result, not
+classification accuracy at an alert threshold.
 
-To describe uncertainty in the change, we use a \emph{user bootstrap}:
-repeatedly sample the 70 insiders with replacement and recalculate the
-mean gain, keeping each insider's full-score and behavior-only AUCs
-paired. Sampling with replacement allows the same insider to appear
-more than once in a resampled group. The estimated user-AUC gain is
-$0.236$, with a descriptive 95\% user-bootstrap interval $[0.185,0.289]$;
-the brackets give its lower and upper endpoints. The model and the
-benign comparison cohort stay fixed, so this interval does not measure
-variation across independently trained models.
+The paired gain is $0.236$, with descriptive 95\% user-bootstrap
+interval $[0.185,0.289]$. The bootstrap resamples the 70 insiders
+with replacement, pairing their two AUCs, while keeping the model
+and benign cohort fixed. The profile-only estimate slightly below
+chance does not establish a reliable reversed ranking.
 
-Behavior-only scoring also improves the displayed day metrics. Their
-AP values must be read with the small fold prevalence described above,
-not the larger pooled prevalence. The profile-only user-AUC estimate
-is slightly below chance, but that point estimate alone does not
-establish a reliable reversed ranking. The paired comparison directly
-supports the benefit of changing which predictions are counted in this
-experiment.
+Changing the scored targets leaves all hidden activations unchanged.
+An intervention instead edits a chosen layer and recomputes the
+downstream predictions. Using the activation matrix $H^{(k)}$
+from \eqref{eq:lm-block}, write
+\begin{equation}
+\widetilde H^{(k)}=\mathcal I(H^{(k)}),\qquad
+\Delta\bar\ell_B=
+\mathcal S_{B,k}(\widetilde H^{(k)})-\mathcal S_{B,k}(H^{(k)}).
+\label{eq:lm-intervention-bridge}
+\end{equation}
+Here $\mathcal I$ is the edit, the tilde marks the edited state,
+and $\mathcal S_{B,k}$ runs the remaining blocks, output layer,
+and behavior-loss calculation with fixed parameters and observed
+targets. Thus $\Delta\bar\ell_B$ measures a change in prediction
+loss caused by the specified internal edit.
 
-The scope of the conclusion is specific. We changed score composition,
-not the model, its input, or its learned representations. Profile text
-can still affect behavior predictions even when its own prediction
-losses are excluded from the average. The result applies to this model,
-representation, and synthetic benchmark, whose evaluation users were
-repeatedly examined during development. Better user ranking also does
-not establish that a user's highest-scoring day is their incident day.
+\chref{ch:mech} specifies this edit through selected sparse features
+of the adapted-minus-base activations. Its corrected experiment
+removes their decoded contribution. Steering and patching are
+other intervention policies; Appendix~\ref{sec:lm-intervention-types}
+defines them and the stronger requirement of causal abstraction
+\cite{geiger2025abstraction}. The current results do not establish
+a formal causal abstraction.
 
-We have therefore answered a question about the model's output: which
-predictions should contribute to the anomaly score? The next question
-concerns the computation producing those predictions. The hidden
-activations introduced in Section~\ref{sec:lm-softmax} provide a place
-to investigate it. \chref{ch:mech} compares those activations before
-and after adaptation, describes their differences with sparse features,
-and tests what happens to prediction loss when selected contributions
-are removed.
+The score result concerns one model, representation, and synthetic
+benchmark. It does not establish transfer to real organizations,
+identify which internal computation uses profile information,
+or show that a user's highest-scoring day is their incident day.
 
 \FloatBarrier
 
@@ -1726,6 +1585,160 @@ the insider outranks all four, giving AUC $4/4=1.00$.
 These examples explain the calculation and are not reported
 experimental observations.
 
+\section{Normalization and Causal Attention}
+\label{sec:lm-block-details}
+For a vector $\mathbf z\in\mathbb R^m$, RMS normalization is
+\begin{equation}
+\mathcal N(\mathbf z)=
+\frac{\boldsymbol\gamma\odot\mathbf z}
+{\sqrt{\epsilon+\frac1m\sum_{i=1}^{m}z_i^2}}.
+\label{eq:lm-rmsnorm}
+\end{equation}
+Here $m$ is the vector length, $i$ its coordinate index,
+$\boldsymbol\gamma\in\mathbb R^m$ a learned scale,
+$\epsilon>0$ a fixed stabilizing constant, and $\odot$ entrywise
+multiplication. Each normalization in \eqref{eq:lm-block} has its
+own scale parameters and operates on each token row separately.
+
+For one attention head, let $\mathbf q_j$, $\mathbf k_s$, and
+$\mathbf v_s$ be its query at position $j$, key at position $s$,
+and value at position $s$, each with $d_h$ coordinates.
+The attention weights $a_{js}$ and the head output $\mathbf y_j$ are
+\begin{equation}
+\begin{aligned}
+a_{js}
+ &=\frac{\exp(\mathbf q_j^\top\mathbf k_s/\sqrt{d_h})}
+         {\sum_{u=1}^{j}\exp(\mathbf q_j^\top\mathbf k_u/\sqrt{d_h})},
+      &&1\leq s\leq j,\\
+a_{js}&=0, &&s>j,\\
+\mathbf y_j&=\sum_{s=1}^{j}a_{js}\mathbf v_s.
+\end{aligned}
+\label{eq:lm-attention}
+\end{equation}
+The index $u$ runs over permitted key positions in the denominator;
+$\top$ is transpose, and $\sqrt{d_h}$ scales the dot products.
+The zero weights prevent position $j$ from reading future positions.
+Concatenating the head outputs and applying a learned output matrix
+gives the attention branch contribution $\mathcal A_k$.
+
+In Qwen, queries and keys in this formula are the projected vectors
+after query/key normalization and position-dependent rotary transformations.
+Multiple query heads share key/value projections through grouped-query
+attention \cite{qwen3}. These operations are included in
+$\mathcal A_k$; the weighted sum is its causal mixing step.
+The MLP then transforms each position separately, while residual
+addition preserves a path for the incoming activation.
+
+\section{Complete Activity Record and Representation Details}
+\label{sec:lm-record-details}
+This is the benign CERT r4.2 record for user \texttt{AAF0535},
+day 7. The session line is wrapped only for display.
+\par\medskip
+\noindent\begin{minipage}{\linewidth}
+\small
+\begin{verbatim}
+DAY week=1 project=na role=39 b_unit=0 f_unit=4 dept=15 team=11 itadmin=0
+PSY O=17 C=21 E=36 A=33 N=31
+SESSIONS total=1 kept=1
+SES idx=0 pc=0 isworkhour=1 isafterhour=0 isweekend=0 isweekendafterhour=0
+    duration=489 n_concurrent_sessions=1 start_with=1 end_with=1
+    ses_start=8.933 ses_end=17.083 n_allact=34 n_logon=1 n_usb=0
+    usb_mean_usb_dur=0 n_file=0 file_n-disk1=0 file_n_exef=0 n_email=3
+    email_mean_n_atts=1.333 n_http=29 http_n_jobf=0 http_n_cloudf=0
+    http_n_leakf=0 http_n_hackf=0
+\end{verbatim}
+\end{minipage}
+\par\medskip
+The employee had one working-hours session on their usual computer,
+lasting 489 minutes, with 3 emails and 29 web requests.
+The letters \texttt{O}, \texttt{C}, \texttt{E}, \texttt{A}, and
+\texttt{N} denote openness, conscientiousness, extraversion,
+agreeableness, and neuroticism.
+
+For the stored representation and tokenizer,
+\[
+\texttt{dept=15}\ \longrightarrow\
+(\texttt{dept},\texttt{=},\texttt{1},\texttt{5}).
+\]
+The arrow denotes tokenization. This complete record contains
+$N=212$ scored targets: $N_P=54$ profile and $N_B=158$ behavior
+targets, using the counts defined in Section~\ref{sec:lm-decomp}.
+Class follows location, so the same digit can belong to either group.
+Each scored prediction uses the observed preceding tokens.
+
+Days contain one to nine sessions, with two thirds containing one.
+The longest records have about 1,300 tokens, within the model's
+input limit. This is within-day likelihood scoring, not next-day
+forecasting or generation of replacement activity.
+
+The historical conversion program omitted four hyphenated fields:
+\path{file_n-to_usb1}, \path{file_n-from_usb1},
+\path{file_n-file_act3}, and \path{file_n-disk1}.
+If a missing field appears as zero, that is a conversion default,
+not a measured absence of activity. The findings apply to this
+recorded representation.
+
+\section{Intervention Policies and Causal Abstraction}
+\label{sec:lm-intervention-types}
+The same downstream computation can be tested with different
+edits. At a fixed layer and token position, let
+$\mathbf h\in\mathbb R^d$ be the original activation and
+$\mathbf h'$ its replacement. Common choices are
+\begin{equation}
+\begin{array}{ll}
+\text{direction steering:}
+ &\mathbf h'=\mathbf h+\alpha\mathbf v,\\[2pt]
+\text{coordinate patching:}
+ &\mathbf h'_J=\mathbf h^{\mathrm{src}}_J,\quad
+  \mathbf h'_{\bar J}=\mathbf h_{\bar J},\\[2pt]
+\text{feature removal:}
+ &\mathbf h'=\mathbf h-\alpha\mathbf c_{\mathcal F}.
+\end{array}
+\label{eq:lm-intervention-policies}
+\end{equation}
+\noindent
+\begin{tabular}{@{}ll@{}}
+$d$ & activation width \\
+$\alpha$ & chosen scalar intervention strength \\
+$\mathbf v\in\mathbb R^d$ & chosen steering direction \\
+$J,\bar J$ & selected coordinates and their complement \\
+$\mathbf h^{\mathrm{src}}$ & donor state at the same layer and an aligned position \\
+$\mathbf c_{\mathcal F}\in\mathbb R^d$ & decoded contribution of selected feature set $\mathcal F$
+\end{tabular}
+
+The corrected experiment uses the final policy, with the physical
+contribution defined by \eqref{eq:ablation}. A joint change in prediction
+loss supports a role under that edit; it does not by itself assign a
+semantic meaning to each feature.
+
+A causal abstraction requires an additional model of the proposed
+high-level computation and a correspondence between interventions
+\cite{geiger2025abstraction}. For deterministic models with well-defined
+outcomes, the exact agreement condition can be written
+\begin{equation}
+\tau\!\left(M_{\mathrm{low}}(\xi;\iota)\right)
+ =M_{\mathrm{high}}\!\left(\tau_C(\xi);\omega(\iota)\right).
+\label{eq:lm-abstraction}
+\end{equation}
+\noindent
+\begin{tabular}{@{}ll@{}}
+$\xi$ & input or background context \\
+$\iota$ & an allowed low-level intervention \\
+$M_{\mathrm{low}}(\xi;\iota)$ & low-level variable assignment under that intervention \\
+$M_{\mathrm{high}}$ & proposed high-level causal model \\
+$\tau$ & map from low-level to high-level variable assignments \\
+$\tau_C$ & corresponding map of background contexts \\
+$\omega$ & map from low-level to high-level interventions
+\end{tabular}
+
+The equality must hold over the specified admissible contexts
+and interventions for exact abstraction; finite experiments can
+assess agreement on the cases tested. A sparse representation
+alone does not supply the high-level model or these maps.
+The thesis's corrected feature-removal result is not a demonstration
+of \eqref{eq:lm-abstraction}.
+
+
 \FloatBarrier
 
 \chapter*{REFERENCES}
@@ -1847,6 +1860,13 @@ A mathematical theory of communication.
 Gao, L., Dupr{\'e} la Tour, T., Tillman, H., Goh, G., Troll, R., Radford, A., Sutskever, I., Leike, J., \& Wu, J. (2024).
 Scaling and evaluating sparse autoencoders.
 arXiv preprint arXiv:2406.04093.
+
+\bibitem{geiger2025abstraction}
+Geiger, A., Ibeling, D., Zur, A., Chaudhary, M., Chauhan, S., Huang, J.,
+Arora, A., Wu, Z., Goodman, N., Potts, C., \& Icard, T. (2025).
+Causal abstraction: A theoretical foundation for mechanistic interpretability.
+\textit{Journal of Machine Learning Research}, 26(83), 1--64.
+\url{https://jmlr.org/papers/v26/23-0058.html}
 
 \end{thebibliography}
 

@@ -16,8 +16,11 @@ checked copy for GitHub. The older `thesis_mechinterp_preview.pdf` is historical
 - Chapter III is rebuilt around neural-network prediction, surprisal, benign-only
   adaptation, and score decomposition, followed by the experimental setup and results.
   Symbols, dimensions, and operators are introduced alongside the calculations.
-  An inline TikZ diagram and connected numerical example explain weights,
-  activations, logits, and probabilities. The matching full draft is 61 pages.
+  Compact symbol keys and worked calculations replace the long definitions.
+  An inline TikZ figure shows the full prediction path, decoder block, and SAE
+  intervention path. Chapter III is 11 pages (previously 16); the full draft is
+  59 pages. Detailed attention math, the complete activity record, and definitions
+  of steering, patching, and causal abstraction are in the appendix.
 - Chapter I and personal/front-matter fields still contain author placeholders.
 
 See `REVISION_NOTES_20261014.md` for the old-to-new section map, evidence changes

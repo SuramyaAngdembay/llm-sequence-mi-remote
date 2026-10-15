@@ -78,7 +78,7 @@ chapters are unchanged. The full compiled draft is now 51 pages. Local before/af
 sources and validation records are in
 `/Users/suramya/Documents/thesis-chapter3-readability-2026-10-14/`.
 
-## Chapter III rebuild (current)
+## Chapter III rebuild (superseded by the math-first pass below)
 
 Following the author's feedback that the initial readability pass was still
 disconnected, Chapter III is rewritten around the computation and its purpose.
@@ -120,6 +120,41 @@ material, illustrative arithmetic, and PDF layout. It is an editorial and
 mathematical-exposition review, not a rerun of the experiments. The before/after
 sources and review records are in
 /Users/suramya/Documents/thesis-chapter3-rebuild-2026-10-14/.
+
+## Chapter III math-first pass (current)
+
+The current draft replaces paragraph-length symbol definitions with a linear
+sequence of equations, compact notation keys, and short interpretations:
+
+1. Scalar activation and dense layer.
+2. Token embeddings, residual transformer blocks, and the actual gated MLP.
+3. Output logits, softmax probabilities, and observed-token surprisal.
+4. Benign-only low-rank adaptation and its loss.
+5. Daily/user scores and exact profile--behavior decomposition.
+6. Corrected results and the downstream effect of an internal edit.
+
+The architecture figure shows the scored forward pass, the two residual branches
+inside a decoder block, and the separate base/adapted SAE intervention path. It is
+inline TikZ and needs no new image file. It has been visually checked after fixing
+node spacing and separating it from the equation definitions.
+
+Chapter III decreases from 16 to 11 pages. The full document is 59 pages, including
+expanded appendix sections for RMS normalization, causal attention, the complete
+activity record, steering, coordinate patching, feature removal, and the exact
+agreement condition for causal abstraction. These intervention definitions are
+background; the corrected experiment remains feature removal and does not claim
+a demonstrated causal abstraction. Geiger et al. (2025) is added as a reference.
+
+The abstract, Chapters I, II, and IV, all empirical tables, the illustrative
+score table, and the frozen evidence JSON are unchanged. The complete record and
+prior appendix derivations are retained. Every prior cross-reference label is
+preserved. Forty-seven document/evidence checks and nine scope/arithmetic checks
+pass. The PDF has no overfull boxes or unresolved references; one existing
+bibliography underfull-box warning remains. These checks validate the document,
+not new experimental results.
+
+Before/after source, rendered page checks, and review reports are saved in
+/Users/suramya/Documents/thesis-chapter3-math-first-2026-10-14/.
 
 ## Files, build, and remaining work
 
