@@ -12,21 +12,31 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-We audit language models adapted to non-insider employee logs by separating
-score construction, evaluation population, input sensitivity, and internal
-intervention effects. A calendar-label audit corrects the observed CERT r4.2
-and r6.2 populations to \rv{r42.my_positive_days} positive days from \rv{r42.my_positive_users} insiders and \rv{r62.my_positive_days} days from
-\rv{r62.my_positive_users} insiders. The main adapters' training membership is unaffected, but several
-label-dependent dictionaries, donors, and comparator fits require repair.
-Corrected main-adapter fold day ROC is \rv{r42.unseen_users.day_roc} and \rv{r62.unseen_users.day_roc} against unseen users,
-compared with \rv{r42.all_users.day_roc} and \rv{r62.all_users.day_roc} against general-population negatives. In a complete
-r4.2 score decomposition, averaging behavior targets improves fold day ROC from
-\rv{c32.full.day_roc} to \rv{c32.behavior_only.day_roc} and AP from \rv{c32.full.day_ap} to \rv{c32.behavior_only.day_ap} while retaining profile context.
-This is score mitigation, not evidence of internal profile independence.
-A corrected sparse-feature pilot completes scoring but fails one realized-control
-check; its diagnostics do not establish attack specificity. We retain the
-mechanistic method, report the verified results with their scope, and identify
-the remaining dependencies before reinstating historical causal claims.
+Language models adapted to benign activity logs can rank insider-threat days
+highly, but a ranking score does not reveal what such a detector has learned:
+unusual behavior, profile novelty, and exposure during adaptation can all raise
+it. In this work, we audit Qwen3-8B adapters trained on non-insider employee
+logs from the CERT r4.2 and r6.2 insider-threat benchmarks, separating score
+construction, evaluation population, input sensitivity, and internal
+intervention effects. A calendar-label audit first corrects the evaluated
+populations to \rv{r42.my_positive_days} positive days from
+\rv{r42.my_positive_users} insiders (r4.2) and \rv{r62.my_positive_days} days
+from \rv{r62.my_positive_users} insiders (r6.2); the adapters' training
+membership is unaffected. Against negatives from the general user population,
+fold day ROC-AUC is \rv{r42.all_users.day_roc} on r4.2 and
+\rv{r62.all_users.day_roc} on r6.2; against benign users unseen during
+adaptation, it falls to \rv{r42.unseen_users.day_roc} and
+\rv{r62.unseen_users.day_roc}. Because the score averages over every target
+token, profile fields included, we decompose it with the model and input held
+fixed: averaging only behavior targets raises r4.2 fold day ROC-AUC from
+\rv{c32.full.day_roc} to \rv{c32.behavior_only.day_roc}, a score mitigation
+rather than evidence that the model ignores profiles. Inside the model,
+sparse-autoencoder edits of adapter-induced representation changes show
+predictive dependence without attack specificity: complete r4.2 ablation
+raises behavior loss but has a negative paired incident-window contrast, and
+fresh r6.2 behavioral-feature removal is not distinguished from norm-matched
+controls. We report each verified result with its scope and identify the
+repairs required before earlier causal claims can be reinstated.
 \end{abstract}
 \section{Introduction}
 High ranking quality does not identify which information an anomaly detector
