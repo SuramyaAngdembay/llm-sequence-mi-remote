@@ -1,0 +1,130 @@
+{
+ "pdf": "paper/build/main-latest-oct.pdf",
+ "pdf_sha256": "f5b48a794c92fe25343605d746cacba3114f02198b870df5a19ec3fce18dc153",
+ "built_utc": "2026-10-20T23:54:31Z",
+ "engine": "pdflatex + bibtex on Magnolia (same command sequence as paper/scripts/build_editions.py; tables and figures not regenerated)",
+ "base_commit": "a71db3c982fc25049e4f0c1061e30665cf199a62",
+ "note": "Built from the working tree: the committed abstract (a71db3c) plus the uncommitted October integration in this worktree, which is not part of any commit.",
+ "sources": {
+  "paper/data/recovery_registry.json": {
+   "sha256": "f964e8697da42635e7faa866448680d7d61800a3bddf67676d8c618433d07a64",
+   "uncommitted_at_build": true
+  },
+  "paper/main.tex": {
+   "sha256": "73b42f9914cd12fcb7c1138d4a328856656754be133db7143aae46b417ec05bb",
+   "uncommitted_at_build": true
+  },
+  "paper/recovery_content/appendix.tex": {
+   "sha256": "7353ddee00f3841133ab8a2cc61416a05048f1cca274a2f2e140312254f75cb0",
+   "uncommitted_at_build": true
+  },
+  "paper/recovery_content/causal_status.tex": {
+   "sha256": "e2b9ea7432ecf114f912775557ef52dd4c45ca252d10034cb58ecec30d5659d9",
+   "uncommitted_at_build": true
+  },
+  "paper/recovery_content/data.tex": {
+   "sha256": "71d1b8c05667c38705f657bc83cae56f2c095692536910e2da044187468b7c35",
+   "uncommitted_at_build": false
+  },
+  "paper/recovery_content/discussion.tex": {
+   "sha256": "3e79f70c27e037da4ed5754028d0fdc6cfc304bb9f1c030be19006a03b61eaef",
+   "uncommitted_at_build": true
+  },
+  "paper/recovery_content/evaluation.tex": {
+   "sha256": "4931eaa3477a53ff10b3396fdbfdaa2bb9e66fdc2ab74bbe223c2dcbbbfef665",
+   "uncommitted_at_build": false
+  },
+  "paper/recovery_content/findings.tex": {
+   "sha256": "3854462ebf068c1deb7d162b21f340a48963c706c69ca10b681161701d02fc04",
+   "uncommitted_at_build": false
+  },
+  "paper/recovery_content/method_readable.tex": {
+   "sha256": "bac91add6d0e3509ad243a91ed240be71e3512011bbae65811a9969c2d0c5dd7",
+   "uncommitted_at_build": true
+  },
+  "paper/recovery_content/method_technical.tex": {
+   "sha256": "65d724444a3cd8cebe034dd95d2cab604635f6bf8b9d33300a8a290b5b19fc35",
+   "uncommitted_at_build": true
+  },
+  "paper/references.bib": {
+   "sha256": "7b27963fb6ee57f0be283d9a6b851432c18b34a5df838c1d0862067f62eb1219",
+   "uncommitted_at_build": false
+  },
+  "paper/tables/recovery_ablation_r42.tex": {
+   "sha256": "1eab5c4e1b1d994b50a50e814b0902f351aa60c7eb97426e275836871fbeedfd",
+   "uncommitted_at_build": true
+  },
+  "paper/tables/recovery_attribution_r42.tex": {
+   "sha256": "7d53eff22fe6f549dab6db5700ac3087c573cccc1ff76c97ccfe77dd55f960ec",
+   "uncommitted_at_build": true
+  },
+  "paper/tables/recovery_attribution_r62.tex": {
+   "sha256": "953f2deaa44847960b674b7194d32b04077f5ca9f8127adea1ea9d5360dbd14d",
+   "uncommitted_at_build": true
+  },
+  "paper/tables/recovery_behavior.tex": {
+   "sha256": "e88fb7d6ac45c73c8af8e82a4632499d3784bd6ae2c96ab542a9977fd4cefe20",
+   "uncommitted_at_build": false
+  },
+  "paper/tables/recovery_classical.tex": {
+   "sha256": "c659f4d7f571f725c7cde8cbd2f9d56c68beb6c91dd421df185a46214fa10117",
+   "uncommitted_at_build": true
+  },
+  "paper/tables/recovery_classical_permutations.tex": {
+   "sha256": "593f801ce4f301f83eb617d28ebcda96a6533ca944b70a144a39b8b02e9dbed7",
+   "uncommitted_at_build": true
+  },
+  "paper/tables/recovery_detector.tex": {
+   "sha256": "905d06802421a4e976397710667c5af26db0653db14a9db0b6ef92df4768dfa1",
+   "uncommitted_at_build": false
+  },
+  "paper/tables/recovery_diagnostic.tex": {
+   "sha256": "e0a911f0e6d4d0d1dec393f390f7b2e65f47c178547243adc5c3255193b492a9",
+   "uncommitted_at_build": false
+  },
+  "paper/tables/recovery_factorial.tex": {
+   "sha256": "a5aa0b3437c4cbee95347dbc95fb3f106f4622afae43bc4e792243fe2bd07c62",
+   "uncommitted_at_build": false
+  },
+  "paper/tables/recovery_fresh_attribution_r62.tex": {
+   "sha256": "2005f836bb9e0f7f3a39f336ef9793bbeb52b4b1df0868096ccf5b8c043823a0",
+   "uncommitted_at_build": true
+  },
+  "paper/tables/recovery_fresh_causal_r62.tex": {
+   "sha256": "d2bb98623e6c24eb4decf810744acf72074bb5282e33ded53837d27011c72a6f",
+   "uncommitted_at_build": true
+  },
+  "paper/tables/recovery_fresh_causal_r62_doses.tex": {
+   "sha256": "e24ee413e683230fa934ef392d132bc71bad15b169d930fe966ceb4183a7172b",
+   "uncommitted_at_build": true
+  },
+  "paper/tables/recovery_fresh_causal_r62_users.tex": {
+   "sha256": "f170dac388b95043000a56f5d954fa29f89577cbafd9f9ce9823a0cd3a6a2ef2",
+   "uncommitted_at_build": true
+  },
+  "paper/tables/recovery_input_swaps.tex": {
+   "sha256": "1a0314e7a8832df7c0851c72bee56e4e1ca62fc1be256cedd0a2ead5e2473a4d",
+   "uncommitted_at_build": true
+  },
+  "paper/tables/recovery_policy_v2.tex": {
+   "sha256": "79f03bc0767204c364c2a6637b40a5c30bb8bc1e90b7520838431ada1a764d0f",
+   "uncommitted_at_build": true
+  },
+  "paper/tables/recovery_populations.tex": {
+   "sha256": "5ff8971599c3f3e4ead4ca8d1e6a2b16d338f6ee6e0c78b1fc199319f9089d26",
+   "uncommitted_at_build": false
+  },
+  "paper/tables/recovery_r62_behavior.tex": {
+   "sha256": "b19fa4ff8b3db5ce6a70372dafebedfcd2c0f2c362cc4302353076c13c36a9cf",
+   "uncommitted_at_build": false
+  },
+  "paper/tables/recovery_timeseries.tex": {
+   "sha256": "fa35118b7840dc5f2d2ca10d5f4e6162e2436b83577eaf8ee271964de0887299",
+   "uncommitted_at_build": false
+  },
+  "paper/tables/recovery_values.tex": {
+   "sha256": "249e03e2b2b370d68aa2d4a7b9516a8f526f72b675e280e6b278ad3eb67c7544",
+   "uncommitted_at_build": true
+  }
+ }
+}
